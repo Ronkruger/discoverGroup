@@ -4,16 +4,12 @@ import { fetchTourBySlug } from "../api/tours";
 import type { Tour, ItineraryDay, Stop } from "../types";
 
 /**
- * Modernized TourDetail with CTA card placed to the right of the hero image
+ * Modernized TourDetail with a single BookingCard component to remove duplication.
  *
- * Changes:
- * - Removed the absolute overlay CTA that sat on top of the hero image.
- * - Render the primary CTA card as a separate column to the right of the hero image
- *   on large screens (side-by-side layout).
- * - On small screens the CTA appears stacked below the hero (mobile-friendly).
+ * - BookingCard is rendered once in the hero row on large screens and as a compact
+ *   stacked card under the hero on small screens. The aside no longer duplicates the card.
  *
- * All original behavior preserved: carousel autoplay, gallery modal, pricing fallbacks,
- * keyboard date navigation, booking payload, modals, etc.
+ * All original behavior preserved.
  */
 
 export default function TourDetail(): JSX.Element {
@@ -270,6 +266,98 @@ export default function TourDetail(): JSX.Element {
     ["--muted-slate" as string]: "#94a3b8",
   };
 
+  // Single BookingCard component used in hero column and compact under hero to avoid duplication
+  function BookingCard({ compact = false }: { compact?: boolean }) {
+    const compactWrapper = compact ? "p-3" : "p-4";
+    const compactButtons = compact ? "text-sm px-2 py-1" : "px-3 py-2";
+    return (
+      <div className={`${compact ? "w-full" : "w-full"} ${compactWrapper} bg-white card-glass border border-white/8 rounded-lg shadow-lg`}>
+        <div className="text-xs text-slate-500">Launch Offer</div>
+
+        <div className="mt-2 flex items-baseline gap-3">
+          <div className="text-2xl font-bold" style={{ color: "var(--accent-yellow)" }}>
+            {formatCurrencyPHP(perPersonPrimary)}
+          </div>
+          <div className="text-xs text-slate-500">per person</div>
+        </div>
+
+        <div className="mt-2 flex items-center gap-2">
+          {priceInfo.promo !== undefined && (
+            <div className="text-xs text-slate-900 bg-accent-yellow px-2 py-1 rounded">Promo available</div>
+          )}
+          <div className="text-xs text-slate-400">· Flexible payment</div>
+        </div>
+
+        <div className="mt-3 flex gap-2">
+          <Link to={`/search?countries=${encodeURIComponent(countriesVisited[0] ?? "")}&brands=Trafalgar&useEmbeddedCards=true`} className={`${compactButtons} bg-rose-600 text-white rounded`}>Available Dates</Link>
+          <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className={`${compactButtons} border rounded bg-white hover:bg-slate-50`}>Customize</Link>
+        </div>
+
+        {!compact && (
+          <>
+            <div className="mt-4">
+              <div className="text-xs text-slate-400">PASSENGERS</div>
+              <div className="mt-2 flex items-center gap-2">
+                <button onClick={() => togglePassenger(-1)} className="px-2 py-1 bg-white/6 rounded">−</button>
+                <input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={passengers}
+                  onChange={(e) => setPassengers(Math.max(1, Math.min(10, Number(e.target.value) || 1)))}
+                  className="w-16 text-black px-2 py-1 rounded border"
+                  aria-label="Number of passengers"
+                />
+                <button onClick={() => togglePassenger(1)} className="px-2 py-1 bg-white/6 rounded">+</button>
+                <div className="ml-auto text-xs text-slate-400">Max 10</div>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <div className="flex items-center justify-between">
+                <div className="text-xs text-slate-300">PRICE</div>
+                <div className="text-xs text-slate-400">Preview options</div>
+              </div>
+
+              <div className="mt-2">
+                <div className="text-lg font-semibold" style={{ color: "var(--accent-yellow)" }}>
+                  {formatCurrencyPHP(perPersonPrimary)} <span className="text-xs text-slate-300">per person</span>
+                </div>
+
+                <div className="mt-2 flex items-center gap-2">
+                  {priceInfo.promo !== undefined && (
+                    <>
+                      <label className="inline-flex items-center gap-2 text-sm text-slate-200">
+                        <input type="checkbox" checked={usePromoForTotals} onChange={(e) => setUsePromoForTotals(e.target.checked)} />
+                        Use promo for totals
+                      </label>
+                      <div className="text-xs text-slate-300">Promo: <span className="font-semibold">{formatCurrencyPHP(priceInfo.promo ?? 0)}</span></div>
+                    </>
+                  )}
+                </div>
+
+                {passengers > 1 && (
+                  <div className="text-sm font-bold mt-3 text-white">Total: {formatCurrencyPHP(totalForPassengers)}</div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-4">
+              <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className="flex-1 text-center px-3 py-2 bg-accent-yellow text-slate-900 rounded font-semibold">CUSTOMIZE</Link>
+              <Link
+                to={`/booking/${encodeURIComponent(builderSlug)}`}
+                state={{ tour, selectedDate, passengers, perPerson: perPersonForTotals }}
+                className="px-3 py-2 border rounded text-sm inline-flex items-center gap-2 bg-white text-slate-900 font-semibold shadow hover:shadow-md"
+              >
+                BOOK NOW
+              </Link>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen" style={themeStyle}>
       <style>{`
@@ -358,50 +446,16 @@ export default function TourDetail(): JSX.Element {
               </div>
             </div>
 
-            {/* mobile/stacked fallback: show a compact inline CTA under the hero on small screens */}
+            {/* mobile/stacked fallback: show BookingCard compact under the hero on small screens */}
             <div className="block lg:hidden mt-3">
-              <div className="w-full bg-white/6 card-glass border border-white/6 rounded-lg p-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-xs text-slate-300">Launch Offer</div>
-                    <div className="text-lg font-bold" style={{ color: "var(--accent-yellow)" }}>{formatCurrencyPHP(perPersonPrimary)}</div>
-                    <div className="text-xs text-slate-400">per person</div>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className="px-3 py-2 bg-accent-yellow text-slate-900 rounded text-sm">Customize</Link>
-                  </div>
-                </div>
-              </div>
+              <BookingCard compact />
             </div>
           </div>
 
-          {/* CTA column (right side of image on lg) */}
+          {/* CTA column (right side of image on lg) - reuse BookingCard to avoid duplication */}
           <div className="lg:col-span-1 flex items-start">
-            <div className="w-full">
-              <div className="hidden lg:block">
-                <div className="w-full bg-white card-glass border border-white/8 rounded-lg p-4 shadow-lg">
-                  <div className="text-xs text-slate-500">Launch Offer</div>
-
-                  <div className="mt-2 flex items-baseline gap-3">
-                    <div className="text-2xl font-bold" style={{ color: "var(--accent-yellow)" }}>
-                      {formatCurrencyPHP(perPersonPrimary)}
-                    </div>
-                    <div className="text-xs text-slate-500">per person</div>
-                  </div>
-
-                  <div className="mt-2 flex items-center gap-2">
-                    {priceInfo.promo !== undefined && (
-                      <div className="text-xs text-slate-900 bg-accent-yellow px-2 py-1 rounded">Promo available</div>
-                    )}
-                    <div className="text-xs text-slate-400">· Flexible payment</div>
-                  </div>
-
-                  <div className="mt-3 flex gap-2">
-                    <Link to={`/search?countries=${encodeURIComponent(countriesVisited[0] ?? "")}&brands=Trafalgar&useEmbeddedCards=true`} className="px-3 py-2 bg-rose-600 text-white rounded text-sm">Available Dates</Link>
-                    <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className="px-3 py-2 border rounded text-sm bg-white hover:bg-slate-50">Customize</Link>
-                  </div>
-                </div>
-              </div>
+            <div className="w-full hidden lg:block">
+              <BookingCard />
             </div>
           </div>
         </div>
@@ -491,13 +545,13 @@ export default function TourDetail(): JSX.Element {
               {activeTab === "details" && (
                 <div className="bg-white/6 card-glass rounded-lg p-6 border border-white/6">
                   <h3 className="text-xl font-semibold mb-4 text-white">Tour details</h3>
-                  <p className="text-slate-300">Practical information, inclusions/exclusions, activity level and more.</p>
+                  <p className="text-slate-300">Practical information, inclusion/exclusion, activity level and more.</p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Right: booking / summary + stops (sticky booking card below) */}
+          {/* Right: booking summary + stops (BookingCard removed from aside to avoid duplication) */}
           <aside className="space-y-6">
             {/* Departure Dates / Travel Window */}
             <section className="bg-white/6 card-glass rounded-lg p-5 border border-white/6 shadow-sm">
@@ -540,90 +594,6 @@ export default function TourDetail(): JSX.Element {
                 </ul>
               </div>
             </section>
-
-            {/* Booking Card (visible when travelWindow exists or a discrete date is picked) */}
-            {(hasTravelWindow || selectedDate) && (
-              <section className="bg-white card-glass border border-white/6 rounded-lg p-5 shadow-lg lg:sticky lg:top-24">
-                <div className="mb-3 text-xs text-slate-300">YOUR TOUR</div>
-
-                <div className="mb-3">
-                  <div className="text-sm text-white font-medium">{tour.title}</div>
-                  <div className="text-xs text-slate-300 mt-1">{tour.line ?? ""} • {tour.durationDays ?? itinerary.length} days</div>
-                </div>
-
-                <div className="mb-3">
-                  <div className="text-xs text-slate-300">DATES</div>
-                  <div className="font-semibold text-white">{hasTravelWindow ? formatDate(tour.travelWindow!.start) : formatDate(selectedDate!)}</div>
-                  <div className="text-slate-400 text-sm mt-1">
-                    to{" "}
-                    {formatDate(
-                      new Date(
-                        new Date(hasTravelWindow ? tour.travelWindow!.start : selectedDate!).getTime() +
-                          ((tour.durationDays ?? itinerary.length) - 1) * 24 * 60 * 60 * 1000
-                      ).toISOString()
-                    )}
-                  </div>
-                </div>
-
-                <div className="mb-3">
-                  <div className="text-xs text-slate-300">PASSENGERS</div>
-                  <div className="mt-1 flex items-center gap-2">
-                    <button onClick={() => togglePassenger(-1)} className="px-2 py-1 bg-white/6 rounded">−</button>
-                    <input
-                      type="number"
-                      min={1}
-                      max={10}
-                      value={passengers}
-                      onChange={(e) => setPassengers(Math.max(1, Math.min(10, Number(e.target.value) || 1)))}
-                      className="w-16 text-black px-2 py-1 rounded border"
-                      aria-label="Number of passengers"
-                    />
-                    <button onClick={() => togglePassenger(1)} className="px-2 py-1 bg-white/6 rounded">+</button>
-                    <div className="ml-auto text-xs text-slate-400">Max 10</div>
-                  </div>
-                </div>
-
-                <div className="mb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs text-slate-300">PRICE</div>
-                    <div className="text-xs text-slate-400">Preview options</div>
-                  </div>
-
-                  <div className="mt-2">
-                    <div className="text-lg font-semibold" style={{ color: "var(--accent-yellow)" }}>
-                      {formatCurrencyPHP(perPersonPrimary)} <span className="text-xs text-slate-300">per person</span>
-                    </div>
-
-                    <div className="mt-2 flex items-center gap-2">
-                      {priceInfo.promo !== undefined && (
-                        <>
-                          <label className="inline-flex items-center gap-2 text-sm text-slate-200">
-                            <input type="checkbox" checked={usePromoForTotals} onChange={(e) => setUsePromoForTotals(e.target.checked)} />
-                            Use promo for totals
-                          </label>
-                          <div className="text-xs text-slate-300">Promo: <span className="font-semibold">{formatCurrencyPHP(priceInfo.promo ?? 0)}</span></div>
-                        </>
-                      )}
-                    </div>
-
-                    {passengers > 1 && (
-                      <div className="text-sm font-bold mt-3 text-white">Total: {formatCurrencyPHP(totalForPassengers)}</div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex gap-2 mt-3">
-                  <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className="flex-1 text-center px-3 py-2 bg-accent-yellow text-slate-900 rounded font-semibold">CUSTOMIZE</Link>
-                  <Link
-                    to={`/booking/${encodeURIComponent(builderSlug)}`}
-                    state={{ tour, selectedDate, passengers, perPerson: perPersonForTotals }}
-                    className="px-3 py-2 border rounded text-sm inline-flex items-center gap-2 bg-white/6"
-                  >
-                    BOOK NOW
-                  </Link>
-                </div>
-              </section>
-            )}
 
             {/* Stops quick list */}
             <div className="bg-white/6 card-glass rounded-lg p-4 border border-white/6">

@@ -19,6 +19,9 @@ export default function TourBuilder(): JSX.Element {
   const [expandedChangeAt, setExpandedChangeAt] = useState<number | null>(null);
   const [inlineInsert, setInlineInsert] = useState<{ tour: Tour; insertAfterIndex: number } | null>(null);
 
+  // New: selected country filter
+  const [countryFilter, setCountryFilter] = useState<string | null>(null);
+
   const pageTopRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
   const railRef = useRef<HTMLDivElement | null>(null);
@@ -68,6 +71,7 @@ export default function TourBuilder(): JSX.Element {
         setPassengers(1);
         setIncludeInfant(false);
         setInfantCount(1);
+        setCountryFilter(null); // clear filter when route changes
         setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 60);
       })
       .catch((err) => {
@@ -567,26 +571,81 @@ export default function TourBuilder(): JSX.Element {
   // canProceed required by CTA block (visible/disabled state)
   const canProceed = Boolean(tour && selectedDate);
 
+  // Theme style from TourDetail: deep-blue gradient with yellow accent
+  const themeStyle: React.CSSProperties = {
+    background:
+      "linear-gradient(180deg, rgba(2,18,51,1) 0%, rgba(8,42,102,1) 35%, rgba(4,18,55,1) 100%)",
+    ["--accent-yellow" as string]: "#FFD24D",
+    ["--accent-yellow-600" as string]: "#FFC107",
+    ["--muted-slate" as string]: "#94a3b8",
+  };
+
+  const countriesVisited = tour?.additionalInfo?.countriesVisited ?? [];
+
   return (
-    <div className="bg-gradient-to-b from-slate-50 to-white min-h-screen py-10">
+    <div className="min-h-screen py-10" style={themeStyle}>
+      <style>{`
+        .accent-yellow { color: var(--accent-yellow); }
+        .bg-accent-yellow { background-color: var(--accent-yellow); }
+        .ring-accent-yellow { box-shadow: 0 0 0 3px rgba(255,210,77,0.12); }
+        .tab-underline { transition: transform .25s cubic-bezier(.2,.9,.2,1), opacity .25s; }
+        .fade-enter { opacity: 0; transform: translateY(6px); }
+        .fade-enter-active { opacity: 1; transform: translateY(0); transition: all .28s ease; }
+        .card-glass { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.06); }
+        .modal-backdrop { background: rgba(2,6,23,0.6); }
+
+        /* Timeline highlight adjustments */
+        .timeline-section { padding: 24px; border-radius: 18px; }
+        .timeline-rail { background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); width: 2px; }
+        .timeline-row { transition: background .18s ease, transform .12s ease; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .timeline-row:hover { background: rgba(255,255,255,0.02); transform: translateY(-2px); }
+        .timeline-card { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.04); }
+        .timeline-marker { width: 44px; height: 44px; border-radius: 9999px; display: grid; place-items: center; }
+        .timeline-marker.included { background: linear-gradient(180deg,#2563eb,#1e40af); box-shadow: 0 6px 20px rgba(2,6,23,0.5); color: white; border: 2px solid rgba(255,255,255,0.06); }
+        .timeline-marker.default { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.04); }
+        .timeline-bar { box-shadow: 0 8px 30px rgba(2,6,23,0.45); border-radius: 8px; opacity: 0.98; }
+        .timeline-connector { opacity: 0.95; box-shadow: 0 6px 20px rgba(2,6,23,0.35); border-radius: 8px; }
+        .timeline-heading { color: #e6eefc; font-weight: 700; }
+        .timeline-sub { color: rgba(230,238,252,0.75); }
+        .timeline-small { color: rgba(230,238,252,0.6); }
+
+        /* Increase small font sizes by 5% inside timeline and card areas to improve readability */
+        .timeline-section .text-xs,
+        .timeline-section .timeline-small,
+        .card-glass .text-xs,
+        .card-glass .timeline-small {
+          font-size: 105% !important;
+          line-height: 1.25;
+        }
+
+        /* Badge interaction */
+        .badge-filter { cursor: pointer; transition: transform .12s; }
+        .badge-filter:hover { transform: translateY(-2px); }
+        .badge-active { box-shadow: 0 6px 18px rgba(2,6,23,0.5); transform: scale(1.02); }
+      `}</style>
+
       <div ref={pageTopRef} />
-      <div className="container mx-auto px-6 lg:px-12">
+      <div className="container mx-auto px-6 lg:px-12 text-slate-200">
         <div className="grid lg:grid-cols-[minmax(0,1fr)_380px] gap-12">
           <div className="space-y-8">
-            <section className="relative rounded-3xl border border-slate-200 bg-white shadow-sm overflow-visible p-6" aria-label="Timeline">
-              <div ref={railRef} className="absolute left-28 top-12 bottom-12 w-1.5 rounded-full bg-slate-200" />
+            <section className="relative rounded-3xl card-glass shadow-sm overflow-visible p-6 timeline-section" aria-label="Timeline">
+              <div ref={railRef} className="absolute left-28 top-12 bottom-12 timeline-rail rounded-full" />
 
               {verticalBars.map((b, i) => (
-                <div key={`bar-${i}`} aria-hidden style={{ position: "absolute", left: `${b.x}px`, top: `${b.top}px`, height: `${b.height}px`, width: 12, borderRadius: 8, background: b.color, boxShadow: "0 6px 18px rgba(15, 23, 42, 0.06)", zIndex: 6 }} />
+                <div key={`bar-${i}`} aria-hidden style={{ position: "absolute", left: `${b.x}px`, top: `${b.top}px`, height: `${b.height}px`, width: 12, borderRadius: 8, background: b.color, boxShadow: "0 8px 28px rgba(2,6,23,0.45)", zIndex: 6 }} className="timeline-bar" />
               ))}
 
               {connectors.map((c, i) => (
-                <div key={`conn-${i}`} aria-hidden style={{ position: "absolute", left: `${c.left}px`, top: `${c.top}px`, height: 8, width: `${c.width}px`, borderRadius: 8, background: c.gradient, opacity: 0.9, zIndex: 7 }} />
+                <div key={`conn-${i}`} aria-hidden style={{ position: "absolute", left: `${c.left}px`, top: `${c.top}px`, height: 8, width: `${c.width}px`, background: c.gradient, zIndex: 7 }} className="timeline-connector" />
               ))}
 
-              <div className="space-y-8">
+              <div className="space-y-8" ref={timelineRef}>
                 {Array.from({ length: finalLength }).map((_, idx) => {
+                  // If a country filter is active, skip rows whose stop.country doesn't match
                   const stop = finalDayStops[idx];
+                  const stopCountry = stop?.country ?? "";
+                  if (countryFilter && stopCountry && countryFilter.toLowerCase() !== stopCountry.toLowerCase()) return null;
+
                   const cityName = stop?.city ?? "";
                   const included = joinIndex !== null && leaveIndex !== null && idx >= joinIndex && idx <= leaveIndex;
                   const isEnd = stop?.isEnd ?? false;
@@ -595,66 +654,104 @@ export default function TourBuilder(): JSX.Element {
                   const setRowRef = (el: HTMLDivElement | null) => { rowRefs.current[idx] = el; };
 
                   return (
-                    <div id={`tb-row-${idx}`} key={`day-${idx}`} ref={setRowRef} className="relative flex items-start gap-6 pb-10 border-b last:border-b-0">
+                    <div id={`tb-row-${idx}`} key={`day-${idx}`} ref={setRowRef} className="relative flex items-start gap-6 pb-10 timeline-row last:border-b-0">
                       <div className="w-28 flex flex-col items-center justify-start pt-1 text-left">
-                        <div className="text-xs font-semibold text-slate-700">{formatWeekday(dateForDayIndex(idx))}</div>
-                        <div className="text-xs text-slate-400 mt-1">{formatMonthDay(dateForDayIndex(idx))}</div>
+                        <div className="text-xs font-semibold timeline-heading">{formatWeekday(dateForDayIndex(idx))}</div>
+                        <div className="text-xs timeline-sub mt-1">{formatMonthDay(dateForDayIndex(idx))}</div>
                       </div>
 
                       <div className="absolute left-24 top-6">
-                        <button onClick={() => onMarkerClick(idx)} className={`w-10 h-10 rounded-full grid place-items-center ring-2 transition-transform transform hover:scale-105 ${included ? "bg-blue-600 ring-blue-600 text-white" : "bg-white ring-slate-200 text-slate-300"}`} aria-label={`Set segment point for day ${idx + 1}`}>
-                          <span className={`block w-4 h-4 rounded-full ${included ? "bg-white" : "bg-slate-200"}`} />
+                        <button onClick={() => onMarkerClick(idx)} className={`timeline-marker ${included ? "timeline-marker included" : "timeline-marker default"}`} aria-label={`Set segment point for day ${idx + 1}`}>
+                          <span className={`block w-4 h-4 rounded-full ${included ? "bg-white" : "bg-slate-400/40"}`} />
                         </button>
                       </div>
 
                       <div className={`flex-1 ${included ? "" : "opacity-95"}`}>
                         <div className="flex items-start justify-between">
                           <div className="min-w-0">
-                            <div className="text-base font-semibold text-slate-900 truncate">{cityName || `Day ${idx + 1}`}</div>
+                            <div className="text-base font-semibold timeline-heading truncate">{cityName || `Day ${idx + 1}`}</div>
+
+                            {/* BADGES: duration, guaranteed, route badge and a country badge (click to filter) */}
+                            <div className="mt-2 flex items-center gap-2">
+                              <span className="inline-flex items-center gap-2 bg-white/6 text-slate-200 px-3 py-1 rounded-full text-sm">• {tour?.durationDays ?? itinerary.length} days</span>
+                              {tour?.guaranteedDeparture && (
+                                <span className="inline-flex items-center gap-2 bg-emerald-600/20 text-emerald-200 px-3 py-1 rounded-full text-sm">Guaranteed</span>
+                              )}
+                              <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm ${lineColorClassMap[tour?.line ?? "DEFAULT"]} text-white`}>{tour?.line}</span>
+
+                              {stopCountry && (
+                                <button
+                                  title={`Filter by ${stopCountry}`}
+                                  onClick={() => setCountryFilter((prev) => prev === stopCountry ? null : stopCountry)}
+                                  className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm badge-filter ${countryFilter === stopCountry ? "badge-active bg-accent-yellow text-slate-900" : "bg-white/6 text-slate-200"}`}
+                                >
+                                  {stopCountry}
+                                </button>
+                              )}
+                            </div>
                           </div>
 
                           <div className="flex items-center gap-3">
                             {((idx === (itinerary.length - 1)) || isEnd) && (
                               <div className="flex items-center gap-2">
-                                <button onClick={() => openInlineChangeAt(idx)} className="text-xs px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200">CHANGE LINE</button>
+                                <button onClick={() => openInlineChangeAt(idx)} className="text-xs px-3 py-1 rounded-full bg-slate-700/30 hover:bg-slate-700/40 text-slate-200 border border-white/6">CHANGE LINE</button>
                                 <span className={`text-xs px-3 py-1 rounded-full text-white ${lineColorClassMap[tour.line ?? "DEFAULT"]}`}>{tour.line}</span>
                               </div>
                             )}
-                            {isEnd && <div className="px-3 py-1 rounded-full bg-slate-100 text-xs text-slate-700 ml-2">END TOUR HERE</div>}
+                            {isEnd && <div className="px-3 py-1 rounded-full bg-slate-700/30 text-xs timeline-small ml-2">END TOUR HERE</div>}
                           </div>
                         </div>
 
-                        {idx > 0 && <div className="mt-3"><span className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold">TRAVEL HERE</span></div>}
+                        {idx > 0 && <div className="mt-3"><span className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-full bg-blue-900/30 text-blue-300 font-semibold">TRAVEL HERE</span></div>}
 
                         <div className="mt-4">
-                          <div className={`p-6 rounded-2xl border ${included ? "bg-white shadow-xl" : "bg-white/95"} border-slate-100`}>
+                          <div className={`p-6 rounded-2xl timeline-card border border-white/6`}>
                             <div className="flex items-center justify-between">
-                              <div className="text-sm font-semibold text-slate-900">Day {idx + 1}</div>
+                              <div className="text-sm font-semibold timeline-heading">Day {idx + 1}</div>
                               <div className="text-xs text-slate-400">{/* optional small info */}</div>
                             </div>
 
+                            {/* Badges also shown in the small timeline card header for quick scanning */}
+                            <div className="mt-2 flex items-center gap-2">
+                              <span className="inline-flex items-center gap-2 bg-white/6 text-slate-200 px-2 py-0.5 rounded-full text-xs">• {tour?.durationDays ?? itinerary.length}d</span>
+                              {tour?.guaranteedDeparture && (
+                                <span className="inline-flex items-center gap-2 bg-emerald-600/20 text-emerald-200 px-2 py-0.5 rounded-full text-xs">Guaranteed</span>
+                              )}
+                              <span className={`inline-flex items-center gap-2 px-2 py-0.5 rounded-full text-xs ${lineColorClassMap[tour?.line ?? "DEFAULT"]} text-white`}>{tour?.line}</span>
+
+                              {stopCountry && (
+                                <button
+                                  title={`Filter by ${stopCountry}`}
+                                  onClick={() => setCountryFilter((prev) => prev === stopCountry ? null : stopCountry)}
+                                  className={`inline-flex items-center gap-2 px-2 py-0.5 rounded-full text-xs badge-filter ${countryFilter === stopCountry ? "badge-active bg-accent-yellow text-slate-900" : "bg-white/6 text-slate-200"}`}
+                                >
+                                  {stopCountry}
+                                </button>
+                              )}
+                            </div>
+
                             <div className="mt-4 flex items-center gap-3">
-                              <button onClick={() => setJoinIndex(idx)} className="text-sm px-3 py-2 rounded-lg border hover:bg-slate-50">Set as join</button>
-                              <button onClick={() => setLeaveIndex(idx)} className="text-sm px-3 py-2 rounded-lg border hover:bg-slate-50">Set as leave</button>
+                              <button onClick={() => setJoinIndex(idx)} className="text-sm px-3 py-2 rounded-lg border hover:bg-white/6 text-slate-200">Set as join</button>
+                              <button onClick={() => setLeaveIndex(idx)} className="text-sm px-3 py-2 rounded-lg border hover:bg-white/6 text-slate-200">Set as leave</button>
                             </div>
                           </div>
                         </div>
 
                         {expandedChangeAt === idx && (
-                          <div id={`change-panel-${idx}`} className="mt-4 border rounded-2xl bg-slate-50 p-4 shadow-sm">
+                          <div id={`change-panel-${idx}`} className="mt-4 border rounded-2xl bg-white/6 p-4 shadow-sm">
                             <div className="grid md:grid-cols-2 gap-4">
                               <div>
-                                <div className="text-xs text-slate-500 mb-3">SELECT ROUTE TO JOIN</div>
+                                <div className="text-xs text-slate-400 mb-3">SELECT ROUTE TO JOIN</div>
                                 <div className="space-y-2 max-h-44 overflow-auto pr-2">
                                   {allTours.map((t) => {
                                     const cls = lineColorClassMap[t.line ?? "DEFAULT"];
                                     return (
-                                      <div key={t.slug} className="flex items-center justify-between px-3 py-2 rounded-lg bg-white border hover:shadow-sm transition">
+                                      <div key={t.slug} className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/6 border hover:shadow-sm transition">
                                         <div className="flex items-center gap-3">
                                           <span className={`w-3.5 h-3.5 rounded-full ${cls}`} />
-                                          <div className="text-sm text-slate-800">{t.title}</div>
+                                          <div className="text-sm text-slate-200">{t.title}</div>
                                         </div>
-                                        <button type="button" onClick={() => insertRouteInline(t.slug)} className="text-sm text-blue-700 hover:text-blue-900 underline">Insert</button>
+                                        <button type="button" onClick={() => insertRouteInline(t.slug)} className="text-sm text-accent-yellow hover:text-accent-yellow-600 underline">Insert</button>
                                       </div>
                                     );
                                   })}
@@ -662,25 +759,25 @@ export default function TourBuilder(): JSX.Element {
                               </div>
 
                               <div>
-                                <div className="text-xs text-slate-500 mb-3">SELECT JOINING POINT (preview)</div>
+                                <div className="text-xs text-slate-400 mb-3">SELECT JOINING POINT (preview)</div>
                                 {inlineInsert ? (
-                                  <div className="bg-white border rounded-lg p-3">
-                                    <div className="text-sm font-semibold text-slate-800 mb-2">{inlineInsert.tour.title}</div>
+                                  <div className="bg-white/6 border rounded-lg p-3">
+                                    <div className="text-sm font-semibold text-slate-200 mb-2">{inlineInsert.tour.title}</div>
                                     <div className="divide-y">
                                       {inlineInsert.tour.fullStops?.map((s, i) => (
                                         <div key={i} className="flex items-center justify-between py-2">
-                                          <span className="text-sm text-slate-700">{(s as Stop).city}</span>
-                                          <button onClick={() => { setJoinIndex(idx + 1 + i); setLeaveIndex(Math.max(idx + 1 + i, leaveIndex ?? idx)); removeInlineInsert(); }} className="text-xs px-2 py-1 rounded bg-slate-100 hover:bg-slate-200">Select</button>
+                                          <span className="text-sm text-slate-200">{(s as Stop).city}</span>
+                                          <button onClick={() => { setJoinIndex(idx + 1 + i); setLeaveIndex(Math.max(idx + 1 + i, leaveIndex ?? idx)); removeInlineInsert(); }} className="text-xs px-2 py-1 rounded bg-slate-700/20 hover:bg-slate-700/30 text-slate-200">Select</button>
                                         </div>
                                       ))}
                                     </div>
 
                                     <div className="mt-3 flex justify-between items-center">
-                                      <div className="text-xs text-slate-500">Preview inserted inline</div>
-                                      <button onClick={removeInlineInsert} className="text-xs text-rose-600 hover:text-rose-800 underline">Remove preview</button>
+                                      <div className="text-xs text-slate-400">Preview inserted inline</div>
+                                      <button onClick={removeInlineInsert} className="text-xs text-rose-400 hover:text-rose-300 underline">Remove preview</button>
                                     </div>
                                   </div>
-                                ) : <div className="text-sm text-slate-500">Choose a route to preview stops</div>}
+                                ) : <div className="text-sm text-slate-400">Choose a route to preview stops</div>}
                               </div>
                             </div>
                           </div>
@@ -693,7 +790,7 @@ export default function TourBuilder(): JSX.Element {
                             {entries.map((p, i) => (
                               <div key={`${idx}-${i}`} className="flex items-center gap-3">
                                 <span className="w-2.5 h-2.5 rounded-full" style={{ background: p.colorHex }} />
-                                <span className="text-xs text-slate-500 truncate" style={{ maxWidth: 120 }}>{p.city}</span>
+                                <span className="text-xs text-slate-300 truncate" style={{ maxWidth: 120 }}>{p.city}</span>
                               </div>
                             ))}
                           </div>
@@ -707,37 +804,62 @@ export default function TourBuilder(): JSX.Element {
               {/* Reset segment control (visible when a segment is selected) */}
               {(joinIndex !== null || leaveIndex !== null) && (
                 <div className="flex justify-center mt-6">
-                  <button onClick={resetSegment} className="w-12 h-12 rounded-full bg-slate-900 text-white grid place-items-center shadow-lg hover:scale-105 transition-transform" title="Reset segment" type="button">✕</button>
+                  <button onClick={resetSegment} className="w-12 h-12 rounded-full bg-amber-600 text-slate-900 grid place-items-center shadow-lg hover:scale-105 transition-transform" title="Reset segment" type="button">✕</button>
                 </div>
               )}
             </section>
           </div>
 
           <aside className="space-y-6">
-            <div className="rounded-3xl border bg-white/80 backdrop-blur shadow-lg overflow-hidden">
+            <div className="rounded-3xl card-glass shadow-lg overflow-hidden">
               <img src={tour.images?.[0] ?? "/assets/placeholder.jpg"} alt={tour.title} className="w-full h-36 object-cover" />
-              <div className="p-6 space-y-5">
+              <div className="p-6 space-y-5 text-slate-200">
                 <div>
-                  <div className="text-xs text-slate-500">Tour Details</div>
-                  <div className="mt-3 text-sm text-slate-800">
-                    <div className="flex items-center justify-between"><span className="text-xs text-slate-500">Start</span><span className="font-medium">{formatDateISO(selectedDate)}</span></div>
-                    <div className="flex items-center justify-between mt-2"><span className="text-xs text-slate-500">End</span><span className="font-medium">{formatDateISO(endDateIso() ?? undefined)}</span></div>
+                  <div className="text-xs text-slate-400">Tour Details</div>
+                  <div className="mt-3 text-sm">
+                    <div className="flex items-center justify-between"><span className="text-xs text-slate-400">Start</span><span className="font-medium">{formatDateISO(selectedDate)}</span></div>
+                    <div className="flex items-center justify-between mt-2"><span className="text-xs text-slate-400">End</span><span className="font-medium">{formatDateISO(endDateIso() ?? undefined)}</span></div>
 
-                    <div className="flex items-center justify-between mt-3"><span className="text-xs text-slate-500">From</span><span className="font-medium">{sidebarFrom}</span></div>
-                    <div className="flex items-center justify-between mt-2"><span className="text-xs text-slate-500">To</span><span className="font-medium">{sidebarTo}</span></div>
+                    <div className="flex items-center justify-between mt-3"><span className="text-xs text-slate-400">From</span><span className="font-medium">{sidebarFrom}</span></div>
+                    <div className="flex items-center justify-between mt-2"><span className="text-xs text-slate-400">To</span><span className="font-medium">{sidebarTo}</span></div>
+
+                    {/* Aside badges: duration, guaranteed, countries */}
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-2 bg-white/6 text-slate-200 px-3 py-1 rounded-full text-sm">• {tour?.durationDays ?? itinerary.length} days</span>
+                      {tour?.guaranteedDeparture && (
+                        <span className="inline-flex items-center gap-2 bg-emerald-600/20 text-emerald-200 px-3 py-1 rounded-full text-sm">Guaranteed departure</span>
+                      )}
+
+                      {/* Countries list turned into clickable filter badges with tooltip (title) */}
+                      {countriesVisited.length > 0 && countriesVisited.map((c) => (
+                        <button
+                          key={c}
+                          title={`Filter timeline by ${c}`}
+                          onClick={() => setCountryFilter((prev) => prev === c ? null : c)}
+                          className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm badge-filter ${countryFilter === c ? "badge-active bg-accent-yellow text-slate-900" : "bg-white/6 text-slate-200"}`}
+                        >
+                          {c}
+                        </button>
+                      ))}
+
+                      {/* Clear filter control */}
+                      {countryFilter && (
+                        <button onClick={() => setCountryFilter(null)} className="text-xs underline text-slate-300 ml-2">Clear filter</button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                <div className="border-t pt-3 text-xs text-slate-500">
+                <div className="border-t pt-3 text-xs text-slate-400">
                   <div>Duration</div>
-                  <div className="text-base font-semibold text-slate-900">{computeDays()} Days</div>
+                  <div className="text-base font-semibold text-slate-200">{computeDays()} Days</div>
                 </div>
 
-                <div className="border-t pt-3 text-xs text-slate-500">
+                <div className="border-t pt-3 text-xs text-slate-400">
                   <div className="flex items-center justify-between">
                     <div>
                       <div>Passengers</div>
-                      <div className="text-base font-semibold text-slate-900">{passengers} Pax{includeInfant && infantCount > 0 ? ` + ${infantCount} Infant(s)` : ""}</div>
+                      <div className="text-base font-semibold text-slate-200">{passengers} Pax{includeInfant && infantCount > 0 ? ` + ${infantCount} Infant(s)` : ""}</div>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -745,13 +867,13 @@ export default function TourBuilder(): JSX.Element {
                         type="button"
                         aria-label="Decrease passengers"
                         onClick={() => changePassengers(-1)}
-                        className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-slate-50"
+                        className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-white/6 text-slate-200"
                       >
                         −
                       </button>
                       <input
                         aria-label="Passengers"
-                        className="w-14 text-center rounded-md border px-2 py-1 text-sm"
+                        className="w-14 text-center rounded-md border px-2 py-1 text-sm bg-transparent text-slate-200"
                         value={passengers}
                         onChange={onPassengersInput}
                         inputMode="numeric"
@@ -761,7 +883,7 @@ export default function TourBuilder(): JSX.Element {
                         type="button"
                         aria-label="Increase passengers"
                         onClick={() => changePassengers(1)}
-                        className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-slate-50"
+                        className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-white/6 text-slate-200"
                       >
                         +
                       </button>
@@ -784,7 +906,7 @@ export default function TourBuilder(): JSX.Element {
                         }}
                         className="w-4 h-4"
                       />
-                      <label htmlFor="infant-checkbox" className="text-sm text-slate-600">Include infant (price TBD)</label>
+                      <label htmlFor="infant-checkbox" className="text-sm text-slate-300">Include infant (price TBD)</label>
                     </div>
 
                     {includeInfant && (
@@ -793,13 +915,13 @@ export default function TourBuilder(): JSX.Element {
                           type="button"
                           aria-label="Decrease infants"
                           onClick={() => changeInfants(-1)}
-                          className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-slate-50"
+                          className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-white/6 text-slate-200"
                         >
                           −
                         </button>
                         <input
                           aria-label="Infants"
-                          className="w-14 text-center rounded-md border px-2 py-1 text-sm"
+                          className="w-14 text-center rounded-md border px-2 py-1 text-sm bg-transparent text-slate-200"
                           value={infantCount}
                           onChange={onInfantsInput}
                           inputMode="numeric"
@@ -809,7 +931,7 @@ export default function TourBuilder(): JSX.Element {
                           type="button"
                           aria-label="Increase infants"
                           onClick={() => changeInfants(1)}
-                          className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-slate-50"
+                          className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-white/6 text-slate-200"
                         >
                           +
                         </button>
@@ -823,21 +945,21 @@ export default function TourBuilder(): JSX.Element {
                   <div className="flex flex-col gap-2">
                     {perPersonBreakdown.lines.map((ln, i) => (
                       <div key={i} className="flex items-center justify-between">
-                        <div className="text-xs text-slate-500">{ln.label}</div>
-                        <div className="text-sm font-semibold text-slate-900">{ln.value}</div>
+                        <div className="text-xs text-slate-400">{ln.label}</div>
+                        <div className="text-sm font-semibold text-slate-200">{ln.value}</div>
                       </div>
                     ))}
 
                     {perPersonBreakdown.totalValue ? (
                       <div className="flex items-center justify-between pt-2 border-t">
-                        <div className="text-xs text-slate-500">{perPersonBreakdown.totalLabel}</div>
-                        <div className="text-base font-semibold text-slate-900">{perPersonBreakdown.totalValue}</div>
+                        <div className="text-xs text-slate-400">{perPersonBreakdown.totalLabel}</div>
+                        <div className="text-base font-semibold text-slate-200">{perPersonBreakdown.totalValue}</div>
                       </div>
                     ) : null}
 
                     <div className="flex items-center justify-between pt-3">
-                      <div className="text-xs text-slate-500">Total</div>
-                      <div className="text-2xl font-extrabold text-slate-900">{formattedPrice()}</div>
+                      <div className="text-xs text-slate-400">Total</div>
+                      <div className="text-2xl font-extrabold text-slate-200">{formattedPrice()}</div>
                     </div>
                   </div>
                 </div>
@@ -847,7 +969,7 @@ export default function TourBuilder(): JSX.Element {
                   <div className="flex gap-3">
                     <Link
                       to={`/tour/${encodeURIComponent(tour?.slug ?? slug ?? "")}`}
-                      className="flex-1 px-3 py-2 border rounded text-center text-sm hover:bg-slate-50"
+                      className="flex-1 px-3 py-2 border rounded text-center text-sm hover:bg-white/6 text-slate-200"
                     >
                       Back to tour
                     </Link>
@@ -855,7 +977,7 @@ export default function TourBuilder(): JSX.Element {
                     <Link
                       to={`/booking/${encodeURIComponent(tour?.slug ?? slug ?? "")}`}
                       state={{ tour, inlineInsert, selectedDate, passengers, perPerson: getCombinedPerPersonPrice().totalPerPerson }}
-                      className={`flex-1 text-center px-3 py-2 rounded font-semibold text-sm ${canProceed ? "bg-rose-600 text-white hover:bg-rose-700" : "bg-slate-100 text-slate-400 cursor-not-allowed"}`}
+                      className={`flex-1 text-center px-3 py-2 rounded font-semibold text-sm ${canProceed ? "bg-accent-yellow text-slate-900 hover:bg-accent-yellow-600" : "bg-white/6 text-slate-400 cursor-not-allowed"}`}
                       aria-disabled={!canProceed}
                       onClick={(e) => {
                         if (!canProceed) e.preventDefault();
@@ -869,7 +991,7 @@ export default function TourBuilder(): JSX.Element {
               </div>
             </div>
 
-            <div className="rounded-2xl border bg-white/85 backdrop-blur p-5 text-sm text-slate-600 shadow-sm">Tip: Select a date to auto-select the full segment. Use the colored markers to fine-tune your join/leave days.</div>
+            <div className="rounded-2xl card-glass p-5 text-sm text-slate-300 shadow-sm">Tip: Select a date to auto-select the full segment. Use the colored markers to fine-tune your join/leave days.</div>
           </aside>
         </div>
       </div>

@@ -1,4 +1,6 @@
-import React, { JSX } from "react";
+import React, { useEffect, useState } from "react";
+import { fetchTours, type Tour } from "../services/apiClient"; // correct relative path from pages
+import { Link } from "react-router-dom";
 
 export default function AdminDashboard(): JSX.Element {
   return (

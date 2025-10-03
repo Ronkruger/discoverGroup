@@ -1,0 +1,3 @@
+# ignore compiled JS that may be produced locally
+/src/**/*.js
+/src/**/*.js.map

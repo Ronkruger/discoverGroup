@@ -7,6 +7,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Root route: provide a small JSON response so GET / is useful in the browser
+app.get("/", (_req: Request, res: Response) =>
+  res.json({
+    message: "API running",
+    endpoints: ["/admin/tours", "/public/tours", "/health"],
+  })
+);
+
 app.use("/admin/tours", adminToursRouter);
 app.use("/public/tours", publicToursRouter);
 

@@ -10,7 +10,7 @@ import DestinationCountry from "./pages/DestinationCountry";
 import SearchResults from "./pages/SearchResults";
 import Booking from "./pages/Booking";
 import BookingConfirmation from "./pages/BookingConfirmation";
-
+import * as React from "react";
 export default function App() {
   return (
     <BrowserRouter>

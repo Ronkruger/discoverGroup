@@ -11,3 +11,89 @@ body {
 }
 a { text-decoration: none; color: inherit; }
 button { cursor: pointer; }
+/* dashboard helpers (add these near top or bottom of your existing file) */
+.dashboard-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 900px) { .dashboard-grid { grid-template-columns: repeat(1, 1fr); } }
+/* Sidebar + layout helpers */
+.admin-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.admin-main {
+  display: flex;
+  flex: 1;
+  background: #fff;
+}
+
+/* left column (sidebar) */
+.sidebar {
+  width: 240px;
+  border-right: 1px solid #eee;
+  background: #fbfbfb;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* collapses on small screens */
+@media (max-width: 900px) {
+  .sidebar {
+    width: 64px;
+    padding: 8px;
+  }
+}
+
+/* main content area */
+.content {
+  flex: 1;
+  padding: 20px;
+  box-sizing: border-box;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* sidebar nav */
+.sidebar .brand {
+  font-weight: 700;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.sidebar a {
+  font-size: 14px;
+  color: #333;
+  padding: 8px 10px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.sidebar a.active {
+  background: rgba(203, 10, 60, 0.06);
+  color: crimson;
+  font-weight: 600;
+}
+
+/* small helper for compact sidebar */
+.sidebar .icon-only {
+  text-align: center;
+  font-size: 12px;
+}
+
+/* adjust Hero alignment when sidebar present */
+.hero-with-sidebar {
+  padding-left: 0;
+}
+
+/* keep footer at bottom */
+footer {
+  background: #fff;
+}

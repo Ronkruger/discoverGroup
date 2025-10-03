@@ -2,12 +2,10 @@
   "name": "@discovergroup/admin",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "dev": "vite",
+ "scripts": {
+    "dev": "vite --port 5174",
     "build": "vite build",
-    "start": "vite preview",
-    "lint": "eslint \"src/**/*.{ts,tsx,js,jsx}\" --fix",
-    "typecheck": "tsc --noEmit"
+    "preview": "vite preview --port 5174"
   },
   "dependencies": {
     "@prisma/client": "^6.16.3",

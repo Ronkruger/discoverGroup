@@ -1,3 +1,4 @@
+import * as React from "react";
 import type { Tour } from "../types";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";

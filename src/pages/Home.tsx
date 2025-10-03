@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import * as React from "react";
 import { fetchTours } from "../api/tours";
 import type { Tour } from "../types";
 import TourCard from "../components/TourCard";
@@ -13,9 +13,9 @@ import "swiper/css";
 import "swiper/css/pagination";
 
 export default function Home() {
-  const [tours, setTours] = useState<Tour[]>([]);
+  const [tours, setTours] = React.useState<Tour[]>([]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     fetchTours().then(setTours);
   }, []);
 
@@ -205,8 +205,8 @@ export default function Home() {
           }}
         >
           {tours.slice(0, 6).map((tour) => (
-            <SwiperSlide key={tour.id}>
-              <motion.div whileHover={{ scale: 1.02 }} className="h-full">
+            <SwiperSlide data-slide-id={tour.id}>
+              <motion.div key={tour.id} whileHover={{ scale: 1.02 }} className="h-full">
                 <TourCard tour={tour} />
               </motion.div>
             </SwiperSlide>

@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 export default function LanguageSwitcher() {
   return (
     <select className="border rounded p-1 text-sm">

@@ -1,5 +1,5 @@
+import * as React from "react";
 import { Link } from "react-router-dom";
-import { useEffect, useRef, useState, type JSX } from "react";
 import LanguageSwitcher from "./LanguageSwitcher";
 import {
   fetchContinents,
@@ -8,22 +8,22 @@ import {
 } from "../api/tours";
 import type { Tour } from "../types";
 
-export default function Header(): JSX.Element {
-  const [promoVisible, setPromoVisible] = useState(true);
-  const [mobileOpen, setMobileOpen] = useState(false);
+export default function Header(): React.ReactElement {
+  const [promoVisible, setPromoVisible] = React.useState(true);
+  const [mobileOpen, setMobileOpen] = React.useState(false);
 
-  const [megaOpen, setMegaOpen] = useState(false);
-  const [continents, setContinents] = useState<string[]>([]);
-  const [loadingContinents, setLoadingContinents] = useState(false);
+  const [megaOpen, setMegaOpen] = React.useState(false);
+  const [continents, setContinents] = React.useState<string[]>([]);
+  const [loadingContinents, setLoadingContinents] = React.useState(false);
 
-  const [selectedContinent, setSelectedContinent] = useState<string | null>(null);
-  const [countries, setCountries] = useState<string[]>([]);
-  const [loadingCountries, setLoadingCountries] = useState(false);
+  const [selectedContinent, setSelectedContinent] = React.useState<string | null>(null);
+  const [countries, setCountries] = React.useState<string[]>([]);
+  const [loadingCountries, setLoadingCountries] = React.useState(false);
 
-  const [countryToursMap, setCountryToursMap] = useState<Record<string, Tour[] | null>>({});
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [countryToursMap, setCountryToursMap] = React.useState<Record<string, Tour[] | null>>({});
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     let cancelled = false;
     (async () => {
       setLoadingContinents(true);
@@ -41,7 +41,7 @@ export default function Header(): JSX.Element {
     };
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     function onDocClick(e: MouseEvent) {
       if (!containerRef.current) return;
       if (!containerRef.current.contains(e.target as Node)) {
@@ -68,7 +68,7 @@ export default function Header(): JSX.Element {
     }
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!countries || countries.length === 0) return;
     let cancelled = false;
 

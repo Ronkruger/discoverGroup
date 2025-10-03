@@ -8,6 +8,18 @@ import {
 } from "../api/tours";
 import type { Tour } from "../types";
 
+// admin URL: prefer env var from Vite, fallback to explicit dev admin port
+// Read from a runtime-supplied global to avoid using `import.meta` which
+// requires a specific TS `--module` setting; you can set `window.__VITE_ADMIN_URL`
+// (or adjust your build) to override the default.
+declare global {
+  interface Window {
+    __VITE_ADMIN_URL?: string;
+  }
+}
+
+const ADMIN_URL = window.__VITE_ADMIN_URL ?? "http://localhost:5174";
+
 export default function Header(): React.ReactElement {
   const [promoVisible, setPromoVisible] = React.useState(true);
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -144,6 +156,7 @@ export default function Header(): React.ReactElement {
             <a href="/faqs" className="hover:text-blue-600">FAQs</a>
             <a href="/get-a-quote" className="hover:text-blue-600">Get a Quote</a>
             <a href="/agents" className="hover:text-blue-600">Agents Login</a>
+
             <div className="relative group">
               <button className="flex items-center gap-1 hover:text-blue-600 font-medium">
                 My Account ▾
@@ -159,6 +172,16 @@ export default function Header(): React.ReactElement {
                 </ul>
               </div>
             </div>
+
+            {/* Admin panel button (desktop) */}
+            <a
+              href={ADMIN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-2 px-3 py-1 rounded-md bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition"
+            >
+              Admin panel
+            </a>
           </div>
         </div>
       </div>
@@ -353,6 +376,16 @@ export default function Header(): React.ReactElement {
                     className="w-full border rounded-full px-3 py-2"
                   />
                 </div>
+
+                {/* Admin panel button (mobile) */}
+                <a
+                  href={ADMIN_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-2 text-center rounded-md bg-blue-600 text-white font-semibold"
+                >
+                  Admin panel
+                </a>
               </div>
             </div>
           </div>

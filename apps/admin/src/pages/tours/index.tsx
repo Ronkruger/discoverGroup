@@ -30,46 +30,121 @@ export default function ToursList(): JSX.Element {
     };
   }, []);
 
-  if (loading) return <div>Loading tours…</div>;
-  if (error) return <div style={{ color: "crimson" }}>Error: {error}</div>;
+  if (loading) return <div style={{ padding: 32 }}>Loading tours…</div>;
+  if (error) return <div style={{ color: "crimson", padding: 32 }}>Error: {error}</div>;
   if (!tours || tours.length === 0)
     return (
-      <div>
+      <div style={{ padding: 32 }}>
         <div style={{ marginBottom: 12 }}>No tours found.</div>
         <Link to="/tours/create">
-          <button>Create first tour</button>
+          <button style={createBtnStyle}>Create first tour</button>
         </Link>
       </div>
     );
 
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <h2>Tours</h2>
+    <div style={{
+      background: "#fff",
+      margin: "40px auto",
+      borderRadius: 12,
+      boxShadow: "0 2px 16px 0 rgba(30,30,60,.08)",
+      maxWidth: 1100,
+      padding: "32px 30px"
+    }}>
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 22
+      }}>
+        <h2 style={{ fontSize: 22, fontWeight: 700 }}>Tours</h2>
         <Link to="/tours/create">
-          <button>Create Tour</button>
+          <button style={createBtnStyle}>+ Create Tour</button>
         </Link>
       </div>
-
-      <ul style={{ paddingLeft: 0, listStyle: "none" }}>
-        {tours.map((t) => (
-          <li key={t.id} style={{ padding: 10, borderBottom: "1px solid #eee" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <div style={{ fontWeight: 600 }}>{t.title ?? t.slug}</div>
-                <div style={{ color: "#666", fontSize: 13 }}>
-                  <code>{t.slug}</code> — {t.durationDays ?? "-"} days
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <Link to={`/tours/${t.id}`}>
-                  <button> Edit </button>
-                </Link>
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <div style={{ overflowX: "auto" }}>
+        <table style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          background: "#fff",
+          borderRadius: 10,
+          overflow: "hidden",
+          fontSize: 15,
+        }}>
+          <thead>
+            <tr style={{ background: "#faf7fa" }}>
+              <th style={thStyle}>Title</th>
+              <th style={thStyle}>Slug</th>
+              <th style={thStyle}>Line</th>
+              <th style={thStyle}>Duration</th>
+              <th style={thStyle}>Regular Price</th>
+              <th style={thStyle}>Promo Price</th>
+              <th style={thStyle}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tours.map((t) => (
+              <tr key={t.id} style={{ background: "#fff" }}>
+                <td style={tdStyle}>
+                  <div style={{ fontWeight: 600 }}>{t.title}</div>
+                  <div style={{ color: "#888", fontSize: 13, maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {t.summary}
+                  </div>
+                </td>
+                <td style={tdStyle}><code>{t.slug}</code></td>
+                <td style={tdStyle}>{t.line}</td>
+                <td style={{ ...tdStyle, textAlign: "center" }}>{t.durationDays ?? "-"}</td>
+                <td style={{ ...tdStyle, textAlign: "right" }}>
+                  {t.regularPricePerPerson ? `₱${t.regularPricePerPerson.toLocaleString()}` : "--"}
+                </td>
+                <td style={{ ...tdStyle, textAlign: "right" }}>
+                  {t.promoPricePerPerson ? `₱${t.promoPricePerPerson.toLocaleString()}` : "--"}
+                </td>
+                <td style={{ ...tdStyle, minWidth: 120 }}>
+                  <Link to={`/tours/${t.id}`}>
+                    <button style={editBtnStyle}>Edit</button>
+                  </Link>
+                  {/* You can add Delete button here */}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
+
+const thStyle: React.CSSProperties = {
+  textAlign: "left",
+  padding: "12px 16px",
+  background: "#f6f6fa",
+  fontWeight: 700,
+  borderBottom: "1px solid #eee"
+};
+const tdStyle: React.CSSProperties = {
+  padding: "12px 16px",
+  borderBottom: "1px solid #f2f2f2",
+  fontSize: 15,
+  verticalAlign: "top"
+};
+const createBtnStyle: React.CSSProperties = {
+  padding: "10px 20px",
+  borderRadius: 6,
+  border: "none",
+  background: "linear-gradient(90deg,#ee4d7e 0,#ff6a3d 100%)",
+  color: "#fff",
+  fontWeight: 600,
+  fontSize: 15,
+  cursor: "pointer"
+};
+const editBtnStyle: React.CSSProperties = {
+  padding: "7px 16px",
+  borderRadius: 6,
+  border: "none",
+  fontWeight: 600,
+  background: "linear-gradient(90deg,#ee4d7e 0,#ff6a3d 100%)",
+  color: "#fff",
+  cursor: "pointer",
+  marginRight: 4,
+};

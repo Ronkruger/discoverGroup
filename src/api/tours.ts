@@ -1,5 +1,5 @@
 // src/api/tours.ts
-import type { Tour } from "../../types";
+import type { Tour } from "../types";
 
 /**
  * Mock tours dataset with helper lookup functions.

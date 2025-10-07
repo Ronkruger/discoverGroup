@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { useEffect, useState, useRef, type JSX } from "react";
 import { fetchTourBySlug } from "../api/tours";
 import type { Tour, ItineraryDay, Stop } from "../types";
+import * as React from "react";
 
 /**
  * Modernized TourDetail with a single BookingCard component to remove duplication.

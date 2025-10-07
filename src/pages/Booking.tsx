@@ -1,4 +1,4 @@
-import { useEffect, useState, type JSX } from "react";
+import * as React from "react";
 import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import type { Tour } from "../types";
 import { fetchTourBySlug } from "../api/tours";
@@ -20,7 +20,7 @@ function formatCurrencyPHP(amount: number) {
   return `PHP ${amount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-export default function Booking(): JSX.Element {
+export default function Booking(): React.JSX.Element {
   const { slug } = useParams<{ slug: string }>();
   const location = useLocation();
   const navState = (location.state ?? {}) as {
@@ -32,29 +32,29 @@ export default function Booking(): JSX.Element {
 
   const navigate = useNavigate();
 
-  const [tour, setTour] = useState<Tour | null>(() => navState?.tour ?? null);
-  const [loading, setLoading] = useState<boolean>(tour === null);
-  const [selectedDate, setSelectedDate] = useState<string | null>(() => navState?.selectedDate ?? null);
-  const [passengers, setPassengers] = useState<number>(() => navState?.passengers ?? 1);
-  const [perPerson, setPerPerson] = useState<number>(() => navState?.perPerson ?? 0);
+  const [tour, setTour] = React.useState<Tour | null>(() => navState?.tour ?? null);
+  const [loading, setLoading] = React.useState<boolean>(tour === null);
+  const [selectedDate, setSelectedDate] = React.useState<string | null>(() => navState?.selectedDate ?? null);
+  const [passengers, setPassengers] = React.useState<number>(() => navState?.passengers ?? 1);
+  const [perPerson, setPerPerson] = React.useState<number>(() => navState?.perPerson ?? 0);
 
   // Booking flow state
-  const [step, setStep] = useState<number>(0); // 0: review, 1: lead, 2: payment, 3: confirm
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = React.useState<number>(0); // 0: review, 1: lead, 2: payment, 3: confirm
+  const [submitting, setSubmitting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
   // Lead details
-  const [leadName, setLeadName] = useState("");
-  const [leadEmail, setLeadEmail] = useState("");
-  const [leadPhone, setLeadPhone] = useState("");
+  const [leadName, setLeadName] = React.useState("");
+  const [leadEmail, setLeadEmail] = React.useState("");
+  const [leadPhone, setLeadPhone] = React.useState("");
 
   // Payment (mock)
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardExpiry, setCardExpiry] = useState("");
-  const [cardCvc, setCardCvc] = useState("");
-  const [billingPostcode, setBillingPostcode] = useState("");
+  const [cardNumber, setCardNumber] = React.useState("");
+  const [cardExpiry, setCardExpiry] = React.useState("");
+  const [cardCvc, setCardCvc] = React.useState("");
+  const [billingPostcode, setBillingPostcode] = React.useState("");
 
-  useEffect(() => {
+  React.useEffect(() => {
     let cancelled = false;
 
     async function load() {

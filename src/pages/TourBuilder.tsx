@@ -2,6 +2,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { useEffect, useRef, useState, type JSX, type ChangeEvent } from "react";
 import type { Tour, Stop } from "../types";
 import { fetchTourBySlug, fetchTours } from "../api/tours";
+import React from "react";
 
 export default function TourBuilder(): JSX.Element {
   const { slug } = useParams<{ slug: string }>();

@@ -5,7 +5,10 @@
     "declaration": true,
     "declarationMap": true,
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "module": "ESNext",
+    "moduleResolution": "bundler", 
+    "types": ["vite/client"]
   },
   "include": ["src/**/*"]
 }

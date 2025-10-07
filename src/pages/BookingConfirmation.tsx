@@ -1,5 +1,7 @@
 import { useLocation, Link } from "react-router-dom";
 import type { JSX } from "react";
+import React, { useEffect } from "react";
+import confetti from "canvas-confetti";
 
 /**
  * Booking confirmation page
@@ -19,6 +21,16 @@ export default function BookingConfirmation(): JSX.Element {
     perPerson?: number;
     total?: number;
   };
+
+  // Confetti burst on mount!
+  useEffect(() => {
+    confetti({
+      particleCount: 120,
+      spread: 90,
+      origin: { y: 0.6 },
+      zIndex: 9999,
+    });
+  }, []);
 
   if (!state.bookingId) {
     return (

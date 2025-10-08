@@ -2,7 +2,7 @@
   "name": "@discovergroup/admin",
   "version": "0.1.0",
   "private": true,
- "scripts": {
+  "scripts": {
     "dev": "vite --port 5174",
     "build": "vite build",
     "preview": "vite preview --port 5174"
@@ -18,7 +18,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.14",
     "@types/node": "^24.6.2",
-    "@types/react": "^18.3.25",
+    "@types/react": "^18.3.26",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^5.0.4",
     "eslint": "^8.44.0",

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { JSX } from "react";
 import Hero from "./Hero";          // Hero is in the same components folder
 import ToursList from "../pages/tours"; // ToursList is in src/pages/tours (index.tsx)
 

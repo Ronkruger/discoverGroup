@@ -1,4 +1,4 @@
-import React from "react";
+import React, { JSX } from "react";
 import { NavLink } from "react-router-dom";
 
 export default function Navbar(): JSX.Element {

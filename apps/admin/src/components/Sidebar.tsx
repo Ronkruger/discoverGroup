@@ -1,4 +1,4 @@
-import React from "react";
+import  { JSX } from "react";
 import { NavLink } from "react-router-dom";
 
 export default function Sidebar(): JSX.Element {

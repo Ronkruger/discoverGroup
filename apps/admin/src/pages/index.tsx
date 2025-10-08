@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { fetchTours, type Tour } from "../services/apiClient"; // correct relative path from pages
-import { Link } from "react-router-dom";
+import React from "react";
+// removed unused type import
 
-export default function AdminDashboard(): JSX.Element {
+export default function AdminDashboard(): React.ReactElement {
   return (
     <div style={{ padding: 28, color: "#0f172a", fontFamily: "Inter, system-ui, sans-serif" }}>
       <h1 style={{ marginBottom: 12 }}>DiscoverGroup — Admin</h1>

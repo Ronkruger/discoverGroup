@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { JSX, useState } from "react";
 import { createTour } from "../../services/apiClient";
 import { useNavigate } from "react-router-dom";
 
@@ -9,6 +9,30 @@ const LINE_OPTIONS = [
 const COUNTRY_OPTIONS = [
   "France", "Switzerland", "Italy", "Vatican City", "Austria", "Germany", "Spain", "Portugal", "Philippines", "USA", "Canada"
 ];
+
+interface NewTourPayload {
+  title: string;
+  slug: string;
+  summary: string;
+  line: string;
+  durationDays: number;
+  highlights: string[];
+  images: string[];
+  guaranteedDeparture: boolean;
+  bookingPdfUrl: string;
+  travelWindow?: { start: string; end: string };
+  itinerary?: { day: number; title: string; description: string }[];
+  fullStops?: { city: string; country: string; days?: number }[];
+  regularPricePerPerson: number;
+  promoPricePerPerson?: number;
+  basePricePerDay?: number;
+  additionalInfo?: {
+    countriesVisited: string[];
+    startingPoint: string;
+    endingPoint: string;
+    mainCities: { [country: string]: string[] };
+  };
+}
 
 export default function CreateTour(): JSX.Element {
   const [title, setTitle] = useState("");
@@ -76,31 +100,48 @@ export default function CreateTour(): JSX.Element {
   function addFullStop() {
     setFullStops(fullStops.concat({ city: "", country: "" }));
   }
+
   function updateFullStop(idx: number, field: "city" | "country" | "days", value: string) {
-    setFullStops(fullStops.map((fs, i) =>
-      i === idx ? { ...fs, [field]: field === "days" ? Number(value) : value } : fs
-    ));
+    setFullStops(fullStops.map((fs, i) => {
+      if (i !== idx) return fs;
+      if (field === "days") {
+        return { ...fs, days: value === "" ? undefined : Number(value) };
+      }
+      return { ...fs, [field]: value };
+    }));
   }
+
   function removeFullStop(idx: number) {
     setFullStops(fullStops.filter((_, i) => i !== idx));
   }
 
-  // Main cities helpers
-  function updateMainCities(country: string, cities: string) {
-    setMainCities({ ...mainCities, [country]: cities });
-  }
-
   function handleCountriesChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    setCountriesVisited(Array.from(e.target.selectedOptions).map(o => o.value));
+    const selected = Array.from(e.target.selectedOptions).map(o => o.value);
+    setCountriesVisited(selected);
+    setMainCities(prev => {
+      const next = { ...prev };
+      // ensure selected countries exist as keys
+      selected.forEach(c => {
+        if (!(c in next)) next[c] = "";
+      });
+      // remove keys for unselected countries
+      Object.keys(next).forEach(k => {
+        if (!selected.includes(k)) delete next[k];
+      });
+      return next;
+    });
   }
 
-  async function handleSave(e?: React.FormEvent) {
-    if (e) e.preventDefault();
+  function updateMainCities(country: string, value: string) {
+    setMainCities(prev => ({ ...prev, [country]: value }));
+  }
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
     setSaving(true);
     setError(null);
-    setSuccess(false);
     try {
-      await createTour({
+      const payload: NewTourPayload = {
         title,
         slug,
         summary,
@@ -112,8 +153,10 @@ export default function CreateTour(): JSX.Element {
         bookingPdfUrl,
         travelWindow: travelStart && travelEnd ? { start: travelStart, end: travelEnd } : undefined,
         itinerary: itinerary.length ? itinerary : undefined,
-        fullStops: fullStops.length ? fullStops : undefined,
-        regularPricePerPerson: Number(regularPrice),
+        fullStops: fullStops.length
+          ? fullStops.map(fs => ({ ...fs, days: fs.days !== undefined ? Number(fs.days) : undefined }))
+          : undefined,
+        regularPricePerPerson: Number(regularPrice || 0),
         promoPricePerPerson: promoPrice ? Number(promoPrice) : undefined,
         basePricePerDay: basePricePerDay ? Number(basePricePerDay) : undefined,
         additionalInfo: {
@@ -126,10 +169,12 @@ export default function CreateTour(): JSX.Element {
               .map(([country, cities]) => [country, cities.split(",").map(s => s.trim()).filter(Boolean)])
           ),
         },
-      } as any);
+      };
+      await createTour(payload);
       setSuccess(true);
       setTimeout(() => navigate("/tours"), 1000);
     } catch (err) {
+      console.error(err);
       setError("Failed to create tour");
     } finally {
       setSaving(false);

@@ -5,18 +5,18 @@
     { "path": "./tsconfig.node.json" }
   ],
   "compilerOptions": {
-    "jsx": "react",
+    "jsx": "react-jsx",
     "baseUrl": ".",
-      "esModuleInterop": true,
-    "moduleResolution": "node",
-    "target": "es2020",
-    "module": "esnext",
-      "lib": ["es2020", "dom"],
-    "paths": {
+"esModuleInterop": true,
+"moduleResolution": "NodeNext",
+"target": "es2020",
+"module": "NodeNext",
+"lib": ["es2020", "dom"],
+"paths": {
       "@discovergroup/types": ["packages/types/src"],
       "@discovergroup/*": ["packages/*/src"]
-    },
-    "types": ["node"]
+    }
+    // REMOVE "types": ["node"] from here
   },
   "include": [
     "src",

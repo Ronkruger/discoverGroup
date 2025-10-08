@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { JSX, useEffect, useState } from "react";
 import { fetchTours, type Tour } from "../../services/apiClient";
 import { Link } from "react-router-dom";
 

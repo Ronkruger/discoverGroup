@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { JSX, useEffect, useState } from "react";
 import Hero from "../components/Hero";
 import StatCard from "../components/StatCard";
 import RecentTours from "../components/RecentTours";
@@ -33,7 +33,8 @@ export default function Home(): JSX.Element {
   }, []);
 
   const total = tours.length;
-  const published = tours.filter((t) => (t as any).published).length; // optional if you have published flag
+  const published = tours.filter((t) => Boolean((t as { published?: boolean }).published)).length; // optional if you have published flag
+  const RecentToursComponent = (RecentTours as unknown) as React.ComponentType<{ tours: Tour[] }>;
 
   return (
     <div>
@@ -64,10 +65,14 @@ export default function Home(): JSX.Element {
             </div>
 
             <div style={{ marginTop: 26 }}>
-              {error ? <div style={{ color: "crimson" }}>Error: {error}</div> : null}
+              {error ? (
+                <div style={{ marginBottom: 12, padding: 10, background: "#ffecec", color: "#a00", borderRadius: 6, border: "1px solid #f5c6cb" }}>
+                  Error loading tours: {error}
+                </div>
+              ) : null}
               <div style={{ marginTop: 8 }}>
-                {/* TS: RecentTours props don't match compiled type, spread as any to satisfy TS for now */}
-                <RecentTours {...({ tours } as any)} />
+                {/* Pass typed tours array directly to RecentTours */}
+                <RecentToursComponent tours={tours} />
               </div>
             </div>
           </div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { fetchTours } from "../api/tours";
 import type { Tour } from "../types";
 import TourCard from "../components/TourCard";
+import React from "react";
 
 // Color map per line
 const lineColors: Record<string, string> = {

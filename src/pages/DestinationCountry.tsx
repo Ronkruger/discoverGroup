@@ -2,6 +2,7 @@ import { useEffect, useState, type JSX, useRef } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import type { Tour } from "../types";
 import { fetchToursByCountry } from "../api/tours";
+import React from "react";
 
 /**
  * DestinationCountry (typed & lint-clean)
@@ -266,7 +267,7 @@ export default function DestinationCountry(): JSX.Element {
     }
 
     const bounds: [number, number][] = [];
-    for (const [, stop] of stops) {
+    stops.forEach((stop) => {
       const coords = CITY_COORDS[stop.city];
       if (coords) {
         const marker = L.marker([coords.lat, coords.lng]);
@@ -275,7 +276,7 @@ export default function DestinationCountry(): JSX.Element {
         marker.addTo(group);
         bounds.push([coords.lat, coords.lng]);
       }
-    }
+    });
 
     if (bounds.length > 0) {
       group.addTo(map);

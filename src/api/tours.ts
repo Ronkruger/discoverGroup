@@ -157,29 +157,27 @@ export async function fetchTourBySlug(slug: string): Promise<Tour | null> {
 
 export async function fetchContinents(): Promise<string[]> {
   await new Promise((r) => setTimeout(r, 120));
-  const countries = mockTours.flatMap((t) => t.additionalInfo?.countriesVisited ?? []);
+  const countries = mockTours.reduce<string[]>((acc, t) => acc.concat(t.additionalInfo?.countriesVisited ?? []), []);
   const continents = countries.map((c) => countryToContinent[c] ?? "Other");
   return unique(continents);
 }
 
 export async function fetchCountriesByContinent(continent: string): Promise<string[]> {
   await new Promise((r) => setTimeout(r, 120));
-  const countries = mockTours.flatMap((t) => t.additionalInfo?.countriesVisited ?? []);
+  const countries = mockTours.reduce<string[]>((acc, t) => acc.concat(t.additionalInfo?.countriesVisited ?? []), []);
   const filtered = countries.filter((c) => (countryToContinent[c] ?? "Other") === continent);
   return unique(filtered).sort((a, b) => a.localeCompare(b));
 }
 
 export async function fetchToursByCountry(country: string): Promise<Tour[]> {
   await new Promise((r) => setTimeout(r, 180));
-  return mockTours.filter((t) => (t.additionalInfo?.countriesVisited ?? []).includes(country));
+  return mockTours.filter((t) => (t.additionalInfo?.countriesVisited ?? []).indexOf(country) !== -1);
 }
 
 export async function fetchToursByContinent(continent: string): Promise<Tour[]> {
   await new Promise((r) => setTimeout(r, 180));
   const continentCountries = new Set(
-    Object.entries(countryToContinent)
-      .filter(([, cont]) => cont === continent)
-      .map(([country]) => country)
+    Object.keys(countryToContinent).filter((country) => countryToContinent[country] === continent)
   );
   return mockTours.filter((t) =>
     (t.additionalInfo?.countriesVisited ?? []).some((c) => continentCountries.has(c))

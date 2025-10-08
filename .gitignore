@@ -24,3 +24,4 @@ apps/api/.env
 *.sln
 *.sw?
 .env 
+.env 

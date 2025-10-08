@@ -129,7 +129,7 @@ export default function Booking(): JSX.Element {
         }
       } catch (e: unknown) {
         if (!cancelled) {
-          console.error(e);
+          console.error('Payment intent creation failed:', e);
           const message =
             e instanceof Error ? e.message :
             typeof e === "string" ? e :

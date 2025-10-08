@@ -2,6 +2,7 @@ import { useEffect, useState, type JSX } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import type { Tour } from "../types";
 import { fetchToursByCountry, fetchTours } from "../api/tours";
+import React from "react";
 
 /**
  * SearchResults page

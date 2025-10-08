@@ -14,8 +14,13 @@ type CreatePaymentIntentResponse = {
 export async function createPaymentIntent(
   payload: CreatePaymentIntentRequest
 ): Promise<CreatePaymentIntentResponse> {
+  // In production (Netlify), use the Netlify function; in development, use local API
   const base = import.meta.env.VITE_API_BASE_URL ?? "";
-  const res = await fetch(`${base}/api/create-payment-intent`, {
+  const endpoint = base ? 
+    `${base}/api/create-payment-intent` : 
+    '/.netlify/functions/create-payment-intent';
+  
+  const res = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),

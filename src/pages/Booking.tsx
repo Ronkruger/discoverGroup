@@ -99,7 +99,7 @@ export default function Booking(): JSX.Element {
     return () => {
       cancelled = true;
     };
-  }, [navState.passengers, navState.selectedDate, perPerson, slug, tour]);
+  }, [navState?.passengers, navState?.selectedDate, perPerson, slug, tour]);
 
   const total = (perPerson ?? 0) * Math.max(1, passengers);
 

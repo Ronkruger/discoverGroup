@@ -4,6 +4,7 @@ import { fetchTourBySlug } from "../api/tours";
 import type { Tour, ItineraryDay, Stop } from "../types";
 import * as React from "react";
 
+
 /**
  * Modernized TourDetail with a single BookingCard component to remove duplication.
  *
@@ -289,10 +290,27 @@ export default function TourDetail(): JSX.Element {
           <div className="text-xs text-slate-400">· Flexible payment</div>
         </div>
 
-        <div className="mt-3 flex gap-2">
-          <Link to={`/search?countries=${encodeURIComponent(countriesVisited[0] ?? "")}&brands=Trafalgar&useEmbeddedCards=true`} className={`${compactButtons} bg-rose-600 text-white rounded`}>Available Dates</Link>
-          <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className={`${compactButtons} border rounded bg-white hover:bg-slate-50`}>Customize</Link>
-        </div>
+        {compact ? (
+          <div className="mt-3 space-y-2">
+            <div className="flex gap-2">
+              <Link to={`/search?countries=${encodeURIComponent(countriesVisited[0] ?? "")}&brands=Trafalgar&useEmbeddedCards=true`} className={`${compactButtons} bg-rose-600 text-white rounded`}>Available Dates</Link>
+              <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className={`${compactButtons} border rounded bg-white hover:bg-slate-50`}>Customize</Link>
+            </div>
+            <Link
+              to={`/booking/${encodeURIComponent(builderSlug)}`}
+              state={{ tour, selectedDate, passengers, perPerson: perPersonForTotals }}
+              className="w-full text-center px-3 py-2 bg-accent-yellow text-slate-900 rounded font-semibold block"
+            >
+              BOOK NOW
+            </Link>
+          </div>
+        ) : (
+          <>
+            <div className="mt-3 flex gap-2">
+              <Link to={`/search?countries=${encodeURIComponent(countriesVisited[0] ?? "")}&brands=Trafalgar&useEmbeddedCards=true`} className={`${compactButtons} bg-rose-600 text-white rounded`}>Available Dates</Link>
+            </div>
+          </>
+        )}
 
         {!compact && (
           <>
@@ -384,8 +402,96 @@ export default function TourDetail(): JSX.Element {
           <span className="text-white font-medium">{tour.title}</span>
         </nav>
 
-        {/* Hero + CTA column to the right on large screens */}
-        <div className="mb-6 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start relative">
+        {/* Mobile-optimized layout: Hero -> Title -> Booking -> Content */}
+        <div className="lg:hidden">
+          {/* Mobile Hero - Reduced height */}
+          <div className="relative mb-4">
+            <div className="rounded-lg overflow-hidden shadow-xl">
+              <div className="relative w-full h-48 bg-slate-800 rounded">
+                {tour.images && tour.images.length > 0 ? (
+                  <img
+                    src={tour.images[carouselIndex]}
+                    alt={`${tour.title} image ${carouselIndex + 1}`}
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out transform hover:scale-105"
+                    loading="lazy"
+                    onClick={() => openGallery(carouselIndex)}
+                    style={{ cursor: "zoom-in" }}
+                  />
+                ) : (
+                  <img src="/assets/placeholder.jpg" alt="placeholder" className="w-full h-full object-cover" />
+                )}
+
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40"></div>
+
+                <button
+                  aria-label="Previous image"
+                  onClick={prevImage}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white rounded-full p-1.5"
+                >
+                  ‹
+                </button>
+                <button
+                  aria-label="Next image"
+                  onClick={nextImage}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white rounded-full p-1.5"
+                >
+                  ›
+                </button>
+
+                {/* Mobile badges - simplified */}
+                <div className="absolute left-4 bottom-4 text-left text-white z-10">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1 bg-white/20 text-white px-2 py-1 rounded-full text-xs">
+                      {tour.durationDays ?? itinerary.length} days
+                    </span>
+                    {tour.guaranteedDeparture && (
+                      <span className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-200 px-2 py-1 rounded-full text-xs">
+                        Guaranteed
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="absolute right-3 bottom-3 flex gap-1 z-10">
+                  {tour.images?.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCarouselIndex(idx)}
+                      aria-label={`Go to image ${idx + 1}`}
+                      className={`w-1.5 h-1.5 rounded-full ${idx === carouselIndex ? "bg-accent-yellow" : "bg-white/30"}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile Title Section */}
+          <div className="mb-4">
+            <div className="text-xs uppercase tracking-wider text-slate-200/80">{tour.line ?? "Line"}</div>
+            <h1 className="font-serif font-extrabold text-2xl text-white mt-1 leading-tight">
+              {tour.title}
+            </h1>
+            <p className="text-slate-300 mt-2 text-sm">{tour.summary}</p>
+            
+            <div className="mt-3 flex items-center gap-2">
+              <button onClick={() => openGallery(0)} className="px-3 py-1.5 bg-accent-yellow text-slate-900 rounded font-semibold text-sm">
+                View gallery
+              </button>
+              {highlights.length > 0 && (
+                <span className="text-xs text-slate-300">• {highlights.slice(0, 2).join(", ")}</span>
+              )}
+            </div>
+          </div>
+
+          {/* Mobile Booking Card */}
+          <div className="mb-6">
+            <BookingCard compact />
+          </div>
+        </div>
+
+        {/* Desktop layout: Hero + CTA column to the right on large screens */}
+        <div className="mb-6 hidden lg:grid grid-cols-3 gap-6 items-start relative">
           {/* Hero image (left: spans 2 columns on lg) */}
           <div className="lg:col-span-2 relative">
             <div className="rounded-lg overflow-hidden shadow-xl">
@@ -421,7 +527,7 @@ export default function TourDetail(): JSX.Element {
                   ›
                 </button>
 
-                {/* small lower-left badges and gallery button left on the image */}
+                {/* Desktop lower-left badges and gallery button */}
                 <div className="absolute left-6 bottom-6 text-left text-white max-w-2xl z-10">
                   <div className="mt-0">
                     <p className="text-slate-200/90 max-w-xl">{String(tour.shortDescription || tour.summary || "")}</p>
@@ -446,23 +552,18 @@ export default function TourDetail(): JSX.Element {
                 </div>
               </div>
             </div>
-
-            {/* mobile/stacked fallback: show BookingCard compact under the hero on small screens */}
-            <div className="block lg:hidden mt-3">
-              <BookingCard compact />
-            </div>
           </div>
 
-          {/* CTA column (right side of image on lg) - reuse BookingCard to avoid duplication */}
-          <div className="lg:col-span-1 flex items-start">
-            <div className="w-full hidden lg:block">
+          {/* Desktop CTA column (right side of image on lg) */}
+          <div className="lg:col-span-1 items-start flex">
+            <div className="w-full">
               <BookingCard />
             </div>
           </div>
         </div>
 
-        {/* Title block (below hero image) */}
-        <div className="mb-6">
+        {/* Desktop Title block (below hero image) */}
+        <div className="mb-6 hidden lg:block">
           <div className="bg-transparent rounded-md">
             <div className="lg:flex lg:items-center lg:justify-between">
               <div className="lg:w-2/3">
@@ -488,25 +589,25 @@ export default function TourDetail(): JSX.Element {
 
         {/* Tabs: full width under the hero/title */}
         <div className="bg-white/6 card-glass rounded-t-lg border-b border-white/6 mb-6">
-          <div className="container mx-auto px-0">
-            <div className="flex gap-6 px-2">
-              <button onClick={() => setActiveTab("itinerary")} className={`px-4 py-3 -mb-px ${activeTab === "itinerary" ? "border-b-2 border-accent-yellow text-accent-yellow font-semibold" : "text-slate-200"}`}>Itinerary</button>
-              <button onClick={() => setActiveTab("availability")} className={`px-4 py-3 -mb-px ${activeTab === "availability" ? "border-b-2 border-accent-yellow text-accent-yellow font-semibold" : "text-slate-200"}`}>Availability</button>
-              <button onClick={() => setActiveTab("extensions")} className={`px-4 py-3 -mb-px ${activeTab === "extensions" ? "border-b-2 border-accent-yellow text-accent-yellow font-semibold" : "text-slate-200"}`}>Extensions</button>
-              <button onClick={() => setActiveTab("details")} className={`px-4 py-3 -mb-px ${activeTab === "details" ? "border-b-2 border-accent-yellow text-accent-yellow font-semibold" : "text-slate-200"}`}>Details</button>
+          <div className="px-4">
+            <div className="flex gap-4 overflow-x-auto">
+              <button onClick={() => setActiveTab("itinerary")} className={`px-3 py-3 whitespace-nowrap -mb-px ${activeTab === "itinerary" ? "border-b-2 border-accent-yellow text-accent-yellow font-semibold" : "text-slate-200"}`}>Itinerary</button>
+              <button onClick={() => setActiveTab("availability")} className={`px-3 py-3 whitespace-nowrap -mb-px ${activeTab === "availability" ? "border-b-2 border-accent-yellow text-accent-yellow font-semibold" : "text-slate-200"}`}>Availability</button>
+              <button onClick={() => setActiveTab("extensions")} className={`px-3 py-3 whitespace-nowrap -mb-px ${activeTab === "extensions" ? "border-b-2 border-accent-yellow text-accent-yellow font-semibold" : "text-slate-200"}`}>Extensions</button>
+              <button onClick={() => setActiveTab("details")} className={`px-3 py-3 whitespace-nowrap -mb-px ${activeTab === "details" ? "border-b-2 border-accent-yellow text-accent-yellow font-semibold" : "text-slate-200"}`}>Details</button>
             </div>
           </div>
         </div>
 
         {/* Content area */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left: main panels */}
           <div className="lg:col-span-2 space-y-6">
             {/* Tab panels */}
-            <div className="mt-0">
+            <div>
               {activeTab === "itinerary" && (
-                <div className="bg-white/6 card-glass rounded-lg p-6 border border-white/6">
-                  <h3 className="text-xl font-semibold mb-4 text-white">Day-by-day itinerary</h3>
+                <div className="bg-white/6 card-glass rounded-lg p-4 lg:p-6 border border-white/6">
+                  <h3 className="text-lg lg:text-xl font-semibold mb-4 text-white">Day-by-day itinerary</h3>
                   <div className="space-y-6">
                     {itinerary.map((day: ItineraryDay) => (
                       <div key={day.day} className="p-4 border rounded-lg bg-white/4">

@@ -161,13 +161,14 @@ export default function Header(): React.ReactElement {
               <button className="flex items-center gap-1 hover:text-blue-600 font-medium">
                 My Account ▾
               </button>
-              <div className="absolute right-0 mt-2 w-44 bg-white border rounded-xl shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition">
+              <div className="absolute right-0 mt-2 w-44 bg-white border rounded-xl shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 ease-in-out">
+                <div className="absolute -top-2 right-0 w-full h-2 bg-transparent"></div>
                 <ul className="py-2 text-sm">
                   <li className="px-4 py-2 hover:bg-gray-50">
-                    <a href="/profile">Profile</a>
+                    <a href="/profile" className="block w-full h-full">Profile</a>
                   </li>
                   <li className="px-4 py-2 hover:bg-gray-50">
-                    <a href="/bookings">Bookings</a>
+                    <a href="/bookings" className="block w-full h-full">Bookings</a>
                   </li>
                 </ul>
               </div>
@@ -301,7 +302,7 @@ export default function Header(): React.ReactElement {
             </div>
 
             {/* Other nav links */}
-            {["Ways To Go", "Deals", "About Us", "River Cruises"].map((item) => (
+            {["Ways To Go", "Deals", "About Us"].map((item) => (
               <a
                 key={item}
                 href="#"
@@ -310,6 +311,22 @@ export default function Header(): React.ReactElement {
                 {item}
               </a>
             ))}
+            
+            {/* My Bookings link */}
+            <a
+              href="/bookings"
+              className="text-sm font-semibold uppercase tracking-wide text-blue-900 hover:text-yellow-400 transition relative after:content-[''] after:absolute after:left-0 after:bottom-[-6px] after:w-0 after:h-[2px] after:bg-yellow-400 hover:after:w-full after:transition-all"
+            >
+              My Bookings
+            </a>
+            
+            {/* River Cruises */}
+            <a
+              href="#"
+              className="text-sm font-semibold uppercase tracking-wide text-blue-900 hover:text-yellow-400 transition relative after:content-[''] after:absolute after:left-0 after:bottom-[-6px] after:w-0 after:h-[2px] after:bg-yellow-400 hover:after:w-full after:transition-all"
+            >
+              River Cruises
+            </a>
           </nav>
 
           {/* Right side */}
@@ -367,6 +384,7 @@ export default function Header(): React.ReactElement {
               <div className="flex flex-col gap-4">
                 <a href="/routes" className="py-2 border-b hover:text-blue-600">Our Routes</a>
                 <a href="/joining-points" className="py-2 border-b hover:text-blue-600">Joining Points</a>
+                <a href="/bookings" className="py-2 border-b hover:text-blue-600">My Bookings</a>
                 <a href="/contact" className="py-2 border-b hover:text-blue-600">Contact</a>
                 <div className="py-2 border-b"><LanguageSwitcher /></div>
                 <div className="py-2">

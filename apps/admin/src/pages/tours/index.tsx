@@ -1,5 +1,8 @@
-import React, { JSX, useEffect, useState } from "react";
-import { fetchTours, type Tour } from "../../services/apiClient";
+// Removed re-export of ManageTours to avoid duplicate default export; ToursList below is the default export.
+
+import { Tour } from "@discovergroup/types";
+import { JSX, useEffect, useState } from "react";
+import { fetchTours } from "../../services/apiClient";
 import { Link } from "react-router-dom";
 
 export default function ToursList(): JSX.Element {

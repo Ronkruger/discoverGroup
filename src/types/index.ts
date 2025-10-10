@@ -46,6 +46,31 @@ export type Tour = {
   itinerary?: ItineraryDay[];
   fullStops?: Stop[];
   basePricePerDay?: number;
+  allowsDownpayment?: boolean;
   additionalInfo?: AdditionalInfo;
   [key: string]: unknown;
+};
+
+export type BookingStatus = 'confirmed' | 'pending' | 'cancelled' | 'completed';
+
+export type PaymentType = 'full' | 'downpayment';
+
+export type Booking = {
+  id: string;
+  bookingId: string;
+  tour: Tour;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  customerPassport?: string;
+  selectedDate: string;
+  passengers: number;
+  perPerson: number;
+  totalAmount: number;
+  paidAmount: number;
+  paymentType: PaymentType;
+  status: BookingStatus;
+  bookingDate: string; // ISO date string
+  paymentIntentId?: string;
+  notes?: string;
 };

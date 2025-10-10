@@ -10,6 +10,7 @@ import DestinationCountry from "./pages/DestinationCountry";
 import SearchResults from "./pages/SearchResults";
 import Booking from "./pages/Booking";
 import BookingConfirmation from "./pages/BookingConfirmation";
+import ViewBookings from "./pages/ViewBookings";
 import * as React from "react";
 export default function App() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
         {/* Booking flow */}
         <Route path="/booking/:slug" element={<Booking />} />
         <Route path="/booking/confirmation" element={<BookingConfirmation />} />
+        <Route path="/bookings" element={<ViewBookings />} />
 
         <Route path="/contact" element={<ContactPage />} />
       </Routes>

@@ -5,7 +5,11 @@ import { fetchTourBySlug } from "../api/tours";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { stripePromise } from "../lib/stripe";
 import { createPaymentIntent } from "../api/payments";
+import { sendBookingConfirmationEmailFallback } from "../api/emailJS";
+import { createBooking } from "../api/bookings";
 import React from "react";
+import ProgressIndicator from "../components/ProgressIndicator";
+import { TrustSignals, UrgencyIndicators, BookingProtection } from "../components/TrustSignals";
 
 function formatCurrencyPHP(amount: number) {
   return `PHP ${amount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -32,6 +36,16 @@ export default function Booking(): JSX.Element {
   // Booking flow state
   const [step, setStep] = useState<number>(0); // 0: review, 1: lead, 2: payment, 3: review, 4: confirm/pay
   const [error, setError] = useState<string | null>(null);
+
+  // Customer information state
+  const [customerName, setCustomerName] = useState<string>("");
+  const [customerEmail, setCustomerEmail] = useState<string>("");
+  const [customerPhone, setCustomerPhone] = useState<string>("");
+  const [customerPassport, setCustomerPassport] = useState<string>("");
+
+  // Payment options state
+  const [paymentType, setPaymentType] = useState<"full" | "downpayment">("full");
+  const [downpaymentPercentage] = useState<number>(30); // 30% default
 
   // Stripe state
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -102,6 +116,11 @@ export default function Booking(): JSX.Element {
   }, [navState?.passengers, navState?.selectedDate, perPerson, slug, tour]);
 
   const total = (perPerson ?? 0) * Math.max(1, passengers);
+  
+  // Calculate payment amounts based on payment type
+  const downpaymentAmount = Math.round(total * (downpaymentPercentage / 100));
+  const remainingBalance = total - downpaymentAmount;
+  const paymentAmount = paymentType === "downpayment" ? downpaymentAmount : total;
 
   // Initialize PaymentIntent when entering Step 2 (Payment)
   useEffect(() => {
@@ -115,17 +134,29 @@ export default function Booking(): JSX.Element {
 
       try {
         const { clientSecret: cs } = await createPaymentIntent({
-          amount: Math.round(total * 100), // PHP in centavos
+          amount: Math.round(paymentAmount * 100), // PHP in centavos
           currency: "php",
           metadata: {
             slug: slug ?? "",
             tourTitle: tour?.title ?? "",
             date: selectedDate ?? "",
             passengers: String(passengers ?? 1),
+            paymentType: paymentType,
+            ...(paymentType === "downpayment" && {
+              downpaymentAmount: String(downpaymentAmount),
+              remainingBalance: String(remainingBalance),
+              downpaymentPercentage: String(downpaymentPercentage)
+            })
           },
         });
         if (!cancelled) {
-          setClientSecret(cs);
+          // Validate client secret format before setting it
+          if (cs && typeof cs === 'string' && cs.includes('_secret_')) {
+            setClientSecret(cs);
+          } else {
+            console.error('Invalid client secret format received:', cs);
+            setError('Payment system error. Please try again.');
+          }
         }
       } catch (e: unknown) {
         if (!cancelled) {
@@ -145,7 +176,7 @@ export default function Booking(): JSX.Element {
     return () => {
       cancelled = true;
     };
-  }, [step, total, selectedDate, passengers, slug, tour?.title]);
+  }, [step, total, paymentAmount, paymentType, downpaymentAmount, remainingBalance, downpaymentPercentage, selectedDate, passengers, slug, tour?.title]);
 
   function validateStep(current: number): string | null {
     if (current === 0) {
@@ -181,6 +212,35 @@ export default function Booking(): JSX.Element {
 
   function handlePaymentSuccess(confirmationId: string) {
     const bookingId = confirmationId || `BK-${Math.random().toString(36).slice(2, 9).toUpperCase()}`;
+    
+    console.log('🎉 Payment successful! Booking details:', {
+      bookingId,
+      customerName,
+      customerEmail,
+      tourTitle: tour?.title
+    });
+
+    // Save booking to our database/storage
+    if (tour && customerName && customerEmail && selectedDate) {
+      createBooking({
+        tour,
+        customerName,
+        customerEmail,
+        customerPhone,
+        customerPassport,
+        selectedDate,
+        passengers,
+        perPerson,
+        paymentType,
+        paymentIntentId: confirmationId,
+      }).then((savedBooking) => {
+        console.log('✅ Booking saved successfully:', savedBooking.bookingId);
+      }).catch((error) => {
+        console.error('❌ Failed to save booking:', error);
+      });
+    }
+    
+    // Navigate immediately - don't wait for email
     navigate("/booking/confirmation", {
       state: {
         bookingId,
@@ -190,8 +250,46 @@ export default function Booking(): JSX.Element {
         passengers,
         perPerson,
         total,
+        customerEmail: customerEmail || undefined,
       },
     });
+    
+    // Send confirmation email in background (non-blocking)
+    if (customerName && customerEmail && tour) {
+      console.log('📧 Sending confirmation email to:', customerEmail);
+      
+      // Fire and forget - don't block the UI
+      setTimeout(() => {
+        sendBookingConfirmationEmailFallback({
+          bookingId,
+          customerName,
+          customerEmail,
+          tourTitle: tour.title,
+          tourDate: selectedDate || '',
+          passengers,
+          pricePerPerson: perPerson,
+          totalAmount: total,
+          downpaymentAmount: paymentType === "downpayment" ? downpaymentAmount : undefined,
+          remainingBalance: paymentType === "downpayment" ? remainingBalance : undefined,
+          isDownpaymentOnly: paymentType === "downpayment",
+          country: tour.additionalInfo?.countriesVisited?.[0] || ''
+        }).then((result) => {
+          if (result.success) {
+            console.log('✅ Booking confirmation email sent successfully:', result.message);
+          } else {
+            console.error('❌ Failed to send confirmation email:', result.error);
+          }
+        }).catch((error) => {
+          console.error('❌ Email sending error:', error);
+        });
+      }, 100); // Small delay to ensure navigation happens first
+    } else {
+      console.warn('⚠️ Email not sent - missing customer details:', {
+        hasCustomerName: !!customerName,
+        hasCustomerEmail: !!customerEmail,
+        hasTour: !!tour
+      });
+    }
   }
 
   const themeStyle: React.CSSProperties = {
@@ -202,14 +300,16 @@ export default function Booking(): JSX.Element {
     ["--muted-slate" as string]: "#94a3b8",
   };
 
-  // UNIQUE keys for steps
-  const stepLabels = [
-    "Review",
-    "Lead details",
-    "Payment",
-    "Review Booking",
-    "Confirm"
+  // Define the booking steps for progress indicator
+  const bookingSteps = [
+    { id: 1, title: "Review", description: "Tour details" },
+    { id: 2, title: "Details", description: "Your information" },
+    { id: 3, title: "Payment", description: "Secure checkout" },
+    { id: 4, title: "Review", description: "Final check" },
+    { id: 5, title: "Confirm", description: "Complete booking" }
   ];
+
+  // (stepLabels removed — it was unused)
 
   if (loading) return <div className="container mx-auto px-5 py-12 text-center text-slate-200">Loading booking details…</div>;
 
@@ -301,31 +401,39 @@ export default function Booking(): JSX.Element {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 space-y-6">
             <div className="card-glass rounded-lg p-4">
-              <div className="flex items-center gap-4">
-                {stepLabels.map((label, i) => (
-                  <div key={label + i} className="flex items-center gap-3">
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold step-dot ${i === step ? "active" : ""}`}
-                      aria-current={i === step ? "step" : undefined}
-                    >
-                      {i + 1}
-                    </div>
-                    <div className={`hidden sm:block text-sm ${i === step ? "text-slate-100 font-semibold" : "text-slate-300"}`}>{label}</div>
-                  </div>
-                ))}
-              </div>
+              <ProgressIndicator 
+                steps={bookingSteps}
+                currentStep={step + 1}
+                className="mb-2"
+              />
             </div>
             <div className="card-glass rounded-lg p-6">
+              {/* Render Stripe Elements only when we have a valid client secret */}
               {(step === 2 || step === 3 || step === 4) && clientSecret && !initializingPayment ? (
                 <Elements stripe={stripePromise} options={{ clientSecret, appearance: elementsAppearance }}>
-                  {/* Always mount PaymentElement for StripeConfirmSection */}
+                  {/* Single PaymentElement - always mounted but positioned for step 2 */}
                   <div style={{ display: step === 2 ? "block" : "none" }}>
-                    <PaymentElement options={{ layout: "tabs" }} />
-                  </div>
-                  {step === 2 && (
                     <section aria-labelledby="payment-heading">
                       <h2 id="payment-heading" className="text-lg font-semibold mb-3 text-slate-100">Payment</h2>
+                      
+                      {/* Trust signals before payment form */}
+                      <div className="mb-6">
+                        <TrustSignals />
+                        <div className="mt-4">
+                          <UrgencyIndicators />
+                        </div>
+                        <div className="mt-4">
+                          <BookingProtection />
+                        </div>
+                      </div>
+                      
                       <div className="text-sm text-slate-300 mb-3">Enter your card details below. Test mode is enabled.</div>
+                      
+                      {/* Stripe Payment Element - this is the card form */}
+                      <div className="my-6">
+                        <PaymentElement options={{ layout: "tabs" }} />
+                      </div>
+                      
                       {error && <div className="mt-3 text-rose-400">{error}</div>}
                       <div className="mt-6 flex justify-between items-center">
                         <button onClick={handleBack} className="px-4 py-2 btn-secondary rounded">Back</button>
@@ -338,7 +446,8 @@ export default function Booking(): JSX.Element {
                         </button>
                       </div>
                     </section>
-                  )}
+                  </div>
+                  
                   {step === 3 && (
                     <section aria-labelledby="review-confirm-heading">
                       <h2 id="review-confirm-heading" className="text-lg font-semibold mb-3 text-slate-100">
@@ -429,6 +538,64 @@ export default function Booking(): JSX.Element {
                         <div className="text-sm text-slate-300">Per person</div>
                         <div className="text-lg font-semibold text-slate-100">{formatCurrencyPHP(perPerson)}</div>
                       </div>
+                      
+                      {/* Payment Options */}
+                      <div className="mt-6 p-4 bg-slate-800/50 rounded-lg">
+                        <h3 className="text-md font-semibold mb-3 text-slate-100">Payment Options</h3>
+                        <div className="space-y-3">
+                          <label className="flex items-center space-x-3 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="paymentType"
+                              value="full"
+                              checked={paymentType === "full"}
+                              onChange={(e) => setPaymentType(e.target.value as "full" | "downpayment")}
+                              className="text-blue-600 focus:ring-blue-500"
+                            />
+                            <div className="flex-1">
+                              <div className="text-slate-100 font-medium">Full Payment</div>
+                              <div className="text-sm text-slate-300">
+                                Pay the complete amount: {formatCurrencyPHP(total)}
+                              </div>
+                            </div>
+                          </label>
+                          
+                          {tour.allowsDownpayment && (
+                            <label className="flex items-center space-x-3 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="paymentType"
+                                value="downpayment"
+                                checked={paymentType === "downpayment"}
+                                onChange={(e) => setPaymentType(e.target.value as "full" | "downpayment")}
+                                className="text-blue-600 focus:ring-blue-500"
+                              />
+                              <div className="flex-1">
+                                <div className="text-slate-100 font-medium">Downpayment ({downpaymentPercentage}%)</div>
+                                <div className="text-sm text-slate-300">
+                                  Pay now: {formatCurrencyPHP(downpaymentAmount)} • 
+                                  Remaining: {formatCurrencyPHP(remainingBalance)}
+                                </div>
+                                <div className="text-xs text-slate-400 mt-1">
+                                  Remaining balance due before departure
+                                </div>
+                              </div>
+                            </label>
+                          )}
+                        </div>
+                        
+                        <div className="mt-4 pt-3 border-t border-slate-700">
+                          <div className="flex items-center justify-between">
+                            <div className="text-sm font-medium text-slate-300">
+                              {paymentType === "full" ? "Total Amount" : "Amount to Pay Now"}
+                            </div>
+                            <div className="text-lg font-bold text-blue-400">
+                              {formatCurrencyPHP(paymentAmount)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
                       <div className="mt-6 flex justify-end gap-3">
                         <button onClick={() => navigate(-1)} className="px-4 py-2 btn-secondary rounded">Back</button>
                         <button onClick={handleNext} className="px-4 py-2 btn-primary rounded">Continue</button>
@@ -440,16 +607,50 @@ export default function Booking(): JSX.Element {
                     <section aria-labelledby="lead-heading">
                       <h2 id="lead-heading" className="text-lg font-semibold mb-3 text-slate-100">Lead passenger details</h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input placeholder="Full name" className="rounded px-3 py-2" />
-                        <input placeholder="Email address" type="email" className="rounded px-3 py-2" />
-                        <input placeholder="Phone (optional)" className="rounded px-3 py-2" />
-                        <input placeholder="Passport or ID" className="rounded px-3 py-2" />
+                        <input 
+                          placeholder="Full name" 
+                          value={customerName}
+                          onChange={(e) => setCustomerName(e.target.value)}
+                          className="rounded px-3 py-2" 
+                          required
+                        />
+                        <input 
+                          placeholder="Email address" 
+                          type="email" 
+                          value={customerEmail}
+                          onChange={(e) => setCustomerEmail(e.target.value)}
+                          className="rounded px-3 py-2" 
+                          required
+                        />
+                        <input 
+                          placeholder="Phone (optional)" 
+                          value={customerPhone}
+                          onChange={(e) => setCustomerPhone(e.target.value)}
+                          className="rounded px-3 py-2" 
+                        />
+                        <input 
+                          placeholder="Passport or ID" 
+                          value={customerPassport}
+                          onChange={(e) => setCustomerPassport(e.target.value)}
+                          className="rounded px-3 py-2" 
+                        />
                       </div>
                       <div className="mt-6 flex justify-between">
                         <button onClick={handleBack} className="px-4 py-2 btn-secondary rounded">Back</button>
                         <div className="flex gap-3">
-                          <button onClick={() => { /* add resets if needed */ }} className="px-4 py-2 btn-secondary rounded">Reset</button>
-                          <button onClick={handleNext} className="px-4 py-2 btn-primary rounded">Continue to payment</button>
+                          <button onClick={() => { 
+                            setCustomerName("");
+                            setCustomerEmail("");
+                            setCustomerPhone("");
+                            setCustomerPassport("");
+                          }} className="px-4 py-2 btn-secondary rounded">Reset</button>
+                          <button 
+                            onClick={handleNext} 
+                            disabled={!customerName.trim() || !customerEmail.trim()}
+                            className="px-4 py-2 btn-primary rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Continue to payment
+                          </button>
                         </div>
                       </div>
                     </section>

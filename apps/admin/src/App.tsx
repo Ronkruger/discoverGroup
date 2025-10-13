@@ -13,6 +13,8 @@ import TourForm from "./pages/tours/TourForm";
 import ManageBookings from "./pages/bookings";
 import UserManagement from "./pages/UserManagement";
 import CustomerService from "./pages/customer-service";
+import Reports from './pages/Reports';
+import Settings from './pages/Settings';
 import { UserRole } from "./types/auth";
 
 // Loading component
@@ -156,12 +158,7 @@ const AppRouter: React.FC = () => {
               path="/reports"
               element={
                 <ProtectedRoute requiredPermission="canAccessReports">
-                  <div className="p-6">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-4">Reports</h1>
-                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                      <p className="text-purple-800">Reports and analytics will be implemented here.</p>
-                    </div>
-                  </div>
+                  <Reports />
                 </ProtectedRoute>
               }
             />
@@ -187,12 +184,7 @@ const AppRouter: React.FC = () => {
                   requiredPermission="canAccessSettings"
                   allowedRoles={[UserRole.ADMINISTRATOR, UserRole.WEB_DEVELOPER]}
                 >
-                  <div className="p-6">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-4">Settings</h1>
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                      <p className="text-gray-800">System settings will be implemented here.</p>
-                    </div>
-                  </div>
+                  <Settings />
                 </ProtectedRoute>
               }
             />

@@ -1,5 +1,122 @@
 @import "tailwindcss";
 
+/* Dark mode CSS variables and styles */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --accent-color: #3b82f6;
+}
+
+.dark {
+  --bg-primary: #1f2937;
+  --bg-secondary: #111827;
+  --bg-tertiary: #374151;
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --border-color: #4b5563;
+  --accent-color: #60a5fa;
+}
+
+/* Apply dark mode styles */
+.dark body {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.dark .bg-white {
+  background-color: var(--bg-primary);
+}
+
+.dark .bg-gray-50 {
+  background-color: var(--bg-secondary);
+}
+
+.dark .bg-gray-100 {
+  background-color: var(--bg-tertiary);
+}
+
+.dark .text-gray-900 {
+  color: var(--text-primary);
+}
+
+.dark .text-gray-600 {
+  color: var(--text-secondary);
+}
+
+.dark .border-gray-200 {
+  border-color: var(--border-color);
+}
+
+.dark .border-gray-300 {
+  border-color: var(--border-color);
+}
+
+/* Sidebar dark mode */
+.dark .admin-sidebar {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+/* Cards and panels */
+.dark .bg-blue-50 {
+  background-color: #1e3a8a;
+}
+
+.dark .bg-green-50 {
+  background-color: #166534;
+}
+
+.dark .bg-red-50 {
+  background-color: #991b1b;
+}
+
+.dark .bg-yellow-50 {
+  background-color: #a16207;
+}
+
+.dark .bg-orange-50 {
+  background-color: #c2410c;
+}
+
+.dark .bg-purple-50 {
+  background-color: #7c2d12;
+}
+
+/* Button styles */
+.dark .hover\\:bg-gray-100:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.dark .hover\\:bg-gray-200:hover {
+  background-color: var(--border-color);
+}
+
+/* Input fields */
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="number"],
+.dark select,
+.dark textarea {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark input[type="text"]:focus,
+.dark input[type="email"]:focus,
+.dark input[type="password"]:focus,
+.dark input[type="number"]:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: var(--accent-color);
+  background-color: var(--bg-primary);
+}
+
 /* minimal reset / layout helper */
 html, body, #root {
   height: 100%;

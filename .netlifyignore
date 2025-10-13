@@ -1,0 +1,5 @@
+apps/api/
+packages/
+*.md
+.git/
+node_modules/

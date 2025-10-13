@@ -5,7 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -p tsconfig.frontend.json && vite build",
+    "build:full": "npm run build:types && npm run build:api && npm run build:admin && npm run build:app",
+    "build:types": "cd packages/types && npm run build",
+    "build:api": "cd apps/api && npm run build",
+    "build:admin": "cd apps/admin && npm run build",
+    "build:app": "tsc && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },

@@ -35,8 +35,8 @@ const getAdminUrl = () => {
     return "http://localhost:5174";
   }
   
-  // Production fallback with known Netlify URL
-  return 'https://admin--discovergrp.netlify.app';
+  // Production fallback with new Netlify admin panel URL
+  return 'https://lambent-dodol-2486cc.netlify.app/';
 };
 
 const ADMIN_URL = getAdminUrl();

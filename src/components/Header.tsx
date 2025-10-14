@@ -18,7 +18,28 @@ declare global {
   }
 }
 
-const ADMIN_URL = window.__VITE_ADMIN_URL ?? "http://localhost:5174";
+// Use environment variable for admin URL, with fallback logic for different environments
+const getAdminUrl = () => {
+  // Check for environment variable first
+  if (import.meta.env.VITE_ADMIN_URL) {
+    return import.meta.env.VITE_ADMIN_URL;
+  }
+  
+  // Check for window variable (for runtime configuration)
+  if (window.__VITE_ADMIN_URL) {
+    return window.__VITE_ADMIN_URL;
+  }
+  
+  // Development fallback
+  if (window.location.hostname === 'localhost') {
+    return "http://localhost:5174";
+  }
+  
+  // Production fallback with known Netlify URL
+  return 'https://admin--discovergrp.netlify.app';
+};
+
+const ADMIN_URL = getAdminUrl();
 
 export default function Header(): React.ReactElement {
   const [promoVisible, setPromoVisible] = React.useState(true);
@@ -175,14 +196,16 @@ export default function Header(): React.ReactElement {
             </div>
 
             {/* Admin panel button (desktop) */}
-            <a
-              href={ADMIN_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-2 px-3 py-1 rounded-md bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition"
-            >
-              Admin panel
-            </a>
+            {ADMIN_URL && (
+              <a
+                href={ADMIN_URL}
+                target="_blank"
+                rel="noopener noreferrser"
+                className="ml-2 px-3 py-1 rounded-md bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition"
+              >
+                Admin panel
+              </a>
+            )}
           </div>
         </div>
       </div>
@@ -396,14 +419,16 @@ export default function Header(): React.ReactElement {
                 </div>
 
                 {/* Admin panel button (mobile) */}
-                <a
-                  href={ADMIN_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="py-2 text-center rounded-md bg-blue-600 text-white font-semibold"
-                >
-                  Admin panel
-                </a>
+                {ADMIN_URL && (
+                  <a
+                    href={ADMIN_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="py-2 text-center rounded-md bg-blue-600 text-white font-semibold"
+                  >
+                    Admin panel
+                  </a>
+                )}
               </div>
             </div>
           </div>

@@ -15,5 +15,8 @@ export default defineConfig({
       protocol: "ws", // or "wss" if you're using https
       port: 5173
     }
-  }
+  },
+    build: {
+    outDir: 'src/build',
+  },
 })

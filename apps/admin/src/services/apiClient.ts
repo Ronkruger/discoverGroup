@@ -1,12 +1,21 @@
 // Browser-safe client used by the Admin UI to call the API.
 import type { Tour } from "@discovergroup/types";
 export type { Tour };
+export type TourPayload = Partial<Tour>;
 
-const API_BASE = (import.meta.env.VITE_ADMIN_API_URL as string) ?? "http://localhost:4000";
-
-export type TourPayload = Partial<
-  Pick<Tour, "slug" | "title" | "summary" | "durationDays" | "regularPricePerPerson" | "promoPricePerPerson" | "additionalInfo">
->;
+// Prefer the admin-specific env var, fall back to the general VITE_API_URL, then localhost for dev
+// Safely attempt to read import.meta.env without directly using the import.meta meta-property
+// (avoid TypeScript compile errors when outputting CommonJS) by calling it at runtime.
+let _env: Record<string, unknown> = {};
+try {
+  const getImportMetaEnv = new Function(
+    'try { return import.meta.env } catch (e) { return undefined }'
+  ) as () => Record<string, unknown> | undefined;
+  _env = getImportMetaEnv() || {};
+} catch {
+  _env = {};
+}
+const API_BASE = (_env.VITE_ADMIN_API_URL as string) || (_env.VITE_API_URL as string) || "http://localhost:4000";
 
 // List all tours
 export async function fetchTours(): Promise<Tour[]> {

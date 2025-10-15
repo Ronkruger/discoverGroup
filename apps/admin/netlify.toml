@@ -5,6 +5,7 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  VITE_ADMIN_API_URL = "https://api--discoverGroup.netlify.app"
 
 [[redirects]]
   from = "/*"

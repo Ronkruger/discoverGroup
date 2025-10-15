@@ -1,4 +1,4 @@
 [build]
-  base = "apps/admin"
-  command = "npm install && npm run build"
-  publish = "dist"
+base = "src"
+publish = "src/build"
+command = "npm run build"

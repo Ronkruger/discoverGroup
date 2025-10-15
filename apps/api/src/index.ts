@@ -1,16 +1,20 @@
 import "dotenv/config";
 import express, { Request, Response } from "express";
 import cors from "cors";
+
 import adminToursRouter from "./routes/admin/tours";
 import publicToursRouter from "./routes/public/tours";
 import paymentsRouter from "./routes/payments";
 import emailRouter from "./routes/email";
+import authRouter from "./routes/auth";
+import { connectDB } from "./db";
 
 console.log("Server starting, environment variables:");
 console.log("STRIPE_SECRET_KEY:", process.env.STRIPE_SECRET_KEY ? "Available" : "Missing");
 console.log("PORT:", process.env.PORT || "4000 (default)");
 
 const app = express();
+connectDB();
 app.use(cors({
   origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],
   credentials: true
@@ -25,10 +29,13 @@ app.get("/", (_req: Request, res: Response) =>
   })
 );
 
+import adminUsersRouter from "./routes/admin/users";
 app.use("/admin/tours", adminToursRouter);
+app.use("/admin/users", adminUsersRouter);
 app.use("/public/tours", publicToursRouter);
 app.use("/api", paymentsRouter);
 app.use("/api", emailRouter);
+app.use("/auth", authRouter);
 
 app.get("/health", (_req: Request, res: Response) => res.json({ ok: true }));
 

@@ -13,6 +13,10 @@ const ContactPage = lazy(() => import("./pages/ContactPage"));
 const TourBuilder = lazy(() => import("./pages/TourBuilder"));
 const DestinationCountry = lazy(() => import("./pages/DestinationCountry"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const Profile = lazy(() => import("./pages/Profile"));
+const UserSettings = lazy(() => import("./pages/UserSettings"));
 
 export default function AppRouter() {
   return (
@@ -33,6 +37,12 @@ export default function AppRouter() {
           {/* Canonical singular routes */}
           <Route path="/tour/:slug" element={<TourDetail />} />
           <Route path="/tour/builder/:slug" element={<TourBuilder />} />
+
+          {/* Auth routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<UserSettings />} />
 
           {/* Redirect plural → singular for compatibility */}
           <Route path="/tours/:slug" element={<Navigate to="/tour/:slug" replace />} />

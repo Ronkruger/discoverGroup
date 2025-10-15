@@ -1,0 +1,9 @@
+{
+  "email": "superadmin@example.com",
+  "password": "$2b$10$zWviU.ENyLVBNZAD16b.ggiFWz/9Sh1.YdCJ5ItD./Msa3zM.SS",
+  "fullName": "Super Admin",
+  "role": "super_admin",
+  "isActive": true,
+  "createdAt": "2025-10-15T00:00:00.000Z",
+  "updatedAt": "2025-10-15T00:00:00.000Z"
+}

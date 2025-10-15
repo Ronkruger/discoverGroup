@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 import LanguageSwitcher from "./LanguageSwitcher";
 import {
   fetchContinents,
@@ -7,6 +8,7 @@ import {
   fetchToursByCountry,
 } from "../api/tours";
 import type { Tour } from "../types";
+
 
 // admin URL: prefer env var from Vite, fallback to explicit dev admin port
 // Read from a runtime-supplied global to avoid using `import.meta` which
@@ -42,6 +44,9 @@ const getAdminUrl = () => {
 const ADMIN_URL = getAdminUrl();
 
 export default function Header(): React.ReactElement {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [userMenuOpen, setUserMenuOpen] = React.useState(false);
   const [promoVisible, setPromoVisible] = React.useState(true);
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
@@ -105,27 +110,26 @@ export default function Header(): React.ReactElement {
     if (!countries || countries.length === 0) return;
     let cancelled = false;
 
-    setCountryToursMap((prev) => {
-      const copy = { ...prev };
-      countries.forEach((c) => {
-        if (!(c in copy)) copy[c] = null;
-      });
-      return copy;
-    });
-
     (async () => {
-      await Promise.all(
-        countries.map(async (c) => {
-          try {
-            const fetched = await fetchToursByCountry(c);
-            if (cancelled) return;
-            setCountryToursMap((prev) => ({ ...prev, [c]: fetched }));
-          } catch (err) {
-            console.error("fetchToursByCountry error for", c, err);
-            if (!cancelled) setCountryToursMap((prev) => ({ ...prev, [c]: [] }));
-          }
-        })
-      );
+      // initialize map entries to null to indicate loading for each country
+      setCountryToursMap((prev) => {
+        const copy = { ...prev };
+        countries.forEach((c) => {
+          if (!(c in copy)) copy[c] = null;
+        });
+        return copy;
+      });
+
+      for (const c of countries) {
+        try {
+          const tours = await fetchToursByCountry(c);
+          if (cancelled) return;
+          setCountryToursMap((prev) => ({ ...prev, [c]: tours }));
+        } catch (err) {
+          console.error("fetchToursByCountry error for", c, err);
+          if (!cancelled) setCountryToursMap((prev) => ({ ...prev, [c]: [] }));
+        }
+      }
     })();
 
     return () => {
@@ -142,7 +146,7 @@ export default function Header(): React.ReactElement {
   })();
 
   return (
-    <header className="w-full bg-white shadow">
+  <header className="w-full backdrop-blur-md bg-white/70 shadow-lg rounded-b-2xl border-b border-slate-200 z-[100] relative">
       {/* Promo bar */}
       {promoVisible && (
         <div className="w-full bg-gradient-to-r from-blue-900 to-blue-700 text-white relative">
@@ -211,15 +215,15 @@ export default function Header(): React.ReactElement {
       </div>
 
       {/* Main header */}
-      <div className="bg-white">
-        <div className="container mx-auto px-4 py-5 flex items-center justify-between gap-8">
+      <div className="bg-transparent">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between gap-8">
           {/* Logo */}
           <a href="/" className="flex items-center gap-3">
-            <img src="../logo.jpg" alt="Logo" className="h-14 w-auto drop-shadow" />
+            <img src="../logo.jpg" alt="Logo" className="h-14 w-auto drop-shadow-lg rounded-xl border border-slate-200 bg-white/80" />
           </a>
 
           {/* Navigation */}
-          <nav className="hidden lg:flex items-center gap-8" ref={containerRef}>
+          <nav className="hidden lg:flex items-center gap-6" ref={containerRef}>
             {/* Destinations */}
             <div
               className="relative"
@@ -227,7 +231,7 @@ export default function Header(): React.ReactElement {
               onFocus={() => setMegaOpen(true)}
             >
               <button
-                className="text-sm font-semibold uppercase tracking-wide flex items-center gap-2 text-blue-900 hover:text-yellow-400 transition relative after:content-[''] after:absolute after:left-0 after:bottom-[-6px] after:w-0 after:h-[2px] after:bg-yellow-400 hover:after:w-full after:transition-all"
+                className="text-base font-semibold uppercase tracking-wide flex items-center gap-2 text-blue-900 hover:text-yellow-400 transition-all duration-200 px-3 py-2 rounded-xl bg-white/60 hover:bg-white/90 shadow-sm"
                 aria-haspopup="dialog"
                 aria-expanded={megaOpen}
               >
@@ -257,10 +261,9 @@ export default function Header(): React.ReactElement {
                                     ? "bg-white shadow font-semibold text-blue-600"
                                     : "text-gray-700"
                                 }`}
-                                type="button"
                               >
                                 <span>{c}</span>
-                                <span className="text-gray-400">›</span>
+                                <span className="text-sm text-gray-400">▸</span>
                               </button>
                             </li>
                           ))
@@ -338,7 +341,7 @@ export default function Header(): React.ReactElement {
             {/* My Bookings link */}
             <a
               href="/bookings"
-              className="text-sm font-semibold uppercase tracking-wide text-blue-900 hover:text-yellow-400 transition relative after:content-[''] after:absolute after:left-0 after:bottom-[-6px] after:w-0 after:h-[2px] after:bg-yellow-400 hover:after:w-full after:transition-all"
+              className="text-base font-semibold uppercase tracking-wide text-blue-900 hover:text-yellow-400 transition-all duration-200 px-3 py-2 rounded-xl bg-white/60 hover:bg-white/90 shadow-sm"
             >
               My Bookings
             </a>
@@ -346,23 +349,23 @@ export default function Header(): React.ReactElement {
             {/* River Cruises */}
             <a
               href="#"
-              className="text-sm font-semibold uppercase tracking-wide text-blue-900 hover:text-yellow-400 transition relative after:content-[''] after:absolute after:left-0 after:bottom-[-6px] after:w-0 after:h-[2px] after:bg-yellow-400 hover:after:w-full after:transition-all"
+              className="text-base font-semibold uppercase tracking-wide text-blue-900 hover:text-yellow-400 transition-all duration-200 px-3 py-2 rounded-xl bg-white/60 hover:bg-white/90 shadow-sm"
             >
               River Cruises
             </a>
           </nav>
 
           {/* Right side */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             {/* search */}
-            <div className="hidden md:flex items-center bg-gray-100 rounded-full shadow px-2">
+            <div className="hidden md:flex items-center bg-white/70 border border-slate-200 rounded-full shadow-lg px-2 backdrop-blur-sm">
               <input
                 type="search"
                 placeholder="Where to or what trip?"
-                className="px-4 py-2 w-64 bg-transparent focus:outline-none text-sm"
+                className="px-4 py-2 w-64 bg-transparent focus:outline-none text-base placeholder:text-slate-400"
               />
-              <button className="p-2 bg-blue-600 rounded-full text-white hover:bg-blue-700 transition">
-                🔍
+              <button className="p-2 bg-blue-600 rounded-full text-white hover:bg-blue-700 transition-all duration-200 shadow-md">
+                <span className="text-lg">🔍</span>
               </button>
             </div>
 
@@ -375,9 +378,58 @@ export default function Header(): React.ReactElement {
               </div>
             </div>
 
+
             <div className="hidden md:block">
               <LanguageSwitcher />
             </div>
+
+            {/* User menu or Login button (desktop) */}
+            {user ? (
+              <div className="relative hidden md:inline-block">
+                <button
+                  className="px-4 py-2 rounded-xl bg-yellow-400 text-blue-900 font-semibold hover:bg-yellow-300 transition-all duration-200 shadow-md border border-yellow-300"
+                  onClick={() => setUserMenuOpen((s) => !s)}
+                >
+                  {user.fullName || user.email}
+                  <span className="ml-2">▼</span>
+                </button>
+                {userMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white/90 border border-slate-200 rounded-2xl shadow-2xl z-50 backdrop-blur-md">
+                    <ul className="py-2 text-base">
+                      <li>
+                        <Link to="/profile" className="block px-5 py-3 hover:bg-blue-50 rounded-xl transition-all" onClick={() => setUserMenuOpen(false)}>
+                          See Profile
+                        </Link>
+                      </li>
+                      <li>
+                        <Link to="/settings" className="block px-5 py-3 hover:bg-blue-50 rounded-xl transition-all" onClick={() => setUserMenuOpen(false)}>
+                          User Settings
+                        </Link>
+                      </li>
+                      <li>
+                        <button
+                          className="block w-full text-left px-5 py-3 hover:bg-red-50 text-red-600 rounded-xl transition-all"
+                          onClick={() => {
+                            logout();
+                            setUserMenuOpen(false);
+                            navigate("/");
+                          }}
+                        >
+                          Logout
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="px-4 py-2 rounded-xl bg-yellow-400 text-blue-900 font-semibold hover:bg-yellow-300 transition-all duration-200 shadow-md border border-yellow-300 hidden md:inline-block"
+              >
+                Login
+              </Link>
+            )}
 
             {/* mobile toggle */}
             <button
@@ -417,6 +469,54 @@ export default function Header(): React.ReactElement {
                     className="w-full border rounded-full px-3 py-2"
                   />
                 </div>
+
+                {/* User menu or Login button (mobile) */}
+                {user ? (
+                  <div className="relative">
+                    <button
+                      className="w-full py-2 text-center rounded-md bg-yellow-400 text-blue-900 font-semibold"
+                      onClick={() => setUserMenuOpen((s) => !s)}
+                    >
+                      {user.fullName || user.email}
+                      <span className="ml-2">▼</span>
+                    </button>
+                    {userMenuOpen && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white border rounded-xl shadow-lg z-50">
+                        <ul className="py-2 text-sm">
+                          <li>
+                            <Link to="/profile" className="block px-4 py-2 hover:bg-gray-50" onClick={() => setUserMenuOpen(false)}>
+                              See Profile
+                            </Link>
+                          </li>
+                          <li>
+                            <Link to="/settings" className="block px-4 py-2 hover:bg-gray-50" onClick={() => setUserMenuOpen(false)}>
+                              User Settings
+                            </Link>
+                          </li>
+                          <li>
+                            <button
+                              className="block w-full text-left px-4 py-2 hover:bg-gray-50 text-red-600"
+                              onClick={() => {
+                                logout();
+                                setUserMenuOpen(false);
+                                navigate("/");
+                              }}
+                            >
+                              Logout
+                            </button>
+                          </li>
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    to="/login"
+                    className="py-2 text-center rounded-md bg-yellow-400 text-blue-900 font-semibold"
+                  >
+                    Login
+                  </Link>
+                )}
 
                 {/* Admin panel button (mobile) */}
                 {ADMIN_URL && (

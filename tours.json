@@ -1,0 +1,26 @@
+[
+  {
+    "id": "route-a-preferred",
+    "slug": "route-a-preferred-europe",
+    "title": "Route A Preferred - European Adventure",
+    "summary": "14-day journey through France, Switzerland, Italy, and Vatican City.",
+    "line": "ROUTE_A",
+    "durationDays": 14,
+    "highlights": ["Paris", "Zurich", "Milan", "Florence", "Rome"],
+    "images": ["../image.png"],
+    "guaranteedDeparture": true,
+    "regularPricePerPerson": 250000,
+    "promoPricePerPerson": 160000,
+    "allowsDownpayment": true,
+    "departureDates": ["2026-02-04", "2026-02-18", "2026-03-04", "2026-03-18"],
+    "travelWindow": {
+      "start": "2026-02-04",
+      "end": "2026-03-31"
+    },
+    "additionalInfo": {
+      "countriesVisited": ["France", "Switzerland", "Italy", "Vatican City"],
+      "startingPoint": "Manila, Philippines",
+      "endingPoint": "Manila, Philippines"
+    }
+  }
+]

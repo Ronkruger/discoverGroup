@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Plus, 
   Edit3,
@@ -24,7 +24,7 @@ import {
 import { authService } from '../services/authService';
 
 const UserManagement: React.FC = () => {
-  const [users, setUsers] = useState<UserType[]>(authService.getAllUsers());
+  const [users, setUsers] = useState<UserType[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -48,6 +48,26 @@ const UserManagement: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const all = await authService.getAllUsers();
+        if (mounted) setUsers(all);
+      } catch {
+        // swallow here; component-level error state can be used if desired
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+  const handleEditUser = (user: UserType) => {
+    setEditingUser(user);
+    setIsEditModalOpen(true);
+    setError(null);
+  };
 
   const filteredUsers = users.filter(user =>
     user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -83,10 +103,9 @@ const UserManagement: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-
     try {
-      await authService.createUser(createForm);
-      setUsers(authService.getAllUsers());
+      await authService.register(createForm);
+      setUsers(await authService.getAllUsers());
       setIsCreateModalOpen(false);
       resetCreateForm();
     } catch (err) {
@@ -96,12 +115,12 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  const handleToggleUserStatus = (userId: string) => {
+  const handleToggleUserStatus = async (userId: string) => {
     try {
-      const user = users.find(u => u.id === userId);
+      const user = users.find((u) => u.id === userId);
       if (user) {
-        authService.updateUser(userId, { isActive: !user.isActive });
-        setUsers(authService.getAllUsers());
+        await authService.updateUser(userId, { isActive: !user.isActive });
+        setUsers(await authService.getAllUsers());
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update user');
@@ -131,21 +150,13 @@ const UserManagement: React.FC = () => {
     setError(null);
   };
 
-  const handleEditUser = (user: UserType) => {
-    setEditingUser(user);
-    setIsEditModalOpen(true);
-    setError(null);
-  };
-
   const handleUpdateUser = async (updatedData: Partial<UserType>) => {
     if (!editingUser) return;
-    
     setIsLoading(true);
     setError(null);
-
     try {
-      authService.updateUser(editingUser.id, updatedData);
-      setUsers(authService.getAllUsers());
+      await authService.updateUser(editingUser.id, updatedData);
+      setUsers(await authService.getAllUsers());
       setIsEditModalOpen(false);
       setEditingUser(null);
     } catch (err) {
@@ -163,6 +174,8 @@ const UserManagement: React.FC = () => {
 
   const getRoleColor = (role: UserRole): string => {
     switch (role) {
+      case UserRole.SUPER_ADMIN:
+        return 'bg-yellow-200 text-yellow-900';
       case UserRole.ADMINISTRATOR:
         return 'bg-red-100 text-red-800';
       case UserRole.WEB_DEVELOPER:

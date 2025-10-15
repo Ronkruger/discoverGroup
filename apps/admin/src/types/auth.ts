@@ -1,4 +1,5 @@
 export enum UserRole {
+  SUPER_ADMIN = 'super_admin',
   ADMINISTRATOR = 'administrator',
   WEB_DEVELOPER = 'web_developer',
   BOOKING_DEPARTMENT = 'booking_department',
@@ -74,6 +75,26 @@ export interface RolePermissions {
 }
 
 export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
+  [UserRole.SUPER_ADMIN]: {
+    canAccessBookings: true,
+    canAccessTours: true,
+    canAccessVisaAssistance: true,
+    canAccessCustomerService: true,
+    canAccessReports: true,
+    canAccessUserManagement: true,
+    canAccessSettings: true,
+    canManageBookingStatus: true,
+    canCreateBookings: true,
+    canCancelBookings: true,
+    canViewAllBookings: true,
+    canCreateTours: true,
+    canEditTours: true,
+    canDeleteTours: true,
+    canProcessVisaApplications: true,
+    canUpdateVisaStatus: true,
+    canRespondToInquiries: true,
+    canAccessCustomerData: true,
+  },
   [UserRole.ADMINISTRATOR]: {
     canAccessBookings: true,
     canAccessTours: true,
@@ -177,6 +198,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
 };
 
 export const ROLE_DISPLAY_NAMES: Record<UserRole, string> = {
+  [UserRole.SUPER_ADMIN]: 'Super Admin',
   [UserRole.ADMINISTRATOR]: 'Administrator',
   [UserRole.WEB_DEVELOPER]: 'Web Developer',
   [UserRole.BOOKING_DEPARTMENT]: 'Booking Department',

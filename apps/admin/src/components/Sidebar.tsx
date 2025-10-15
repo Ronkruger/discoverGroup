@@ -84,7 +84,8 @@ export default function Sidebar(): JSX.Element {
 
   const hasPermission = (permission?: keyof import('../types/auth').RolePermissions): boolean => {
     if (!permission) return true; // No permission required
-    return authService.hasPermission(permission);
+    if (!user) return false;
+    return authService.hasPermission(permission, user);
   };
 
   const visibleItems = navigationItems.filter(item => hasPermission(item.permission));
@@ -114,7 +115,7 @@ export default function Sidebar(): JSX.Element {
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-blue-100">
                   <span className="text-blue-600 font-semibold text-sm">
-                    {user.fullName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                    {user.fullName ? user.fullName.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase() : ''}
                   </span>
                 </div>
               )}

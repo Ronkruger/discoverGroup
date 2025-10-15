@@ -1,0 +1,105 @@
+[
+  {
+    "id": "1",
+    "bookingId": "BK-ABC123",
+    "tour": {
+      "id": "route-a",
+      "slug": "route-a",
+      "title": "Route A Preferred - European Adventure",
+      "summary": "Experience the best of Europe in 14 unforgettable days",
+      "durationDays": 14,
+      "highlights": ["Paris", "Rome", "Barcelona", "Amsterdam"],
+      "images": ["/image.png"],
+      "guaranteedDeparture": true,
+      "basePricePerDay": 350,
+      "allowsDownpayment": true,
+      "travelWindow": {"start": "2026-02-04", "end": "2026-02-18"},
+      "additionalInfo": {
+        "countriesVisited": ["France", "Italy", "Spain", "Netherlands"],
+        "startingPoint": "Paris",
+        "endingPoint": "Amsterdam"
+      }
+    },
+    "customerName": "John Doe",
+    "customerEmail": "john.doe@email.com",
+    "customerPhone": "+63 912 345 6789",
+    "customerPassport": "P123456789",
+    "selectedDate": "2026-02-04",
+    "passengers": 2,
+    "perPerson": 4900,
+    "totalAmount": 9800,
+    "paidAmount": 9800,
+    "paymentType": "full",
+    "status": "confirmed",
+    "bookingDate": "2025-10-13T15:04:05.000Z",
+    "paymentIntentId": "pi_3SGXdk1jrkeQVBHGOaFzDxsq"
+  },
+  {
+    "id": "2",
+    "bookingId": "BK-DEF456",
+    "tour": {
+      "id": "route-b",
+      "slug": "route-b",
+      "title": "Route B Premium - Asian Discovery",
+      "summary": "Discover the wonders of Asia in 12 amazing days",
+      "durationDays": 12,
+      "highlights": ["Tokyo", "Bangkok", "Singapore", "Seoul"],
+      "images": ["/image.png"],
+      "guaranteedDeparture": true,
+      "basePricePerDay": 280,
+      "allowsDownpayment": true,
+      "travelWindow": {"start": "2026-03-15", "end": "2026-03-27"},
+      "additionalInfo": {
+        "countriesVisited": ["Japan", "Thailand", "Singapore", "South Korea"],
+        "startingPoint": "Tokyo",
+        "endingPoint": "Seoul"
+      }
+    },
+    "customerName": "Jane Smith",
+    "customerEmail": "jane.smith@email.com",
+    "customerPhone": "+63 917 654 3210",
+    "selectedDate": "2026-03-15",
+    "passengers": 1,
+    "perPerson": 3360,
+    "totalAmount": 3360,
+    "paidAmount": 1008,
+    "paymentType": "downpayment",
+    "status": "pending",
+    "bookingDate": "2025-10-10T15:04:05.000Z",
+    "paymentIntentId": "pi_3SGXef2krlfRWCIHPbGgExtr"
+  },
+  {
+    "id": "3",
+    "bookingId": "BK-GHI789",
+    "tour": {
+      "id": "route-a",
+      "slug": "route-a",
+      "title": "Route A Preferred - European Adventure",
+      "summary": "Experience the best of Europe in 14 unforgettable days",
+      "durationDays": 14,
+      "highlights": ["Paris", "Rome", "Barcelona", "Amsterdam"],
+      "images": ["/image.png"],
+      "guaranteedDeparture": true,
+      "basePricePerDay": 350,
+      "allowsDownpayment": true,
+      "travelWindow": {"start": "2026-02-04", "end": "2026-02-18"},
+      "additionalInfo": {
+        "countriesVisited": ["France", "Italy", "Spain", "Netherlands"],
+        "startingPoint": "Paris",
+        "endingPoint": "Amsterdam"
+      }
+    },
+    "customerName": "Mike Johnson",
+    "customerEmail": "mike.johnson@email.com",
+    "customerPhone": "+63 920 111 2222",
+    "selectedDate": "2026-02-04",
+    "passengers": 4,
+    "perPerson": 4900,
+    "totalAmount": 19600,
+    "paidAmount": 19600,
+    "paymentType": "full",
+    "status": "completed",
+    "bookingDate": "2025-10-05T15:04:05.000Z",
+    "paymentIntentId": "pi_3SGXfg3lsmgSXDJIOcHhFytu"
+  }
+]

@@ -1,0 +1,94 @@
+[
+  {
+    "title": "Grand European Capitals",
+    "slug": "grand-european-capitals",
+    "summary": "Visit the most iconic capitals of Europe: London, Paris, Rome, Berlin, and more, with expert guides and comfortable accommodations.",
+    "line": "RED",
+    "durationDays": 14,
+    "highlights": [
+      "London city tour",
+      "Eiffel Tower in Paris",
+      "Colosseum in Rome",
+      "Berlin Wall visit"
+    ],
+    "images": [
+      "https://example.com/images/london.jpg",
+      "https://example.com/images/paris.jpg",
+      "https://example.com/images/rome.jpg",
+      "https://example.com/images/berlin.jpg"
+    ],
+    "guaranteedDeparture": true,
+    "bookingPdfUrl": "/assets/european-capitals.pdf",
+    "travelWindow": {
+      "start": "2025-04-01",
+      "end": "2025-10-31"
+    },
+    "itinerary": [
+      { "day": 1, "title": "Arrival in London", "description": "Meet and greet, transfer to hotel." },
+      { "day": 2, "title": "London City Tour", "description": "See Buckingham Palace, Big Ben, and more." },
+      { "day": 3, "title": "Travel to Paris", "description": "Eurostar train to Paris, evening Seine cruise." }
+    ],
+    "fullStops": [
+      { "city": "London", "country": "United Kingdom", "days": 3 },
+      { "city": "Paris", "country": "France", "days": 3 },
+      { "city": "Rome", "country": "Italy", "days": 3 },
+      { "city": "Berlin", "country": "Germany", "days": 2 }
+    ],
+    "regularPricePerPerson": 2500,
+    "promoPricePerPerson": 2200,
+    "basePricePerDay": 180,
+    "additionalInfo": {
+      "countriesVisited": ["United Kingdom", "France", "Italy", "Germany"],
+      "startingPoint": "London",
+      "endingPoint": "Berlin",
+      "mainCities": {
+        "United Kingdom": ["London"],
+        "France": ["Paris"],
+        "Italy": ["Rome"],
+        "Germany": ["Berlin"]
+      }
+    }
+  },
+  {
+    "title": "Safari Adventure in Kenya",
+    "slug": "safari-adventure-kenya",
+    "summary": "Embark on a thrilling safari through Kenya's national parks, see the Big Five, and enjoy luxury lodges.",
+    "line": "ROUTE_A",
+    "durationDays": 7,
+    "highlights": [
+      "Maasai Mara game drives",
+      "Lake Nakuru flamingos",
+      "Cultural Maasai village visit"
+    ],
+    "images": [
+      "https://example.com/images/maasai-mara.jpg",
+      "https://example.com/images/lake-nakuru.jpg"
+    ],
+    "guaranteedDeparture": false,
+    "bookingPdfUrl": "/assets/kenya-safari.pdf",
+    "travelWindow": {
+      "start": "2025-06-01",
+      "end": "2025-09-30"
+    },
+    "itinerary": [
+      { "day": 1, "title": "Arrival in Nairobi", "description": "Welcome dinner and briefing." },
+      { "day": 2, "title": "Drive to Maasai Mara", "description": "Afternoon game drive." }
+    ],
+    "fullStops": [
+      { "city": "Nairobi", "country": "Kenya", "days": 1 },
+      { "city": "Maasai Mara", "country": "Kenya", "days": 3 },
+      { "city": "Lake Nakuru", "country": "Kenya", "days": 2 }
+    ],
+    "regularPricePerPerson": 1800,
+    "promoPricePerPerson": 1500,
+    "basePricePerDay": 250,
+    "additionalInfo": {
+      "countriesVisited": ["Kenya"],
+      "startingPoint": "Nairobi",
+      "endingPoint": "Nairobi",
+      "mainCities": {
+        "Kenya": ["Nairobi", "Maasai Mara", "Lake Nakuru"]
+      }
+    }
+  }
+]

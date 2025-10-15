@@ -47,10 +47,10 @@ const PermissionsTest: React.FC<PermissionsTestProps> = ({ user }) => {
           <div className="space-y-2">
             {permissions.length > 0 ? (
               permissions.map((item) => (
-                <div key={item} className="flex items-center gap-2">
+                <div key={item.to} className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                   <span className="text-sm text-gray-700 capitalize">
-                    {item.replace('-', ' ')}
+                    {item.label.replace('-', ' ')}
                   </span>
                 </div>
               ))

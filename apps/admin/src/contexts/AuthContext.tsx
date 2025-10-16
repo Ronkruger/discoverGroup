@@ -33,14 +33,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   });
 
   useEffect(() => {
-    // Check if user is already logged in on app start
-    const user = authService.getCurrentUser();
-    setAuthState({
-      user,
-      isAuthenticated: !!user,
-      isLoading: false,
-      error: null,
-    });
+    // Async check for current user on app start
+    (async () => {
+      try {
+        const user = await authService.getCurrentUser();
+        setAuthState({
+          user,
+          isAuthenticated: !!user,
+          isLoading: false,
+          error: null,
+        });
+      } catch (error) {
+        setAuthState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+          error: error instanceof Error ? error.message : 'Auth check failed',
+        });
+      }
+    })();
   }, []);
 
   const login = async (credentials: LoginCredentials): Promise<void> => {
@@ -95,8 +106,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
   };
 
-  const refreshUser = (): void => {
-    const user = authService.getCurrentUser();
+  const refreshUser = async (): Promise<void> => {
+    const user = await authService.getCurrentUser();
     setAuthState(prev => ({
       ...prev,
       user,

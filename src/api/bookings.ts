@@ -1,122 +1,15 @@
 import type { Booking, Tour, BookingStatus, PaymentType } from "../types";
 
-// Mock storage for bookings (in a real app, this would be a database)
-let mockBookings: Booking[] = [];
+// Removed mockBookings and all localStorage fallback. All booking operations use backend only.
 
 // Helper function to generate a booking ID
 function generateBookingId(): string {
   return `BK-${Math.random().toString(36).slice(2, 9).toUpperCase()}`;
 }
 
-// Initialize with some sample data for demonstration
-function initializeSampleData() {
-  if (mockBookings.length === 0) {
-    const sampleTour1: Tour = {
-      id: "route-a",
-      slug: "route-a",
-      title: "Route A Preferred - European Adventure",
-      summary: "Experience the best of Europe in 14 unforgettable days",
-      durationDays: 14,
-      highlights: ["Paris", "Rome", "Barcelona", "Amsterdam"],
-      images: ["/image.png"],
-      guaranteedDeparture: true,
-      basePricePerDay: 350,
-      allowsDownpayment: true,
-      travelWindow: {
-        start: "2026-02-04",
-        end: "2026-02-18"
-      },
-      additionalInfo: {
-        countriesVisited: ["France", "Italy", "Spain", "Netherlands"],
-        startingPoint: "Paris",
-        endingPoint: "Amsterdam"
-      }
-    };
+// Removed initializeSampleData to prevent dummy bookings from being created
 
-    const sampleTour2: Tour = {
-      id: "route-b",
-      slug: "route-b", 
-      title: "Route B Premium - Asian Discovery",
-      summary: "Discover the wonders of Asia in 12 amazing days",
-      durationDays: 12,
-      highlights: ["Tokyo", "Bangkok", "Singapore", "Seoul"],
-      images: ["/image.png"],
-      guaranteedDeparture: true,
-      basePricePerDay: 280,
-      allowsDownpayment: true,
-      travelWindow: {
-        start: "2026-03-15",
-        end: "2026-03-27"
-      },
-      additionalInfo: {
-        countriesVisited: ["Japan", "Thailand", "Singapore", "South Korea"],
-        startingPoint: "Tokyo",
-        endingPoint: "Seoul"
-      }
-    };
-
-    // Create sample bookings
-    const sampleBookings: Booking[] = [
-      {
-        id: "1",
-        bookingId: "BK-ABC123",
-        tour: sampleTour1,
-        customerName: "John Doe",
-        customerEmail: "john.doe@email.com",
-        customerPhone: "+63 912 345 6789",
-        customerPassport: "P123456789",
-        selectedDate: "2026-02-04",
-        passengers: 2,
-        perPerson: 4900,
-        totalAmount: 9800,
-        paidAmount: 9800,
-        paymentType: "full",
-        status: "confirmed",
-        bookingDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
-        paymentIntentId: "pi_3SGXdk1jrkeQVBHGOaFzDxsq",
-      },
-      {
-        id: "2", 
-        bookingId: "BK-DEF456",
-        tour: sampleTour2,
-        customerName: "Jane Smith",
-        customerEmail: "jane.smith@email.com",
-        customerPhone: "+63 917 654 3210",
-        selectedDate: "2026-03-15",
-        passengers: 1,
-        perPerson: 3360,
-        totalAmount: 3360,
-        paidAmount: 1008, // 30% downpayment
-        paymentType: "downpayment",
-        status: "pending",
-        bookingDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
-        paymentIntentId: "pi_3SGXef2krlfRWCIHPbGgExtr",
-      },
-      {
-        id: "3",
-        bookingId: "BK-GHI789", 
-        tour: sampleTour1,
-        customerName: "Mike Johnson",
-        customerEmail: "mike.johnson@email.com",
-        customerPhone: "+63 920 111 2222",
-        selectedDate: "2026-02-04",
-        passengers: 4,
-        perPerson: 4900,
-        totalAmount: 19600,
-        paidAmount: 19600,
-        paymentType: "full",
-        status: "completed",
-        bookingDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days ago
-        paymentIntentId: "pi_3SGXfg3lsmgSXDJIOcHhFytu",
-      }
-    ];
-
-    mockBookings = sampleBookings;
-    localStorage.setItem('bookings', JSON.stringify(mockBookings));
-  }
-}
-
-// Create a new booking
+// Create a new booking (POST to backend)
 export async function createBooking(bookingData: {
   tour: Tour;
   customerName: string;
@@ -135,10 +28,8 @@ export async function createBooking(bookingData: {
     ? totalAmount 
     : Math.round(totalAmount * 0.3); // 30% downpayment
 
-  const booking: Booking = {
-    id: bookingId,
-    bookingId,
-    tour: bookingData.tour,
+  const payload = {
+    tourSlug: bookingData.tour.slug,
     customerName: bookingData.customerName,
     customerEmail: bookingData.customerEmail,
     customerPhone: bookingData.customerPhone,
@@ -150,37 +41,60 @@ export async function createBooking(bookingData: {
     paidAmount,
     paymentType: bookingData.paymentType,
     status: 'confirmed',
+    bookingId,
     bookingDate: new Date().toISOString(),
     paymentIntentId: bookingData.paymentIntentId,
+    notes: '',
   };
 
-  mockBookings.push(booking);
-  
-  // Store in localStorage for persistence across sessions
-  localStorage.setItem('bookings', JSON.stringify(mockBookings));
-  
-  return booking;
+  const res = await fetch('http://localhost:4000/api/bookings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error('Failed to create booking');
+  const saved = await res.json();
+  // Return a Booking object matching frontend type
+  return {
+    ...saved,
+    tour: bookingData.tour,
+    id: saved._id || bookingId,
+  };
 }
 
 // Get all bookings
 export async function fetchAllBookings(): Promise<Booking[]> {
-  // Initialize sample data on first load
-  initializeSampleData();
-  
-  // Load from localStorage if available
-  const stored = localStorage.getItem('bookings');
-  if (stored) {
-    try {
-      mockBookings = JSON.parse(stored);
-    } catch (error) {
-      console.error('Error parsing stored bookings:', error);
-      mockBookings = [];
-    }
+  // Try to fetch from backend
+  try {
+    const res = await fetch('http://localhost:4000/api/bookings');
+    if (!res.ok) throw new Error('Failed to fetch bookings');
+    const data = await res.json();
+    // If backend returns bookings, map them to Booking type
+    return (data as Array<Record<string, unknown>>).map((b) => {
+      const booking: Booking = {
+        id: typeof b._id === 'string' ? b._id : (typeof b.bookingId === 'string' ? b.bookingId : ''),
+        bookingId: typeof b.bookingId === 'string' ? b.bookingId : '',
+        tour: typeof b.tour === 'object' && b.tour !== null ? (b.tour as Tour) : {} as Tour,
+        customerName: typeof b.customerName === 'string' ? b.customerName : '',
+        customerEmail: typeof b.customerEmail === 'string' ? b.customerEmail : '',
+        customerPhone: typeof b.customerPhone === 'string' ? b.customerPhone : '',
+        customerPassport: typeof b.customerPassport === 'string' ? b.customerPassport : undefined,
+        selectedDate: typeof b.selectedDate === 'string' ? b.selectedDate : '',
+        passengers: typeof b.passengers === 'number' ? b.passengers : 0,
+        perPerson: typeof b.perPerson === 'number' ? b.perPerson : 0,
+        totalAmount: typeof b.totalAmount === 'number' ? b.totalAmount : 0,
+        paidAmount: typeof b.paidAmount === 'number' ? b.paidAmount : 0,
+        paymentType: (typeof b.paymentType === 'string' ? b.paymentType : 'full') as PaymentType,
+        status: (typeof b.status === 'string' ? b.status : 'confirmed') as BookingStatus,
+        bookingDate: typeof b.bookingDate === 'string' ? b.bookingDate : '',
+        paymentIntentId: typeof b.paymentIntentId === 'string' ? b.paymentIntentId : undefined,
+        notes: typeof b.notes === 'string' ? b.notes : undefined,
+      };
+      return booking;
+    }).sort((a, b) => new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime());
+  } catch {
+    throw new Error('Failed to fetch bookings from backend');
   }
-  
-  return mockBookings.sort((a, b) => 
-    new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime()
-  );
 }
 
 // Get booking by ID
@@ -189,30 +103,34 @@ export async function fetchBookingById(bookingId: string): Promise<Booking | nul
   return bookings.find(booking => booking.bookingId === bookingId) || null;
 }
 
-// Update booking status
+// Update booking status (must be implemented via backend API)
 export async function updateBookingStatus(bookingId: string, status: BookingStatus): Promise<Booking | null> {
-  const bookings = await fetchAllBookings();
-  const bookingIndex = bookings.findIndex(booking => booking.bookingId === bookingId);
-  
-  if (bookingIndex === -1) {
-    return null;
+  // Call backend to update status for the given bookingId
+  const res = await fetch(`http://localhost:4000/api/bookings/${encodeURIComponent(bookingId)}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  });
+
+  if (!res.ok) {
+    if (res.status === 404) return null;
+    throw new Error('Failed to update booking status');
   }
-  
-  mockBookings[bookingIndex].status = status;
-  localStorage.setItem('bookings', JSON.stringify(mockBookings));
-  
-  return mockBookings[bookingIndex];
+
+  // Return the updated booking from backend (refresh via fetchBookingById)
+  return fetchBookingById(bookingId);
 }
 
-// Delete booking
+// Delete booking (must be implemented via backend API)
 export async function deleteBooking(bookingId: string): Promise<boolean> {
-  const bookings = await fetchAllBookings();
-  const initialLength = bookings.length;
-  mockBookings = bookings.filter(booking => booking.bookingId !== bookingId);
-  
-  localStorage.setItem('bookings', JSON.stringify(mockBookings));
-  
-  return mockBookings.length < initialLength;
+  const res = await fetch(`http://localhost:4000/api/bookings/${encodeURIComponent(bookingId)}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  if (res.status === 404) return false;
+  if (!res.ok) throw new Error('Failed to delete booking');
+  return true;
 }
 
 // Search bookings by customer email

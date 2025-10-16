@@ -29,10 +29,19 @@ app.get("/", (_req: Request, res: Response) =>
   })
 );
 
+
 import adminUsersRouter from "./routes/admin/users";
+import adminBookingsRouter from "./routes/admin/bookings";
+import adminReportsRouter from "./routes/admin/reports";
+import adminCustomerServiceRouter from "./routes/admin/customer-service";
+import apiBookingsRouter from "./routes/api/bookings";
 app.use("/admin/tours", adminToursRouter);
 app.use("/admin/users", adminUsersRouter);
+app.use("/admin/bookings", adminBookingsRouter);
+app.use("/admin/reports", adminReportsRouter);
+app.use("/admin/customer-service", adminCustomerServiceRouter);
 app.use("/public/tours", publicToursRouter);
+app.use("/api/bookings", apiBookingsRouter);
 app.use("/api", paymentsRouter);
 app.use("/api", emailRouter);
 app.use("/auth", authRouter);

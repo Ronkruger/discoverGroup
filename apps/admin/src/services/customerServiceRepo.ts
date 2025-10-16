@@ -1,13 +1,16 @@
-const API_BASE_URL = (typeof process !== 'undefined' && process.env && process.env.VITE_API_URL) || 'http://localhost:4000';
-function getToken() { return localStorage.getItem('token'); }
+
 
 import {
+  Customer,
   CustomerInquiry,
   CSRTask,
   CustomerTourHistory,
   CustomerServiceStats,
-  TaskFilter
+  TaskFilter,
 } from '../types/customerService';
+
+const API_BASE_URL = (typeof process !== 'undefined' && process.env && process.env.VITE_API_URL) || 'http://localhost:4000';
+function getToken() { return localStorage.getItem('token'); }
 
 export const customerServiceRepo = {
   async createInquiry(inquiry: Omit<CustomerInquiry, 'id' | 'createdAt' | 'updatedAt'>): Promise<CustomerInquiry> {
@@ -17,6 +20,22 @@ export const customerServiceRepo = {
       body: JSON.stringify(inquiry),
     });
     if (!res.ok) throw new Error('Failed to create inquiry');
+    return await res.json();
+  },
+
+  async getAllCustomers(): Promise<Customer[]> {
+    const res = await fetch(`${API_BASE_URL}/admin/customers`, {
+      headers: { 'Authorization': `Bearer ${getToken()}` },
+    });
+    if (!res.ok) throw new Error('Failed to fetch customers');
+    return await res.json();
+  },
+
+  async getAllInquiries(): Promise<CustomerInquiry[]> {
+    const res = await fetch(`${API_BASE_URL}/admin/inquiries`, {
+      headers: { 'Authorization': `Bearer ${getToken()}` },
+    });
+    if (!res.ok) throw new Error('Failed to fetch inquiries');
     return await res.json();
   },
 

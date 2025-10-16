@@ -244,9 +244,9 @@ export default function Header(): React.ReactElement {
                   role="dialog"
                   aria-label="Destinations mega menu"
                 >
-                  <div className="bg-white border rounded-2xl shadow-2xl overflow-hidden grid grid-cols-[240px_1fr_320px]">
+                  <div className="bg-white border rounded-3xl shadow-2xl overflow-hidden grid grid-cols-[240px_1fr_320px]">
                     {/* continents */}
-                    <div className="bg-gray-50 p-6 border-r">
+                    <div className="bg-gray-50 p-6 border-r border-gray-200">
                       <div className="text-sm text-gray-500 mb-4">All regions</div>
                       <ul className="space-y-2">
                         {loadingContinents ? (
@@ -272,7 +272,7 @@ export default function Header(): React.ReactElement {
                     </div>
 
                     {/* countries */}
-                    <div className="p-6 border-r">
+                    <div className="p-6 border-r border-gray-200 bg-white/80">
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="font-semibold text-blue-900">
                           {selectedContinent ? `${selectedContinent} Destinations` : "Choose a region"}
@@ -294,7 +294,7 @@ export default function Header(): React.ReactElement {
                               key={country}
                               to={`/destinations/${encodeURIComponent(country)}`}
                               state={{ tours: toursForCountry ?? [], country }}
-                              className="flex items-center gap-2 text-left hover:underline hover:text-blue-600"
+                              className="flex items-center gap-2 text-left px-2 py-2 rounded-lg transition-all duration-150 hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-100 focus:text-blue-900"
                             >
                               <span>{country}</span>
                               {isLoadingTours && (
@@ -307,19 +307,19 @@ export default function Header(): React.ReactElement {
                     </div>
 
                     {/* CTA */}
-                    <div className="w-80 relative">
+                    <div className="w-80 relative bg-gradient-to-br from-blue-100/60 to-blue-200/60 flex flex-col justify-end rounded-tr-3xl rounded-br-3xl overflow-hidden">
                       <div
-                        className="h-full bg-cover bg-center"
+                        className="absolute inset-0 bg-cover bg-center scale-110 opacity-60"
                         style={{ backgroundImage: `url('/assets/paris.jpg')` }}
-                      >
-                        <div className="h-full flex items-end p-6 bg-black/30">
-                          <Link
-                            to={rightCtaSearchUrl}
-                            className="bg-yellow-400 text-blue-900 font-semibold px-6 py-2 rounded-full shadow hover:bg-yellow-300 transition"
-                          >
-                            See All Tours
-                          </Link>
-                        </div>
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-blue-900/40 to-transparent" />
+                      <div className="relative z-10 h-full flex items-end p-8">
+                        <Link
+                          to={rightCtaSearchUrl}
+                          className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-blue-900 font-bold px-8 py-3 rounded-full shadow-xl hover:from-yellow-300 hover:to-yellow-400 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-300 text-lg"
+                        >
+                          See All Tours
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -328,46 +328,32 @@ export default function Header(): React.ReactElement {
             </div>
 
             {/* Other nav links */}
-            {["Ways To Go", "Deals", "About Us"].map((item) => (
-              <a
-                key={item}
-                href="#"
-                className="text-sm font-semibold uppercase tracking-wide text-blue-900 hover:text-yellow-400 transition relative after:content-[''] after:absolute after:left-0 after:bottom-[-6px] after:w-0 after:h-[2px] after:bg-yellow-400 hover:after:w-full after:transition-all"
-              >
-                {item}
-              </a>
-            ))}
-            
-            {/* My Bookings link */}
-            <a
-              href="/bookings"
-              className="text-base font-semibold uppercase tracking-wide text-blue-900 hover:text-yellow-400 transition-all duration-200 px-3 py-2 rounded-xl bg-white/60 hover:bg-white/90 shadow-sm"
-            >
-              My Bookings
-            </a>
-            
-            {/* River Cruises */}
+
             <a
               href="#"
-              className="text-base font-semibold uppercase tracking-wide text-blue-900 hover:text-yellow-400 transition-all duration-200 px-3 py-2 rounded-xl bg-white/60 hover:bg-white/90 shadow-sm"
+              className="text-sm font-semibold uppercase tracking-wide text-blue-900 hover:text-yellow-400 transition relative after:content-[''] after:absolute after:left-0 after:bottom-[-6px] after:w-0 after:h-[2px] after:bg-yellow-400 hover:after:w-full after:transition-all"
             >
-              River Cruises
+              Ways To Go
             </a>
+            <a
+              href="#"
+              className="text-sm font-semibold uppercase tracking-wide text-blue-900 hover:text-yellow-400 transition relative after:content-[''] after:absolute after:left-0 after:bottom-[-6px] after:w-0 after:h-[2px] after:bg-yellow-400 hover:after:w-full after:transition-all"
+            >
+              Deals
+            </a>
+            <Link
+              to="/about-us"
+              className="text-sm font-semibold uppercase tracking-wide text-blue-900 hover:text-yellow-400 transition relative after:content-[''] after:absolute after:left-0 after:bottom-[-6px] after:w-0 after:h-[2px] after:bg-yellow-400 hover:after:w-full after:transition-all"
+            >
+              About Us
+            </Link>
+            
+            {/* My Bookings link removed from nav, now in user dropdown */}
           </nav>
 
           {/* Right side */}
           <div className="flex items-center gap-6">
-            {/* search */}
-            <div className="hidden md:flex items-center bg-white/70 border border-slate-200 rounded-full shadow-lg px-2 backdrop-blur-sm">
-              <input
-                type="search"
-                placeholder="Where to or what trip?"
-                className="px-4 py-2 w-64 bg-transparent focus:outline-none text-base placeholder:text-slate-400"
-              />
-              <button className="p-2 bg-blue-600 rounded-full text-white hover:bg-blue-700 transition-all duration-200 shadow-md">
-                <span className="text-lg">🔍</span>
-              </button>
-            </div>
+
 
             {/* contact */}
             <div className="hidden lg:flex flex-col text-sm text-gray-700 items-end leading-tight bg-gray-50 p-3 rounded-xl shadow-md">
@@ -396,6 +382,11 @@ export default function Header(): React.ReactElement {
                 {userMenuOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white/90 border border-slate-200 rounded-2xl shadow-2xl z-50 backdrop-blur-md">
                     <ul className="py-2 text-base">
+                      <li>
+                        <Link to="/bookings" className="block px-5 py-3 hover:bg-blue-50 rounded-xl transition-all" onClick={() => setUserMenuOpen(false)}>
+                          My Bookings
+                        </Link>
+                      </li>
                       <li>
                         <Link to="/profile" className="block px-5 py-3 hover:bg-blue-50 rounded-xl transition-all" onClick={() => setUserMenuOpen(false)}>
                           See Profile

@@ -78,53 +78,56 @@ export default function SearchResults(): JSX.Element {
   }
 
   return (
-    <main className="container mx-auto px-5 py-10">
-      <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Search results</h1>
-          <p className="text-slate-600">Showing tours for {country || "all countries"}.</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="text-sm text-slate-500">Passengers</div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setPassengers((p) => Math.max(1, p - 1))}
-              className="w-8 h-8 rounded-full border flex items-center justify-center"
-            >
-              −
-            </button>
-            <input
-              aria-label="Passengers"
-              className="w-16 text-center rounded-md border px-2 py-1 text-sm"
-              value={passengers}
-              onChange={(e) => {
-                const v = parseInt(e.target.value, 10);
-                if (!Number.isNaN(v) && v >= 1) setPassengers(v);
-              }}
-              inputMode="numeric"
-              pattern="[0-9]*"
-            />
-            <button
-              type="button"
-              onClick={() => setPassengers((p) => p + 1)}
-              className="w-8 h-8 rounded-full border flex items-center justify-center"
-            >
-              +
-            </button>
+    <main className="min-h-[80vh] bg-gradient-to-br from-blue-50 via-white to-yellow-50/40 py-10">
+      <div className="container mx-auto px-5">
+        <header className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-extrabold text-blue-900 drop-shadow-sm">Search results</h1>
+            <p className="text-slate-600 text-base">Showing tours for <span className="font-semibold text-blue-700">{country || "all countries"}</span>.</p>
           </div>
-        </div>
-      </header>
 
-      {loading && <div className="text-slate-500">Loading results…</div>}
+          <div className="flex items-center gap-3 bg-white/80 rounded-xl shadow px-4 py-2 border border-slate-200">
+            <div className="text-sm text-slate-500 font-medium">Passengers</div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPassengers((p) => Math.max(1, p - 1))}
+                className="w-9 h-9 rounded-full border border-slate-300 flex items-center justify-center text-lg font-bold bg-slate-100 hover:bg-blue-100 active:bg-blue-200 transition"
+                aria-label="Decrease passengers"
+              >
+                −
+              </button>
+              <input
+                aria-label="Passengers"
+                className="w-14 text-center rounded-lg border border-slate-300 px-2 py-1 text-base font-semibold bg-white shadow-sm focus:ring-2 focus:ring-blue-300"
+                value={passengers}
+                onChange={(e) => {
+                  const v = parseInt(e.target.value, 10);
+                  if (!Number.isNaN(v) && v >= 1) setPassengers(v);
+                }}
+                inputMode="numeric"
+                pattern="[0-9]*"
+              />
+              <button
+                type="button"
+                onClick={() => setPassengers((p) => p + 1)}
+                className="w-9 h-9 rounded-full border border-slate-300 flex items-center justify-center text-lg font-bold bg-slate-100 hover:bg-blue-100 active:bg-blue-200 transition"
+                aria-label="Increase passengers"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {loading && <div className="text-slate-500">Loading results…</div>}
 
       {!loading && tours.length === 0 && (
-        <div className="p-6 border rounded bg-white text-slate-600">No tours found.</div>
+        <div className="p-8 border rounded-2xl bg-white/80 text-slate-600 shadow-md text-center text-lg font-medium">No tours found.</div>
       )}
 
       {!loading && tours.length > 0 && (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {tours.map((t) => {
             const priceInfo = getPerPersonForTour(t);
             const perPerson = priceInfo.regular ?? priceInfo.effective;
@@ -132,35 +135,41 @@ export default function SearchResults(): JSX.Element {
             const total = perPerson * Math.max(1, passengers);
 
             return (
-              <article key={t.slug} className="bg-white border rounded-lg overflow-hidden shadow-sm">
-                <div className="h-44 bg-gray-100">
-                  <img src={t.images?.[0] ?? "/assets/placeholder.jpg"} alt={t.title} className="w-full h-44 object-cover" />
+              <article key={t.slug} className="bg-white/90 border border-slate-200 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-200 flex flex-col">
+                <div className="relative h-48 bg-gray-100">
+                  <img src={t.images?.[0] ?? "/assets/placeholder.jpg"} alt={t.title} className="w-full h-48 object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-blue-900/40 to-transparent" />
+                  <div className="absolute top-4 left-4 bg-yellow-400 text-blue-900 text-xs font-bold px-3 py-1 rounded-full shadow">{t.durationDays} Days</div>
                 </div>
-                <div className="p-4">
-                  <h2 className="text-lg font-semibold text-slate-900">{t.title}</h2>
-                  <p className="text-sm text-slate-600 mt-2">{t.summary}</p>
+                <div className="p-5 flex flex-col flex-1">
+                  <h2 className="text-xl font-bold text-blue-900 mb-1 drop-shadow-sm">{t.title}</h2>
+                  <p className="text-sm text-slate-600 mb-3 line-clamp-2">{t.summary}</p>
 
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="text-xs text-slate-500">{t.durationDays} Days</div>
-
-                    <div className="text-sm text-right">
+                  <div className="mt-auto flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
                       <div className="text-xs text-slate-500">Per head</div>
-                      <div className="text-base font-semibold text-slate-900">{formatCurrencyPHP(perPerson)}</div>
-                      {promo !== undefined && priceInfo.regular !== undefined && (
-                        <div className="text-xs text-slate-500 mt-1">Promo: <span className="text-rose-600">{formatCurrencyPHP(promo)}</span></div>
-                      )}
-                      {promo !== undefined && priceInfo.regular === undefined && (
-                        <div className="text-xs text-slate-500 mt-1">Promo applied</div>
-                      )}
-
-                      <div className="text-xs text-slate-500 mt-2">Total ({passengers} pax)</div>
-                      <div className="text-base font-semibold text-slate-900">{formatCurrencyPHP(total)}</div>
+                      <div className="text-base font-bold text-blue-900">{formatCurrencyPHP(perPerson)}</div>
+                    </div>
+                    {promo !== undefined && priceInfo.regular !== undefined && (
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs text-slate-500">Promo</div>
+                        <div className="text-xs font-semibold text-rose-600 line-through">{formatCurrencyPHP(priceInfo.regular)}</div>
+                        <div className="text-sm font-bold text-rose-600">{formatCurrencyPHP(promo)}</div>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="text-xs text-slate-500">Total ({passengers} pax)</div>
+                      <div className="text-base font-bold text-blue-900">{formatCurrencyPHP(total)}</div>
                     </div>
                   </div>
 
-                  <div className="mt-4 flex gap-2">
-                    <Link to={`/tour/builder/${t.slug}`} className="text-xs px-3 py-2 bg-slate-100 rounded hover:bg-slate-200">Builder</Link>
-                    <Link to={`/tour/${t.slug}`} className="text-xs px-3 py-2 bg-rose-600 text-white rounded hover:bg-rose-700">View</Link>
+                  <div className="mt-5 flex gap-3">
+                    <Link to={`/tour/builder/${t.slug}`} className="flex-1 flex items-center justify-center gap-2 text-xs px-4 py-2 bg-blue-50 text-blue-800 font-semibold rounded-full shadow hover:bg-blue-100 hover:scale-105 transition-all duration-150">
+                      <span>🛠️</span> Builder
+                    </Link>
+                    <Link to={`/tour/${t.slug}`} className="flex-1 flex items-center justify-center gap-2 text-xs px-4 py-2 bg-gradient-to-r from-rose-500 to-rose-600 text-white font-semibold rounded-full shadow hover:from-rose-400 hover:to-rose-500 hover:scale-105 transition-all duration-150">
+                      <span>🔎</span> View
+                    </Link>
                   </div>
                 </div>
               </article>
@@ -168,6 +177,7 @@ export default function SearchResults(): JSX.Element {
           })}
         </div>
       )}
+      </div>
     </main>
   );
 }

@@ -9,7 +9,8 @@ import {
 } from '../../services/bookingRepo';
 
 // Utility functions
-function formatCurrency(amount: number): string {
+function formatCurrency(amount: number | undefined | null): string {
+  if (typeof amount !== 'number' || isNaN(amount)) return 'PHP 0.00';
   return `PHP ${amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
@@ -101,7 +102,7 @@ function DashboardStatsCard({ stats }: { stats: DashboardStats }) {
           </div>
           <div className="ml-4">
             <h3 className="text-sm font-medium text-gray-500">Weekly Growth</h3>
-            <p className="text-2xl font-bold text-gray-900">{stats.weeklyGrowth.toFixed(1)}%</p>
+            <p className="text-2xl font-bold text-gray-900">{typeof stats.weeklyGrowth === 'number' && !isNaN(stats.weeklyGrowth) ? stats.weeklyGrowth.toFixed(1) : '0.0'}%</p>
             <p className="text-sm text-gray-600">vs last week</p>
           </div>
         </div>
@@ -116,7 +117,7 @@ function DashboardStatsCard({ stats }: { stats: DashboardStats }) {
           </div>
           <div className="ml-4">
             <h3 className="text-sm font-medium text-gray-500">Monthly Growth</h3>
-            <p className="text-2xl font-bold text-gray-900">{stats.monthlyGrowth.toFixed(1)}%</p>
+            <p className="text-2xl font-bold text-gray-900">{typeof stats.monthlyGrowth === 'number' && !isNaN(stats.monthlyGrowth) ? stats.monthlyGrowth.toFixed(1) : '0.0'}%</p>
             <p className="text-sm text-gray-600">vs last month</p>
           </div>
         </div>
@@ -467,8 +468,8 @@ export default function ManageBookings() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="max-w-xs">
-                        <div className="text-sm font-medium text-gray-900 truncate">{booking.tour.title}</div>
-                        <div className="text-sm text-gray-500">{booking.tour.durationDays} days</div>
+                        <div className="text-sm font-medium text-gray-900 truncate">{booking.tour ? booking.tour.title : 'Unknown Tour'}</div>
+                        <div className="text-sm text-gray-500">{booking.tour ? `${booking.tour.durationDays} days` : ''}</div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

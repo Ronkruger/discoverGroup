@@ -36,15 +36,16 @@ const CustomerService: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'customers' | 'inquiries' | 'tasks'>('overview');
   const [searchTerm, setSearchTerm] = useState('');
 
+
   useEffect(() => {
     loadData();
   }, []);
 
-  const loadData = () => {
-    setStats(customerServiceRepo.getCustomerServiceStats());
-    setCustomers(customerServiceRepo.getAllCustomers());
-    setInquiries(customerServiceRepo.getAllInquiries());
-    setTasks(customerServiceRepo.getAllTasks());
+  const loadData = async () => {
+    setStats(await customerServiceRepo.getCustomerServiceStats());
+  setCustomers(await customerServiceRepo.getAllCustomers());
+    setInquiries(await customerServiceRepo.getAllInquiries());
+    setTasks(await customerServiceRepo.getAllTasks());
   };
 
   const getStatusColor = (status: string, type: 'inquiry' | 'task') => {

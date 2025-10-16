@@ -5,6 +5,12 @@ import Footer from "./components/Footer";
 import Loading from "./components/Loading";
 import React from "react";
 
+
+import Booking from "./pages/Booking";
+import ViewBookings from "./pages/ViewBookings";
+
+import BookingConfirmation from "./pages/BookingConfirmation";
+
 // Lazy load pages
 const Home = lazy(() => import("./pages/Home"));
 const RoutesPage = lazy(() => import("./pages/RoutesPage"));
@@ -17,6 +23,7 @@ const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const Profile = lazy(() => import("./pages/Profile"));
 const UserSettings = lazy(() => import("./pages/UserSettings"));
+const AboutUs = lazy(() => import("./pages/AboutUs"));
 
 export default function AppRouter() {
   return (
@@ -38,6 +45,16 @@ export default function AppRouter() {
           <Route path="/tour/:slug" element={<TourDetail />} />
           <Route path="/tour/builder/:slug" element={<TourBuilder />} />
 
+
+          {/* Booking route */}
+          <Route path="/booking/:slug" element={<Booking />} />
+
+          {/* My Bookings (user bookings list) */}
+          <Route path="/bookings" element={<ViewBookings />} />
+
+          {/* Booking confirmation route */}
+          <Route path="/booking/confirmation" element={<BookingConfirmation />} />
+
           {/* Auth routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -48,6 +65,7 @@ export default function AppRouter() {
           <Route path="/tours/:slug" element={<Navigate to="/tour/:slug" replace />} />
           <Route path="/tours/:slug/builder" element={<Navigate to="/tour/builder/:slug" replace />} />
 
+          <Route path="/about-us" element={<AboutUs />} />
           <Route path="/contact" element={<ContactPage />} />
 
           {/* Helpful fallback route to display when no route matches (avoids silent console-only warnings) */}

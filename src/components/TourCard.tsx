@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { Tour } from "../types";
 import { Link } from "react-router-dom";
-import { ArrowRight, Heart, Share2, MapPin, Calendar, Users, Star, CheckCircle, Clock } from "lucide-react";
+import { ArrowRight, Heart, Share2, MapPin, Calendar, Star, CheckCircle, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface TourCardProps {
@@ -74,7 +74,7 @@ export default function TourCard({
 
   return (
     <article 
-      className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 h-80 flex flex-col cursor-pointer"
+      className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-3 hover:scale-105 h-80 flex flex-col cursor-pointer border border-transparent hover:border-blue-400/60 hover:ring-2 hover:ring-blue-200/40"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
@@ -84,7 +84,7 @@ export default function TourCard({
       aria-labelledby={`tour-title-${tour.slug}`}
     >
       {/* Background image with overlay */}
-      <div className="absolute inset-0 transition-transform duration-300 group-hover:scale-105">
+  <div className="absolute inset-0 transition-transform duration-300 group-hover:scale-110 group-hover:brightness-105">
         <img
           src={currentImage}
           alt={tour.title}
@@ -95,23 +95,7 @@ export default function TourCard({
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
         
         {/* Hover overlay with additional info */}
-        {isHovered && (
-          <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 text-center transform scale-95 group-hover:scale-100 transition-transform">
-              <h4 className="font-semibold text-gray-900 mb-2">Quick Preview</h4>
-              <div className="flex gap-4 text-sm text-gray-700">
-                <div className="flex items-center gap-1">
-                  <MapPin className="w-4 h-4" />
-                  <span>{countries?.[0] || 'Europe'}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Users className="w-4 h-4" />
-                  <span>Small Group</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+
       </div>
 
       {/* Quick Action Buttons */}

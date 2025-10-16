@@ -69,7 +69,7 @@ const AppRouter: React.FC = () => {
               element={
                 <ProtectedRoute 
                   requiredPermission="canAccessTours"
-                  allowedRoles={[UserRole.ADMINISTRATOR, UserRole.BOOKING_DEPARTMENT]}
+                  allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.BOOKING_DEPARTMENT]}
                 >
                   <ToursList />
                 </ProtectedRoute>
@@ -80,7 +80,7 @@ const AppRouter: React.FC = () => {
               element={
                 <ProtectedRoute 
                   requiredPermission="canAccessTours"
-                  allowedRoles={[UserRole.ADMINISTRATOR, UserRole.BOOKING_DEPARTMENT]}
+                  allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.BOOKING_DEPARTMENT]}
                 >
                   <TourForm />
                 </ProtectedRoute>
@@ -91,7 +91,7 @@ const AppRouter: React.FC = () => {
               element={
                 <ProtectedRoute 
                   requiredPermission="canAccessTours"
-                  allowedRoles={[UserRole.ADMINISTRATOR, UserRole.BOOKING_DEPARTMENT]}
+                  allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.BOOKING_DEPARTMENT]}
                 >
                   <TourForm />
                 </ProtectedRoute>
@@ -102,7 +102,7 @@ const AppRouter: React.FC = () => {
               element={
                 <ProtectedRoute 
                   requiredPermission="canAccessTours"
-                  allowedRoles={[UserRole.ADMINISTRATOR, UserRole.BOOKING_DEPARTMENT]}
+                  allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.BOOKING_DEPARTMENT]}
                 >
                   <TourForm />
                 </ProtectedRoute>
@@ -115,7 +115,7 @@ const AppRouter: React.FC = () => {
               element={
                 <ProtectedRoute 
                   requiredPermission="canAccessBookings"
-                  allowedRoles={[UserRole.ADMINISTRATOR, UserRole.BOOKING_DEPARTMENT, UserRole.CSR_DEPARTMENT]}
+                  allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.BOOKING_DEPARTMENT, UserRole.CSR_DEPARTMENT]}
                 >
                   <ManageBookings />
                 </ProtectedRoute>
@@ -128,7 +128,7 @@ const AppRouter: React.FC = () => {
               element={
                 <ProtectedRoute 
                   requiredPermission="canAccessVisaAssistance"
-                  allowedRoles={[UserRole.ADMINISTRATOR, UserRole.VISA_DEPARTMENT]}
+                  allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.VISA_DEPARTMENT]}
                 >
                   <div className="p-6">
                     <h1 className="text-2xl font-bold text-gray-900 mb-4">Visa Assistance</h1>
@@ -146,7 +146,7 @@ const AppRouter: React.FC = () => {
               element={
                 <ProtectedRoute 
                   requiredPermission="canAccessCustomerService"
-                  allowedRoles={[UserRole.ADMINISTRATOR, UserRole.CSR_DEPARTMENT, UserRole.VISA_DEPARTMENT]}
+                  allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.CSR_DEPARTMENT, UserRole.VISA_DEPARTMENT]}
                 >
                   <CustomerService />
                 </ProtectedRoute>
@@ -169,7 +169,7 @@ const AppRouter: React.FC = () => {
               element={
                 <ProtectedRoute 
                   requiredPermission="canAccessUserManagement"
-                  allowedRoles={[UserRole.ADMINISTRATOR, UserRole.WEB_DEVELOPER]}
+                  allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.WEB_DEVELOPER]}
                 >
                   <UserManagement />
                 </ProtectedRoute>
@@ -182,7 +182,7 @@ const AppRouter: React.FC = () => {
               element={
                 <ProtectedRoute 
                   requiredPermission="canAccessSettings"
-                  allowedRoles={[UserRole.ADMINISTRATOR, UserRole.WEB_DEVELOPER]}
+                  allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.WEB_DEVELOPER]}
                 >
                   <Settings />
                 </ProtectedRoute>

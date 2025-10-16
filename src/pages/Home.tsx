@@ -58,80 +58,75 @@ export default function Home() {
   return (
     <main>
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-blue-700 to-blue-500 text-white py-24 overflow-hidden">
+      <section className="relative bg-gradient-to-r from-blue-700 to-blue-500 text-white py-24 overflow-hidden min-h-[60vh] flex items-center justify-center">
         {/* Animated Background */}
         <motion.div
-          className="absolute inset-0 bg-[url('/hero-bg.jpg')] bg-cover bg-center opacity-20"
-          animate={{ y: [0, 30, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_#3b82f6_40%,_transparent_70%),_radial-gradient(circle_at_bottom_right,_#1d4ed8_40%,_transparent_70%)] opacity-60"
+          animate={{ backgroundPosition: ["0% 0%", "100% 100%"] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         />
-    <div className="relative bg-gradient-to-r from-blue-700 to-blue-500 text-white py-32 overflow-hidden">
-  {/* Animated Gradient / Particles */}
-  <motion.div
-    className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_#3b82f6,_transparent),_radial-gradient(circle_at_bottom_right,_#1d4ed8,_transparent)]"
-    animate={{ backgroundPosition: ["0% 0%", "100% 100%"] }}
-    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-  />
-
-  {/* Floating Travel Icons */}
-  <motion.div
-    className="absolute top-10 left-20 text-4xl"
-    animate={{ y: [0, 20, 0] }}
-    transition={{ duration: 6, repeat: Infinity }}
-  >
-    ✈️
-  </motion.div>
-  <motion.div
-    className="absolute bottom-16 right-24 text-4xl"
-    animate={{ y: [0, -20, 0] }}
-    transition={{ duration: 8, repeat: Infinity }}
-  >
-    🗺️
-  </motion.div>
-  <motion.div
-    className="absolute top-1/2 left-1/3 text-4xl"
-    animate={{ rotate: [0, 10, -10, 0] }}
-    transition={{ duration: 10, repeat: Infinity }}
-  >
-    🏰
-  </motion.div>
-
-  {/* Main Content */}
-  <div className="container mx-auto px-6 text-center relative z-10">
-    <motion.h1
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
-      className="text-4xl md:text-6xl font-bold mb-6 drop-shadow-lg"
-    >
-      Discover Europe with <span className="text-yellow-300">Discover Group</span>
-    </motion.h1>
-
-    <motion.p
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 1, delay: 0.2 }}
-      className="text-lg mb-8 max-w-2xl mx-auto opacity-90"
-    >
-      Explore iconic destinations with our guided tours — 
-      guaranteed departures, flexible routes, and unforgettable experiences.
-    </motion.p>
-
-    {/* Search / Explore Bar */}
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.6, delay: 0.4 }}
-      className="flex justify-center max-w-2xl mx-auto"
-    >
-      <EnhancedSearch 
-        placeholder="Where do you want to go?"
-        className="w-full"
-      />
-    </motion.div>
-  </div>
-</div>
-
+        {/* Floating Travel Icons */}
+        <motion.div
+          className="absolute top-10 left-20 text-4xl drop-shadow-xl"
+          animate={{ y: [0, 20, 0] }}
+          transition={{ duration: 6, repeat: Infinity }}
+        >
+          ✈️
+        </motion.div>
+        <motion.div
+          className="absolute bottom-16 right-24 text-4xl drop-shadow-xl"
+          animate={{ y: [0, -20, 0] }}
+          transition={{ duration: 8, repeat: Infinity }}
+        >
+          🗺️
+        </motion.div>
+        <motion.div
+          className="absolute top-1/2 left-1/3 text-4xl drop-shadow-xl"
+          animate={{ rotate: [0, 10, -10, 0] }}
+          transition={{ duration: 10, repeat: Infinity }}
+        >
+          🏰
+        </motion.div>
+        {/* Glassmorphism Card */}
+        <div className="relative z-10 w-full max-w-3xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-3xl shadow-2xl p-10 flex flex-col items-center"
+          >
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-4xl md:text-6xl font-bold mb-6 drop-shadow-lg"
+            >
+              Discover Europe with <span className="text-yellow-300">Discover Group</span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.2 }}
+              className="text-lg mb-8 max-w-2xl mx-auto opacity-90"
+            >
+              Explore iconic destinations with our guided tours — <br className="hidden md:inline" />
+              guaranteed departures, flexible routes, and unforgettable experiences.
+            </motion.p>
+            {/* Search / Explore Bar + CTA */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="flex w-full max-w-xl mx-auto gap-2"
+            >
+              <EnhancedSearch 
+                placeholder="Where do you want to go?"
+                className="w-full rounded-l-full bg-white/80 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
+                tours={tours}
+              />
+            </motion.div>
+          </motion.div>
+        </div>
       </section>
 
       {/* Trust Signals & Social Proof */}

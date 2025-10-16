@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, MapPin, Clock, TrendingUp } from 'lucide-react';
+import { Search, MapPin, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface SearchSuggestion {
@@ -10,16 +10,21 @@ interface SearchSuggestion {
   icon?: React.ReactNode;
 }
 
+
+import type { Tour } from "../types";
+
 interface EnhancedSearchProps {
   placeholder?: string;
   className?: string;
   onSearch?: (query: string) => void;
+  tours?: Tour[];
 }
 
 export const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
   placeholder = "Where do you want to go?",
   className = "",
-  onSearch
+  onSearch,
+  tours = []
 }) => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -28,37 +33,24 @@ export const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Popular destinations and suggestions
-  const popularDestinations: SearchSuggestion[] = [
-    {
-      type: 'destination',
-      title: 'Prague',
-      subtitle: 'Czech Republic',
-      url: '/search?countries=Czech Republic',
-      icon: <MapPin className="w-4 h-4" />
-    },
-    {
-      type: 'destination',
-      title: 'Vienna',
-      subtitle: 'Austria',
-      url: '/search?countries=Austria',
-      icon: <MapPin className="w-4 h-4" />
-    },
-    {
-      type: 'destination',
-      title: 'Budapest',
-      subtitle: 'Hungary',
-      url: '/search?countries=Hungary',
-      icon: <MapPin className="w-4 h-4" />
-    },
-    {
-      type: 'tour',
-      title: 'European Highlights',
-      subtitle: '14 days • Multiple countries',
-      url: '/tour/europe-highlights',
-      icon: <Clock className="w-4 h-4" />
+  // Build suggestions from real tours data
+  const popularDestinations: SearchSuggestion[] = tours.map(tour => {
+    // Try to get countries from additionalInfo or fullStops
+    let countries: string[] = [];
+    if (tour.additionalInfo && Array.isArray(tour.additionalInfo.countriesVisited)) {
+      countries = tour.additionalInfo.countriesVisited;
+    } else if (Array.isArray(tour.fullStops)) {
+      const stopsWithCountry = tour.fullStops.filter(stop => typeof stop.country === 'string');
+      countries = Array.from(new Set(stopsWithCountry.map(stop => stop.country as string)));
     }
-  ];
+    return {
+      type: 'tour',
+      title: tour.title,
+      subtitle: countries.length > 0 ? countries.join(', ') : undefined,
+      url: `/tour/${tour.slug || tour.id}`,
+      icon: <MapPin className="w-4 h-4" />
+    };
+  });
 
   const recentSearches: SearchSuggestion[] = [
     {
@@ -91,11 +83,11 @@ export const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
     setQuery(value);
     
     if (value.length > 0) {
-      // Filter suggestions based on query
+      // Filter suggestions based on query from real tours
       const filtered = popularDestinations.filter(
         suggestion =>
           suggestion.title.toLowerCase().includes(value.toLowerCase()) ||
-          suggestion.subtitle?.toLowerCase().includes(value.toLowerCase())
+          (suggestion.subtitle && suggestion.subtitle.toLowerCase().includes(value.toLowerCase()))
       );
       setSuggestions(filtered);
     } else {

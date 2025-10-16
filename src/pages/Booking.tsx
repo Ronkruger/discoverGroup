@@ -1,5 +1,6 @@
 import { useEffect, useState, type JSX } from "react";
-import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
+import { Link, useNavigate, useParams, useLocation, Navigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 import type { Tour } from "../types";
 import { fetchTourBySlug } from "../api/tours";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
@@ -16,15 +17,15 @@ function formatCurrencyPHP(amount: number) {
 }
 
 export default function Booking(): JSX.Element {
-  const { slug } = useParams<{ slug: string }>();
+  const { user } = useAuth();
   const location = useLocation();
+  const { slug } = useParams<{ slug: string }>();
   const navState = (location.state ?? {}) as {
     tour?: Tour;
     selectedDate?: string;
     passengers?: number;
     perPerson?: number;
   } | undefined;
-
   const navigate = useNavigate();
 
   const [tour, setTour] = useState<Tour | null>(() => navState?.tour ?? null);
@@ -313,12 +314,15 @@ export default function Booking(): JSX.Element {
 
   if (loading) return <div className="container mx-auto px-5 py-12 text-center text-slate-200">Loading booking details…</div>;
 
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
   if (!tour) {
     return (
       <main style={themeStyle} className="min-h-screen">
         <div className="container mx-auto px-5 py-12">
-          <div className="max-w-2xl mx-auto card-glass p-6 rounded shadow text-center">
-            <h2 className="text-xl font-semibold mb-2">Tour not found</h2>
+          <div className="text-center text-slate-200">
             <p className="text-slate-300 mb-4">We couldn't find that tour. Go back to browse other routes.</p>
             <Link to="/routes" className="inline-block px-4 py-2 bg-rose-600 text-white rounded">Browse routes</Link>
           </div>

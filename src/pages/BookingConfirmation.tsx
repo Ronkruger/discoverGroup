@@ -1,4 +1,4 @@
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useParams } from "react-router-dom";
 import type { JSX } from "react";
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -120,6 +120,7 @@ const recommendations = [
 
 export default function BookingConfirmation(): JSX.Element {
   const location = useLocation();
+  const { bookingId: urlBookingId } = useParams<{ bookingId?: string }>();
   const [activeTab, setActiveTab] = useState("details");
   const [testingEmail, setTestingEmail] = useState(false);
   
@@ -133,6 +134,20 @@ export default function BookingConfirmation(): JSX.Element {
     total?: number;
     customerEmail?: string;
   };
+
+  // Get booking ID from URL parameter or location state
+  const bookingId = urlBookingId || state.bookingId;
+
+  // Debug logging
+  console.log('🔍 BookingConfirmation Debug Info:', {
+    urlBookingId,
+    stateBookingId: state.bookingId,
+    finalBookingId: bookingId,
+    hasLocationState: !!location.state,
+    locationState: location.state,
+    tourTitle: state.tourTitle,
+    allStateKeys: Object.keys(state)
+  });
 
   // Test email function
   const handleTestEmail = async () => {
@@ -200,7 +215,7 @@ export default function BookingConfirmation(): JSX.Element {
     const file = new Blob([`
 Booking Confirmation
 -------------------
-Booking ID: ${state.bookingId}
+Booking ID: ${bookingId}
 Tour: ${state.tourTitle}
 Country: ${state.country}
 Date: ${state.date}
@@ -208,7 +223,7 @@ Passengers: ${state.passengers}
 Total: PHP ${(state.total ?? 0).toLocaleString()}
     `], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
-    element.download = `booking-${state.bookingId}.txt`;
+    element.download = `booking-${bookingId}.txt`;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
@@ -219,27 +234,44 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
       const startDate = new Date(state.date);
       const endDate = new Date(startDate.getTime() + 8 * 60 * 60 * 1000); // 8 hours later
       
-      const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(state.tourTitle)}&dates=${startDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}/${endDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}&details=${encodeURIComponent(`Booking ID: ${state.bookingId}\nLocation: ${state.country}`)}`;
+      const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(state.tourTitle)}&dates=${startDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}/${endDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}&details=${encodeURIComponent(`Booking ID: ${bookingId}\nLocation: ${state.country}`)}`;
       
       window.open(googleCalendarUrl, '_blank');
     }
   };
 
-  if (!state.bookingId) {
+  if (!bookingId) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center px-6">
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-8 text-center max-w-md"
+          className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-8 text-center max-w-lg"
         >
           <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 className="w-8 h-8 text-red-400" />
           </div>
           <h2 className="text-xl font-bold text-white mb-2">No Booking Found</h2>
-          <p className="text-slate-300 mb-6">
+          <p className="text-slate-300 mb-4">
             No booking data available. If you just completed a booking please check your email.
           </p>
+          
+          {/* Debug Information */}
+          <div className="text-left bg-slate-800/50 p-4 rounded-lg mb-4 text-sm">
+            <div className="text-yellow-400 mb-2">Debug Info:</div>
+            <div className="text-slate-300">
+              <div>Has Location State: {location.state ? '✅ Yes' : '❌ No'}</div>
+              <div>URL Booking ID: {urlBookingId || '❌ Missing'}</div>
+              <div>State Booking ID: {state.bookingId || '❌ Missing'}</div>
+              <div>Final Booking ID: {bookingId || '❌ Missing'}</div>
+              <div>Tour Title: {state.tourTitle || '❌ Missing'}</div>
+              <div>Available Keys: {Object.keys(state).length > 0 ? Object.keys(state).join(', ') : 'None'}</div>
+              <div className="mt-2 text-xs text-slate-400">
+                Raw State: {JSON.stringify(location.state, null, 2)}
+              </div>
+            </div>
+          </div>
+          
           <Link 
             to="/" 
             className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
@@ -349,7 +381,7 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
               <div className="space-y-4">
                 <div>
                   <div className="text-slate-400 text-sm mb-1">Booking Reference</div>
-                  <div className="text-white text-xl font-mono bg-white/5 px-3 py-2 rounded">{state.bookingId}</div>
+                  <div className="text-white text-xl font-mono bg-white/5 px-3 py-2 rounded">{bookingId}</div>
                 </div>
                 <div>
                   <div className="text-slate-400 text-sm mb-1">Tour</div>

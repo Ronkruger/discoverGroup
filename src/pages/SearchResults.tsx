@@ -145,6 +145,85 @@ export default function SearchResults(): JSX.Element {
                   <h2 className="text-xl font-bold text-blue-900 mb-1 drop-shadow-sm">{t.title}</h2>
                   <p className="text-sm text-slate-600 mb-3 line-clamp-2">{t.summary}</p>
 
+                  {/* Departure dates info */}
+                  {(() => {
+                    // Normalize departureDates to objects with startDate/endDate so we can safely access startDate
+                    const rawDepartures = Array.isArray(t.departureDates) ? t.departureDates : [];
+                    const departureDates: { startDate: string; endDate?: string }[] = rawDepartures.map((d) =>
+                      typeof d === "string" ? { startDate: d } : (d as { startDate: string; endDate?: string })
+                    );
+                    const travelWindow = t.travelWindow;
+                    
+                    if (departureDates.length > 0) {
+                      const now = new Date();
+                      const upcomingDepartures = departureDates
+                        .filter((dept) => {
+                          const sd = new Date(dept.startDate);
+                          return sd > now;
+                        })
+                        .sort(
+                          (a, b) =>
+                            new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+                        );
+                      
+                      if (upcomingDepartures.length > 0) {
+                        const nextDeparture = upcomingDepartures[0];
+                        const startDate = new Date(nextDeparture.startDate).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        });
+                        const endSource = nextDeparture.endDate ?? nextDeparture.startDate;
+                        const endDate = new Date(endSource).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        });
+                        return (
+                          <div className="text-xs text-slate-500 mb-2 flex items-center gap-1">
+                            📅 Next: {startDate} - {endDate}
+                            {departureDates.length > 1 && (
+                              <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full ml-1">
+                                +{departureDates.length - 1} more
+                              </span>
+                            )}
+                          </div>
+                        );
+                      }
+                    } else if (travelWindow) {
+                      // travelWindow may use different property names; prefer startDate/endDate but fall back to start/end or other common names
+                      const tw = travelWindow as {
+                        startDate?: string;
+                        endDate?: string;
+                        start?: string;
+                        end?: string;
+                        startAt?: string;
+                        endAt?: string;
+                        from?: string;
+                        to?: string;
+                      };
+                      const s = tw.startDate ?? tw.start ?? tw.startAt ?? tw.from;
+                      const e = tw.endDate ?? tw.end ?? tw.endAt ?? tw.to;
+                      if (s && e) {
+                        const startDate = new Date(s).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        });
+                        const endDate = new Date(e).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        });
+                        return (
+                          <div className="text-xs text-slate-500 mb-2">
+                            📅 {startDate} - {endDate}
+                          </div>
+                        );
+                      }
+                    }
+                    
+                    return null;
+                  })()}
+
                   <div className="mt-auto flex flex-col gap-2">
                     <div className="flex items-center justify-between">
                       <div className="text-xs text-slate-500">Per head</div>

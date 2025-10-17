@@ -3,7 +3,8 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IBooking extends Document {
   user?: mongoose.Types.ObjectId;
-  tour: mongoose.Types.ObjectId;
+  tour?: mongoose.Types.ObjectId; // Make optional for backward compatibility
+  tourSlug?: string; // Add tour slug field for when tour isn't in MongoDB
   passengers: number;
   totalAmount: number;
   status: string;
@@ -24,7 +25,8 @@ export interface IBooking extends Document {
 
 const BookingSchema = new Schema<IBooking>({
   user: { type: Schema.Types.ObjectId, ref: 'User', required: false },
-  tour: { type: Schema.Types.ObjectId, ref: 'Tour', required: true },
+  tour: { type: Schema.Types.ObjectId, ref: 'Tour', required: false }, // Make optional
+  tourSlug: { type: String, required: false }, // Add tour slug field
   passengers: { type: Number, required: true },
   totalAmount: { type: Number, required: true },
   status: { type: String, default: 'pending' },

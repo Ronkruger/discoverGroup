@@ -17,6 +17,13 @@ const isString = (value: unknown): value is string => typeof value === 'string';
 const isStringArray = (value: unknown): value is string[] => 
   Array.isArray(value) && value.every(item => typeof item === 'string');
 
+// Type guard for travelWindow objects that include startDate/endDate strings
+const isTravelWindowWithDates = (value: unknown): value is { startDate: string; endDate: string } =>
+  typeof value === 'object' && value !== null &&
+  'startDate' in value && 'endDate' in value &&
+  typeof (value as Record<string, unknown>).startDate === 'string' &&
+  typeof (value as Record<string, unknown>).endDate === 'string';
+
 export default function TourCard({ 
   tour, 
   onWishlist, 
@@ -59,6 +66,62 @@ export default function TourCard({
   const rating = isNumber(tour.rating) ? tour.rating : undefined;
   const travelDate = isString(tour.travelDate) ? tour.travelDate : undefined;
   const countries = isStringArray(tour.countries) ? tour.countries : undefined;
+
+  // Handle departure dates display
+  const departureDates: unknown[] = Array.isArray(tour.departureDates) ? tour.departureDates : [];
+  const travelWindow = tour.travelWindow;
+  
+  // Get the display date - prioritize departure dates, fallback to travel window or travel date
+  const getDisplayDate = () => {
+    if (departureDates.length > 0) {
+      // Show the next upcoming departure date
+      const now = new Date();
+
+      // only treat items that are objects with startDate/endDate
+      const isDepartureObj = (d: unknown): d is { startDate: string; endDate: string } =>
+        typeof d === 'object' && d !== null && 'startDate' in d && 'endDate' in d &&
+        typeof (d as Record<string, unknown>).startDate === 'string' && typeof (d as Record<string, unknown>).endDate === 'string';
+
+      const validDepartures = departureDates.filter(isDepartureObj);
+
+      const upcomingDepartures = validDepartures
+        .filter(dept => new Date(dept.startDate) > now)
+        .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+
+      if (upcomingDepartures.length > 0) {
+        const nextDeparture = upcomingDepartures[0];
+        const start = new Date(nextDeparture.startDate).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric'
+        });
+        const end = new Date(nextDeparture.endDate).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+        return `${start} - ${end}`;
+      }
+    }
+
+    // Fallback to travel window
+    if (isTravelWindowWithDates(travelWindow)) {
+      const start = new Date(travelWindow.startDate).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric'
+      });
+      const end = new Date(travelWindow.endDate).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+      return `${start} - ${end}`;
+    }
+    
+    // Final fallback to travel date
+    return travelDate;
+  };
+
+  const displayDate = getDisplayDate();
 
   // Calculate pricing display
   const hasPromoPrice = promoPrice && regularPrice && promoPrice < regularPrice;
@@ -171,10 +234,15 @@ export default function TourCard({
           
           {/* Travel info */}
           <div className="flex items-center gap-4 text-xs text-gray-300 mt-1">
-            {travelDate && (
+            {displayDate && (
               <div className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
-                <span>{travelDate}</span>
+                <span>{displayDate}</span>
+              </div>
+            )}
+            {departureDates.length > 1 && (
+              <div className="flex items-center gap-1 bg-blue-600/80 px-2 py-1 rounded">
+                <span>+{departureDates.length - 1} more dates</span>
               </div>
             )}
             {countries && countries.length > 0 && (

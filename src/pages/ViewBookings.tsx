@@ -323,7 +323,7 @@ export default function ViewBookings() {
         </div>
 
         {/* Summary Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-lg border p-4">
             <div className="text-2xl font-bold text-blue-600">{bookings.length}</div>
             <div className="text-sm text-gray-600">Total Bookings</div>
@@ -339,12 +339,6 @@ export default function ViewBookings() {
               {bookings.filter(b => b.status === 'pending').length}
             </div>
             <div className="text-sm text-gray-600">Pending</div>
-          </div>
-          <div className="bg-white rounded-lg border p-4">
-            <div className="text-2xl font-bold text-gray-800">
-              {formatCurrencyPHP(bookings.reduce((sum, b) => sum + b.totalAmount, 0))}
-            </div>
-            <div className="text-sm text-gray-600">Total Revenue</div>
           </div>
         </div>
 

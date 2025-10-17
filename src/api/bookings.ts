@@ -7,6 +7,17 @@ function generateBookingId(): string {
   return `BK-${Math.random().toString(36).slice(2, 9).toUpperCase()}`;
 }
 
+// Helper function to get tour title from slug (since tours aren't in MongoDB)
+function getTourTitleFromSlug(slug: string): string {
+  const tourTitles: Record<string, string> = {
+    'route-a-preferred': 'Route A Preferred - European Adventure',
+    'route-b-classic': 'Route B Classic - Mediterranean Journey',
+    'route-c-premium': 'Route C Premium - Nordic Explorer',
+    // Add more tour mappings as needed
+  };
+  return tourTitles[slug] || `Tour ${slug}`;
+}
+
 // Removed initializeSampleData to prevent dummy bookings from being created
 
 // Create a new booking (POST to backend)
@@ -52,8 +63,20 @@ export async function createBooking(bookingData: {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error('Failed to create booking');
+  
+  if (!res.ok) {
+    const errorText = await res.text().catch(() => 'Unknown error');
+    console.error('❌ Backend booking save failed:', {
+      status: res.status,
+      statusText: res.statusText,
+      error: errorText
+    });
+    throw new Error(`Failed to create booking: ${res.status} ${errorText}`);
+  }
+  
   const saved = await res.json();
+  console.log('🎯 Backend response:', saved);
+  
   // Return a Booking object matching frontend type
   return {
     ...saved,
@@ -71,10 +94,35 @@ export async function fetchAllBookings(): Promise<Booking[]> {
     const data = await res.json();
     // If backend returns bookings, map them to Booking type
     return (data as Array<Record<string, unknown>>).map((b) => {
+      // Create a minimal tour object from tourSlug since full tour data isn't stored in MongoDB
+      const tour: Tour = {
+        id: typeof b.tourSlug === 'string' ? b.tourSlug : '',
+        slug: typeof b.tourSlug === 'string' ? b.tourSlug : '',
+        title: getTourTitleFromSlug(typeof b.tourSlug === 'string' ? b.tourSlug : ''),
+        summary: '',
+        line: 'ROUTE_A',
+        durationDays: 14,
+        highlights: [],
+        images: [],
+        guaranteedDeparture: true,
+        regularPricePerPerson: typeof b.perPerson === 'number' ? b.perPerson : 0,
+        promoPricePerPerson: typeof b.perPerson === 'number' ? b.perPerson : 0,
+        allowsDownpayment: true,
+        additionalInfo: {
+          countriesVisited: [],
+          startingPoint: 'Manila, Philippines',
+          endingPoint: 'Manila, Philippines'
+        },
+        itinerary: [],
+        fullStops: [],
+        departureDates: [],
+        travelWindow: { start: '', end: '' }
+      };
+      
       const booking: Booking = {
         id: typeof b._id === 'string' ? b._id : (typeof b.bookingId === 'string' ? b.bookingId : ''),
         bookingId: typeof b.bookingId === 'string' ? b.bookingId : '',
-        tour: typeof b.tour === 'object' && b.tour !== null ? (b.tour as Tour) : {} as Tour,
+        tour,
         customerName: typeof b.customerName === 'string' ? b.customerName : '',
         customerEmail: typeof b.customerEmail === 'string' ? b.customerEmail : '',
         customerPhone: typeof b.customerPhone === 'string' ? b.customerPhone : '',

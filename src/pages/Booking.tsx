@@ -4,7 +4,8 @@ import { useAuth } from "../context/useAuth";
 import type { Tour } from "../types";
 import { fetchTourBySlug } from "../api/tours";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import { stripePromise } from "../lib/stripe";
+import type { Stripe } from "@stripe/stripe-js";
+import { stripePromise, isStripeAvailable, processManualPayment } from "../lib/stripe";
 import { createPaymentIntent } from "../api/payments";
 import { sendBookingConfirmationEmailFallback } from "../api/emailJS";
 import { createBooking } from "../api/bookings";
@@ -51,6 +52,30 @@ export default function Booking(): JSX.Element {
   // Stripe state
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [initializingPayment, setInitializingPayment] = useState(false);
+  const [stripeAvailable, setStripeAvailable] = useState<boolean | null>(null); // null = loading
+  const [stripeLoadingError, setStripeLoadingError] = useState<string | null>(null);
+
+  // Check Stripe availability on component mount
+  useEffect(() => {
+    const checkStripe = async () => {
+      try {
+        console.log('🔍 Checking Stripe availability...');
+        const available = await isStripeAvailable();
+        setStripeAvailable(available);
+        if (!available) {
+          setStripeLoadingError('Failed to load Stripe.js from CDN');
+          console.warn('Stripe.js failed to load - check network connectivity');
+        } else {
+          console.log('✅ Stripe.js is available');
+        }
+      } catch (error) {
+        setStripeAvailable(false);
+        setStripeLoadingError(error instanceof Error ? error.message : 'Unknown Stripe loading error');
+        console.error('Stripe availability check error:', error);
+      }
+    };
+    checkStripe();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -189,6 +214,11 @@ export default function Booking(): JSX.Element {
       return null;
     }
     if (current === 2) {
+      // In test mode or when Stripe fails, allow proceeding without strict validation
+      if (!stripeAvailable) {
+        console.log('🧪 Validation: Stripe unavailable, test mode allowed');
+        return null; // Allow proceeding in test mode
+      }
       if (initializingPayment) return "Initializing payment, please wait…";
       if (!clientSecret) return "Payment is not ready yet. Please wait a moment.";
       return null;
@@ -223,6 +253,19 @@ export default function Booking(): JSX.Element {
 
     // Save booking to our database/storage
     if (tour && customerName && customerEmail && selectedDate) {
+      console.log('🔄 Attempting to save booking to MongoDB...');
+      console.log('📋 Booking data:', {
+        tourSlug: tour.slug,
+        customerName,
+        customerEmail,
+        selectedDate,
+        passengers,
+        perPerson,
+        total,
+        paymentType,
+        paymentIntentId: confirmationId
+      });
+      
       createBooking({
         tour,
         customerName,
@@ -235,14 +278,25 @@ export default function Booking(): JSX.Element {
         paymentType,
         paymentIntentId: confirmationId,
       }).then((savedBooking) => {
-        console.log('✅ Booking saved successfully:', savedBooking.bookingId);
+        console.log('✅ Booking saved successfully to MongoDB:', savedBooking.bookingId);
+        console.log('💾 Saved booking details:', savedBooking);
       }).catch((error) => {
-        console.error('❌ Failed to save booking:', error);
+        console.error('❌ Failed to save booking to MongoDB:', error);
+        console.error('🔍 Error details:', error.message);
+        // Still continue with navigation even if save fails
+      });
+    } else {
+      console.warn('⚠️ Cannot save booking - missing required data:', {
+        hasTour: !!tour,
+        hasCustomerName: !!customerName,
+        hasCustomerEmail: !!customerEmail,
+        hasSelectedDate: !!selectedDate
       });
     }
     
     // Navigate immediately - don't wait for email
-    navigate("/booking/confirmation", {
+    // Use both URL parameter and state for better reliability
+    navigate(`/booking/confirmation/${bookingId}`, {
       state: {
         bookingId,
         tourTitle: tour?.title ?? slug,
@@ -334,18 +388,41 @@ export default function Booking(): JSX.Element {
   const elementsAppearance = {
     theme: "night" as const,
     variables: {
-      colorPrimary: "#ef4444",
-      colorText: "#e6eefc",
-      colorBackground: "#0f172a",
-      colorTextSecondary: "#dbeafe",
-      colorDanger: "#fb7185",
+      colorPrimary: "#3b82f6", // blue
+      colorText: "#ffffff", // white text
+      colorBackground: "#1e293b", // lighter dark background
+      colorTextSecondary: "#cbd5e1", // light gray
+      colorDanger: "#ef4444", // red for errors
       borderRadius: "8px",
+      fontFamily: "system-ui, -apple-system, sans-serif",
+      spacingUnit: "4px",
     },
     rules: {
       ".Input": {
-        border: "1px solid rgba(255,255,255,0.16)",
+        border: "2px solid #475569", // visible border
+        backgroundColor: "#334155", // darker input background
+        padding: "12px",
+        fontSize: "16px",
+        color: "#ffffff",
       },
-      ".Label": { color: "#dbeafe" },
+      ".Input:focus": {
+        border: "2px solid #3b82f6", // blue focus border
+        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+      },
+      ".Label": { 
+        color: "#e2e8f0", // light text for labels
+        fontSize: "14px",
+        marginBottom: "8px",
+      },
+      ".Tab": {
+        backgroundColor: "#475569",
+        color: "#e2e8f0",
+        border: "1px solid #64748b",
+      },
+      ".Tab--selected": {
+        backgroundColor: "#3b82f6",
+        color: "#ffffff",
+      },
     },
   };
 
@@ -412,9 +489,131 @@ export default function Booking(): JSX.Element {
               />
             </div>
             <div className="card-glass rounded-lg p-6">
-              {/* Render Stripe Elements only when we have a valid client secret */}
-              {(step === 2 || step === 3 || step === 4) && clientSecret && !initializingPayment ? (
-                <Elements stripe={stripePromise} options={{ clientSecret, appearance: elementsAppearance }}>
+              {/* Check if Stripe is available first */}
+              {!stripeAvailable && (step === 2 || step === 3 || step === 4) && (
+                <div className="text-center py-8">
+                  <div className="text-yellow-400 text-4xl mb-4">⚠️</div>
+                  <h3 className="text-lg font-semibold mb-3 text-slate-100">Payment System Temporarily Unavailable</h3>
+                  <p className="text-slate-300 mb-6">
+                    We're experiencing network issues with the payment form. You can still complete your booking using one of these options:
+                  </p>
+                  <div className="flex flex-col gap-3 max-w-md mx-auto">
+                    <button 
+                      onClick={async () => {
+                        try {
+                          setError(null);
+                          console.log('🔄 Processing manual payment...');
+                          
+                          const result = await processManualPayment({
+                            amount: Math.round(paymentAmount * 100),
+                            currency: "php",
+                            metadata: {
+                              slug: slug ?? "",
+                              tourTitle: tour?.title ?? "",
+                              date: selectedDate ?? "",
+                              passengers: String(passengers ?? 1),
+                              paymentType: paymentType,
+                            }
+                          });
+                          
+                          if (result.success) {
+                            handlePaymentSuccess(result.paymentIntentId);
+                          }
+                        } catch (error) {
+                          setError('Manual payment failed. Please try refreshing or contact support.');
+                          console.error('Manual payment error:', error);
+                        }
+                      }}
+                      className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                    >
+                      💳 Complete Payment (Test Mode)
+                    </button>
+                    <button 
+                      onClick={() => window.location.reload()} 
+                      className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                    >
+                      🔄 Refresh Page
+                    </button>
+                    <button onClick={handleBack} className="px-6 py-3 btn-secondary rounded-lg">
+                      ← Go Back
+                    </button>
+                  </div>
+                  <div className="mt-6 text-sm text-slate-400">
+                    <p className="mb-2">Alternative payment options:</p>
+                    <p>📞 Call: +63 02 8526 8404</p>
+                    <p>📧 Email: reservations@example.com</p>
+                  </div>
+                  {error && <div className="mt-4 text-rose-400 font-medium">{error}</div>}
+                </div>
+              )}
+              
+              {/* Always show debug info for troubleshooting */}
+              <div className="mb-4 p-3 bg-red-900/30 rounded text-xs text-red-300 border border-red-600">
+                🔍 DEBUG: Stripe={stripeAvailable === null ? '⏳ LOADING' : stripeAvailable ? '✅' : '❌'} | Step={step} | ClientSecret={clientSecret ? '✅' : '❌'} | Init={initializingPayment ? '⏳' : '✅'}
+                {stripeLoadingError && <><br />❌ Stripe Error: {stripeLoadingError}</>}
+              </div>
+              
+              {/* Show loading state while checking Stripe */}
+              {stripeAvailable === null && (
+                <div className="mb-4 p-4 bg-blue-900/30 rounded text-blue-300 border border-blue-600">
+                  <div className="flex items-center gap-3">
+                    <div className="animate-spin h-5 w-5 border-2 border-blue-400 border-t-transparent rounded-full"></div>
+                    <span>Loading Stripe.js payment system...</span>
+                  </div>
+                  <div className="text-xs mt-2 text-blue-400">
+                    This may take a few moments due to network connectivity
+                  </div>
+                </div>
+              )}
+              
+              {/* Show error state if Stripe failed to load */}
+              {stripeAvailable === false && (
+                <div className="mb-4 p-4 bg-red-900/30 rounded text-red-300 border border-red-600">
+                  <div className="font-semibold mb-2">⚠️ Payment System Loading Failed</div>
+                  <div className="text-sm mb-3">
+                    Unable to load Stripe.js from CDN. This is likely due to:
+                  </div>
+                  <ul className="text-xs space-y-1 ml-4 list-disc">
+                    <li>Network connectivity issues</li>
+                    <li>Firewall blocking external requests</li>
+                    <li>DNS resolution problems</li>
+                  </ul>
+                  <div className="mt-3 text-xs">
+                    <strong>Solutions:</strong> Check internet connection, try different network, or contact support
+                  </div>
+                  
+                  {/* Add test mode button */}
+                  <div className="mt-4 p-3 bg-green-900/30 rounded border border-green-600">
+                    <div className="text-green-300 font-semibold mb-2">🧪 Test Mode Available</div>
+                    <div className="text-xs text-green-400 mb-3">
+                      You can complete your booking using test mode to verify the system works.
+                      Your booking will be saved to the database.
+                    </div>
+                    <button
+                      onClick={async () => {
+                        try {
+                          const paymentIntentId = `pi_test_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+                          console.log('🧪 Test mode payment initiated:', paymentIntentId);
+                          handlePaymentSuccess(paymentIntentId);
+                        } catch (error) {
+                          console.error('Test payment failed:', error);
+                          setError('Test payment failed: ' + error);
+                        }
+                      }}
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+                    >
+                      💳 Complete Payment (Test Mode)
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              {stripeAvailable === true && (step === 2 || step === 3 || step === 4) && clientSecret && !initializingPayment ? (
+                <Elements stripe={stripePromise as unknown as Promise<Stripe | null>} options={{ clientSecret, appearance: elementsAppearance }}>
+                  <div className="mb-4 p-3 bg-blue-900/30 rounded text-xs text-blue-300">
+                    ✅ STRIPE ELEMENTS ACTIVE
+                  </div>
+                  
                   {/* Single PaymentElement - always mounted but positioned for step 2 */}
                   <div style={{ display: step === 2 ? "block" : "none" }}>
                     <section aria-labelledby="payment-heading">
@@ -434,8 +633,16 @@ export default function Booking(): JSX.Element {
                       <div className="text-sm text-slate-300 mb-3">Enter your card details below. Test mode is enabled.</div>
                       
                       {/* Stripe Payment Element - this is the card form */}
-                      <div className="my-6">
-                        <PaymentElement options={{ layout: "tabs" }} />
+                      <div className="my-6 p-6 bg-slate-800 border-2 border-slate-600 rounded-lg">
+                        <div className="mb-3 text-sm font-medium text-slate-200">Payment Information</div>
+                        <div className="mb-4 text-xs text-slate-400">PaymentElement should render below:</div>
+                        <div className="min-h-[120px] bg-slate-700 p-4 rounded border">
+                          <PaymentElement options={{ layout: "tabs" }} />
+                        </div>
+                        <div className="mt-4 text-xs text-slate-400">PaymentElement should render above ↑</div>
+                        <div className="mt-3 text-xs text-slate-500">
+                          Secure payment powered by Stripe • Test mode enabled
+                        </div>
                       </div>
                       
                       {error && <div className="mt-3 text-rose-400">{error}</div>}
@@ -465,8 +672,8 @@ export default function Booking(): JSX.Element {
                             <div className="text-sm text-slate-300 mt-1">{tour.summary}</div>
                           </div>
                           <div className="text-right">
-                            <div className="text-xs text-slate-300">Date</div>
-                            <div className="font-semibold text-slate-100">{selectedDate ? new Date(selectedDate).toDateString() : "—"}</div>
+                            <div className="text-xs text-slate-300">Departure Date</div>
+                            <div className="font-semibold text-slate-100">{selectedDate || "—"}</div>
                             <div className="text-xs text-slate-300 mt-2">Passengers</div>
                             <div className="font-semibold text-slate-100">{passengers}</div>
                           </div>
@@ -495,7 +702,6 @@ export default function Booking(): JSX.Element {
                   )}
                   {step === 4 && (
                     <>
-                      {/* PaymentElement is still mounted (hidden) for Stripe! */}
                       <StripeConfirmSection
                         tour={tour}
                         slug={slug}
@@ -511,6 +717,26 @@ export default function Booking(): JSX.Element {
                 </Elements>
               ) : (
                 <>
+                  {/* Show different message based on Stripe availability */}
+                  {stripeAvailable === null ? (
+                    <div className="mb-4 p-3 bg-blue-900/30 rounded text-xs text-blue-300 border border-blue-600">
+                      ⏳ Waiting for Stripe.js to load...
+                    </div>
+                  ) : stripeAvailable === false ? (
+                    <div className="mb-4 p-3 bg-red-900/30 rounded text-xs text-red-300 border border-red-600">
+                      ❌ Stripe.js failed to load - payment form unavailable
+                    </div>
+                  ) : (
+                    <div className="mb-4 p-3 bg-yellow-900/30 rounded text-xs text-yellow-300 border border-yellow-600">
+                      ⚠️ Payment form not ready - complete previous steps first
+                    </div>
+                  )}
+                </>
+              )}
+              
+              {/* Regular booking steps when Stripe isn't needed or not available */}
+              {(!stripeAvailable || step < 2) && (
+                <>
                   {step === 0 && (
                     <section aria-labelledby="review-heading">
                       <h2 id="review-heading" className="text-lg font-semibold mb-3 text-slate-100">Review your selection</h2>
@@ -521,19 +747,30 @@ export default function Booking(): JSX.Element {
                           <div className="text-sm text-slate-300 mt-1">{tour.summary}</div>
                         </div>
                         <div>
-                          <div className="text-xs text-slate-300">Date</div>
-                          <select value={selectedDate ?? ""} onChange={(e) => setSelectedDate(e.target.value)} className="mt-1 w-full rounded px-3 py-2">
-                            {tour.travelWindow ? (
-                              <>
-                                <option value={tour.travelWindow.start}>{new Date(tour.travelWindow.start).toDateString()}</option>
-                                <option value={tour.travelWindow.end}>{new Date(tour.travelWindow.end).toDateString()}</option>
-                              </>
-                            ) : tour.departureDates && tour.departureDates.length > 0 ? (
-                              tour.departureDates.map((d) => <option key={d} value={d}>{new Date(d).toDateString()}</option>)
+                          <div className="text-xs text-slate-300">Travel Date</div>
+                          <select 
+                            value={selectedDate ?? ""} 
+                            onChange={(e) => setSelectedDate(e.target.value)} 
+                            className="mt-1 w-full rounded px-3 py-2 bg-slate-700 border border-slate-600 text-slate-100"
+                          >
+                            <option value="">Select departure date</option>
+                            {tour.departureDates && tour.departureDates.length > 0 ? (
+                              tour.departureDates.map((dateRange, index) => (
+                                <option key={index} value={dateRange}>
+                                  {dateRange}
+                                </option>
+                              ))
+                            ) : tour.travelWindow ? (
+                              <option value={`${tour.travelWindow.start} - ${tour.travelWindow.end}`}>
+                                {`${new Date(tour.travelWindow.start).toLocaleDateString()} - ${new Date(tour.travelWindow.end).toLocaleDateString()}`}
+                              </option>
                             ) : (
-                              <option value="">No dates available</option>
+                              <option value="" disabled>No departure dates available</option>
                             )}
                           </select>
+                          {!selectedDate && (
+                            <div className="text-xs text-red-400 mt-1">Please select a departure date to continue</div>
+                          )}
                           <div className="text-xs text-slate-300 mt-3">Passengers</div>
                           <input type="number" min={1} value={passengers} onChange={(e) => setPassengers(Math.max(1, Number(e.target.value)))} className="mt-1 w-32 rounded px-3 py-2" />
                         </div>
@@ -672,7 +909,7 @@ export default function Booking(): JSX.Element {
                   <div className="text-lg font-semibold text-slate-100">{tour.title}</div>
                   <div className="text-sm text-slate-300 mt-1">{tour.line ?? ""} • {tour.durationDays ?? tour.itinerary?.length ?? 0} days</div>
                   <div className="mt-4 text-sm text-slate-300 space-y-2">
-                    <div><strong className="text-slate-100">Date:</strong> <span className="ml-2">{selectedDate ? new Date(selectedDate).toDateString() : "—"}</span></div>
+                    <div><strong className="text-slate-100">Departure:</strong> <span className="ml-2">{selectedDate || "—"}</span></div>
                     <div><strong className="text-slate-100">Passengers:</strong> <span className="ml-2">{passengers}</span></div>
                     <div><strong className="text-slate-100">Per head:</strong> <span className="ml-2 font-semibold">{formatCurrencyPHP(perPerson)}</span></div>
                     <div className="card-divider">
@@ -767,8 +1004,8 @@ function StripeConfirmSection(props: {
             <div className="text-sm text-slate-300 mt-1">{tour.summary}</div>
           </div>
           <div className="text-right">
-            <div className="text-xs text-slate-300">Date</div>
-            <div className="font-semibold text-slate-100">{selectedDate ? new Date(selectedDate).toDateString() : "—"}</div>
+            <div className="text-xs text-slate-300">Departure Date</div>
+            <div className="font-semibold text-slate-100">{selectedDate || "—"}</div>
             <div className="text-xs text-slate-300 mt-2">Passengers</div>
             <div className="font-semibold text-slate-100">{passengers}</div>
           </div>

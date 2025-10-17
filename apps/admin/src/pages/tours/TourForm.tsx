@@ -553,6 +553,114 @@ export default function TourForm(): JSX.Element {
           </div>
         </div>
 
+        {/* Travel Dates Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="bg-green-100 p-3 rounded-xl">
+              <Clock className="text-green-600" size={28} />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Departure Dates</h2>
+              <p className="text-gray-600">Set multiple departure windows for this tour</p>
+            </div>
+          </div>
+          
+          <div className="space-y-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="font-semibold text-blue-900 mb-2">📅 Multiple Departure Windows</h3>
+              <p className="text-blue-700 text-sm">
+                Add multiple departure date ranges for this tour. Each range represents a separate tour departure that customers can book.
+                For example: "Feb 4-18, 2026", "May 27 - Jun 10, 2026", etc.
+              </p>
+            </div>
+
+            {/* Departure Dates List */}
+            <div className="space-y-4">
+              <label className="block text-sm font-semibold text-gray-700">
+                Departure Date Ranges
+              </label>
+              
+              {formData.departureDates.map((dateRange, index) => (
+                <div key={index} className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                  <span className="text-sm font-medium text-gray-600 w-8">#{index + 1}</span>
+                  <input
+                    type="text"
+                    value={dateRange}
+                    onChange={(e) => {
+                      const newDates = [...formData.departureDates];
+                      newDates[index] = e.target.value;
+                      handleInputChange("departureDates", newDates);
+                    }}
+                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="e.g., Feb 4-18, 2026 or May 27 - Jun 10, 2026"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newDates = formData.departureDates.filter((_, i) => i !== index);
+                      handleInputChange("departureDates", newDates);
+                    }}
+                    className="text-red-500 hover:text-red-700 px-3 py-2 rounded-lg hover:bg-red-50"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              
+              {/* Add New Departure Date */}
+              <button
+                type="button"
+                onClick={() => {
+                  const newDates = [...formData.departureDates, ""];
+                  handleInputChange("departureDates", newDates);
+                }}
+                className="w-full border-2 border-dashed border-green-300 rounded-lg p-4 text-green-600 hover:border-green-400 hover:bg-green-50 transition-all"
+              >
+                + Add New Departure Date Range
+              </button>
+              
+              {formData.departureDates.length === 0 && (
+                <div className="text-center py-6 text-gray-500">
+                  <Clock className="mx-auto mb-2" size={32} />
+                  <p>No departure dates set yet. Add your first departure date range above.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Legacy Travel Window (Optional) */}
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-semibold text-gray-700 mb-4">Legacy Travel Window (Optional)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.travelWindow.start}
+                    onChange={(e) => handleInputChange("travelWindow", { ...formData.travelWindow, start: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    End Date
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.travelWindow.end}
+                    onChange={(e) => handleInputChange("travelWindow", { ...formData.travelWindow, end: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                This is the old single travel window format. Use departure date ranges above for better flexibility.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Images Section */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
           <div className="flex items-center gap-3 mb-8">

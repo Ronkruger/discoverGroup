@@ -54,6 +54,7 @@ export default function AppRouter() {
 
           {/* Booking confirmation route */}
           <Route path="/booking/confirmation" element={<BookingConfirmation />} />
+          <Route path="/booking/confirmation/:bookingId" element={<BookingConfirmation />} />
 
           {/* Auth routes */}
           <Route path="/login" element={<Login />} />

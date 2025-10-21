@@ -67,27 +67,32 @@ export default function TourCard({
   const travelDate = isString(tour.travelDate) ? tour.travelDate : undefined;
   const countries = isStringArray(tour.countries) ? tour.countries : undefined;
 
-  // Handle departure dates display
+  // Sale logic
+  const now = new Date();
+  const saleIsActive = tour.isSaleEnabled && tour.saleEndDate && new Date(tour.saleEndDate) > now;
+
+  // Only show promo price if sale is active
+  const hasPromoPrice = saleIsActive && promoPrice && regularPrice && promoPrice < regularPrice;
+  const displayPrice = hasPromoPrice ? promoPrice : (regularPrice || price);
+  const originalPrice = hasPromoPrice ? regularPrice : undefined;
+
+  // Calculate savings percentage
+  const savingsPercent = originalPrice && displayPrice 
+    ? Math.round(((originalPrice - displayPrice) / originalPrice) * 100)
+    : 0;
+
   const departureDates: unknown[] = Array.isArray(tour.departureDates) ? tour.departureDates : [];
   const travelWindow = tour.travelWindow;
-  
-  // Get the display date - prioritize departure dates, fallback to travel window or travel date
   const getDisplayDate = () => {
     if (departureDates.length > 0) {
-      // Show the next upcoming departure date
       const now = new Date();
-
-      // only treat items that are objects with startDate/endDate
       const isDepartureObj = (d: unknown): d is { startDate: string; endDate: string } =>
         typeof d === 'object' && d !== null && 'startDate' in d && 'endDate' in d &&
         typeof (d as Record<string, unknown>).startDate === 'string' && typeof (d as Record<string, unknown>).endDate === 'string';
-
       const validDepartures = departureDates.filter(isDepartureObj);
-
       const upcomingDepartures = validDepartures
         .filter(dept => new Date(dept.startDate) > now)
         .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-
       if (upcomingDepartures.length > 0) {
         const nextDeparture = upcomingDepartures[0];
         const start = new Date(nextDeparture.startDate).toLocaleDateString('en-US', {
@@ -102,8 +107,6 @@ export default function TourCard({
         return `${start} - ${end}`;
       }
     }
-
-    // Fallback to travel window
     if (isTravelWindowWithDates(travelWindow)) {
       const start = new Date(travelWindow.startDate).toLocaleDateString('en-US', {
         month: 'short',
@@ -116,28 +119,15 @@ export default function TourCard({
       });
       return `${start} - ${end}`;
     }
-    
-    // Final fallback to travel date
     return travelDate;
   };
 
   const displayDate = getDisplayDate();
-
-  // Calculate pricing display
-  const hasPromoPrice = promoPrice && regularPrice && promoPrice < regularPrice;
-  const displayPrice = hasPromoPrice ? promoPrice : (regularPrice || price);
-  const originalPrice = hasPromoPrice ? regularPrice : undefined;
-
-  // Calculate savings percentage
-  const savingsPercent = originalPrice && displayPrice 
-    ? Math.round(((originalPrice - displayPrice) / originalPrice) * 100)
-    : 0;
-
   const currentImage = tour.images?.[currentImageIndex] ?? "/image.png";
 
   return (
     <article 
-      className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-3 hover:scale-105 h-80 flex flex-col cursor-pointer border border-transparent hover:border-blue-400/60 hover:ring-2 hover:ring-blue-200/40"
+      className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-3 hover:scale-105 h-80 flex flex-col cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
@@ -147,18 +137,14 @@ export default function TourCard({
       aria-labelledby={`tour-title-${tour.slug}`}
     >
       {/* Background image with overlay */}
-  <div className="absolute inset-0 transition-transform duration-300 group-hover:scale-110 group-hover:brightness-105">
+      <div className="absolute inset-0 transition-transform duration-300 group-hover:scale-110 group-hover:brightness-105">
         <img
           src={currentImage}
           alt={tour.title}
           className="w-full h-full object-cover transition-opacity duration-500"
           loading="lazy"
         />
-        {/* Enhanced gradient for better readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
-        
-        {/* Hover overlay with additional info */}
-
       </div>
 
       {/* Quick Action Buttons */}
@@ -220,7 +206,6 @@ export default function TourCard({
 
       {/* Content overlay */}
       <div className="relative z-10 p-5 flex flex-col justify-end h-full text-white">
-        {/* Tour content */}
         <div className="flex flex-col gap-2">
           <h3 
             id={`tour-title-${tour.slug}`}
@@ -231,8 +216,6 @@ export default function TourCard({
           <p className="text-sm text-gray-200 drop-shadow line-clamp-2">
             {tour.summary}
           </p>
-          
-          {/* Travel info */}
           <div className="flex items-center gap-4 text-xs text-gray-300 mt-1">
             {displayDate && (
               <div className="flex items-center gap-1">
@@ -274,7 +257,7 @@ export default function TourCard({
 
           <Link
             to={`/tour/${tour.slug}`}
-            className="inline-flex items-center gap-2 bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="inline-flex items-center gap-2 bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105"
             aria-label={`View details for ${tour.title}`}
           >
             More Info <ArrowRight size={16} />
@@ -282,7 +265,6 @@ export default function TourCard({
         </div>
       </div>
 
-      {/* Image indicators for multiple images */}
       {tour.images && tour.images.length > 1 && isHovered && (
         <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1 z-20">
           {tour.images.map((_, index) => (

@@ -6,8 +6,12 @@ interface Tour {
   id: string;
   title: string;
   slug: string;
-  summary?: string;
+  summary?: string | null;
   durationDays?: number;
+  isSaleEnabled?: boolean;
+  saleEndDate?: string | null;
+  regularPricePerPerson?: number;
+  promoPricePerPerson?: number | null;
 }
 
 export default function EditTour(): JSX.Element {
@@ -51,6 +55,53 @@ export default function EditTour(): JSX.Element {
           <input value={tour.summary ?? ""} onChange={(e) => setTour({ ...tour, summary: e.target.value })} />
         </label>
       </div>
+      <div style={{ marginBottom: 10 }}>
+        <label>
+          Regular Price (PHP)
+          <br />
+          <input
+            type="number"
+            value={tour.regularPricePerPerson ?? ""}
+            onChange={e => setTour({ ...tour, regularPricePerPerson: Number(e.target.value) })}
+          />
+        </label>
+      </div>
+      <div style={{ marginBottom: 10 }}>
+        <label>
+          Promo Price (PHP)
+          <br />
+          <input
+            type="number"
+            value={tour.promoPricePerPerson ?? ""}
+            onChange={e => setTour({ ...tour, promoPricePerPerson: Number(e.target.value) })}
+          />
+        </label>
+      </div>
+      {/* Sale Toggle */}
+      <div style={{ marginBottom: 10 }}>
+        <label>
+          <input
+            type="checkbox"
+            checked={!!tour.isSaleEnabled}
+            onChange={e => setTour({ ...tour, isSaleEnabled: e.target.checked })}
+          />
+          Enable Sale
+        </label>
+      </div>
+      {/* Sale End Date */}
+      {tour.isSaleEnabled && (
+        <div style={{ marginBottom: 10 }}>
+          <label>
+            Sale End Date
+            <br />
+            <input
+              type="date"
+              value={tour.saleEndDate ? tour.saleEndDate.slice(0, 10) : ""}
+              onChange={e => setTour({ ...tour, saleEndDate: e.target.value })}
+            />
+          </label>
+        </div>
+      )}
 
       <div>
         <button
@@ -61,6 +112,10 @@ export default function EditTour(): JSX.Element {
                 title: tour.title,
                 slug: tour.slug,
                 summary: tour.summary,
+                regularPricePerPerson: tour.regularPricePerPerson,
+                promoPricePerPerson: tour.promoPricePerPerson,
+                isSaleEnabled: tour.isSaleEnabled,
+                saleEndDate: tour.saleEndDate,
               });
               navigate("/");
             } catch (err) {

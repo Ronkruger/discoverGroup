@@ -36,6 +36,10 @@ export interface ITour extends Document {
     mainCities?: Record<string, string[]>;
     [key: string]: unknown;
   };
+  regularPricePerPerson?: number;
+  promoPricePerPerson?: number | null;
+  isSaleEnabled?: boolean;
+  saleEndDate?: string | null;
   [key: string]: unknown;
 }
 
@@ -73,11 +77,13 @@ const TourSchema = new Schema<ITour>({
     endingPoint: { type: String },
     countriesVisited: [{ type: String }],
     mainCities: { type: Schema.Types.Mixed }
-  }
+  },
+  regularPricePerPerson: { type: Number },
+  promoPricePerPerson: { type: Number, default: null },
+  isSaleEnabled: { type: Boolean, default: false },
+  saleEndDate: { type: String, default: null },
 }, { 
   timestamps: true,
   strict: false // Allow additional fields for flexibility
 });
 export default mongoose.model<ITour>('Tour', TourSchema);
-
-

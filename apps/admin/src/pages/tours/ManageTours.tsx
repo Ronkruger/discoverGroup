@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { fetchTours, type Tour } from "../../services/apiClient";
 import { Link } from "react-router-dom";
 
-// Extended Tour type to include pricing fields
+// Extended Tour type to include pricing and sale fields
 interface ExtendedTour extends Tour {
   regularPricePerPerson?: number;
   promoPricePerPerson?: number;
+  isSaleEnabled?: boolean;
+  saleEndDate?: string | null;
 }
 
 export default function ManageTours(): React.ReactElement {
@@ -110,13 +112,15 @@ export default function ManageTours(): React.ReactElement {
                         <th className="py-3 px-4 text-left font-semibold text-gray-700">Duration</th>
                         <th className="py-3 px-4 text-left font-semibold text-gray-700">Regular Price</th>
                         <th className="py-3 px-4 text-left font-semibold text-gray-700">Promo Price</th>
+                        <th className="py-3 px-4 text-left font-semibold text-gray-700">Sale Enabled</th>
+                        <th className="py-3 px-4 text-left font-semibold text-gray-700">Sale Ends</th>
                         <th className="py-3 px-4 text-left font-semibold text-gray-700">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {(!tours || tours.length === 0) ? (
                         <tr>
-                          <td className="text-center text-gray-400 py-6" colSpan={7}>
+                          <td className="text-center text-gray-400 py-6" colSpan={9}>
                             No tours found.
                           </td>
                         </tr>
@@ -129,6 +133,12 @@ export default function ManageTours(): React.ReactElement {
                             <td className="py-3 px-4">{tour.durationDays}</td>
                             <td className="py-3 px-4">{tour.regularPricePerPerson ? `₱${tour.regularPricePerPerson.toLocaleString()}` : "--"}</td>
                             <td className="py-3 px-4">{tour.promoPricePerPerson ? `₱${tour.promoPricePerPerson.toLocaleString()}` : "--"}</td>
+                            <td className="py-3 px-4">{tour.isSaleEnabled ? "Yes" : "No"}</td>
+                            <td className="py-3 px-4">
+                              {tour.saleEndDate
+                                ? new Date(tour.saleEndDate).toLocaleDateString()
+                                : "--"}
+                            </td>
                             <td className="py-3 px-4">
                               <Link
                                 to={`/tours/${tour.id}/edit`}

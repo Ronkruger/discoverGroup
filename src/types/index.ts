@@ -48,6 +48,11 @@ export type Tour = {
   basePricePerDay?: number;
   allowsDownpayment?: boolean;
   additionalInfo?: AdditionalInfo;
+  regularPricePerPerson?: number;
+  promoPricePerPerson?: number | null;
+  // Sale fields
+  isSaleEnabled?: boolean;
+  saleEndDate?: string | null;
   [key: string]: unknown;
 };
 

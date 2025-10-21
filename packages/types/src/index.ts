@@ -52,6 +52,10 @@ export type Tour = {
 
   additionalInfo?: AdditionalInfo | null;
 
+  // Sale fields
+  isSaleEnabled?: boolean;
+  saleEndDate?: string | null;
+
   // allow future fields without breaking consumers
   [key: string]: unknown;
 };
@@ -69,5 +73,7 @@ export type TourCreate = Partial<
     | "regularPricePerPerson"
     | "promoPricePerPerson"
     | "additionalInfo"
+    | "isSaleEnabled"
+    | "saleEndDate"
   >
 >;

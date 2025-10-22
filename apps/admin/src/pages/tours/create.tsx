@@ -1,5 +1,5 @@
 import React, { JSX, useState } from "react";
-import { createTour } from "../../services/apiClient";
+import { createTour, TourPayload } from "../../services/apiClient";
 import { useNavigate } from "react-router-dom";
 
 const LINE_OPTIONS = [
@@ -9,30 +9,6 @@ const LINE_OPTIONS = [
 const COUNTRY_OPTIONS = [
   "France", "Switzerland", "Italy", "Vatican City", "Austria", "Germany", "Spain", "Portugal", "Philippines", "USA", "Canada"
 ];
-
-interface NewTourPayload {
-  title: string;
-  slug: string;
-  summary: string;
-  line: string;
-  durationDays: number;
-  highlights: string[];
-  images: string[];
-  guaranteedDeparture: boolean;
-  bookingPdfUrl: string;
-  travelWindow?: { start: string; end: string };
-  itinerary?: { day: number; title: string; description: string }[];
-  fullStops?: { city: string; country: string; days?: number }[];
-  regularPricePerPerson: number;
-  promoPricePerPerson?: number;
-  basePricePerDay?: number;
-  additionalInfo?: {
-    countriesVisited: string[];
-    startingPoint: string;
-    endingPoint: string;
-    mainCities: { [country: string]: string[] };
-  };
-}
 
 export default function CreateTour(): JSX.Element {
   const [title, setTitle] = useState("");
@@ -57,6 +33,8 @@ export default function CreateTour(): JSX.Element {
   const [regularPrice, setRegularPrice] = useState<number | "">("");
   const [promoPrice, setPromoPrice] = useState<number | "">("");
   const [basePricePerDay, setBasePricePerDay] = useState<number | "">("");
+  const [isSaleEnabled, setIsSaleEnabled] = useState(false);
+  const [saleEndDate, setSaleEndDate] = useState<string | "">("");
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -141,7 +119,7 @@ export default function CreateTour(): JSX.Element {
     setSaving(true);
     setError(null);
     try {
-      const payload: NewTourPayload = {
+      const payload: TourPayload = {
         title,
         slug,
         summary,
@@ -169,6 +147,8 @@ export default function CreateTour(): JSX.Element {
               .map(([country, cities]) => [country, cities.split(",").map(s => s.trim()).filter(Boolean)])
           ),
         },
+        isSaleEnabled,
+        saleEndDate: isSaleEnabled && saleEndDate ? saleEndDate : undefined,
       };
       await createTour(payload);
       setSuccess(true);
@@ -282,12 +262,35 @@ export default function CreateTour(): JSX.Element {
             <input type="number" min={0} value={regularPrice} onChange={e => setRegularPrice(e.target.value ? Number(e.target.value) : "")} style={inputStyle} />
           </label>
           <label style={{ ...labelStyle, flex: 1 }}>Promo price (₱)
-            <input type="number" min={0} value={promoPrice} onChange={e => setPromoPrice(e.target.value ? Number(e.target.value) : "")} style={inputStyle} />
+            <input type="number" min={0} value={promoPrice} onChange={e => setPromoPrice(e.target.value ? Number(e.target.value) : "")} style={inputStyle} disabled={!isSaleEnabled}/>
           </label>
           <label style={{ ...labelStyle, flex: 1 }}>Base price per day (₱)
             <input type="number" min={0} value={basePricePerDay} onChange={e => setBasePricePerDay(e.target.value ? Number(e.target.value) : "")} style={inputStyle} />
           </label>
         </div>
+        <div style={{ marginBottom: 10 }}>
+          <label>
+            <input
+              type="checkbox"
+              checked={isSaleEnabled}
+              onChange={e => setIsSaleEnabled(e.target.checked)}
+            />
+            Enable Promo Price (Sale)
+          </label>
+        </div>
+        {isSaleEnabled && (
+          <div style={{ marginBottom: 10 }}>
+            <label>
+              Sale End Date
+              <br />
+              <input
+                type="date"
+                value={typeof saleEndDate === "string" ? saleEndDate : ""}
+                onChange={e => setSaleEndDate(e.target.value)}
+              />
+            </label>
+          </div>
+        )}
         <div style={{ marginBottom: 16 }}>
           <label style={labelStyle}>Booking PDF URL
             <input value={bookingPdfUrl} onChange={e => setBookingPdfUrl(e.target.value)} placeholder="/assets/route-a-preferred.pdf" style={inputStyle} />

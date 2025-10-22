@@ -25,6 +25,8 @@ interface ExtendedTour extends Tour {
   promoPricePerPerson?: number;
   shortDescription?: string;
   departureDates?: string[];
+  isSaleEnabled?: boolean;
+  saleEndDate?: string | null;
 }
 
 interface TourFormData {
@@ -43,6 +45,9 @@ interface TourFormData {
   regularPricePerPerson: number | "";
   promoPricePerPerson: number | "";
   basePricePerDay: number | "";
+  // NEW: sale toggle + end date
+  isSaleEnabled?: boolean;
+  saleEndDate?: string | "";
 
   // Travel Details
   travelWindow: { start: string; end: string };
@@ -89,6 +94,9 @@ export default function TourForm(): JSX.Element {
     regularPricePerPerson: "",
     promoPricePerPerson: "",
     basePricePerDay: "",
+    // init sale fields
+    isSaleEnabled: false,
+    saleEndDate: "",
     
     travelWindow: { start: "", end: "" },
     departureDates: [],
@@ -110,8 +118,6 @@ export default function TourForm(): JSX.Element {
   // Continents for dropdown
   const [continents, setContinents] = useState<string[]>([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-
-  // Temporary input states
 
   // Helper function to generate slug from title
   const generateSlug = (title: string): string => {
@@ -149,7 +155,7 @@ export default function TourForm(): JSX.Element {
           return;
         }
         
-        // Convert tour to form data
+        // Convert tour to form data and include sale fields if present
         setFormData({
           title: tour.title || "",
           slug: tour.slug || "",
@@ -161,9 +167,12 @@ export default function TourForm(): JSX.Element {
           guaranteedDeparture: tour.guaranteedDeparture || false,
           bookingPdfUrl: tour.bookingPdfUrl || "",
           
-          regularPricePerPerson: tour.regularPricePerPerson || "",
-          promoPricePerPerson: tour.promoPricePerPerson || "",
-          basePricePerDay: tour.basePricePerDay || "",
+          regularPricePerPerson: tour.regularPricePerPerson ?? "",
+          promoPricePerPerson: tour.promoPricePerPerson ?? "",
+          basePricePerDay: tour.basePricePerDay ?? "",
+          // populate sale fields from tour
+          isSaleEnabled: tour.isSaleEnabled ?? false,
+          saleEndDate: tour.saleEndDate ?? "",
           
           travelWindow: tour.travelWindow || { start: "", end: "" },
           departureDates: tour.departureDates || [],
@@ -229,6 +238,9 @@ export default function TourForm(): JSX.Element {
         regularPricePerPerson: formData.regularPricePerPerson === "" ? undefined : Number(formData.regularPricePerPerson),
         promoPricePerPerson: formData.promoPricePerPerson === "" ? undefined : Number(formData.promoPricePerPerson),
         basePricePerDay: formData.basePricePerDay === "" ? undefined : Number(formData.basePricePerDay),
+        // include sale fields
+        isSaleEnabled: !!formData.isSaleEnabled,
+        saleEndDate: formData.isSaleEnabled && formData.saleEndDate ? formData.saleEndDate : undefined,
         travelWindow: formData.travelWindow.start && formData.travelWindow.end ? formData.travelWindow : undefined,
         additionalInfo: {
           ...formData.additionalInfo,
@@ -528,8 +540,39 @@ export default function TourForm(): JSX.Element {
                   onChange={(e) => handleInputChange("promoPricePerPerson", e.target.value ? Number(e.target.value) : "")}
                   className="w-full border border-gray-300 rounded-xl pl-8 pr-4 py-3 text-lg font-medium focus:ring-2 focus:ring-yellow-500 focus:border-transparent shadow-sm"
                   placeholder="200,000.00"
+                  disabled={!formData.isSaleEnabled}
                 />
               </div>
+
+              {/* Enable/disable sale toggle */}
+              <div className="flex items-center mt-4 gap-2">
+                <input
+                  type="checkbox"
+                  id="enable-sale"
+                  checked={!!formData.isSaleEnabled}
+                  onChange={e => handleInputChange("isSaleEnabled", e.target.checked)}
+                  className="w-4 h-4"
+                />
+                <label htmlFor="enable-sale" className="font-medium">
+                  Enable Promo Price (Sale)
+                </label>
+              </div>
+
+              {/* Sale end date */}
+              {formData.isSaleEnabled && (
+                <div className="mt-2 flex items-center gap-2">
+                  <label className="font-medium" htmlFor="sale-end-date">
+                    Sale End Date:
+                  </label>
+                  <input
+                    id="sale-end-date"
+                    type="date"
+                    value={formData.saleEndDate ? formData.saleEndDate.slice(0, 10) : ""}
+                    onChange={e => handleInputChange("saleEndDate", e.target.value)}
+                    className="rounded border px-2 py-1"
+                  />
+                </div>
+              )}
             </div>
             
             <div>

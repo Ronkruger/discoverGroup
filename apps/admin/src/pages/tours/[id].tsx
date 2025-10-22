@@ -74,6 +74,7 @@ export default function EditTour(): JSX.Element {
             type="number"
             value={tour.promoPricePerPerson ?? ""}
             onChange={e => setTour({ ...tour, promoPricePerPerson: Number(e.target.value) })}
+            disabled={!tour.isSaleEnabled}
           />
         </label>
       </div>
@@ -85,7 +86,7 @@ export default function EditTour(): JSX.Element {
             checked={!!tour.isSaleEnabled}
             onChange={e => setTour({ ...tour, isSaleEnabled: e.target.checked })}
           />
-          Enable Sale
+          Enable Promo Price (Sale)
         </label>
       </div>
       {/* Sale End Date */}

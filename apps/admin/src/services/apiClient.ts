@@ -26,7 +26,23 @@ export async function fetchTours(): Promise<Tour[]> {
     const text = await res.text().catch(() => res.statusText);
     throw new Error(`Failed to fetch tours: ${res.status} ${text}`);
   }
-  return (await res.json()) as Tour[];
+  const data = (await res.json()) as Record<string, unknown>[];
+  // Normalize returned tours: ensure `id` exists (the admin UI expects `id`)
+  const normalized = data.map((t: Record<string, unknown>) => ({
+    ...(t || {}),
+    id: t.id ?? t.slug ?? (t._id ? String(t._id) : undefined),
+  })) as Tour[];
+  // Debug logging to help identify why admin UI might show fewer tours
+  try {
+    // only log in dev
+    if (typeof window !== 'undefined' && window.location && window.location.hostname === 'localhost') {
+      console.debug('[admin apiClient] fetchTours ->', normalized.length, 'tours', normalized.map((x: Tour) => x.slug || x.id));
+    }
+  } catch (err) {
+    // don't crash the client if logging fails; print to console for dev visibility
+    console.debug('[admin apiClient] fetchTours logging error', err);
+  }
+  return normalized;
 }
 
 // Get a single tour by id (or slug) — pages expect fetchTourById

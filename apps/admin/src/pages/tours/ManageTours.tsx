@@ -132,10 +132,10 @@ export default function ManageTours(): React.ReactElement {
                             <td className="py-3 px-4">{tour.line}</td>
                             <td className="py-3 px-4">{tour.durationDays}</td>
                             <td className="py-3 px-4">{tour.regularPricePerPerson ? `₱${tour.regularPricePerPerson.toLocaleString()}` : "--"}</td>
-                            <td className="py-3 px-4">{tour.promoPricePerPerson ? `₱${tour.promoPricePerPerson.toLocaleString()}` : "--"}</td>
+                            <td className="py-3 px-4">{tour.promoPricePerPerson && tour.isSaleEnabled ? `₱${tour.promoPricePerPerson.toLocaleString()}` : "--"}</td>
                             <td className="py-3 px-4">{tour.isSaleEnabled ? "Yes" : "No"}</td>
                             <td className="py-3 px-4">
-                              {tour.saleEndDate
+                              {tour.isSaleEnabled && tour.saleEndDate
                                 ? new Date(tour.saleEndDate).toLocaleDateString()
                                 : "--"}
                             </td>

@@ -21,41 +21,102 @@ function formatDate(dateString: string) {
 
 function getStatusBadgeColor(status: BookingStatus): string {
   switch (status) {
-    case 'confirmed':
-      return 'bg-green-100 text-green-800 border-green-200';
-    case 'pending':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'cancelled':
-      return 'bg-red-100 text-red-800 border-red-200';
-    case 'completed':
-      return 'bg-blue-100 text-blue-800 border-blue-200';
+    case "confirmed":
+      return "bg-green-100 text-green-800 border-green-200";
+    case "pending":
+      return "bg-yellow-100 text-yellow-800 border-yellow-200";
+    case "cancelled":
+      return "bg-red-100 text-red-800 border-red-200";
+    case "completed":
+      return "bg-blue-100 text-blue-800 border-blue-200";
     default:
-      return 'bg-gray-100 text-gray-800 border-gray-200';
+      return "bg-gray-100 text-gray-800 border-gray-200";
   }
 }
 
 function StatusBadge({ status }: { status: BookingStatus }) {
   const getIcon = () => {
     switch (status) {
-      case 'confirmed':
-        return '✓';
-      case 'pending':
-        return '⏳';
-      case 'cancelled':
-        return '✗';
-      case 'completed':
-        return '🎉';
+      case "confirmed":
+        return "✓";
+      case "pending":
+        return "⏳";
+      case "cancelled":
+        return "✗";
+      case "completed":
+        return "🎉";
       default:
-        return '?';
+        return "?";
     }
   };
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusBadgeColor(status)}`}>
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusBadgeColor(
+        status
+      )}`}
+    >
       <span className="mr-1">{getIcon()}</span>
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   );
+}
+
+/**
+ * Attempts to discover the current user's email from client-side storage.
+ * Checks common locations: localStorage/sessionStorage keys and window globals.
+ * Returns an email string (lowercased) or undefined if not found.
+ *
+ * NOTE: If your app has a proper auth context or store (e.g. Redux, React Context),
+ * it's better to read the logged-in user there. This heuristic is a fallback.
+ */
+function getCurrentUserEmailFromClient(): string | undefined {
+  try {
+    const tryParse = (v: string | null) => {
+      if (!v) return undefined;
+      // try JSON parse
+      try {
+        const obj = JSON.parse(v);
+        if (obj && typeof obj === "object") {
+          // common fields
+          return (obj.email || obj.userEmail || obj.emailAddress) as string | undefined;
+        }
+      } catch {
+        // not JSON
+      }
+      // treat raw string as email
+      if (typeof v === "string" && v.includes("@")) return v;
+      return undefined;
+    };
+
+    const keys = ["currentUser", "user", "currentUserEmail", "userEmail", "email"];
+    for (const k of keys) {
+      const lv = localStorage.getItem(k);
+      const emailFromLocal = tryParse(lv);
+      if (emailFromLocal) return emailFromLocal.toLowerCase();
+
+      const sv = sessionStorage.getItem(k);
+      const emailFromSession = tryParse(sv);
+      if (emailFromSession) return emailFromSession.toLowerCase();
+    }
+
+    // Check window globals
+    if (typeof window !== "undefined") {
+      interface WindowWithUser extends Window {
+        __CURRENT_USER__?: { email?: string };
+        __USER__?: { email?: string };
+        currentUser?: { email?: string };
+      }
+      const w = window as WindowWithUser;
+      if (w.__CURRENT_USER__ && w.__CURRENT_USER__.email) return String(w.__CURRENT_USER__.email).toLowerCase();
+      if (w.__USER__ && w.__USER__.email) return String(w.__USER__.email).toLowerCase();
+      if (w.currentUser && w.currentUser.email) return String(w.currentUser.email).toLowerCase();
+    }
+  } catch (err) {
+    // ignore errors
+    console.error("getCurrentUserEmailFromClient error", err);
+  }
+  return undefined;
 }
 
 export default function ViewBookings() {
@@ -68,6 +129,14 @@ export default function ViewBookings() {
   const [sortBy, setSortBy] = useState<"date" | "amount" | "status">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
+  // store detected current user email (lowercased) - undefined means "not detected"
+  const [currentUserEmail, setCurrentUserEmail] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const email = getCurrentUserEmailFromClient();
+    if (email) setCurrentUserEmail(email);
+  }, []);
+
   useEffect(() => {
     loadBookings();
   }, []);
@@ -75,12 +144,19 @@ export default function ViewBookings() {
   const filterAndSortBookings = useCallback(() => {
     let filtered = [...bookings];
 
-    // Filter by email
+    // If currentUserEmail is present, restrict to bookings of that email only
+    if (currentUserEmail) {
+      filtered = filtered.filter(b => (b.customerEmail || "").toLowerCase() === currentUserEmail);
+    }
+
+    // Filter by search input (email, name, bookingId)
     if (searchEmail.trim()) {
-      filtered = filtered.filter(booking =>
-        booking.customerEmail.toLowerCase().includes(searchEmail.toLowerCase()) ||
-        booking.customerName.toLowerCase().includes(searchEmail.toLowerCase()) ||
-        booking.bookingId.toLowerCase().includes(searchEmail.toLowerCase())
+      const q = searchEmail.toLowerCase();
+      filtered = filtered.filter(
+        booking =>
+          (booking.customerEmail || "").toLowerCase().includes(q) ||
+          (booking.customerName || "").toLowerCase().includes(q) ||
+          (booking.bookingId || "").toLowerCase().includes(q)
       );
     }
 
@@ -92,7 +168,6 @@ export default function ViewBookings() {
     // Sort
     filtered.sort((a, b) => {
       let compareValue = 0;
-
       switch (sortBy) {
         case "date":
           compareValue = new Date(a.bookingDate).getTime() - new Date(b.bookingDate).getTime();
@@ -104,12 +179,11 @@ export default function ViewBookings() {
           compareValue = a.status.localeCompare(b.status);
           break;
       }
-
       return sortOrder === "asc" ? compareValue : -compareValue;
     });
 
     setFilteredBookings(filtered);
-  }, [bookings, searchEmail, statusFilter, sortBy, sortOrder]);
+  }, [bookings, searchEmail, statusFilter, sortBy, sortOrder, currentUserEmail]);
 
   useEffect(() => {
     filterAndSortBookings();
@@ -132,7 +206,7 @@ export default function ViewBookings() {
   async function handleStatusChange(bookingId: string, newStatus: BookingStatus) {
     try {
       await updateBookingStatus(bookingId, newStatus);
-      loadBookings(); // Reload to get updated data
+      await loadBookings();
     } catch (err) {
       console.error("Error updating booking status:", err);
       setError("Failed to update booking status. Please try again.");
@@ -143,10 +217,9 @@ export default function ViewBookings() {
     if (!confirm("Are you sure you want to delete this booking? This action cannot be undone.")) {
       return;
     }
-
     try {
       await deleteBooking(bookingId);
-      loadBookings(); // Reload to get updated data
+      await loadBookings();
     } catch (err) {
       console.error("Error deleting booking:", err);
       setError("Failed to delete booking. Please try again.");
@@ -155,17 +228,17 @@ export default function ViewBookings() {
 
   function exportToCSV() {
     const headers = [
-      'Booking ID',
-      'Customer Name', 
-      'Customer Email',
-      'Tour Title',
-      'Travel Date',
-      'Passengers',
-      'Total Amount',
-      'Paid Amount',
-      'Payment Type',
-      'Status',
-      'Booking Date'
+      "Booking ID",
+      "Customer Name",
+      "Customer Email",
+      "Tour Title",
+      "Travel Date",
+      "Passengers",
+      "Total Amount",
+      "Paid Amount",
+      "Payment Type",
+      "Status",
+      "Booking Date",
     ];
 
     const csvData = filteredBookings.map(booking => [
@@ -179,19 +252,19 @@ export default function ViewBookings() {
       booking.paidAmount.toString(),
       booking.paymentType,
       booking.status,
-      new Date(booking.bookingDate).toLocaleDateString()
+      new Date(booking.bookingDate).toLocaleDateString(),
     ]);
 
     const csvContent = [headers, ...csvData]
-      .map(row => row.map(field => `"${field}"`).join(','))
-      .join('\n');
+      .map(row => row.map(field => `"${field}"`).join(","))
+      .join("\n");
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `bookings-${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
+    link.setAttribute("href", url);
+    link.setAttribute("download", `bookings-${new Date().toISOString().split("T")[0]}.csv`);
+    link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -201,6 +274,11 @@ export default function ViewBookings() {
     return <Loading />;
   }
 
+  // summary counts reflect filtered view (user-only when applicable)
+  const totalCount = filteredBookings.length;
+  const confirmedCount = filteredBookings.filter(b => b.status === "confirmed").length;
+  const pendingCount = filteredBookings.filter(b => b.status === "pending").length;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
@@ -209,7 +287,9 @@ export default function ViewBookings() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">View Bookings</h1>
-              <p className="text-gray-600">Manage and track all tour bookings</p>
+              <p className="text-gray-600">
+                {currentUserEmail ? `Showing bookings for ${currentUserEmail}` : "Manage and track all tour bookings"}
+              </p>
             </div>
             <div className="flex gap-3">
               <Link
@@ -325,19 +405,15 @@ export default function ViewBookings() {
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-lg border p-4">
-            <div className="text-2xl font-bold text-blue-600">{bookings.length}</div>
+            <div className="text-2xl font-bold text-blue-600">{totalCount}</div>
             <div className="text-sm text-gray-600">Total Bookings</div>
           </div>
           <div className="bg-white rounded-lg border p-4">
-            <div className="text-2xl font-bold text-green-600">
-              {bookings.filter(b => b.status === 'confirmed').length}
-            </div>
+            <div className="text-2xl font-bold text-green-600">{confirmedCount}</div>
             <div className="text-sm text-gray-600">Confirmed</div>
           </div>
           <div className="bg-white rounded-lg border p-4">
-            <div className="text-2xl font-bold text-yellow-600">
-              {bookings.filter(b => b.status === 'pending').length}
-            </div>
+            <div className="text-2xl font-bold text-yellow-600">{pendingCount}</div>
             <div className="text-sm text-gray-600">Pending</div>
           </div>
         </div>
@@ -353,10 +429,11 @@ export default function ViewBookings() {
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No bookings found</h3>
               <p className="text-gray-600">
-                {searchEmail || statusFilter !== "all" 
+                {searchEmail || statusFilter !== "all"
                   ? "No bookings match your current filters."
-                  : "No bookings have been made yet."
-                }
+                  : currentUserEmail
+                  ? "You have no bookings yet."
+                  : "No bookings have been made yet."}
               </p>
             </div>
           ) : (
@@ -364,95 +441,49 @@ export default function ViewBookings() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Booking Details
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Customer
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Tour
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Travel Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Payment
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking Details</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tour</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Travel Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredBookings.map((booking) => (
+                  {filteredBookings.map(booking => (
                     <tr key={booking.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {booking.bookingId}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {formatDate(booking.bookingDate)}
-                          </div>
-                          <div className="text-xs text-gray-400">
-                            {booking.passengers} passenger{booking.passengers > 1 ? 's' : ''}
-                          </div>
+                          <div className="text-sm font-medium text-gray-900">{booking.bookingId}</div>
+                          <div className="text-sm text-gray-500">{formatDate(booking.bookingDate)}</div>
+                          <div className="text-xs text-gray-400">{booking.passengers} passenger{booking.passengers > 1 ? "s" : ""}</div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {booking.customerName}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {booking.customerEmail}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {booking.customerPhone}
-                          </div>
+                          <div className="text-sm font-medium text-gray-900">{booking.customerName}</div>
+                          <div className="text-sm text-gray-500">{booking.customerEmail}</div>
+                          <div className="text-sm text-gray-500">{booking.customerPhone}</div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="max-w-xs">
-                          <div className="text-sm font-medium text-gray-900 truncate">
-                            {booking.tour.title}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {booking.tour.durationDays} days
-                          </div>
-                          <Link
-                            to={`/tour/${booking.tour.slug}`}
-                            className="text-xs text-blue-600 hover:text-blue-800 underline"
-                          >
-                            View Tour Details
-                          </Link>
+                          <div className="text-sm font-medium text-gray-900 truncate">{booking.tour.title}</div>
+                          <div className="text-sm text-gray-500">{booking.tour.durationDays} days</div>
+                          <Link to={`/tour/${booking.tour.slug}`} className="text-xs text-blue-600 hover:text-blue-800 underline">View Tour Details</Link>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
-                          {new Date(booking.selectedDate).toLocaleDateString("en-PH", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}
+                          {new Date(booking.selectedDate).toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" })}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {formatCurrencyPHP(booking.totalAmount)}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            Paid: {formatCurrencyPHP(booking.paidAmount)}
-                          </div>
-                          <div className="text-xs text-gray-400 capitalize">
-                            {booking.paymentType}
-                            {booking.paymentType === 'downpayment' && ' (30%)'}
-                          </div>
+                          <div className="text-sm font-medium text-gray-900">{formatCurrencyPHP(booking.totalAmount)}</div>
+                          <div className="text-sm text-gray-500">Paid: {formatCurrencyPHP(booking.paidAmount)}</div>
+                          <div className="text-xs text-gray-400 capitalize">{booking.paymentType}{booking.paymentType === "downpayment" && " (30%)"}</div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -470,17 +501,12 @@ export default function ViewBookings() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div className="flex items-center space-x-2">
+                          {/* IMPORTANT: pass the full booking object in location.state and include the booking DB id in the path.
+                              This makes the confirmation page able to read the booking from state (preferred) and/or fetch it
+                              by id if needed. */}
                           <Link
-                            to={`/booking/confirmation`}
-                            state={{
-                              bookingId: booking.bookingId,
-                              tour: booking.tour,
-                              customerName: booking.customerName,
-                              customerEmail: booking.customerEmail,
-                              totalAmount: booking.totalAmount,
-                              selectedDate: booking.selectedDate,
-                              passengers: booking.passengers,
-                            }}
+                            to={`/booking/confirmation/${booking.id}`}
+                            state={{ booking }}
                             className="text-blue-600 hover:text-blue-800"
                             title="View Details"
                           >
@@ -489,11 +515,8 @@ export default function ViewBookings() {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
                           </Link>
-                          <button
-                            onClick={() => handleDeleteBooking(booking.bookingId)}
-                            className="text-red-600 hover:text-red-800"
-                            title="Delete Booking"
-                          >
+
+                          <button onClick={() => handleDeleteBooking(booking.bookingId)} className="text-red-600 hover:text-red-800" title="Delete Booking">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
@@ -512,7 +535,7 @@ export default function ViewBookings() {
         {filteredBookings.length > 0 && (
           <div className="mt-6 flex items-center justify-between">
             <div className="text-sm text-gray-700">
-              Showing {filteredBookings.length} of {bookings.length} booking{bookings.length !== 1 ? 's' : ''}
+              Showing {filteredBookings.length} of {bookings.length} booking{bookings.length !== 1 ? "s" : ""}
             </div>
             <div className="text-sm text-gray-500">
               {searchEmail || statusFilter !== "all" ? (

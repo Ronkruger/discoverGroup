@@ -4,14 +4,18 @@ import { fetchTourBySlug } from "../api/tours";
 import type { Tour, ItineraryDay, Stop } from "../types";
 import * as React from "react";
 
-
 /**
  * Modernized TourDetail with a single BookingCard component to remove duplication.
  *
- * - BookingCard is rendered once in the hero row on large screens and as a compact
- *   stacked card under the hero on small screens. The aside no longer duplicates the card.
+ * - Uses bookingPdfUrl (flipbook link) if present and additionalInfo.countries (name+image) for country previews.
+ * - Falls back to legacy fields (additionalInfo.countriesVisited) when needed.
  *
- * All original behavior preserved.
+ * - Improved "Available Dates" behavior:
+ *   Clicking "Available Dates" now switches to the Availability tab and scrolls the departure dates
+ *   into view on the page (works for both ISO-like dates and admin-entered date-range strings).
+ *
+ * - Departure dates are rendered in a vertical/two-column responsive grid (wraps to next line after two items),
+ *   instead of a horizontal scroller.
  */
 
 export default function TourDetail(): JSX.Element {
@@ -19,9 +23,9 @@ export default function TourDetail(): JSX.Element {
   const [tour, setTour] = useState<Tour | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [passengers, setPassengers] = useState<number>(1);
-  const [activeTab, setActiveTab] = useState<"itinerary" | "availability" | "extensions" | "details">(
-    "itinerary"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "itinerary" | "availability" | "extensions" | "details"
+  >("itinerary");
 
   // Interactive UI state
   const [carouselIndex, setCarouselIndex] = useState(0);
@@ -31,6 +35,7 @@ export default function TourDetail(): JSX.Element {
   const [stopsMapOpen, setStopsMapOpen] = useState(false);
 
   const carouselTimerRef = useRef<number | null>(null);
+  // datesRef is the container for the date buttons (grid / vertical)
   const datesRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -43,7 +48,10 @@ export default function TourDetail(): JSX.Element {
         setTour(t);
         if (t) {
           const defaultDate =
-            t.travelWindow?.start ?? (t.departureDates && t.departureDates.length ? t.departureDates[0] : null);
+            t.travelWindow?.start ??
+            (t.departureDates && t.departureDates.length
+              ? t.departureDates[0]
+              : null);
           setSelectedDate(defaultDate);
         }
       } catch (err) {
@@ -60,7 +68,9 @@ export default function TourDetail(): JSX.Element {
   useEffect(() => {
     if (tour?.images && tour.images.length > 1) {
       carouselTimerRef.current = window.setInterval(() => {
-        setCarouselIndex((i) => (tour.images ? (i + 1) % tour.images.length : 0));
+        setCarouselIndex((i) =>
+          tour.images ? (i + 1) % tour.images.length : 0
+        );
       }, 4500);
       return () => {
         if (carouselTimerRef.current) {
@@ -69,7 +79,6 @@ export default function TourDetail(): JSX.Element {
         }
       };
     } else {
-      // If there are not enough images, clear any existing interval
       if (carouselTimerRef.current) {
         clearInterval(carouselTimerRef.current);
         carouselTimerRef.current = null;
@@ -80,11 +89,27 @@ export default function TourDetail(): JSX.Element {
   // scroll helper (used by keyboard navigation)
   function scrollDateIntoView(date?: string) {
     if (!datesRef.current || !date) return;
-    const btn = datesRef.current.querySelector(`[data-date="${date}"]`) as HTMLElement | null;
-    if (btn) btn.scrollIntoView({ behavior: "smooth", inline: "center" });
+    const btn = datesRef.current.querySelector(
+      `[data-date="${date}"]`
+    ) as HTMLElement | null;
+    if (btn) {
+      // center the button in the nearest scrollable ancestor (datesRef)
+      try {
+        btn.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+        btn.focus();
+      } catch {
+        // fallback
+        btn.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      // fallback: scroll container into view
+      try { datesRef.current.scrollIntoView({ behavior: "smooth", block: "center" }); } catch {
+        // intentionally ignore scroll errors
+      }
+    }
   }
 
-  // keyboard support for dates (left/right) — placed before early return so hooks are called consistently
+  // keyboard support for dates (supports grid navigation: left/right = prev/next, up/down = +/- cols)
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       const departureDates = tour?.departureDates;
@@ -92,6 +117,10 @@ export default function TourDetail(): JSX.Element {
       if (!selectedDate) return;
       const idx = departureDates.indexOf(selectedDate);
       if (idx === -1) return;
+
+      // determine current columns (match CSS: 1 col on small, 2 on sm+)
+      const cols = window.innerWidth >= 640 ? 2 : 1;
+
       if (e.key === "ArrowLeft") {
         const prev = departureDates[Math.max(0, idx - 1)];
         setSelectedDate(prev);
@@ -100,37 +129,51 @@ export default function TourDetail(): JSX.Element {
         const next = departureDates[Math.min(departureDates.length - 1, idx + 1)];
         setSelectedDate(next);
         scrollDateIntoView(next);
+      } else if (e.key === "ArrowUp") {
+        const upIdx = Math.max(0, idx - cols);
+        const up = departureDates[upIdx];
+        setSelectedDate(up);
+        scrollDateIntoView(up);
+      } else if (e.key === "ArrowDown") {
+        const downIdx = Math.min(departureDates.length - 1, idx + cols);
+        const down = departureDates[downIdx];
+        setSelectedDate(down);
+        scrollDateIntoView(down);
       }
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [selectedDate, tour?.departureDates]);
 
-  if (!tour) return <p className="p-6 text-slate-200">Loading tour details...</p>;
-
   // Helpers
-  const formatDate = (dateStr: string) =>
-    new Date(dateStr).toLocaleDateString("en-GB", {
+  // formatDate is tolerant of admin-entered human-friendly ranges (e.g. "May 27, 2026 - June 10, 2026")
+  // If the string looks like a range or cannot be parsed as a Date, return it as-is.
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return "";
+    // If looks like a range (contains a dash with words/dates around it) — return raw string
+    if (/\d{4}|\d{1,2}\s?[A-Za-z]|-/g.test(dateStr) && /[-–—]/.test(dateStr) && dateStr.split(/[-–—]/).length >= 2) {
+      return dateStr;
+    }
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) {
+      // not a valid Date — return raw string
+      return dateStr;
+    }
+    return d.toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "short",
       year: "numeric",
     });
+  };
 
   // Pricing helpers: prefer regular per-person values from tour, fallback to promo then basePricePerDay * days
   function getPerPersonPrices(t: Tour) {
-    // typed access to optional fields that exist in mock data
     const regular = (t as unknown as { regularPricePerPerson?: number }).regularPricePerPerson;
     const promo = (t as unknown as { promoPricePerPerson?: number }).promoPricePerPerson;
-
-    // compute fallback from basePricePerDay
     const days = t.durationDays ?? (t.itinerary?.length ?? 0);
     const basePricePerDay = t.basePricePerDay ?? 0;
     const computed = Math.round(basePricePerDay * days);
-
-    // We will use the regular price as primary if present.
-    // If regular is absent, fall back to promo, then to computed.
     const effective = typeof regular === "number" ? regular : typeof promo === "number" ? promo : computed;
-
     return { regular, promo, computed, effective };
   }
 
@@ -141,21 +184,28 @@ export default function TourDetail(): JSX.Element {
     return `PHP ${amount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
-  const priceInfo = getPerPersonPrices(tour);
-  // Use regular as primary per-user request; effectiveForDisplay will be regular if available, otherwise promo/computed.
+  const priceInfo = tour ? getPerPersonPrices(tour) : { regular: undefined, promo: undefined, computed: 0, effective: 0 };
   const perPersonPrimary = typeof priceInfo.regular === "number" ? priceInfo.regular : priceInfo.effective;
   const perPersonForTotals = usePromoForTotals && typeof priceInfo.promo === "number" ? priceInfo.promo : perPersonPrimary;
   const totalForPassengers = Math.max(1, passengers) * (perPersonForTotals ?? 0);
 
-  const builderSlug = slug ?? tour.slug;
+  const builderSlug = slug ?? tour?.slug ?? "";
 
   // Safe accessors / fallbacks
-  const itinerary = tour.itinerary ?? [];
-  const highlights = tour.highlights ?? [];
-  const countriesVisited = tour.additionalInfo?.countriesVisited ?? [];
+  const itinerary = tour?.itinerary ?? [];
+  const highlights = tour?.highlights ?? [];
+  // Prefer per-country entries (with images) -> additionalInfo.countries; fall back to legacy countriesVisited strings.
+  const countriesFromEntries: string[] = tour && Array.isArray(tour.additionalInfo?.countries)
+    ? tour.additionalInfo.countries
+        .map((c: { name?: string }) => c?.name)
+        .filter((name): name is string => typeof name === "string" && !!name)
+    : [];
+  const countriesVisited = countriesFromEntries.length > 0
+    ? countriesFromEntries
+    : (tour?.additionalInfo?.countriesVisited ?? []);
 
-  const hasTravelWindow = !!tour.travelWindow?.start && !!tour.travelWindow?.end;
-  const hasDepartureDates = Array.isArray(tour.departureDates) && tour.departureDates.length > 0;
+  const hasTravelWindow = !!tour && !!tour.travelWindow?.start && !!tour.travelWindow?.end;
+  const hasDepartureDates = !!tour && Array.isArray(tour.departureDates) && tour.departureDates.length > 0;
 
   // --- Stops helpers (country name -> ISO -> flag emoji)
   const countryNameToIso: Record<string, string> = {
@@ -235,7 +285,7 @@ export default function TourDetail(): JSX.Element {
     return String.fromCodePoint(first, second);
   }
 
-  const stops: Stop[] = (tour.fullStops ?? []) as Stop[];
+  const stops: Stop[] = (tour?.fullStops ?? []) as Stop[];
 
   // UI handlers
   function prevImage() {
@@ -257,6 +307,33 @@ export default function TourDetail(): JSX.Element {
 
   function togglePassenger(delta: number) {
     setPassengers((p) => Math.max(1, Math.min(10, p + delta)));
+  }
+
+  // Show available dates: switch to availability tab, scroll the departure date controls into view and focus
+  function showAvailableDates() {
+    setActiveTab("availability");
+    // set a small delay so the DOM updates and the dates area is present
+    setTimeout(() => {
+      if (!datesRef.current) {
+        // if datesRef not mounted, try to scroll to top of availability section by finding the first button
+        const el = document.querySelector('[data-date]') as HTMLElement | null;
+        if (el) el.scrollIntoView({ behavior: "smooth", inline: "center" });
+        return;
+      }
+      // if there are departure dates, pick the first one as selected and scroll it into view
+      const departureDates = tour?.departureDates;
+      if (departureDates && departureDates.length > 0) {
+        const first = departureDates[0];
+        setSelectedDate(first);
+        scrollDateIntoView(first);
+        // try focusing the button
+        const btn = datesRef.current.querySelector(`[data-date="${first}"]`) as HTMLElement | null;
+        if (btn) btn.focus();
+        return;
+      }
+      // otherwise scroll the availability container
+      datesRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 150);
   }
 
   // Inline styles + small CSS for theme variables and transitions
@@ -290,10 +367,19 @@ export default function TourDetail(): JSX.Element {
           <div className="text-xs text-slate-400">· Flexible payment</div>
         </div>
 
+        {/* If a flipbook is provided, show quick access */}
+        {tour && tour.bookingPdfUrl && (
+          <div className="mt-3">
+            <a href={tour.bookingPdfUrl} target="_blank" rel="noopener noreferrer" className="inline-block text-sm px-3 py-1 bg-white/90 rounded font-semibold">
+              Open Flipbook
+            </a>
+          </div>
+        )}
+
         {compact ? (
           <div className="mt-3 space-y-2">
             <div className="flex gap-2">
-              <Link to={`/search?countries=${encodeURIComponent(countriesVisited[0] ?? "")}&brands=Trafalgar&useEmbeddedCards=true`} className={`${compactButtons} bg-rose-600 text-white rounded`}>Available Dates</Link>
+              <button onClick={showAvailableDates} className={`${compactButtons} bg-rose-600 text-white rounded`}>Available Dates</button>
               <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className={`${compactButtons} border rounded bg-white hover:bg-slate-50`}>Customize</Link>
             </div>
             <Link
@@ -307,7 +393,7 @@ export default function TourDetail(): JSX.Element {
         ) : (
           <>
             <div className="mt-3 flex gap-2">
-              <Link to={`/search?countries=${encodeURIComponent(countriesVisited[0] ?? "")}&brands=Trafalgar&useEmbeddedCards=true`} className={`${compactButtons} bg-rose-600 text-white rounded`}>Available Dates</Link>
+              <button onClick={showAvailableDates} className={`${compactButtons} bg-rose-600 text-white rounded`}>Available Dates</button>
             </div>
           </>
         )}
@@ -390,6 +476,45 @@ export default function TourDetail(): JSX.Element {
         .modal-backdrop { background: rgba(2,6,23,0.6); }
         .itinerary-day { transition: all .18s ease; }
         .itinerary-day:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(2,6,23,0.45); }
+
+        /* Pill buttons */
+        .date-pill {
+          white-space: normal;
+          user-select: none;
+          border-radius: 10px;
+          padding: 9px 14px;
+          font-weight: 600;
+          font-size: 13px;
+          border: 1px solid rgba(255,255,255,0.08);
+          color: #cbd5e1; /* slate-300 */
+          background: rgba(255,255,255,0.03);
+          box-shadow: none;
+          text-align: center;
+        }
+        .date-pill:hover {
+          transform: translateY(-1px);
+          background: rgba(255,255,255,0.06);
+        }
+        .date-pill.selected {
+          background: var(--accent-yellow);
+          color: #06202a;
+          border: 2px solid #1a1a1a;
+          box-shadow: 0 4px 14px rgba(0,0,0,0.35), 0 0 0 3px rgba(0,0,0,0.06) inset;
+        }
+
+        /* Grid for dates: 1 column on very small screens, 2 columns on sm+ */
+        .dates-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 10px;
+          max-height: 220px;
+          overflow-y: auto;
+        }
+        @media (min-width: 640px) {
+          .dates-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
       `}</style>
 
       <div className="container mx-auto px-4 py-8">
@@ -399,7 +524,7 @@ export default function TourDetail(): JSX.Element {
           <span className="text-slate-400">/</span>
           <Link to="/tours" className="hover:underline">Tours</Link>
           <span className="text-slate-400">/</span>
-          <span className="text-white font-medium">{tour.title}</span>
+          <span className="text-white font-medium">{tour ? tour.title : ""}</span>
         </nav>
 
         {/* Mobile-optimized layout: Hero -> Title -> Booking -> Content */}
@@ -408,7 +533,7 @@ export default function TourDetail(): JSX.Element {
           <div className="relative mb-4">
             <div className="rounded-lg overflow-hidden shadow-xl">
               <div className="relative w-full h-48 bg-slate-800 rounded">
-                {tour.images && tour.images.length > 0 ? (
+                {tour && tour.images && tour.images.length > 0 ? (
                   <img
                     src={tour.images[carouselIndex]}
                     alt={`${tour.title} image ${carouselIndex + 1}`}
@@ -442,9 +567,9 @@ export default function TourDetail(): JSX.Element {
                 <div className="absolute left-4 bottom-4 text-left text-white z-10">
                   <div className="flex items-center gap-2">
                     <span className="inline-flex items-center gap-1 bg-white/20 text-white px-2 py-1 rounded-full text-xs">
-                      {tour.durationDays ?? itinerary.length} days
+                      {(tour?.durationDays ?? itinerary.length)} days
                     </span>
-                    {tour.guaranteedDeparture && (
+                    {tour && tour.guaranteedDeparture && (
                       <span className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-200 px-2 py-1 rounded-full text-xs">
                         Guaranteed
                       </span>
@@ -453,7 +578,7 @@ export default function TourDetail(): JSX.Element {
                 </div>
 
                 <div className="absolute right-3 bottom-3 flex gap-1 z-10">
-                  {tour.images?.map((_, idx) => (
+                  {tour && tour.images?.map((_, idx) => (
                     <button
                       key={idx}
                       onClick={() => setCarouselIndex(idx)}
@@ -468,12 +593,12 @@ export default function TourDetail(): JSX.Element {
 
           {/* Mobile Title Section */}
           <div className="mb-4">
-            <div className="text-xs uppercase tracking-wider text-slate-200/80">{tour.line ?? "Line"}</div>
+            <div className="text-xs uppercase tracking-wider text-slate-200/80">{tour?.line ?? "Line"}</div>
             <h1 className="font-serif font-extrabold text-2xl text-white mt-1 leading-tight">
-              {tour.title}
+              {tour?.title}
             </h1>
-            <p className="text-slate-300 mt-2 text-sm">{tour.summary}</p>
-            
+            <p className="text-slate-300 mt-2 text-sm">{tour?.summary}</p>
+
             <div className="mt-3 flex items-center gap-2">
               <button onClick={() => openGallery(0)} className="px-3 py-1.5 bg-accent-yellow text-slate-900 rounded font-semibold text-sm">
                 View gallery
@@ -497,7 +622,7 @@ export default function TourDetail(): JSX.Element {
             <div className="rounded-lg overflow-hidden shadow-xl">
               {/* Carousel */}
               <div className="relative w-full h-80 md:h-[380px] bg-slate-800 rounded">
-                {tour.images && tour.images.length > 0 ? (
+                {tour && tour.images && tour.images.length > 0 ? (
                   <img
                     src={tour.images[carouselIndex]}
                     alt={`${tour.title} image ${carouselIndex + 1}`}
@@ -530,18 +655,18 @@ export default function TourDetail(): JSX.Element {
                 {/* Desktop lower-left badges and gallery button */}
                 <div className="absolute left-6 bottom-6 text-left text-white max-w-2xl z-10">
                   <div className="mt-0">
-                    <p className="text-slate-200/90 max-w-xl">{String(tour.shortDescription || tour.summary || "")}</p>
+                    <p className="text-slate-200/90 max-w-xl">{tour ? String(tour.shortDescription || tour.summary || "") : ""}</p>
                   </div>
 
                   <div className="mt-4 flex items-center gap-3">
-                    <span className="inline-flex items-center gap-2 bg-white/6 text-white px-3 py-1 rounded-full text-sm">• {tour.durationDays ?? itinerary.length} days</span>
-                    {tour.guaranteedDeparture && <span className="inline-flex items-center gap-2 bg-emerald-50/6 text-emerald-200 px-3 py-1 rounded-full text-sm">Guaranteed</span>}
+                    <span className="inline-flex items-center gap-2 bg-white/6 text-white px-3 py-1 rounded-full text-sm">• {tour?.durationDays ?? itinerary.length} days</span>
+                    {tour && tour.guaranteedDeparture && <span className="inline-flex items-center gap-2 bg-emerald-50/6 text-emerald-200 px-3 py-1 rounded-full text-sm">Guaranteed</span>}
                     <button onClick={() => openGallery(0)} className="px-3 py-1.5 bg-accent-yellow text-slate-900 rounded font-semibold text-sm">View gallery</button>
                   </div>
                 </div>
 
                 <div className="absolute right-4 bottom-4 flex gap-2 z-10">
-                  {tour.images?.map((_, idx) => (
+                  {tour && tour.images?.map((_, idx) => (
                     <button
                       key={idx}
                       onClick={() => setCarouselIndex(idx)}
@@ -567,15 +692,15 @@ export default function TourDetail(): JSX.Element {
           <div className="bg-transparent rounded-md">
             <div className="lg:flex lg:items-center lg:justify-between">
               <div className="lg:w-2/3">
-                <div className="text-xs uppercase tracking-wider text-slate-200/80">{tour.line ?? "Line"}</div>
+                <div className="text-xs uppercase tracking-wider text-slate-200/80">{tour ? tour.line ?? "Line" : "Line"}</div>
                 <h1 className="font-serif font-extrabold text-3xl md:text-4xl text-white mt-2 leading-tight">
-                  {tour.title}
+                  {tour ? tour.title : ""}
                 </h1>
-                <p className="text-slate-300 mt-3 max-w-3xl">{tour.summary}</p>
+                <p className="text-slate-300 mt-3 max-w-3xl">{tour ? tour.summary : ""}</p>
 
                 <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <span className="inline-flex items-center gap-2 bg-white/6 text-white px-3 py-1 rounded-full text-sm">• {tour.durationDays ?? itinerary.length} days</span>
-                  {tour.guaranteedDeparture && <span className="inline-flex items-center gap-2 bg-emerald-50/6 text-emerald-200 px-3 py-1 rounded-full text-sm">Guaranteed departure</span>}
+                  <span className="inline-flex items-center gap-2 bg-white/6 text-white px-3 py-1 rounded-full text-sm">• {tour ? (tour.durationDays ?? itinerary.length) : itinerary.length} days</span>
+                  {tour && tour.guaranteedDeparture && <span className="inline-flex items-center gap-2 bg-emerald-50/6 text-emerald-200 px-3 py-1 rounded-full text-sm">Guaranteed departure</span>}
                   {highlights.length > 0 && <span className="text-sm text-slate-300">• {highlights.join(", ")}</span>}
                 </div>
               </div>
@@ -629,7 +754,7 @@ export default function TourDetail(): JSX.Element {
                   <h3 className="text-xl font-semibold mb-4 text-white">Availability</h3>
                   <p className="text-slate-300">
                     {hasTravelWindow ? (
-                      <>This tour runs from <strong className="text-white">{formatDate(tour.travelWindow!.start)}</strong> to <strong className="text-white">{formatDate(tour.travelWindow!.end)}</strong>.</>
+                      <>This tour runs from <strong className="text-white">{formatDate(tour!.travelWindow!.start)}</strong> to <strong className="text-white">{formatDate(tour!.travelWindow!.end)}</strong>.</>
                     ) : hasDepartureDates ? (
                       <>Multiple discrete departure dates are available. Choose one from the right.</>
                     ) : (
@@ -648,6 +773,14 @@ export default function TourDetail(): JSX.Element {
                 <div className="bg-white/6 card-glass rounded-lg p-6 border border-white/6">
                   <h3 className="text-xl font-semibold mb-4 text-white">Tour details</h3>
                   <p className="text-slate-300">Practical information, inclusion/exclusion, activity level and more.</p>
+
+                  {/* If flipbook is available show it here too */}
+                  {tour && tour.bookingPdfUrl && (
+                    <div className="mt-4">
+                      <h4 className="text-sm text-white mb-2">Flipbook</h4>
+                      <a href={tour.bookingPdfUrl} target="_blank" rel="noopener noreferrer" className="inline-block px-3 py-2 bg-accent-yellow text-slate-900 rounded font-semibold">Open Flipbook</a>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -661,23 +794,25 @@ export default function TourDetail(): JSX.Element {
 
               {hasTravelWindow ? (
                 <div className="text-sm text-slate-200">
-                  <div className="font-semibold text-white">{formatDate(tour.travelWindow!.start)} – {formatDate(tour.travelWindow!.end)}</div>
+                  <div className="font-semibold text-white">{formatDate(tour!.travelWindow!.start)} – {formatDate(tour!.travelWindow!.end)}</div>
                   <div className="text-slate-400 text-xs mt-1">Travel window (inclusive)</div>
                 </div>
               ) : hasDepartureDates ? (
-                <div ref={datesRef} className="flex gap-2 overflow-x-auto pb-1">
-                  {tour.departureDates!.map((date) => (
-                    <button
-                      key={date}
-                      data-date={date}
-                      onClick={() => setSelectedDate(date)}
-                      className={`px-3 py-2 text-sm rounded-lg border whitespace-nowrap ${selectedDate === date ? "bg-accent-yellow text-slate-900 border-accent-yellow" : "bg-white/6 text-slate-200 border-white/10"}`}
-                      aria-pressed={selectedDate === date}
-                    >
-                      {formatDate(date)}
-                    </button>
-                  ))}
-                </div>
+                <>
+                  <div ref={datesRef} className="dates-grid" aria-live="polite">
+                    {tour!.departureDates!.map((date) => (
+                      <button
+                        key={date}
+                        data-date={date}
+                        onClick={() => { setSelectedDate(date); }}
+                        className={`date-pill ${selectedDate === date ? "selected" : ""}`}
+                        aria-pressed={selectedDate === date}
+                      >
+                        {formatDate(date)}
+                      </button>
+                    ))}
+                  </div>
+                </>
               ) : (
                 <div className="text-sm text-slate-400">No departure information available</div>
               )}
@@ -687,13 +822,32 @@ export default function TourDetail(): JSX.Element {
             <section className="bg-white/6 card-glass rounded-lg p-5 border border-white/6 shadow-sm">
               <h4 className="text-sm text-slate-200 mb-2">Tour overview</h4>
               <div className="text-sm text-slate-200">
-                <p className="mb-2">{tour.summary}</p>
+                <p className="mb-2">{tour?.summary}</p>
 
                 <ul className="text-sm text-slate-300 space-y-2">
-                  <li><strong className="text-white">Duration:</strong> {tour.durationDays ?? itinerary.length} days</li>
+                  <li><strong className="text-white">Duration:</strong> {(tour?.durationDays ?? itinerary.length)} days</li>
                   <li><strong className="text-white">Countries:</strong> {countriesVisited.join(", ") || "—"}</li>
                   <li><strong className="text-white">Highlights:</strong> {highlights.join(", ") || "—"}</li>
                 </ul>
+
+                {/* Country image preview (first up to 3) */}
+                {tour && Array.isArray(tour.additionalInfo?.countries) && tour.additionalInfo.countries.length > 0 && (
+                  <div className="mt-3 flex gap-2">
+                    {tour.additionalInfo.countries.slice(0, 3).map((c: { name: string; image?: string }, i: number) => (
+                      <div key={i} className="w-20 h-12 overflow-hidden rounded border bg-black/5">
+                        {c.image ? <img src={c.image} alt={c.name} className="w-full h-full object-cover" /> : <div className="text-xs text-slate-300 p-2">{c.name}</div>}
+                      </div>
+                    ))}
+                    {tour.additionalInfo.countries.length > 3 && <div className="text-xs text-slate-300 self-end">+{tour.additionalInfo.countries.length - 3}</div>}
+                  </div>
+                )}
+
+                {/* If flipbook present show a quick link */}
+                {tour && tour.bookingPdfUrl && (
+                  <div className="mt-3">
+                    <a href={tour.bookingPdfUrl} target="_blank" rel="noopener noreferrer" className="inline-block px-3 py-1 bg-white/90 rounded font-semibold">Open Flipbook</a>
+                  </div>
+                )}
               </div>
             </section>
 
@@ -737,14 +891,28 @@ export default function TourDetail(): JSX.Element {
           <div className="max-w-4xl w-full mx-4 bg-transparent">
             <div className="relative">
               <button onClick={() => setGalleryOpen(false)} className="absolute right-2 top-2 z-50 bg-white/10 text-white rounded-full p-2">✕</button>
-              {tour.images && tour.images.length > 0 && (
+              {tour && tour.images && tour.images.length > 0 && (
                 <img src={tour.images[galleryIndex]} alt={`Gallery ${galleryIndex + 1}`} className="w-full h-[70vh] object-contain" />
               )}
               <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                <button onClick={() => setGalleryIndex((i) => (i - 1 + (tour.images?.length ?? 1)) % (tour.images?.length ?? 1))} className="bg-white/10 text-white rounded-full p-2">‹</button>
+                <button
+                  onClick={() => {
+                    if (tour && tour.images && tour.images.length > 0) {
+                      setGalleryIndex((i) => (i - 1 + tour.images!.length) % tour.images!.length);
+                    }
+                  }}
+                  className="bg-white/10 text-white rounded-full p-2"
+                >‹</button>
               </div>
               <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                <button onClick={() => setGalleryIndex((i) => (i + 1) % (tour.images?.length ?? 1))} className="bg-white/10 text-white rounded-full p-2">›</button>
+                <button
+                  onClick={() => {
+                    if (tour && tour.images && tour.images.length > 0) {
+                      setGalleryIndex((i) => (i + 1) % ((tour.images?.length ?? 1)));
+                    }
+                  }}
+                  className="bg-white/10 text-white rounded-full p-2"
+                >›</button>
               </div>
             </div>
           </div>

@@ -1,14 +1,15 @@
-// Removed re-export of ManageTours to avoid duplicate default export; ToursList below is the default export.
+// Updated ToursList with Delete button wired to services/apiClient.deleteTour
 
 import { Tour } from "@discovergroup/types";
 import { JSX, useEffect, useState } from "react";
-import { fetchTours } from "../../services/apiClient";
+import { fetchTours, deleteTour } from "../../services/apiClient";
 import { Link } from "react-router-dom";
 
 export default function ToursList(): JSX.Element {
   const [tours, setTours] = useState<Tour[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | number | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -32,6 +33,23 @@ export default function ToursList(): JSX.Element {
       mounted = false;
     };
   }, []);
+
+  async function handleDelete(id: string | number) {
+    const ok = window.confirm("Are you sure you want to delete this tour? This action cannot be undone.");
+    if (!ok) return;
+
+    try {
+      setDeletingId(id);
+      await deleteTour(id);
+      // remove from local state
+      setTours(prev => (prev ? prev.filter(t => `${t.id}` !== `${id}`) : prev));
+    } catch (err) {
+      console.error("Delete failed", err);
+      alert(err instanceof Error ? err.message : "Failed to delete tour");
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   if (loading) return <div style={{ padding: 32 }}>Loading tours…</div>;
   if (error) return <div style={{ color: "crimson", padding: 32 }}>Error: {error}</div>;
@@ -103,11 +121,22 @@ export default function ToursList(): JSX.Element {
                 <td style={{ ...tdStyle, textAlign: "right" }}>
                   {t.promoPricePerPerson ? `₱${t.promoPricePerPerson.toLocaleString()}` : "--"}
                 </td>
-                <td style={{ ...tdStyle, minWidth: 120 }}>
+                <td style={{ ...tdStyle, minWidth: 160 }}>
                   <Link to={`/tours/${t.id}`}>
                     <button style={editBtnStyle}>Edit</button>
                   </Link>
-                  {/* You can add Delete button here */}
+                  <button
+                    onClick={() => handleDelete(t.id)}
+                    disabled={deletingId === t.id}
+                    style={{
+                      ...deleteBtnStyle,
+                      opacity: deletingId === t.id ? 0.6 : 1,
+                      cursor: deletingId === t.id ? "not-allowed" : "pointer"
+                    }}
+                    aria-label={`Delete tour ${t.title}`}
+                  >
+                    {deletingId === t.id ? "Deleting…" : "Delete"}
+                  </button>
                 </td>
               </tr>
             ))}
@@ -149,5 +178,14 @@ const editBtnStyle: React.CSSProperties = {
   background: "linear-gradient(90deg,#ee4d7e 0,#ff6a3d 100%)",
   color: "#fff",
   cursor: "pointer",
-  marginRight: 4,
+  marginRight: 8,
+};
+const deleteBtnStyle: React.CSSProperties = {
+  padding: "7px 12px",
+  borderRadius: 6,
+  border: "none",
+  fontWeight: 600,
+  background: "#ef4444",
+  color: "#fff",
+  cursor: "pointer",
 };

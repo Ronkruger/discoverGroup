@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { fetchTours, type Tour } from "../../services/apiClient";
+import { fetchTours, deleteTour, type Tour } from "../../services/apiClient";
 import { Link } from "react-router-dom";
 
-// Extended Tour type to include pricing and sale fields
+// Extended Tour type to include pricing and sale fields and bookingPdfUrl
 interface ExtendedTour extends Tour {
   regularPricePerPerson?: number;
   promoPricePerPerson?: number;
   isSaleEnabled?: boolean;
   saleEndDate?: string | null;
+  bookingPdfUrl?: string | null;
 }
 
 export default function ManageTours(): React.ReactElement {
   const [tours, setTours] = useState<ExtendedTour[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | number | null>(null);
 
   useEffect(() => {
     loadTours();
@@ -31,6 +33,22 @@ export default function ManageTours(): React.ReactElement {
       setTours([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string | number) => {
+    const ok = window.confirm("Are you sure you want to delete this tour? This action cannot be undone.");
+    if (!ok) return;
+
+    try {
+      setDeletingId(id);
+      await deleteTour(id);
+      setTours(prev => (prev ? prev.filter(t => `${t.id}` !== `${id}`) : prev));
+    } catch (err) {
+      console.error("Delete failed", err);
+      alert(err instanceof Error ? err.message : "Failed to delete tour");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -112,8 +130,7 @@ export default function ManageTours(): React.ReactElement {
                         <th className="py-3 px-4 text-left font-semibold text-gray-700">Duration</th>
                         <th className="py-3 px-4 text-left font-semibold text-gray-700">Regular Price</th>
                         <th className="py-3 px-4 text-left font-semibold text-gray-700">Promo Price</th>
-                        <th className="py-3 px-4 text-left font-semibold text-gray-700">Sale Enabled</th>
-                        <th className="py-3 px-4 text-left font-semibold text-gray-700">Sale Ends</th>
+                        <th className="py-3 px-4 text-left font-semibold text-gray-700">Flipbook</th>
                         <th className="py-3 px-4 text-left font-semibold text-gray-700">Actions</th>
                       </tr>
                     </thead>
@@ -133,19 +150,41 @@ export default function ManageTours(): React.ReactElement {
                             <td className="py-3 px-4">{tour.durationDays}</td>
                             <td className="py-3 px-4">{tour.regularPricePerPerson ? `₱${tour.regularPricePerPerson.toLocaleString()}` : "--"}</td>
                             <td className="py-3 px-4">{tour.promoPricePerPerson && tour.isSaleEnabled ? `₱${tour.promoPricePerPerson.toLocaleString()}` : "--"}</td>
-                            <td className="py-3 px-4">{tour.isSaleEnabled ? "Yes" : "No"}</td>
+
+                            {/* Flipbook column */}
                             <td className="py-3 px-4">
-                              {tour.isSaleEnabled && tour.saleEndDate
-                                ? new Date(tour.saleEndDate).toLocaleDateString()
-                                : "--"}
+                              {tour.bookingPdfUrl ? (
+                                <a
+                                  href={tour.bookingPdfUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="px-3 py-1 rounded text-xs font-medium bg-blue-50 text-blue-700 hover:bg-blue-100"
+                                  onClick={() => {
+                                    // allow click even when deleting is happening (but visual disabled state is handled on button)
+                                  }}
+                                >
+                                  Open Flipbook
+                                </a>
+                              ) : (
+                                <span className="text-xs text-gray-400">—</span>
+                              )}
                             </td>
-                            <td className="py-3 px-4">
+
+                            <td className="py-3 px-4 flex gap-2">
                               <Link
                                 to={`/tours/${tour.id}/edit`}
                                 className="px-4 py-1 bg-gradient-to-r from-pink-400 to-pink-500 text-white rounded font-medium text-xs shadow hover:from-pink-500 hover:to-pink-600 transition"
                               >
                                 Edit
                               </Link>
+
+                              <button
+                                onClick={() => handleDelete(tour.id)}
+                                disabled={deletingId === tour.id}
+                                className={`px-3 py-1 rounded text-xs font-medium ${deletingId === tour.id ? "bg-red-200 text-red-600" : "bg-red-500 text-white hover:bg-red-600"}`}
+                              >
+                                {deletingId === tour.id ? "Deleting…" : "Delete"}
+                              </button>
                             </td>
                           </tr>
                         ))

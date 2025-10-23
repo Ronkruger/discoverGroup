@@ -4,8 +4,6 @@ export type { Tour };
 export type TourPayload = Partial<Tour>;
 
 // Prefer the admin-specific env var, fall back to the general VITE_API_URL, then localhost for dev
-// Safely attempt to read import.meta.env without directly using the import.meta meta-property
-// (avoid TypeScript compile errors when outputting CommonJS) by calling it at runtime.
 let _env: Record<string, unknown> = {};
 try {
   const getImportMetaEnv = new Function(
@@ -17,6 +15,53 @@ try {
 }
 const API_BASE = (_env.VITE_ADMIN_API_URL as string) || (_env.VITE_API_URL as string) || "http://localhost:4000";
 
+// Helper to extract a stable id string from a returned tour object.
+// Prefer the Mongo _id where possible (it may be a string or an object like { $oid: '...' }).
+interface RawTourData {
+  _id?: string | { $oid: string } | unknown;
+  id?: string | unknown;
+  slug?: string | unknown;
+}
+
+function extractStableId(raw: Record<string, unknown>): string | undefined {
+  const rawData = raw as RawTourData;
+  const rawId = rawData._id ?? rawData.id ?? rawData.slug;
+  if (rawId === undefined || rawId === null) return undefined;
+  if (typeof rawId === "string") return rawId;
+  if (typeof rawId === "object") {
+    const objId = rawId as { $oid?: string };
+    if ("$oid" in objId && typeof objId.$oid === "string") return objId.$oid;
+  }
+  return String(rawId);
+}
+
+// Normalize a returned tour so the client always has `id` (string) and preserves additionalInfo fields.
+function normalizeTour(raw: Record<string, unknown>): Tour {
+  const stableId = extractStableId(raw);
+  const normalized: Record<string, unknown> = {
+    ...raw,
+    id: stableId ?? raw.id,
+  };
+
+  // Ensure additionalInfo exists and countries array preserved if present
+  normalized.additionalInfo = normalized.additionalInfo || {};
+  if (
+    raw.additionalInfo &&
+    typeof raw.additionalInfo === "object" &&
+    Array.isArray((raw.additionalInfo as { countries?: unknown[] }).countries)
+  ) {
+    if (typeof normalized.additionalInfo !== "object" || normalized.additionalInfo === null) {
+      normalized.additionalInfo = {};
+    }
+    (normalized.additionalInfo as { countries?: unknown[] }).countries = (raw.additionalInfo as { countries?: unknown[] }).countries;
+  }
+
+  // Keep bookingPdfUrl (used for Flipbook links)
+  if ("bookingPdfUrl" in raw) normalized.bookingPdfUrl = raw.bookingPdfUrl;
+
+  return normalized as Tour;
+}
+
 // List all tours
 export async function fetchTours(): Promise<Tour[]> {
   const res = await fetch(`${API_BASE}/admin/tours`, {
@@ -26,26 +71,30 @@ export async function fetchTours(): Promise<Tour[]> {
     const text = await res.text().catch(() => res.statusText);
     throw new Error(`Failed to fetch tours: ${res.status} ${text}`);
   }
-  const data = (await res.json()) as Record<string, unknown>[];
-  // Normalize returned tours: ensure `id` exists (the admin UI expects `id`)
-  const normalized = data.map((t: Record<string, unknown>) => ({
-    ...(t || {}),
-    id: t.id ?? t.slug ?? (t._id ? String(t._id) : undefined),
-  })) as Tour[];
-  // Debug logging to help identify why admin UI might show fewer tours
+  const data = await res.json();
+  const normalized = (data || []).map((t: Record<string, unknown>) => normalizeTour(t));
+
   try {
-    // only log in dev
     if (typeof window !== 'undefined' && window.location && window.location.hostname === 'localhost') {
-      console.debug('[admin apiClient] fetchTours ->', normalized.length, 'tours', normalized.map((x: Tour) => x.slug || x.id));
+      console.debug(
+        '[admin apiClient] fetchTours ->',
+        normalized.length,
+        'tours',
+        normalized.map((x: Tour) => ({ id: x.id, slug: (x as unknown as { slug?: string }).slug, _id: (x as unknown as { _id?: string })._id, bookingPdfUrl: (x as unknown as { bookingPdfUrl?: string }).bookingPdfUrl }))
+      );
     }
-  } catch (err) {
-    // don't crash the client if logging fails; print to console for dev visibility
-    console.debug('[admin apiClient] fetchTours logging error', err);
+  } catch {
+    console.debug(
+      '[admin apiClient] fetchTours ->',
+      normalized.length,
+      'tours',
+      normalized.map((x: Tour) => ({ id: x.id, slug: (x as unknown as { slug?: string }).slug, _id: (x as unknown as { _id?: string })._id, bookingPdfUrl: x.bookingPdfUrl }))
+    );
   }
   return normalized;
 }
 
-// Get a single tour by id (or slug) — pages expect fetchTourById
+// Get a single tour by id (or slug)
 export async function fetchTourById(id: string | number): Promise<Tour | null> {
   const res = await fetch(`${API_BASE}/admin/tours/${id}`, {
     headers: { "Accept": "application/json" },
@@ -55,7 +104,8 @@ export async function fetchTourById(id: string | number): Promise<Tour | null> {
     const text = await res.text().catch(() => res.statusText);
     throw new Error(`Failed to fetch tour ${id}: ${res.status} ${text}`);
   }
-  return (await res.json()) as Tour;
+  const raw = await res.json();
+  return normalizeTour(raw);
 }
 
 // Create a new tour
@@ -69,7 +119,8 @@ export async function createTour(data: TourPayload): Promise<Tour> {
     const text = await res.text().catch(() => res.statusText);
     throw new Error(`Failed to create tour: ${res.status} ${text}`);
   }
-  return (await res.json()) as Tour;
+  const raw = await res.json();
+  return normalizeTour(raw);
 }
 
 // Update an existing tour
@@ -84,13 +135,15 @@ export async function updateTour(id: string | number, data: TourPayload): Promis
     const text = await res.text().catch(() => res.statusText);
     throw new Error(`Failed to update tour ${id}: ${res.status} ${text}`);
   }
-  return (await res.json()) as Tour;
+  const raw = await res.json();
+  return normalizeTour(raw);
 }
 
 // Delete a tour
 export async function deleteTour(id: string | number): Promise<void> {
   const res = await fetch(`${API_BASE}/admin/tours/${id}`, {
     method: "DELETE",
+    headers: { "Accept": "application/json" },
   });
   if (!res.ok) {
     if (res.status === 404) throw new Error("not found");

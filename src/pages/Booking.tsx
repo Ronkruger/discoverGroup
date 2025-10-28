@@ -17,19 +17,31 @@ function formatCurrencyPHP(amount: number) {
   return `PHP ${amount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+// Define an extended type that includes the new fields from TourForm
+type ExtendedTour = Tour & {
+  regularPricePerPerson?: number;
+  promoPricePerPerson?: number;
+  basePricePerDay?: number;
+  durationDays?: number;
+  itinerary?: unknown[];
+  isSaleEnabled?: boolean;
+  saleEndDate?: string | null;
+  allowsDownpayment?: boolean;
+};
+
 export default function Booking(): JSX.Element {
   const { user } = useAuth();
   const location = useLocation();
   const { slug } = useParams<{ slug: string }>();
   const navState = (location.state ?? {}) as {
-    tour?: Tour;
+    tour?: ExtendedTour; // Use extended type
     selectedDate?: string;
     passengers?: number;
     perPerson?: number;
   } | undefined;
   const navigate = useNavigate();
 
-  const [tour, setTour] = useState<Tour | null>(() => navState?.tour ?? null);
+  const [tour, setTour] = useState<ExtendedTour | null>(() => navState?.tour ?? null);
   const [loading, setLoading] = useState<boolean>(tour === null);
   const [selectedDate, setSelectedDate] = useState<string | null>(() => navState?.selectedDate ?? null);
   const [passengers, setPassengers] = useState<number>(() => navState?.passengers ?? 1);
@@ -77,53 +89,65 @@ export default function Booking(): JSX.Element {
     checkStripe();
   }, []);
 
+  /**
+   * Helper to calculate the correct price per person,
+   * respecting the isSaleEnabled and saleEndDate fields.
+   */
+  const getEffectivePrice = (tourData: ExtendedTour): number => {
+    const anyT = tourData as ExtendedTour;
+
+    const saleDate = anyT.saleEndDate ? new Date(anyT.saleEndDate) : null;
+    const isSaleActive = anyT.isSaleEnabled &&
+                         typeof anyT.promoPricePerPerson === 'number' &&
+                         (!saleDate || saleDate > new Date()); // Sale is on if no end date or end date is in the future
+
+    const regular = typeof anyT.regularPricePerPerson === "number" ? anyT.regularPricePerPerson : undefined;
+    const promo = typeof anyT.promoPricePerPerson === "number" ? anyT.promoPricePerPerson : undefined;
+    const days = anyT.durationDays ?? (anyT.itinerary?.length ?? 0);
+    const computed = Math.round((anyT.basePricePerDay ?? 0) * days);
+
+    if (isSaleActive && promo !== undefined) {
+      return promo;
+    } else if (regular !== undefined) {
+      return regular;
+    } else if (promo !== undefined) { // Fallback to promo if regular is missing, even if sale is "off"
+      return promo;
+    } else {
+      return computed; // Last resort
+    }
+  };
+
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
+      // If tour data is passed via state, use it
       if (tour) {
+        // But if perPerson price wasn't passed, calculate it
         if (!perPerson) {
-          const anyT = tour as unknown as {
-            regularPricePerPerson?: number;
-            promoPricePerPerson?: number;
-            basePricePerDay?: number;
-            durationDays?: number;
-            itinerary?: unknown[];
-          };
-          const regular = typeof anyT.regularPricePerPerson === "number" ? anyT.regularPricePerPerson : undefined;
-          const promo = typeof anyT.promoPricePerPerson === "number" ? anyT.promoPricePerPerson : undefined;
-          const days = tour.durationDays ?? (tour.itinerary?.length ?? 0);
-          const computed = Math.round((anyT.basePricePerDay ?? 0) * days);
-          setPerPerson(regular ?? promo ?? computed);
+          setPerPerson(getEffectivePrice(tour));
         }
         setLoading(false);
         return;
       }
 
+      // If no tour data and no slug, we can't do anything
       if (!slug) {
         setLoading(false);
         return;
       }
 
+      // Fetch tour data by slug
       setLoading(true);
       try {
-        const fetched = await fetchTourBySlug(slug);
+        const fetched = (await fetchTourBySlug(slug)) as ExtendedTour;
         if (!cancelled) {
           setTour(fetched);
+          // If tour was fetched, calculate price if not passed in state
           if (fetched && !perPerson) {
-            const anyT = fetched as unknown as {
-              regularPricePerPerson?: number;
-              promoPricePerPerson?: number;
-              basePricePerDay?: number;
-              durationDays?: number;
-              itinerary?: unknown[];
-            };
-            const regular = typeof anyT.regularPricePerPerson === "number" ? anyT.regularPricePerPerson : undefined;
-            const promo = typeof anyT.promoPricePerPerson === "number" ? anyT.promoPricePerPerson : undefined;
-            const days = fetched.durationDays ?? (fetched.itinerary?.length ?? 0);
-            const computed = Math.round((anyT.basePricePerDay ?? 0) * days);
-            setPerPerson(regular ?? promo ?? computed);
+            setPerPerson(getEffectivePrice(fetched));
           }
+          // Set other details from navState if they exist
           if (navState?.selectedDate) setSelectedDate(navState.selectedDate);
           if (navState?.passengers) setPassengers(navState.passengers);
         }
@@ -139,7 +163,7 @@ export default function Booking(): JSX.Element {
     return () => {
       cancelled = true;
     };
-  }, [navState?.passengers, navState?.selectedDate, perPerson, slug, tour]);
+  }, [navState?.passengers, navState?.selectedDate, perPerson, slug, tour]); // Dependencies remain the same
 
   const total = (perPerson ?? 0) * Math.max(1, passengers);
   

@@ -1,3 +1,13 @@
+// Helper to validate image URLs against CSP
+function isSafeImageUrl(url: string | undefined): boolean {
+  if (!url) return false;
+  // Allow only http(s) URLs or relative URLs
+  return (
+    url.startsWith("http://") ||
+    url.startsWith("https://") ||
+    url.startsWith("/")
+  );
+}
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState, useRef, type JSX } from "react";
 import { fetchTourBySlug } from "../api/tours";
@@ -34,6 +44,19 @@ export default function TourDetail(): JSX.Element {
   const [usePromoForTotals, setUsePromoForTotals] = useState(false);
   const [stopsMapOpen, setStopsMapOpen] = useState(false);
 
+  // Use galleryImages if available, fallback to images
+  const images: string[] = React.useMemo(() => {
+    if (tour?.galleryImages && Array.isArray(tour.galleryImages) && tour.galleryImages.length > 0) {
+      return tour.galleryImages;
+    }
+    if (Array.isArray(tour?.images)) {
+      return tour.images;
+    }
+    return [];
+  }, [tour?.galleryImages, tour?.images]);
+    // Debug: log images array used for gallery
+    console.log("images for gallery", images);
+
   const carouselTimerRef = useRef<number | null>(null);
   // datesRef is the container for the date buttons (grid / vertical)
   const datesRef = useRef<HTMLDivElement | null>(null);
@@ -46,6 +69,11 @@ export default function TourDetail(): JSX.Element {
         const t = await fetchTourBySlug(slug);
         if (cancelled) return;
         setTour(t);
+          // Debug: log galleryImages and full tour object
+          if (t) {
+            console.log("tour.galleryImages", t.galleryImages);
+            console.log("tour", t);
+          }
         if (t) {
           const defaultDate =
             t.travelWindow?.start ??
@@ -66,11 +94,9 @@ export default function TourDetail(): JSX.Element {
 
   // Autoplay for carousel
   useEffect(() => {
-    if (tour?.images && tour.images.length > 1) {
+    if (images.length > 1) {
       carouselTimerRef.current = window.setInterval(() => {
-        setCarouselIndex((i) =>
-          tour.images ? (i + 1) % tour.images.length : 0
-        );
+        setCarouselIndex((i) => (images.length ? (i + 1) % images.length : 0));
       }, 4500);
       return () => {
         if (carouselTimerRef.current) {
@@ -84,7 +110,7 @@ export default function TourDetail(): JSX.Element {
         carouselTimerRef.current = null;
       }
     }
-  }, [tour]);
+  }, [images]);
 
   // scroll helper (used by keyboard navigation)
   function scrollDateIntoView(date?: string) {
@@ -289,15 +315,15 @@ export default function TourDetail(): JSX.Element {
 
   // UI handlers
   function prevImage() {
-    if (!tour || !tour.images || tour.images.length === 0) return;
+    if (!images || images.length === 0) return;
     setCarouselIndex((i) => {
-      const len = tour.images?.length ?? 1;
+      const len = images.length;
       return (i - 1 + len) % len;
     });
   }
   function nextImage() {
-    if (!tour || !tour.images || tour.images.length === 0) return;
-    setCarouselIndex((i) => (i + 1) % ((tour.images?.length ?? 1)));
+    if (!images || images.length === 0) return;
+    setCarouselIndex((i) => (i + 1) % images.length);
   }
 
   function openGallery(index = 0) {
@@ -533,7 +559,7 @@ export default function TourDetail(): JSX.Element {
           <div className="relative mb-4">
             <div className="rounded-lg overflow-hidden shadow-xl">
               <div className="relative w-full h-48 bg-slate-800 rounded">
-                {tour && tour.images && tour.images.length > 0 ? (
+                {tour && tour.images && tour.images.length > 0 && isSafeImageUrl(tour.images[carouselIndex]) ? (
                   <img
                     src={tour.images[carouselIndex]}
                     alt={`${tour.title} image ${carouselIndex + 1}`}
@@ -622,7 +648,7 @@ export default function TourDetail(): JSX.Element {
             <div className="rounded-lg overflow-hidden shadow-xl">
               {/* Carousel */}
               <div className="relative w-full h-80 md:h-[380px] bg-slate-800 rounded">
-                {tour && tour.images && tour.images.length > 0 ? (
+                {tour && tour.images && tour.images.length > 0 && isSafeImageUrl(tour.images[carouselIndex]) ? (
                   <img
                     src={tour.images[carouselIndex]}
                     alt={`${tour.title} image ${carouselIndex + 1}`}
@@ -835,7 +861,7 @@ export default function TourDetail(): JSX.Element {
                   <div className="mt-3 flex gap-2">
                     {tour.additionalInfo.countries.slice(0, 3).map((c: { name: string; image?: string }, i: number) => (
                       <div key={i} className="w-20 h-12 overflow-hidden rounded border bg-black/5">
-                        {c.image ? <img src={c.image} alt={c.name} className="w-full h-full object-cover" /> : <div className="text-xs text-slate-300 p-2">{c.name}</div>}
+                        {c.image && isSafeImageUrl(c.image) ? <img src={c.image} alt={c.name} className="w-full h-full object-cover" /> : <div className="text-xs text-slate-300 p-2">{c.name}</div>}
                       </div>
                     ))}
                     {tour.additionalInfo.countries.length > 3 && <div className="text-xs text-slate-300 self-end">+{tour.additionalInfo.countries.length - 3}</div>}
@@ -891,14 +917,32 @@ export default function TourDetail(): JSX.Element {
           <div className="max-w-4xl w-full mx-4 bg-transparent">
             <div className="relative">
               <button onClick={() => setGalleryOpen(false)} className="absolute right-2 top-2 z-50 bg-white/10 text-white rounded-full p-2">✕</button>
-              {tour && tour.images && tour.images.length > 0 && (
-                <img src={tour.images[galleryIndex]} alt={`Gallery ${galleryIndex + 1}`} className="w-full h-[70vh] object-contain" />
+              {/* DEBUG: Render image unconditionally and overlay src */}
+              {images.length > 0 && (
+                <>
+                  <img
+                    src={images[galleryIndex]}
+                    alt={`Gallery ${galleryIndex + 1}`}
+                    className="w-full h-[70vh] object-contain border-2 border-yellow-400"
+                    onLoad={e => {
+                      const img = e.currentTarget;
+                      console.log('Gallery image loaded:', img.src, 'naturalWidth:', img.naturalWidth, 'naturalHeight:', img.naturalHeight);
+                    }}
+                    onError={e => {
+                      const img = e.currentTarget;
+                      console.error('Gallery image failed to load:', img.src);
+                    }}
+                  />
+                  <div style={{position:'absolute',top:10,left:10,zIndex:1000,color:'yellow',background:'rgba(0,0,0,0.7)',padding:'6px',fontSize:'12px',maxWidth:'80vw',wordBreak:'break-all'}}>
+                    <b>DEBUG src:</b> {images[galleryIndex]}
+                  </div>
+                </>
               )}
               <div className="absolute left-4 top-1/2 -translate-y-1/2">
                 <button
                   onClick={() => {
-                    if (tour && tour.images && tour.images.length > 0) {
-                      setGalleryIndex((i) => (i - 1 + tour.images!.length) % tour.images!.length);
+                    if (images.length > 0) {
+                      setGalleryIndex((i) => (i - 1 + images.length) % images.length);
                     }
                   }}
                   className="bg-white/10 text-white rounded-full p-2"
@@ -907,8 +951,8 @@ export default function TourDetail(): JSX.Element {
               <div className="absolute right-4 top-1/2 -translate-y-1/2">
                 <button
                   onClick={() => {
-                    if (tour && tour.images && tour.images.length > 0) {
-                      setGalleryIndex((i) => (i + 1) % ((tour.images?.length ?? 1)));
+                    if (images.length > 0) {
+                      setGalleryIndex((i) => (i + 1) % images.length);
                     }
                   }}
                   className="bg-white/10 text-white rounded-full p-2"

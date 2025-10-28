@@ -1,3 +1,13 @@
+// Helper to validate image URLs against CSP
+function isSafeImageUrl(url: string | undefined): boolean {
+  if (!url) return false;
+  // Allow only http(s) URLs or relative URLs
+  return (
+    url.startsWith("http://") ||
+    url.startsWith("https://") ||
+    url.startsWith("/")
+  );
+}
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useEffect, useRef, useState, type JSX, type ChangeEvent } from "react";
 import type { Tour, Stop } from "../types";
@@ -813,7 +823,11 @@ export default function TourBuilder(): JSX.Element {
 
           <aside className="space-y-6">
             <div className="rounded-3xl card-glass shadow-lg overflow-hidden">
-              <img src={tour.images?.[0] ?? "/assets/placeholder.jpg"} alt={tour.title} className="w-full h-36 object-cover" />
+              <img
+                src={isSafeImageUrl(tour.images?.[0]) ? tour.images?.[0] : "/assets/placeholder.jpg"}
+                alt={tour.title}
+                className="w-full h-36 object-cover"
+              />
               <div className="p-6 space-y-5 text-slate-200">
                 <div>
                   <div className="text-xs text-slate-400">Tour Details</div>

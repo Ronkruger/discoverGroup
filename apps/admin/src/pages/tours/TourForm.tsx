@@ -1,3 +1,4 @@
+
 import React, { JSX, useState, useEffect } from "react";
 import { createTour, updateTour, fetchTourById, type Tour } from "../../services/apiClient";
 import { fetchContinents } from "../../../../../src/api/tours";
@@ -10,6 +11,53 @@ import {
   DollarSign,
   Camera
 } from "lucide-react";
+import { createClient } from '@supabase/supabase-js';
+
+// --- Supabase Upload Helper ---
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+console.log('supabaseUrl:', supabaseUrl);
+console.log('supabaseAnonKey:', supabaseAnonKey);
+const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
+
+async function uploadImageToSupabase(
+  file: File,
+  bucket: string = 'tour-images',
+  tourId?: string,
+  label?: string
+): Promise<string> {
+  // Accept tourId and label for foldered storage
+  // Usage: uploadImageToSupabase(file, 'tour-images', tourId, label)
+  const filePath = tourId && label
+    ? `${tourId}/${label}-${Date.now()}-${file.name}`
+    : `${Date.now()}-${file.name}`;
+  console.log('[Supabase Upload] Attempting upload:', {
+    file,
+    fileType: file?.type,
+    fileSize: file?.size,
+    bucket,
+    filePath,
+    policyHint: 'Ensure your Supabase storage policy allows INSERT for public/anons.'
+  });
+  const response = await supabase.storage.from(bucket).upload(filePath, file);
+  console.log('[Supabase Upload] Raw response:', response);
+  const { error, data } = response;
+  if (error) {
+    console.error('[Supabase Upload] Error:', error.message, error);
+    alert('Supabase upload failed: ' + error.message);
+    return '';
+  }
+  // Get public URL
+  const { publicUrl } = supabase.storage.from(bucket).getPublicUrl(filePath).data;
+  console.log('[Supabase Upload] Success. Public URL:', publicUrl, 'Data:', data);
+  return publicUrl;
+}
+
+// Simulate backend API for image record creation
+async function createImageRecord(label: 'main' | 'gallery'): Promise<{ id: string; label: string; url?: string }> {
+  // Replace with real API call if available
+  return { id: `${label}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, label };
+}
 
 const LINE_OPTIONS = [
   { value: "", label: "Select Line" },
@@ -20,14 +68,38 @@ const LINE_OPTIONS = [
 ];
 
 interface ExtendedTour extends Tour {
-  regularPricePerPerson?: number;
-  promoPricePerPerson?: number;
-  shortDescription?: string;
-  departureDates?: string[];
-  isSaleEnabled?: boolean;
-  saleEndDate?: string | null;
-  bookingPdfUrl?: string;
+  title: string;
+  slug: string;
+  summary: string;
+  shortDescription: string;
+  line: string;
+  continent: string;
+  durationDays: number;
+  guaranteedDeparture: boolean;
+  bookingPdfUrl: string;
+  regularPricePerPerson: number;
+  promoPricePerPerson: number;
+  basePricePerDay: number;
+  isSaleEnabled: boolean;
+  saleEndDate: string;
+  travelWindow: { start: string; end: string };
+  departureDates: string[];
+  highlights: string[];
+  mainImage: string;
+  galleryImages: string[];
+  relatedImages: string[];
+  itinerary: { day: number; title: string; description: string }[];
+  fullStops: { city: string; country: string; days?: number }[];
+  additionalInfo: {
+    countriesVisited: string[];
+    startingPoint: string;
+    endingPoint: string;
+    mainCities: Record<string, string[]>;
+    countries: CountryEntry[];
+  };
+
 }
+
 
 interface CountryEntry {
   name: string;
@@ -60,7 +132,9 @@ interface TourFormData {
 
   // Content
   highlights: string[];
-  images: string[];
+  mainImage: string;
+  galleryImages: string[];
+  relatedImages: string[];
 
   // Itinerary
   itinerary: { day: number; title: string; description: string }[];
@@ -78,13 +152,6 @@ interface TourFormData {
 }
 
 export default function TourForm(): JSX.Element {
-  const navigate = useNavigate();
-  const { id } = useParams();
-  const isEdit = Boolean(id);
-
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState<TourFormData>({
@@ -97,36 +164,46 @@ export default function TourForm(): JSX.Element {
     durationDays: 7,
     guaranteedDeparture: false,
     bookingPdfUrl: "",
-
     regularPricePerPerson: "",
     promoPricePerPerson: "",
     basePricePerDay: "",
-    // init sale fields
     isSaleEnabled: false,
     saleEndDate: "",
-
     travelWindow: { start: "", end: "" },
     departureDates: [],
-
     highlights: [],
-    images: [],
-
+    mainImage: "",
+    galleryImages: [],
+    relatedImages: [],
     itinerary: [],
-
     fullStops: [],
     additionalInfo: {
       countriesVisited: [],
       startingPoint: "",
       endingPoint: "",
       mainCities: {},
-      countries: [] // initialize countries list
+      countries: []
     }
   });
 
+  // Dynamic gallery upload fields
+  const [galleryFields, setGalleryFields] = useState<string[]>([]);
+  // Gallery modal state for galleryImages
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const isEdit = Boolean(id);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   // Continents for dropdown
   const [continents, setContinents] = useState<string[]>([]);
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-
+  // Sync galleryFields with formData.galleryImages
+  useEffect(() => {
+    setGalleryFields(formData.galleryImages.length ? formData.galleryImages : [""]);
+  }, [formData.galleryImages]);
   // Helper function to generate slug from title
   const generateSlug = (title: string): string => {
     return title
@@ -186,7 +263,9 @@ export default function TourForm(): JSX.Element {
           departureDates: tour.departureDates || [],
 
           highlights: tour.highlights || [],
-          images: tour.images || [],
+          mainImage: typeof tour.mainImage === 'string' ? tour.mainImage : "",
+          galleryImages: Array.isArray(tour.galleryImages) ? tour.galleryImages : [],
+          relatedImages: Array.isArray(tour.relatedImages) ? tour.relatedImages : [],
 
           itinerary: (tour.itinerary || []).map((it, i) => ({
             day: typeof it.day === "number" ? it.day : i + 1,
@@ -224,18 +303,18 @@ export default function TourForm(): JSX.Element {
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-')
         .trim();
-      setFormData(prev => ({ ...prev, slug }));
+  setFormData((prev: TourFormData) => ({ ...prev, slug }));
     }
   }, [formData.title, isEdit]);
 
   // Form handlers
   const handleInputChange = <K extends keyof TourFormData>(field: K, value: TourFormData[K]) => {
-    setFormData(prev => ({ ...prev, [field]: value } as unknown as TourFormData));
+  setFormData((prev: TourFormData) => ({ ...prev, [field]: value } as unknown as TourFormData));
   };
 
   // ----- Countries to Visit helpers -----
   function addCountry() {
-    setFormData(prev => ({
+  setFormData((prev: TourFormData) => ({
       ...prev,
       additionalInfo: {
         ...prev.additionalInfo,
@@ -245,7 +324,7 @@ export default function TourForm(): JSX.Element {
   }
 
   function updateCountry(index: number, field: "name" | "image", value: string) {
-    setFormData(prev => {
+  setFormData((prev: TourFormData) => {
       const countries = [...(prev.additionalInfo.countries || [])];
       countries[index] = { ...(countries[index] || { name: "", image: "" }), [field]: value };
       return { ...prev, additionalInfo: { ...prev.additionalInfo, countries } };
@@ -253,7 +332,7 @@ export default function TourForm(): JSX.Element {
   }
 
   function removeCountry(index: number) {
-    setFormData(prev => {
+  setFormData((prev: TourFormData) => {
       const countries = [...(prev.additionalInfo.countries || [])];
       countries.splice(index, 1);
       return { ...prev, additionalInfo: { ...prev.additionalInfo, countries } };
@@ -262,8 +341,9 @@ export default function TourForm(): JSX.Element {
 
   function handleCountryFile(index: number, file?: File | null) {
     if (!file) return;
-    const objectUrl = URL.createObjectURL(file);
-    updateCountry(index, "image", objectUrl);
+    uploadImageToSupabase(file, 'country-images').then(url => {
+      if (url) updateCountry(index, "image", url);
+    });
   }
   // ---------------------------------------
 
@@ -439,7 +519,7 @@ export default function TourForm(): JSX.Element {
                   <option value="">
                     {continents.length === 0 ? "🔄 Loading continents..." : "🌍 Select Continent"}
                   </option>
-                  {continents.map(continent => (
+                  {continents.map((continent: string) => (
                     <option key={continent} value={continent}>
                       {continent === "Europe" ? "🇪🇺" : continent === "Asia" ? "🌏" : "🌎"} {continent}
                     </option>
@@ -671,7 +751,7 @@ export default function TourForm(): JSX.Element {
                   Departure Date Ranges
                 </label>
 
-                {formData.departureDates.map((dateRange, index) => (
+                {formData.departureDates.map((dateRange: string, index: number) => (
                   <div key={index} className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
                     <span className="text-sm font-medium text-gray-600 w-8">#{index + 1}</span>
                     <input
@@ -688,7 +768,7 @@ export default function TourForm(): JSX.Element {
                     <button
                       type="button"
                       onClick={() => {
-                        const newDates = formData.departureDates.filter((_, i) => i !== index);
+                        const newDates = formData.departureDates.filter((_: string, i: number) => i !== index);
                         handleInputChange("departureDates", newDates);
                       }}
                       className="text-red-500 hover:text-red-700 px-3 py-2 rounded-lg hover:bg-red-50"
@@ -764,82 +844,184 @@ export default function TourForm(): JSX.Element {
               </div>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-8">
+              {/* Main Image Upload */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  📸 Upload Images
-                </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-purple-400 hover:bg-purple-50 transition-all duration-200">
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={(e) => {
-                      const files = Array.from(e.target.files || []);
-                      setImageFiles(files);
-                      // Convert files to URLs for preview and form data
-                      const imageUrls = files.map(file => URL.createObjectURL(file));
-                      handleInputChange("images", imageUrls);
-                    }}
-                    className="hidden"
-                    id="image-upload"
-                  />
-                  <label
-                    htmlFor="image-upload"
-                    className="cursor-pointer flex flex-col items-center"
-                  >
-                    <Camera className="text-gray-400 mb-4" size={56} />
-                    <span className="text-xl font-semibold text-gray-700 mb-2">Click to upload images</span>
-                    <span className="text-gray-500">or drag and drop your photos here</span>
-                  </label>
-                </div>
-                <p className="text-sm text-gray-500 mt-2">
-                  📝 Supported formats: JPG, PNG, GIF • Maximum 10 images • Each image up to 5MB
-                </p>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">Main Image (required)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    // Create record with label 'main'
+                    const record = await createImageRecord('main');
+                    const url = await uploadImageToSupabase(file, 'tour-images', id || formData.slug, 'main');
+                    // Update record with URL (simulate)
+                    record.url = url;
+                    if (url) handleInputChange("mainImage", url);
+                  }}
+                  className="mb-2"
+                />
+                {formData.mainImage && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <img src={formData.mainImage} alt="Main Tour" className="w-48 h-32 object-cover rounded border" />
+                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-semibold">Main</span>
+                  </div>
+                )}
               </div>
 
-              {/* Image Preview */}
-              {formData.images.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {formData.images.map((image, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={image}
-                        alt={`Tour image ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-lg border border-gray-200"
-                      />
+              {/* Gallery Images Upload */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">Tour Gallery Images</label>
+                <div className="space-y-2">
+                  {galleryFields.map((img: string, idx: number) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      {img ? (
+                        <img src={img} alt={`Gallery ${idx + 1}`} className="w-24 h-16 object-cover rounded border" />
+                      ) : (
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            const record = await createImageRecord('gallery');
+                            const url = await uploadImageToSupabase(file, 'tour-images', id || formData.slug, 'gallery');
+                            record.url = url;
+                            // Update galleryFields and formData.galleryImages
+                            const newFields = [...galleryFields];
+                            newFields[idx] = url;
+                            setGalleryFields(newFields);
+                            handleInputChange("galleryImages", newFields.filter(Boolean));
+                          }}
+                          className="mb-2"
+                        />
+                      )}
                       <button
                         type="button"
                         onClick={() => {
-                          const newImages = formData.images.filter((_, i) => i !== index);
-                          const newFiles = imageFiles.filter((_, i) => i !== index);
-                          handleInputChange("images", newImages);
-                          setImageFiles(newFiles);
+                          const newFields = galleryFields.filter((_: string, i: number) => i !== idx);
+                          setGalleryFields(newFields);
+                          handleInputChange("galleryImages", newFields.filter(Boolean));
                         }}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
-                      >
-                        ×
-                      </button>
+                        className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-semibold"
+                      >Remove</button>
                     </div>
                   ))}
+                  <button
+                    type="button"
+                    onClick={() => setGalleryFields([...galleryFields, ""])}
+                    className="px-4 py-2 bg-purple-100 text-purple-700 rounded font-semibold mt-2"
+                  >+ Add Gallery Image</button>
                 </div>
-              )}
+                {formData.galleryImages.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+                    {formData.galleryImages.map((image: string, index: number) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={image}
+                          alt={`Gallery ${index + 1}`}
+                          className="w-full h-24 object-cover rounded border cursor-pointer"
+                          onClick={() => { setGalleryIndex(index); setGalleryOpen(true); }}
+                        />
+                        <span className="absolute top-2 left-2 bg-white text-purple-700 border border-purple-300 rounded-full px-2 py-1 text-xs font-bold shadow">Gallery</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // Set as main image
+                            handleInputChange("mainImage", image);
+                          }}
+                          className="absolute bottom-2 left-2 bg-blue-100 text-blue-700 border border-blue-300 rounded-full px-2 py-1 text-xs font-bold shadow hover:bg-blue-200"
+                        >
+                          Set as Main
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // Remove image from gallery
+                            const newGallery = formData.galleryImages.filter((_: string, i: number) => i !== index);
+                            handleInputChange("galleryImages", newGallery);
+                          }}
+                          className="absolute bottom-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-              {/* Fallback URL input for existing images */}
+                {/* Gallery Modal */}
+                {galleryOpen && formData.galleryImages.length > 0 && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+                    <div className="relative bg-white rounded-lg shadow-lg p-4 max-w-xl w-full flex flex-col items-center">
+                      <img
+                        src={formData.galleryImages[galleryIndex]}
+                        alt={`Gallery image ${galleryIndex + 1}`}
+                        className="w-full h-96 object-contain rounded-lg mb-4"
+                      />
+                      <div className="flex gap-4 mb-2">
+                        <button
+                          type="button"
+                          onClick={() => setGalleryIndex((galleryIndex - 1 + formData.galleryImages.length) % formData.galleryImages.length)}
+                          className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                        >
+                          Prev
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setGalleryIndex((galleryIndex + 1) % formData.galleryImages.length)}
+                          className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                        >
+                          Next
+                        </button>
+                      </div>
+                      <div className="flex gap-2 mb-2">
+                        {formData.galleryImages.map((img: string, idx: number) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            className={`w-4 h-4 rounded-full border ${galleryIndex === idx ? 'bg-blue-500 border-blue-700' : 'bg-gray-300 border-gray-400'}`}
+                            onClick={() => setGalleryIndex(idx)}
+                          />
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setGalleryOpen(false)}
+                        className="mt-2 px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Related Images Upload */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Or add image URLs (one per line)
-                </label>
-                <textarea
-                  rows={3}
-                  value={formData.images.join('\n')}
-                  onChange={(e) => {
-                    const urls = e.target.value.split('\n').filter(url => url.trim() !== '');
-                    handleInputChange("images", urls);
+                <label className="block text-sm font-semibold text-gray-700 mb-3">Other Related Images</label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const files = Array.from(e.target.files || []);
+                    if (files.length === 0) return;
+                    const urls = await Promise.all(files.map(async (file) => await uploadImageToSupabase(file, 'tour-images', id || formData.slug, 'related')));
+                    const validUrls = urls.filter(url => url);
+                    handleInputChange("relatedImages", [...formData.relatedImages, ...validUrls]);
                   }}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
+                  className="mb-2"
                 />
+                {formData.relatedImages.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {formData.relatedImages.map((image: string, index: number) => (
+                      <img key={index} src={image} alt={`Related ${index + 1}`} className="w-20 h-16 object-cover rounded border" />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -864,7 +1046,7 @@ export default function TourForm(): JSX.Element {
 
             <div className="space-y-4">
               {(formData.additionalInfo.countries && formData.additionalInfo.countries.length > 0) ? (
-                formData.additionalInfo.countries.map((c, idx) => (
+                formData.additionalInfo.countries.map((c: CountryEntry, idx: number) => (
                   <div key={idx} className="grid grid-cols-1 md:grid-cols-6 gap-3 items-center bg-gray-50 p-3 rounded">
                     <div className="md:col-span-2">
                       <label className="block text-xs text-gray-600 mb-1">Country</label>
@@ -883,7 +1065,6 @@ export default function TourForm(): JSX.Element {
                         type="url"
                         value={c.image ?? ""}
                         onChange={(e) => updateCountry(idx, "image", e.target.value)}
-                        placeholder="https://example.com/country.jpg"
                         className="w-full border border-gray-300 rounded px-3 py-2"
                       />
                       <div className="text-xs text-gray-500 mt-1">Or upload an image file below — a preview will be shown.</div>
@@ -959,3 +1140,5 @@ export default function TourForm(): JSX.Element {
     </div>
   );
 }
+
+

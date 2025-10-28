@@ -4,16 +4,7 @@ export type { Tour };
 export type TourPayload = Partial<Tour>;
 
 // Prefer the admin-specific env var, fall back to the general VITE_API_URL, then localhost for dev
-let _env: Record<string, unknown> = {};
-try {
-  const getImportMetaEnv = new Function(
-    'try { return import.meta.env } catch (e) { return undefined }'
-  ) as () => Record<string, unknown> | undefined;
-  _env = getImportMetaEnv() || {};
-} catch {
-  _env = {};
-}
-const API_BASE = (_env.VITE_ADMIN_API_URL as string) || (_env.VITE_API_URL as string) || "http://localhost:4000";
+const API_BASE = import.meta.env.VITE_ADMIN_API_URL || import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 // Helper to extract a stable id string from a returned tour object.
 // Prefer the Mongo _id where possible (it may be a string or an object like { $oid: '...' }).

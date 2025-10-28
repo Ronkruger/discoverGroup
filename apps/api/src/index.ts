@@ -8,6 +8,8 @@ import paymentsRouter from "./routes/payments";
 import emailRouter from "./routes/email";
 import authRouter from "./routes/auth";
 import { connectDB } from "./db";
+import path from "path";
+import uploadsRouter from "./routes/uploads";
 
 console.log("Server starting, environment variables:");
 console.log("STRIPE_SECRET_KEY:", process.env.STRIPE_SECRET_KEY ? "Available" : "Missing");
@@ -15,6 +17,8 @@ console.log("PORT:", process.env.PORT || "4000 (default)");
 
 const app = express();
 connectDB();
+app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
+app.use("/api/uploads", uploadsRouter);
 // During development allow any localhost origin to simplify running multiple dev servers on different ports.
 if (process.env.NODE_ENV === 'production') {
   app.use(cors({

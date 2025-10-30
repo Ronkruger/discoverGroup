@@ -779,11 +779,21 @@ export default function Booking(): JSX.Element {
                           >
                             <option value="">Select departure date</option>
                             {tour.departureDates && tour.departureDates.length > 0 ? (
-                              tour.departureDates.map((dateRange, index) => (
-                                <option key={index} value={dateRange}>
-                                  {dateRange}
-                                </option>
-                              ))
+                              tour.departureDates.map((dateRange, index) => {
+                                const value =
+                                  typeof dateRange === "string"
+                                    ? dateRange
+                                    : `${dateRange.start} - ${dateRange.end}`;
+                                const label =
+                                  typeof dateRange === "string"
+                                    ? dateRange
+                                    : `${new Date(dateRange.start).toLocaleDateString()} - ${new Date(dateRange.end).toLocaleDateString()}`;
+                                return (
+                                  <option key={index} value={value}>
+                                    {label}
+                                  </option>
+                                );
+                              })
                             ) : tour.travelWindow ? (
                               <option value={`${tour.travelWindow.start} - ${tour.travelWindow.end}`}>
                                 {`${new Date(tour.travelWindow.start).toLocaleDateString()} - ${new Date(tour.travelWindow.end).toLocaleDateString()}`}

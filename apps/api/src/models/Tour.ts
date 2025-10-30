@@ -53,7 +53,10 @@ const TourSchema = new Schema<ITour>({
   images: [{ type: String }],
   guaranteedDeparture: { type: Boolean, default: false },
   bookingPdfUrl: { type: String },
-  departureDates: [{ type: String }],
+  departureDates: [{
+    start: { type: String, required: true },
+    end: { type: String, required: true }
+  }],
   travelWindow: {
     start: { type: String },
     end: { type: String }

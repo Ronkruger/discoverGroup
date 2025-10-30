@@ -200,16 +200,7 @@ export default function Header(): React.ReactElement {
             </div>
 
             {/* Admin panel button (desktop) */}
-            {ADMIN_URL && (
-              <a
-                href={ADMIN_URL}
-                target="_blank"
-                rel="noopener noreferrser"
-                className="ml-2 px-3 py-1 rounded-md bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition"
-              >
-                Admin panel
-              </a>
-            )}
+     
           </div>
         </div>
       </div>

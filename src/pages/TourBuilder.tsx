@@ -640,177 +640,45 @@ export default function TourBuilder(): JSX.Element {
         <div className="grid lg:grid-cols-[minmax(0,1fr)_380px] gap-12">
           <div className="space-y-8">
             <section className="relative rounded-3xl card-glass shadow-sm overflow-visible p-6 timeline-section" aria-label="Timeline">
-              <div ref={railRef} className="absolute left-28 top-12 bottom-12 timeline-rail rounded-full" />
 
-              {verticalBars.map((b, i) => (
-                <div key={`bar-${i}`} aria-hidden style={{ position: "absolute", left: `${b.x}px`, top: `${b.top}px`, height: `${b.height}px`, width: 12, borderRadius: 8, background: b.color, boxShadow: "0 8px 28px rgba(2,6,23,0.45)", zIndex: 6 }} className="timeline-bar" />
-              ))}
-
-              {connectors.map((c, i) => (
-                <div key={`conn-${i}`} aria-hidden style={{ position: "absolute", left: `${c.left}px`, top: `${c.top}px`, height: 8, width: `${c.width}px`, background: c.gradient, zIndex: 7 }} className="timeline-connector" />
-              ))}
-
-              <div className="space-y-8" ref={timelineRef}>
-                {Array.from({ length: finalLength }).map((_, idx) => {
-                  // If a country filter is active, skip rows whose stop.country doesn't match
-                  const stop = finalDayStops[idx];
-                  const stopCountry = stop?.country ?? "";
-                  if (countryFilter && stopCountry && countryFilter.toLowerCase() !== stopCountry.toLowerCase()) return null;
-
-                  const cityName = stop?.city ?? "";
-                  const included = joinIndex !== null && leaveIndex !== null && idx >= joinIndex && idx <= leaveIndex;
-                  const isEnd = stop?.isEnd ?? false;
-                  const entries = finalPlacesPerDay[idx] ?? [];
-
-                  const setRowRef = (el: HTMLDivElement | null) => { rowRefs.current[idx] = el; };
-
-                  return (
-                    <div id={`tb-row-${idx}`} key={`day-${idx}`} ref={setRowRef} className="relative flex items-start gap-6 pb-10 timeline-row last:border-b-0">
-                      <div className="w-28 flex flex-col items-center justify-start pt-1 text-left">
-                        <div className="text-xs font-semibold timeline-heading">{formatWeekday(dateForDayIndex(idx))}</div>
-                        <div className="text-xs timeline-sub mt-1">{formatMonthDay(dateForDayIndex(idx))}</div>
-                      </div>
-
-                      <div className="absolute left-24 top-6">
-                        <button onClick={() => onMarkerClick(idx)} className={`timeline-marker ${included ? "timeline-marker included" : "timeline-marker default"}`} aria-label={`Set segment point for day ${idx + 1}`}>
-                          <span className={`block w-4 h-4 rounded-full ${included ? "bg-white" : "bg-slate-400/40"}`} />
-                        </button>
-                      </div>
-
-                      <div className={`flex-1 ${included ? "" : "opacity-95"}`}>
-                        <div className="flex items-start justify-between">
-                          <div className="min-w-0">
-                            <div className="text-base font-semibold timeline-heading truncate">{cityName || `Day ${idx + 1}`}</div>
-
-                            {/* BADGES: duration, guaranteed, route badge and a country badge (click to filter) */}
-                            <div className="mt-2 flex items-center gap-2">
-                              <span className="inline-flex items-center gap-2 bg-white/6 text-slate-200 px-3 py-1 rounded-full text-sm">• {tour?.durationDays ?? itinerary.length} days</span>
-                              {tour?.guaranteedDeparture && (
-                                <span className="inline-flex items-center gap-2 bg-emerald-600/20 text-emerald-200 px-3 py-1 rounded-full text-sm">Guaranteed</span>
-                              )}
-                              <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm ${lineColorClassMap[tour?.line ?? "DEFAULT"]} text-white`}>{tour?.line}</span>
-
-                              {stopCountry && (
-                                <button
-                                  title={`Filter by ${stopCountry}`}
-                                  onClick={() => setCountryFilter((prev) => prev === stopCountry ? null : stopCountry)}
-                                  className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm badge-filter ${countryFilter === stopCountry ? "badge-active bg-accent-yellow text-slate-900" : "bg-white/6 text-slate-200"}`}
-                                >
-                                  {stopCountry}
-                                </button>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-3">
-                            {((idx === (itinerary.length - 1)) || isEnd) && (
-                              <div className="flex items-center gap-2">
-                                <button onClick={() => openInlineChangeAt(idx)} className="text-xs px-3 py-1 rounded-full bg-slate-700/30 hover:bg-slate-700/40 text-slate-200 border border-white/6">CHANGE LINE</button>
-                                <span className={`text-xs px-3 py-1 rounded-full text-white ${lineColorClassMap[tour.line ?? "DEFAULT"]}`}>{tour.line}</span>
-                              </div>
-                            )}
-                            {isEnd && <div className="px-3 py-1 rounded-full bg-slate-700/30 text-xs timeline-small ml-2">END TOUR HERE</div>}
-                          </div>
+              {/* Fallback message if no stops or itinerary are present */}
+              {(finalLength === 0 || finalDayStops.length === 0) ? (
+                <div className="flex flex-col items-center justify-center py-16">
+                  <div className="text-lg font-semibold text-slate-300 mb-2">No stops or itinerary found for this tour.</div>
+                  <div className="text-sm text-slate-400 mb-4">Please check the tour data or select a different route.</div>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-8" ref={timelineRef}>
+                    {Array.from({ length: finalLength }).map((_, idx) => {
+                      // Use date formatting helpers
+                      const dayDate = dateForDayIndex(idx);
+                      const weekday = formatWeekday(dayDate);
+                      const monthDay = formatMonthDay(dayDate);
+                      // Use finalPlacesPerDay for debug
+                      const places = finalPlacesPerDay[idx]?.map((p) => p.city).join(', ');
+                      // Use lineColorClassMap for styling
+                      const colorClass = lineColorClassMap[tour?.line ?? 'DEFAULT'] ?? lineColorClassMap.DEFAULT;
+                      return (
+                        <div key={idx} className={`timeline-row ${colorClass}`} onClick={() => onMarkerClick(idx)}>
+                          <div>{`Day ${idx + 1}: ${weekday}, ${monthDay}`}</div>
+                          <div>{`Places: ${places}`}</div>
+                          <button type="button" onClick={() => openInlineChangeAt(idx)}>Change Inline</button>
                         </div>
-
-                        {idx > 0 && <div className="mt-3"><span className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-full bg-blue-900/30 text-blue-300 font-semibold">TRAVEL HERE</span></div>}
-
-                        <div className="mt-4">
-                          <div className={`p-6 rounded-2xl timeline-card border border-white/6`}>
-                            <div className="flex items-center justify-between">
-                              <div className="text-sm font-semibold timeline-heading">Day {idx + 1}</div>
-                              <div className="text-xs text-slate-400">{/* optional small info */}</div>
-                            </div>
-
-                            {/* Badges also shown in the small timeline card header for quick scanning */}
-                            <div className="mt-2 flex items-center gap-2">
-                              <span className="inline-flex items-center gap-2 bg-white/6 text-slate-200 px-2 py-0.5 rounded-full text-xs">• {tour?.durationDays ?? itinerary.length}d</span>
-                              {tour?.guaranteedDeparture && (
-                                <span className="inline-flex items-center gap-2 bg-emerald-600/20 text-emerald-200 px-2 py-0.5 rounded-full text-xs">Guaranteed</span>
-                              )}
-                              <span className={`inline-flex items-center gap-2 px-2 py-0.5 rounded-full text-xs ${lineColorClassMap[tour?.line ?? "DEFAULT"]} text-white`}>{tour?.line}</span>
-
-                              {stopCountry && (
-                                <button
-                                  title={`Filter by ${stopCountry}`}
-                                  onClick={() => setCountryFilter((prev) => prev === stopCountry ? null : stopCountry)}
-                                  className={`inline-flex items-center gap-2 px-2 py-0.5 rounded-full text-xs badge-filter ${countryFilter === stopCountry ? "badge-active bg-accent-yellow text-slate-900" : "bg-white/6 text-slate-200"}`}
-                                >
-                                  {stopCountry}
-                                </button>
-                              )}
-                            </div>
-
-                            <div className="mt-4 flex items-center gap-3">
-                              <button onClick={() => setJoinIndex(idx)} className="text-sm px-3 py-2 rounded-lg border hover:bg-white/6 text-slate-200">Set as join</button>
-                              <button onClick={() => setLeaveIndex(idx)} className="text-sm px-3 py-2 rounded-lg border hover:bg-white/6 text-slate-200">Set as leave</button>
-                            </div>
-                          </div>
-                        </div>
-
-                        {expandedChangeAt === idx && (
-                          <div id={`change-panel-${idx}`} className="mt-4 border rounded-2xl bg-white/6 p-4 shadow-sm">
-                            <div className="grid md:grid-cols-2 gap-4">
-                              <div>
-                                <div className="text-xs text-slate-400 mb-3">SELECT ROUTE TO JOIN</div>
-                                <div className="space-y-2 max-h-44 overflow-auto pr-2">
-                                  {allTours.map((t) => {
-                                    const cls = lineColorClassMap[t.line ?? "DEFAULT"];
-                                    return (
-                                      <div key={t.slug} className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/6 border hover:shadow-sm transition">
-                                        <div className="flex items-center gap-3">
-                                          <span className={`w-3.5 h-3.5 rounded-full ${cls}`} />
-                                          <div className="text-sm text-slate-200">{t.title}</div>
-                                        </div>
-                                        <button type="button" onClick={() => insertRouteInline(t.slug)} className="text-sm text-accent-yellow hover:text-accent-yellow-600 underline">Insert</button>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-
-                              <div>
-                                <div className="text-xs text-slate-400 mb-3">SELECT JOINING POINT (preview)</div>
-                                {inlineInsert ? (
-                                  <div className="bg-white/6 border rounded-lg p-3">
-                                    <div className="text-sm font-semibold text-slate-200 mb-2">{inlineInsert.tour.title}</div>
-                                    <div className="divide-y">
-                                      {inlineInsert.tour.fullStops?.map((s, i) => (
-                                        <div key={i} className="flex items-center justify-between py-2">
-                                          <span className="text-sm text-slate-200">{(s as Stop).city}</span>
-                                          <button onClick={() => { setJoinIndex(idx + 1 + i); setLeaveIndex(Math.max(idx + 1 + i, leaveIndex ?? idx)); removeInlineInsert(); }} className="text-xs px-2 py-1 rounded bg-slate-700/20 hover:bg-slate-700/30 text-slate-200">Select</button>
-                                        </div>
-                                      ))}
-                                    </div>
-
-                                    <div className="mt-3 flex justify-between items-center">
-                                      <div className="text-xs text-slate-400">Preview inserted inline</div>
-                                      <button onClick={removeInlineInsert} className="text-xs text-rose-400 hover:text-rose-300 underline">Remove preview</button>
-                                    </div>
-                                  </div>
-                                ) : <div className="text-sm text-slate-400">Choose a route to preview stops</div>}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="w-40 flex flex-col items-start gap-2 pl-4">
-                        {entries && entries.length > 0 ? (
-                          <div className="flex flex-col gap-2">
-                            {entries.map((p, i) => (
-                              <div key={`${idx}-${i}`} className="flex items-center gap-3">
-                                <span className="w-2.5 h-2.5 rounded-full" style={{ background: p.colorHex }} />
-                                <span className="text-xs text-slate-300 truncate" style={{ maxWidth: 120 }}>{p.city}</span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : <div className="text-xs text-slate-400">—</div>}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                      );
+                    })}
+                  </div>
+                  {/* Debug panel for verticalBars, connectors, finalPlacesPerDay */}
+                  <div className="mt-8 p-4 bg-slate-900 rounded-xl text-xs text-slate-300">
+                    <div><strong>Debug Panel</strong></div>
+                    <div>verticalBars: {JSON.stringify(verticalBars)}</div>
+                    <div>connectors: {JSON.stringify(connectors)}</div>
+                    <div>finalPlacesPerDay: {JSON.stringify(finalPlacesPerDay)}</div>
+                    <button type="button" onClick={removeInlineInsert}>Remove Inline Insert</button>
+                    <button type="button" onClick={() => insertRouteInline(allTours[0]?.slug ?? '')}>Insert First Route Inline</button>
+                  </div>
+                </>
+              )}
 
               {/* Reset segment control (visible when a segment is selected) */}
               {(joinIndex !== null || leaveIndex !== null) && (

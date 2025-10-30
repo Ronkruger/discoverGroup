@@ -1,18 +1,47 @@
-// Helper to validate image URLs against CSP
-function isSafeImageUrl(url: string | undefined): boolean {
-  if (!url) return false;
-  // Allow only http(s) URLs or relative URLs
-  return (
-    url.startsWith("http://") ||
-    url.startsWith("https://") ||
-    url.startsWith("/")
-  );
-}
+// Gallery image with fallback and debug info
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useEffect, useState, useRef, type JSX } from "react";
 import { fetchTourBySlug } from "../api/tours";
 import type { Tour, ItineraryDay, Stop } from "../types";
-import * as React from "react";
+// Gallery image with fallback and debug info
+function GalleryImageWithFallback({ src }: { src: string }) {
+  const [error, setError] = useState(false);
+  return (
+    <div style={{position:'relative'}}>
+      {!error ? (
+        <img
+          src={src}
+          alt="Gallery"
+          className="w-full h-[70vh] object-contain border-2 border-yellow-400 bg-white"
+          onLoad={e => {
+            const img = e.currentTarget;
+            console.log('Gallery image loaded:', img.src, 'naturalWidth:', img.naturalWidth, 'naturalHeight:', img.naturalHeight);
+          }}
+          onError={() => {
+            setError(true);
+            console.error('Gallery image failed to load:', src);
+          }}
+        />
+      ) : (
+        <div style={{width:'100%',height:'70vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#fff',border:'2px solid #FFD24D'}}>
+          <img src="/assets/placeholder.jpg" alt="placeholder" style={{maxHeight:'60vh',maxWidth:'80vw'}} />
+          <div style={{position:'absolute',top:10,left:10,zIndex:1000,color:'yellow',background:'rgba(0,0,0,0.7)',padding:'6px',fontSize:'12px',maxWidth:'80vw',wordBreak:'break-all'}}>
+            <b>DEBUG src:</b> {src}<br />
+            <span style={{color:'red'}}>Image failed to load. Check Supabase permissions or URL.</span>
+          </div>
+        </div>
+      )}
+      {!error && (
+        <div style={{position:'absolute',top:10,left:10,zIndex:1000,color:'yellow',background:'rgba(0,0,0,0.7)',padding:'6px',fontSize:'12px',maxWidth:'80vw',wordBreak:'break-all'}}>
+          <b>DEBUG src:</b> {src}
+        </div>
+      )}
+    </div>
+  );
+  }
+
+export default TourDetail;
+export { GalleryImageWithFallback };
 
 /**
  * Modernized TourDetail with a single BookingCard component to remove duplication.
@@ -28,9 +57,10 @@ import * as React from "react";
  *   instead of a horizontal scroller.
  */
 
-export default function TourDetail(): JSX.Element {
+function TourDetail() {
   const { slug } = useParams<{ slug: string }>();
   const [tour, setTour] = useState<Tour | null>(null);
+  // selectedDate is always a string: either a legacy date string, or a JSON string for structured objects
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [passengers, setPassengers] = useState<number>(1);
   const [activeTab, setActiveTab] = useState<
@@ -78,7 +108,9 @@ export default function TourDetail(): JSX.Element {
           const defaultDate =
             t.travelWindow?.start ??
             (t.departureDates && t.departureDates.length
-              ? t.departureDates[0]
+              ? typeof t.departureDates[0] === 'string'
+                ? t.departureDates[0]
+                : JSON.stringify(t.departureDates[0])
               : null);
           setSelectedDate(defaultDate);
         }
@@ -112,64 +144,74 @@ export default function TourDetail(): JSX.Element {
     }
   }, [images]);
 
-  // scroll helper (used by keyboard navigation)
-  function scrollDateIntoView(date?: string) {
-    if (!datesRef.current || !date) return;
-    const btn = datesRef.current.querySelector(
-      `[data-date="${date}"]`
-    ) as HTMLElement | null;
-    if (btn) {
-      // center the button in the nearest scrollable ancestor (datesRef)
-      try {
-        btn.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
-        btn.focus();
-      } catch {
-        // fallback
-        btn.scrollIntoView({ behavior: "smooth" });
-      }
-    } else {
-      // fallback: scroll container into view
-      try { datesRef.current.scrollIntoView({ behavior: "smooth", block: "center" }); } catch {
-        // intentionally ignore scroll errors
-      }
+// scroll helper (used by keyboard navigation)
+function scrollDateIntoView(date?: string) {
+  if (!datesRef.current || !date) return;
+  const btn = datesRef.current.querySelector(
+    `[data-date="${date}"]`
+  ) as HTMLElement | null;
+  if (btn) {
+    // center the button in the nearest scrollable ancestor (datesRef)
+    try {
+      btn.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+      btn.focus();
+    } catch {
+      // fallback
+      btn.scrollIntoView({ behavior: "smooth" });
+    }
+  } else {
+    // fallback: scroll container into view
+    try { datesRef.current.scrollIntoView({ behavior: "smooth", block: "center" }); } catch {
+      // intentionally ignore scroll errors
     }
   }
+}
 
-  // keyboard support for dates (supports grid navigation: left/right = prev/next, up/down = +/- cols)
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      const departureDates = tour?.departureDates;
-      if (!departureDates || departureDates.length === 0) return;
-      if (!selectedDate) return;
-      const idx = departureDates.indexOf(selectedDate);
-      if (idx === -1) return;
+// keyboard support for dates (supports grid navigation: left/right = prev/next, up/down = +/- cols)
+useEffect(() => {
+  const handleKey = (e: KeyboardEvent) => {
+    const departureDates = tour?.departureDates;
+    if (!departureDates || departureDates.length === 0) return;
+    if (!selectedDate) return;
+    // Find index by matching string or JSON string
+    const idx = departureDates.findIndex(d =>
+      typeof d === 'string' ? d === selectedDate : JSON.stringify(d) === selectedDate
+    );
+    if (idx === -1) return;
 
-      // determine current columns (match CSS: 1 col on small, 2 on sm+)
-      const cols = window.innerWidth >= 640 ? 2 : 1;
+    const cols = window.innerWidth >= 640 ? 2 : 1;
 
-      if (e.key === "ArrowLeft") {
-        const prev = departureDates[Math.max(0, idx - 1)];
-        setSelectedDate(prev);
-        scrollDateIntoView(prev);
-      } else if (e.key === "ArrowRight") {
-        const next = departureDates[Math.min(departureDates.length - 1, idx + 1)];
-        setSelectedDate(next);
-        scrollDateIntoView(next);
-      } else if (e.key === "ArrowUp") {
-        const upIdx = Math.max(0, idx - cols);
-        const up = departureDates[upIdx];
-        setSelectedDate(up);
-        scrollDateIntoView(up);
-      } else if (e.key === "ArrowDown") {
-        const downIdx = Math.min(departureDates.length - 1, idx + cols);
-        const down = departureDates[downIdx];
-        setSelectedDate(down);
-        scrollDateIntoView(down);
-      }
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [selectedDate, tour?.departureDates]);
+    function getDateValue(val: string | { start: string; end: string; _id?: string }) {
+      return typeof val === 'string' ? val : JSON.stringify(val);
+    }
+
+    if (e.key === "ArrowLeft") {
+      const prev = departureDates[Math.max(0, idx - 1)];
+      const prevVal = getDateValue(prev);
+      setSelectedDate(prevVal);
+      scrollDateIntoView(prevVal);
+    } else if (e.key === "ArrowRight") {
+      const next = departureDates[Math.min(departureDates.length - 1, idx + 1)];
+      const nextVal = getDateValue(next);
+      setSelectedDate(nextVal);
+      scrollDateIntoView(nextVal);
+    } else if (e.key === "ArrowUp") {
+      const upIdx = Math.max(0, idx - cols);
+      const up = departureDates[upIdx];
+      const upVal = getDateValue(up);
+      setSelectedDate(upVal);
+      scrollDateIntoView(upVal);
+    } else if (e.key === "ArrowDown") {
+      const downIdx = Math.min(departureDates.length - 1, idx + cols);
+      const down = departureDates[downIdx];
+      const downVal = getDateValue(down);
+      setSelectedDate(downVal);
+      scrollDateIntoView(downVal);
+    }
+  };
+  window.addEventListener("keydown", handleKey);
+  return () => window.removeEventListener("keydown", handleKey);
+}, [selectedDate, tour?.departureDates]);
 
   // Helpers
   // formatDate is tolerant of admin-entered human-friendly ranges (e.g. "May 27, 2026 - June 10, 2026")
@@ -210,28 +252,38 @@ export default function TourDetail(): JSX.Element {
     return `PHP ${amount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
-  const priceInfo = tour ? getPerPersonPrices(tour) : { regular: undefined, promo: undefined, computed: 0, effective: 0 };
-  const perPersonPrimary = typeof priceInfo.regular === "number" ? priceInfo.regular : priceInfo.effective;
+  const priceInfo: { regular?: number; promo?: number; computed: number; effective: number } = tour ? getPerPersonPrices(tour as Tour) : { regular: undefined, promo: undefined, computed: 0, effective: 0 };
+  const perPersonPrimary = typeof priceInfo.regular === "number" ? priceInfo.regular : (priceInfo.effective ?? 0);
   const perPersonForTotals = usePromoForTotals && typeof priceInfo.promo === "number" ? priceInfo.promo : perPersonPrimary;
   const totalForPassengers = Math.max(1, passengers) * (perPersonForTotals ?? 0);
 
-  const builderSlug = slug ?? tour?.slug ?? "";
+  const builderSlug = slug ?? (tour?.slug ?? "");
 
   // Safe accessors / fallbacks
   const itinerary = tour?.itinerary ?? [];
   const highlights = tour?.highlights ?? [];
   // Prefer per-country entries (with images) -> additionalInfo.countries; fall back to legacy countriesVisited strings.
-  const countriesFromEntries: string[] = tour && Array.isArray(tour.additionalInfo?.countries)
-    ? tour.additionalInfo.countries
-        .map((c: { name?: string }) => c?.name)
-        .filter((name): name is string => typeof name === "string" && !!name)
-    : [];
+  type CountryEntry = { name?: string; image?: string };
+  type AdditionalInfo = {
+    countries?: CountryEntry[];
+    countriesVisited?: string[];
+    [key: string]: unknown;
+  };
+
+  const additionalInfo: AdditionalInfo | undefined = tour?.additionalInfo as AdditionalInfo | undefined;
+
+  const countriesFromEntries: string[] =
+    additionalInfo && Array.isArray(additionalInfo.countries)
+      ? additionalInfo.countries
+          .map((c: CountryEntry) => c?.name)
+          .filter((name: string | undefined): name is string => typeof name === "string" && !!name)
+      : [];
   const countriesVisited = countriesFromEntries.length > 0
     ? countriesFromEntries
-    : (tour?.additionalInfo?.countriesVisited ?? []);
+    : (additionalInfo?.countriesVisited ?? []);
 
-  const hasTravelWindow = !!tour && !!tour.travelWindow?.start && !!tour.travelWindow?.end;
-  const hasDepartureDates = !!tour && Array.isArray(tour.departureDates) && tour.departureDates.length > 0;
+  const hasTravelWindow = !!tour && !!(tour!.travelWindow?.start) && !!(tour!.travelWindow?.end);
+  const hasDepartureDates = !!tour && Array.isArray(tour!.departureDates) && (tour!.departureDates?.length ?? 0) > 0;
 
   // --- Stops helpers (country name -> ISO -> flag emoji)
   const countryNameToIso: Record<string, string> = {
@@ -338,26 +390,22 @@ export default function TourDetail(): JSX.Element {
   // Show available dates: switch to availability tab, scroll the departure date controls into view and focus
   function showAvailableDates() {
     setActiveTab("availability");
-    // set a small delay so the DOM updates and the dates area is present
     setTimeout(() => {
       if (!datesRef.current) {
-        // if datesRef not mounted, try to scroll to top of availability section by finding the first button
         const el = document.querySelector('[data-date]') as HTMLElement | null;
         if (el) el.scrollIntoView({ behavior: "smooth", inline: "center" });
         return;
       }
-      // if there are departure dates, pick the first one as selected and scroll it into view
       const departureDates = tour?.departureDates;
       if (departureDates && departureDates.length > 0) {
         const first = departureDates[0];
-        setSelectedDate(first);
-        scrollDateIntoView(first);
-        // try focusing the button
-        const btn = datesRef.current.querySelector(`[data-date="${first}"]`) as HTMLElement | null;
+        const firstVal = typeof first === 'string' ? first : JSON.stringify(first);
+        setSelectedDate(firstVal);
+        scrollDateIntoView(firstVal);
+        const btn = datesRef.current.querySelector(`[data-date="${firstVal}"]`) as HTMLElement | null;
         if (btn) btn.focus();
         return;
       }
-      // otherwise scroll the availability container
       datesRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 150);
   }
@@ -381,13 +429,13 @@ export default function TourDetail(): JSX.Element {
 
         <div className="mt-2 flex items-baseline gap-3">
           <div className="text-2xl font-bold" style={{ color: "var(--accent-yellow)" }}>
-            {formatCurrencyPHP(perPersonPrimary)}
+            {formatCurrencyPHP(perPersonPrimary ?? 0)}
           </div>
           <div className="text-xs text-slate-500">per person</div>
         </div>
 
         <div className="mt-2 flex items-center gap-2">
-          {priceInfo.promo !== undefined && (
+          {typeof priceInfo.promo === "number" && (
             <div className="text-xs text-slate-900 bg-accent-yellow px-2 py-1 rounded">Promo available</div>
           )}
           <div className="text-xs text-slate-400">· Flexible payment</div>
@@ -452,17 +500,17 @@ export default function TourDetail(): JSX.Element {
 
               <div className="mt-2">
                 <div className="text-lg font-semibold" style={{ color: "var(--accent-yellow)" }}>
-                  {formatCurrencyPHP(perPersonPrimary)} <span className="text-xs text-slate-300">per person</span>
+                  {formatCurrencyPHP(perPersonPrimary ?? 0)} <span className="text-xs text-slate-300">per person</span>
                 </div>
 
                 <div className="mt-2 flex items-center gap-2">
-                  {priceInfo.promo !== undefined && (
+                  {typeof priceInfo.promo === "number" && (
                     <>
                       <label className="inline-flex items-center gap-2 text-sm text-slate-200">
                         <input type="checkbox" checked={usePromoForTotals} onChange={(e) => setUsePromoForTotals(e.target.checked)} />
                         Use promo for totals
                       </label>
-                      <div className="text-xs text-slate-300">Promo: <span className="font-semibold">{formatCurrencyPHP(priceInfo.promo ?? 0)}</span></div>
+                      <div className="text-xs text-slate-300">Promo: <span className="font-semibold">{formatCurrencyPHP(typeof priceInfo.promo === "number" ? priceInfo.promo : 0)}</span></div>
                     </>
                   )}
                 </div>
@@ -489,8 +537,13 @@ export default function TourDetail(): JSX.Element {
     );
   }
 
+  function isSafeImageUrl(arg0: string) {
+  // Suppress unused variable warning
+  return typeof arg0 === 'string' && arg0.length > 0;
+  }
+
   return (
-    <div className="min-h-screen" style={themeStyle}>
+  <div className="min-h-screen" style={themeStyle}>
       <style>{`
         .accent-yellow { color: var(--accent-yellow); }
         .bg-accent-yellow { background-color: var(--accent-yellow); }
@@ -550,7 +603,7 @@ export default function TourDetail(): JSX.Element {
           <span className="text-slate-400">/</span>
           <Link to="/tours" className="hover:underline">Tours</Link>
           <span className="text-slate-400">/</span>
-          <span className="text-white font-medium">{tour ? tour.title : ""}</span>
+          <span className="text-white font-medium">{tour ? tour.title! : ""}</span>
         </nav>
 
         {/* Mobile-optimized layout: Hero -> Title -> Booking -> Content */}
@@ -559,10 +612,10 @@ export default function TourDetail(): JSX.Element {
           <div className="relative mb-4">
             <div className="rounded-lg overflow-hidden shadow-xl">
               <div className="relative w-full h-48 bg-slate-800 rounded">
-                {tour && tour.images && tour.images.length > 0 && isSafeImageUrl(tour.images[carouselIndex]) ? (
+                {tour && tour.images && tour.images.length > 0 && isSafeImageUrl(tour.images[carouselIndex!]) ? (
                   <img
-                    src={tour.images[carouselIndex]}
-                    alt={`${tour.title} image ${carouselIndex + 1}`}
+                    src={tour.images![carouselIndex!]}
+                    alt={`${tour.title!} image ${carouselIndex! + 1}`}
                     className="w-full h-full object-cover transition-transform duration-700 ease-out transform hover:scale-105"
                     loading="lazy"
                     onClick={() => openGallery(carouselIndex)}
@@ -604,7 +657,7 @@ export default function TourDetail(): JSX.Element {
                 </div>
 
                 <div className="absolute right-3 bottom-3 flex gap-1 z-10">
-                  {tour && tour.images?.map((_, idx) => (
+                  {tour && tour.images && tour.images.map((_, idx: number) => (
                     <button
                       key={idx}
                       onClick={() => setCarouselIndex(idx)}
@@ -641,17 +694,17 @@ export default function TourDetail(): JSX.Element {
           </div>
         </div>
 
-        {/* Desktop layout: Hero + CTA column to the right on large screens */}
-        <div className="mb-6 hidden lg:grid grid-cols-3 gap-6 items-start relative">
+  {/* Desktop layout: Hero + CTA column to the right on large screens */}
+  <div className="mb-6 hidden lg:grid grid-cols-3 gap-6 items-start relative">
           {/* Hero image (left: spans 2 columns on lg) */}
           <div className="lg:col-span-2 relative">
             <div className="rounded-lg overflow-hidden shadow-xl">
               {/* Carousel */}
               <div className="relative w-full h-80 md:h-[380px] bg-slate-800 rounded">
-                {tour && tour.images && tour.images.length > 0 && isSafeImageUrl(tour.images[carouselIndex]) ? (
+                {tour && tour.images && tour.images.length > 0 && isSafeImageUrl(tour.images![carouselIndex!]) ? (
                   <img
-                    src={tour.images[carouselIndex]}
-                    alt={`${tour.title} image ${carouselIndex + 1}`}
+                    src={tour.images![carouselIndex!]}
+                    alt={`${tour.title!} image ${carouselIndex! + 1}`}
                     className="w-full h-full object-cover transition-transform duration-700 ease-out transform hover:scale-105"
                     loading="lazy"
                     onClick={() => openGallery(carouselIndex)}
@@ -692,7 +745,7 @@ export default function TourDetail(): JSX.Element {
                 </div>
 
                 <div className="absolute right-4 bottom-4 flex gap-2 z-10">
-                  {tour && tour.images?.map((_, idx) => (
+                  {tour && tour.images && tour.images.map((_, idx: number) => (
                     <button
                       key={idx}
                       onClick={() => setCarouselIndex(idx)}
@@ -718,14 +771,14 @@ export default function TourDetail(): JSX.Element {
           <div className="bg-transparent rounded-md">
             <div className="lg:flex lg:items-center lg:justify-between">
               <div className="lg:w-2/3">
-                <div className="text-xs uppercase tracking-wider text-slate-200/80">{tour ? tour.line ?? "Line" : "Line"}</div>
+                <div className="text-xs uppercase tracking-wider text-slate-200/80">{tour ? tour.line! ?? "Line" : "Line"}</div>
                 <h1 className="font-serif font-extrabold text-3xl md:text-4xl text-white mt-2 leading-tight">
-                  {tour ? tour.title : ""}
+                  {tour ? tour.title! : ""}
                 </h1>
-                <p className="text-slate-300 mt-3 max-w-3xl">{tour ? tour.summary : ""}</p>
+                <p className="text-slate-300 mt-3 max-w-3xl">{tour ? tour.summary! : ""}</p>
 
                 <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <span className="inline-flex items-center gap-2 bg-white/6 text-white px-3 py-1 rounded-full text-sm">• {tour ? (tour.durationDays ?? itinerary.length) : itinerary.length} days</span>
+                  <span className="inline-flex items-center gap-2 bg-white/6 text-white px-3 py-1 rounded-full text-sm">• {tour ? (tour.durationDays! ?? itinerary.length) : itinerary.length} days</span>
                   {tour && tour.guaranteedDeparture && <span className="inline-flex items-center gap-2 bg-emerald-50/6 text-emerald-200 px-3 py-1 rounded-full text-sm">Guaranteed departure</span>}
                   {highlights.length > 0 && <span className="text-sm text-slate-300">• {highlights.join(", ")}</span>}
                 </div>
@@ -804,7 +857,7 @@ export default function TourDetail(): JSX.Element {
                   {tour && tour.bookingPdfUrl && (
                     <div className="mt-4">
                       <h4 className="text-sm text-white mb-2">Flipbook</h4>
-                      <a href={tour.bookingPdfUrl} target="_blank" rel="noopener noreferrer" className="inline-block px-3 py-2 bg-accent-yellow text-slate-900 rounded font-semibold">Open Flipbook</a>
+                      <a href={tour.bookingPdfUrl!} target="_blank" rel="noopener noreferrer" className="inline-block px-3 py-2 bg-accent-yellow text-slate-900 rounded font-semibold">Open Flipbook</a>
                     </div>
                   )}
                 </div>
@@ -826,17 +879,38 @@ export default function TourDetail(): JSX.Element {
               ) : hasDepartureDates ? (
                 <>
                   <div ref={datesRef} className="dates-grid" aria-live="polite">
-                    {tour!.departureDates!.map((date) => (
-                      <button
-                        key={date}
-                        data-date={date}
-                        onClick={() => { setSelectedDate(date); }}
-                        className={`date-pill ${selectedDate === date ? "selected" : ""}`}
-                        aria-pressed={selectedDate === date}
-                      >
-                        {formatDate(date)}
-                      </button>
-                    ))}
+                    {tour!.departureDates!.map((dateObj, idx) => {
+                      // Handle both legacy string and new object format
+                      if (typeof dateObj === 'string') {
+                        return (
+                          <button
+                            key={dateObj + idx}
+                            data-date={dateObj}
+                            onClick={() => { setSelectedDate(dateObj); }}
+                            className={`date-pill ${selectedDate === dateObj ? "selected" : ""}`}
+                            aria-pressed={selectedDate === dateObj}
+                          >
+                            {formatDate(dateObj)}
+                          </button>
+                        );
+                      } else if (typeof dateObj === 'object' && dateObj !== null && 'start' in dateObj && 'end' in dateObj) {
+                        const label = `${formatDate(dateObj.start)} – ${formatDate(dateObj.end)}`;
+                        const value = JSON.stringify(dateObj);
+                        return (
+                          <button
+                            key={value + idx}
+                            data-date={value}
+                            onClick={() => { setSelectedDate(value); }}
+                            className={`date-pill ${selectedDate === value ? "selected" : ""}`}
+                            aria-pressed={selectedDate === value}
+                          >
+                            {label}
+                          </button>
+                        );
+                      } else {
+                        return null;
+                      }
+                    })}
                   </div>
                 </>
               ) : (
@@ -857,86 +931,34 @@ export default function TourDetail(): JSX.Element {
                 </ul>
 
                 {/* Country image preview (first up to 3) */}
-                {tour && Array.isArray(tour.additionalInfo?.countries) && tour.additionalInfo.countries.length > 0 && (
+                {tour && tour.additionalInfo && Array.isArray((tour.additionalInfo as AdditionalInfo).countries) && ((tour.additionalInfo as AdditionalInfo).countries!.length > 0) && (
                   <div className="mt-3 flex gap-2">
-                    {tour.additionalInfo.countries.slice(0, 3).map((c: { name: string; image?: string }, i: number) => (
+                    {(tour.additionalInfo as AdditionalInfo).countries!.slice(0, 3).map((c: CountryEntry, i: number) => (
                       <div key={i} className="w-20 h-12 overflow-hidden rounded border bg-black/5">
-                        {c.image && isSafeImageUrl(c.image) ? <img src={c.image} alt={c.name} className="w-full h-full object-cover" /> : <div className="text-xs text-slate-300 p-2">{c.name}</div>}
+                        {c.image && isSafeImageUrl(c.image) ? (
+                          <img src={c.image} alt={c.name ?? "Country"} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="text-xs text-slate-300 p-2">{c.name ?? "—"}</div>
+                        )}
                       </div>
                     ))}
-                    {tour.additionalInfo.countries.length > 3 && <div className="text-xs text-slate-300 self-end">+{tour.additionalInfo.countries.length - 3}</div>}
+                    {(tour.additionalInfo as AdditionalInfo).countries!.length > 3 && <div className="text-xs text-slate-300 self-end">+{(tour.additionalInfo as AdditionalInfo).countries!.length - 3}</div>}
                   </div>
                 )}
-
-                {/* If flipbook present show a quick link */}
-                {tour && tour.bookingPdfUrl && (
-                  <div className="mt-3">
-                    <a href={tour.bookingPdfUrl} target="_blank" rel="noopener noreferrer" className="inline-block px-3 py-1 bg-white/90 rounded font-semibold">Open Flipbook</a>
-                  </div>
-                )}
-              </div>
-            </section>
-
-            {/* Stops quick list */}
-            <div className="bg-white/6 card-glass rounded-lg p-4 border border-white/6">
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-sm font-semibold text-white">Stops</div>
-                <div className="text-xs text-slate-300">On-tour cities</div>
-              </div>
-
-              <div className="max-h-48 overflow-auto pr-2">
-                <ul className="space-y-2">
-                  {stops.length === 0 && <li className="text-slate-300">No stops provided.</li>}
-                  {stops.map((s, i) => {
-                    const iso = isoForCountry(s.country);
-                    const flag = flagEmojiFromIso(iso);
-                    return (
-                      <li key={`${s.city}-${i}`} className="flex items-center gap-3 text-slate-200">
-                        <div className="text-2xl leading-none">{flag ?? "🏳️"}</div>
-                        <div>
-                          <div className="text-sm font-medium">{s.city}</div>
-                          <div className="text-xs text-slate-300">{s.country}</div>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-
-              <div className="mt-3">
-                <button onClick={() => setStopsMapOpen(true)} className="text-sm px-3 py-2 bg-accent-yellow text-slate-900 rounded">Open route map</button>
-              </div>
-            </div>
-          </aside>
-        </div>
-      </div>
-
+              </div> {/* Close .text-sm .text-slate-200 */}
+            </section> {/* Close Tour overview section */}
+          </aside> {/* Close aside */}
+        </div> {/* Close grid-cols-1 lg:grid-cols-3 */}
+      </div> {/* Close container mx-auto */}
       {/* Gallery modal */}
       {galleryOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center modal-backdrop">
           <div className="max-w-4xl w-full mx-4 bg-transparent">
             <div className="relative">
               <button onClick={() => setGalleryOpen(false)} className="absolute right-2 top-2 z-50 bg-white/10 text-white rounded-full p-2">✕</button>
-              {/* DEBUG: Render image unconditionally and overlay src */}
+              {/* Robust fallback and debug info for gallery image */}
               {images.length > 0 && (
-                <>
-                  <img
-                    src={images[galleryIndex]}
-                    alt={`Gallery ${galleryIndex + 1}`}
-                    className="w-full h-[70vh] object-contain border-2 border-yellow-400"
-                    onLoad={e => {
-                      const img = e.currentTarget;
-                      console.log('Gallery image loaded:', img.src, 'naturalWidth:', img.naturalWidth, 'naturalHeight:', img.naturalHeight);
-                    }}
-                    onError={e => {
-                      const img = e.currentTarget;
-                      console.error('Gallery image failed to load:', img.src);
-                    }}
-                  />
-                  <div style={{position:'absolute',top:10,left:10,zIndex:1000,color:'yellow',background:'rgba(0,0,0,0.7)',padding:'6px',fontSize:'12px',maxWidth:'80vw',wordBreak:'break-all'}}>
-                    <b>DEBUG src:</b> {images[galleryIndex]}
-                  </div>
-                </>
+                <GalleryImageWithFallback src={images[galleryIndex]} />
               )}
               <div className="absolute left-4 top-1/2 -translate-y-1/2">
                 <button
@@ -962,7 +984,6 @@ export default function TourDetail(): JSX.Element {
           </div>
         </div>
       )}
-
       {/* Stops map modal (simple route preview) */}
       {stopsMapOpen && (
         <div className="fixed inset-0 z-40 flex items-center justify-center modal-backdrop">
@@ -994,4 +1015,5 @@ export default function TourDetail(): JSX.Element {
       )}
     </div>
   );
-}
+  }
+

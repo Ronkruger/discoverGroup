@@ -83,7 +83,7 @@ interface ExtendedTour extends Tour {
   isSaleEnabled: boolean;
   saleEndDate: string;
   travelWindow: { start: string; end: string };
-  departureDates: string[];
+  departureDates: { start: string; end: string }[];
   highlights: string[];
   mainImage: string;
   galleryImages: string[];
@@ -128,7 +128,7 @@ interface TourFormData {
 
   // Travel Details
   travelWindow: { start: string; end: string };
-  departureDates: string[];
+  departureDates: { start: string; end: string }[];
 
   // Content
   highlights: string[];
@@ -152,6 +152,29 @@ interface TourFormData {
 }
 
 export default function TourForm(): JSX.Element {
+  // Departure Date Range Handlers
+  function addDepartureDateRange() {
+    setFormData((prev) => ({
+      ...prev,
+      departureDates: [...prev.departureDates, { start: '', end: '' }],
+    }));
+  }
+
+  function updateDepartureDateRange(index: number, field: 'start' | 'end', value: string) {
+    setFormData((prev) => {
+      const updated = [...prev.departureDates];
+      updated[index] = { ...updated[index], [field]: value };
+      return { ...prev, departureDates: updated };
+    });
+  }
+
+  function removeDepartureDateRange(index: number) {
+    setFormData((prev) => {
+      const updated = [...prev.departureDates];
+      updated.splice(index, 1);
+      return { ...prev, departureDates: updated };
+    });
+  }
 
   // Form state
   const [formData, setFormData] = useState<TourFormData>({
@@ -750,46 +773,29 @@ export default function TourForm(): JSX.Element {
                 <label className="block text-sm font-semibold text-gray-700">
                   Departure Date Ranges
                 </label>
-
-                {formData.departureDates.map((dateRange: string, index: number) => (
-                  <div key={index} className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                    <span className="text-sm font-medium text-gray-600 w-8">#{index + 1}</span>
+                {formData.departureDates.map((range, idx) => (
+                  <div key={idx} className="flex items-center gap-2 mb-2 bg-gray-50 rounded-lg p-4">
+                    <span className="text-sm font-medium text-gray-600 w-8">#{idx + 1}</span>
+                    <label className="text-sm">Start Date:</label>
                     <input
-                      type="text"
-                      value={dateRange}
-                      onChange={(e) => {
-                        const newDates = [...formData.departureDates];
-                        newDates[index] = e.target.value;
-                        handleInputChange("departureDates", newDates);
-                      }}
-                      className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="e.g., Feb 4-18, 2026 or May 27 - Jun 10, 2026"
+                      type="date"
+                      value={range.start}
+                      onChange={e => updateDepartureDateRange(idx, 'start', e.target.value)}
+                      className="border rounded px-2 py-1"
                     />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newDates = formData.departureDates.filter((_: string, i: number) => i !== index);
-                        handleInputChange("departureDates", newDates);
-                      }}
-                      className="text-red-500 hover:text-red-700 px-3 py-2 rounded-lg hover:bg-red-50"
-                    >
-                      Remove
-                    </button>
+                    <label className="text-sm">End Date:</label>
+                    <input
+                      type="date"
+                      value={range.end}
+                      onChange={e => updateDepartureDateRange(idx, 'end', e.target.value)}
+                      className="border rounded px-2 py-1"
+                    />
+                    <button type="button" onClick={() => removeDepartureDateRange(idx)} className="text-red-500 ml-2">Remove</button>
                   </div>
                 ))}
-
-                {/* Add New Departure Date */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    const newDates = [...formData.departureDates, ""];
-                    handleInputChange("departureDates", newDates);
-                  }}
-                  className="w-full border-2 border-dashed border-green-300 rounded-lg p-4 text-green-600 hover:border-green-400 hover:bg-green-50 transition-all"
-                >
+                <button type="button" onClick={addDepartureDateRange} className="w-full border-2 border-dashed border-green-300 rounded-lg p-4 text-green-600 hover:border-green-400 hover:bg-green-50 transition-all">
                   + Add New Departure Date Range
                 </button>
-
                 {formData.departureDates.length === 0 && (
                   <div className="text-center py-6 text-gray-500">
                     <Clock className="mx-auto mb-2" size={32} />

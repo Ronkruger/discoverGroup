@@ -39,8 +39,8 @@ export type Tour = {
   images?: string[];
   guaranteedDeparture?: boolean;
   bookingPdfUrl?: string;
-  // Keep backward-compatible departureDates (optional) in case some components still use it.
-  departureDates?: string[];
+  // departureDates can be legacy string[] or new structured {start, end, _id?}[]
+  departureDates?: (string | { start: string; end: string; _id?: string })[];
   // New: travelWindow describes the start/end of the scheduled travel (when the tour runs)
   travelWindow?: TravelWindow;
   itinerary?: ItineraryDay[];

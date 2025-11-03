@@ -32,6 +32,9 @@ export async function createBooking(bookingData: {
   perPerson: number;
   paymentType: PaymentType;
   paymentIntentId?: string;
+  appointmentDate?: string;
+  appointmentTime?: string;
+  appointmentPurpose?: string;
 }): Promise<Booking> {
   const bookingId = generateBookingId();
   const totalAmount = bookingData.perPerson * bookingData.passengers;
@@ -56,6 +59,9 @@ export async function createBooking(bookingData: {
     bookingDate: new Date().toISOString(),
     paymentIntentId: bookingData.paymentIntentId,
     notes: '',
+    appointmentDate: bookingData.appointmentDate,
+    appointmentTime: bookingData.appointmentTime,
+    appointmentPurpose: bookingData.appointmentPurpose,
   };
 
   const res = await fetch('http://localhost:4000/api/bookings', {
@@ -137,6 +143,9 @@ export async function fetchAllBookings(): Promise<Booking[]> {
         bookingDate: typeof b.bookingDate === 'string' ? b.bookingDate : '',
         paymentIntentId: typeof b.paymentIntentId === 'string' ? b.paymentIntentId : undefined,
         notes: typeof b.notes === 'string' ? b.notes : undefined,
+        appointmentDate: typeof b.appointmentDate === 'string' ? b.appointmentDate : undefined,
+        appointmentTime: typeof b.appointmentTime === 'string' ? b.appointmentTime : undefined,
+        appointmentPurpose: typeof b.appointmentPurpose === 'string' ? b.appointmentPurpose : undefined,
       };
       return booking;
     }).sort((a, b) => new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime());

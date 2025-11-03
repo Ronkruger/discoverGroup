@@ -1,8 +1,37 @@
 // Gallery image with fallback and debug info
+/**
+ * TourForm Fields Reference (Admin Form)
+ *
+ * This list reflects all fields used in the admin TourForm for tour creation/editing.
+ * Keep this in sync with the form and backend payloads for maintainability.
+ *
+ * Fields:
+ * - title
+ * - slug
+ * - summary
+ * - shortDescription
+ * - line
+ * - durationDays
+ * - images
+ * - galleryImages
+ * - highlights
+ * - itinerary
+ * - departureDates
+ * - travelWindow (start, end)
+ * - basePricePerDay
+ * - regularPricePerPerson
+ * - promoPricePerPerson
+ * - guaranteedDeparture
+ * - bookingPdfUrl
+ * - additionalInfo (countries, countriesVisited, ...)
+ * - fullStops
+ * - extensions
+ */
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { fetchTourBySlug } from "../api/tours";
-import type { Tour, ItineraryDay, Stop } from "../types";
+import type { Tour, ItineraryDay, Stop, DepartureDate } from "../types";
+import { DepartureDateCalendar } from "../components/DepartureDateCalendar";
 // Gallery image with fallback and debug info
 function GalleryImageWithFallback({ src }: { src: string }) {
   const [error, setError] = useState(false);
@@ -813,13 +842,18 @@ useEffect(() => {
                 <div className="bg-white/6 card-glass rounded-lg p-4 lg:p-6 border border-white/6">
                   <h3 className="text-lg lg:text-xl font-semibold mb-4 text-white">Day-by-day itinerary</h3>
                   <div className="space-y-6">
-                    {itinerary.map((day: ItineraryDay) => (
+                    {itinerary.map((day: ItineraryDay & { image?: string }) => (
                       <div key={day.day} className="p-4 border rounded-lg bg-white/4">
                         <div className="flex items-start justify-between">
-                          <div>
+                          <div className="w-full">
                             <div className="text-sm text-slate-300">Day {day.day}</div>
                             <div className="text-lg font-semibold text-white">{day.title}</div>
                             <p className="text-slate-300 mt-2">{day.description}</p>
+                            {day.image && (
+                              <div className="mt-3">
+                                <img src={day.image} alt={`Itinerary Day ${day.day}`} className="w-full max-w-md h-40 object-cover rounded border" />
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -867,56 +901,40 @@ useEffect(() => {
 
           {/* Right: booking summary + stops (BookingCard removed from aside to avoid duplication) */}
           <aside className="space-y-6">
-            {/* Departure Dates / Travel Window */}
-            <section className="bg-white/6 card-glass rounded-lg p-5 border border-white/6 shadow-sm">
-              <h4 className="text-sm text-slate-200 mb-3">Departure</h4>
-
-              {hasTravelWindow ? (
+            {/* Departure Dates Calendar */}
+            {hasDepartureDates && (
+              <section ref={datesRef}>
+                <DepartureDateCalendar
+                  departureDates={(tour!.departureDates! as DepartureDate[]).map(dateObj => {
+                    // Handle both legacy string and new object format
+                    if (typeof dateObj === 'string') {
+                      return { start: dateObj, end: dateObj };
+                    }
+                    return dateObj;
+                  })}
+                  selectedDate={selectedDate || undefined}
+                  onSelectDate={(date: string) => setSelectedDate(date)}
+                />
+              </section>
+            )}
+            
+            {/* Legacy Travel Window (if no departure dates) */}
+            {!hasDepartureDates && hasTravelWindow && (
+              <section className="bg-white/6 card-glass rounded-lg p-5 border border-white/6 shadow-sm">
+                <h4 className="text-sm text-slate-200 mb-3">Travel Window</h4>
                 <div className="text-sm text-slate-200">
                   <div className="font-semibold text-white">{formatDate(tour!.travelWindow!.start)} – {formatDate(tour!.travelWindow!.end)}</div>
-                  <div className="text-slate-400 text-xs mt-1">Travel window (inclusive)</div>
+                  <div className="text-slate-400 text-xs mt-1">Tour runs during this period</div>
                 </div>
-              ) : hasDepartureDates ? (
-                <>
-                  <div ref={datesRef} className="dates-grid" aria-live="polite">
-                    {tour!.departureDates!.map((dateObj, idx) => {
-                      // Handle both legacy string and new object format
-                      if (typeof dateObj === 'string') {
-                        return (
-                          <button
-                            key={dateObj + idx}
-                            data-date={dateObj}
-                            onClick={() => { setSelectedDate(dateObj); }}
-                            className={`date-pill ${selectedDate === dateObj ? "selected" : ""}`}
-                            aria-pressed={selectedDate === dateObj}
-                          >
-                            {formatDate(dateObj)}
-                          </button>
-                        );
-                      } else if (typeof dateObj === 'object' && dateObj !== null && 'start' in dateObj && 'end' in dateObj) {
-                        const label = `${formatDate(dateObj.start)} – ${formatDate(dateObj.end)}`;
-                        const value = JSON.stringify(dateObj);
-                        return (
-                          <button
-                            key={value + idx}
-                            data-date={value}
-                            onClick={() => { setSelectedDate(value); }}
-                            className={`date-pill ${selectedDate === value ? "selected" : ""}`}
-                            aria-pressed={selectedDate === value}
-                          >
-                            {label}
-                          </button>
-                        );
-                      } else {
-                        return null;
-                      }
-                    })}
-                  </div>
-                </>
-              ) : (
+              </section>
+            )}
+            
+            {!hasDepartureDates && !hasTravelWindow && (
+              <section className="bg-white/6 card-glass rounded-lg p-5 border border-white/6 shadow-sm">
+                <h4 className="text-sm text-slate-200 mb-3">Departure</h4>
                 <div className="text-sm text-slate-400">No departure information available</div>
-              )}
-            </section>
+              </section>
+            )}
 
             {/* Tour summary card */}
             <section className="bg-white/6 card-glass rounded-lg p-5 border border-white/6 shadow-sm">

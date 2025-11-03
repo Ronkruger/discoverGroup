@@ -1,3 +1,31 @@
+/**
+ * TourForm Fields Reference (Admin Form)
+ *
+ * This list reflects all fields used in the admin TourForm for tour creation/editing.
+ * Keep this in sync with the form and backend payloads for maintainability.
+ *
+ * Fields:
+ * - title
+ * - slug
+ * - summary
+ * - shortDescription
+ * - line
+ * - durationDays
+ * - images
+ * - galleryImages
+ * - highlights
+ * - itinerary
+ * - departureDates
+ * - travelWindow (start, end)
+ * - basePricePerDay
+ * - regularPricePerPerson
+ * - promoPricePerPerson
+ * - guaranteedDeparture
+ * - bookingPdfUrl
+ * - additionalInfo (countries, countriesVisited, ...)
+ * - fullStops
+ * - extensions
+ */
 // Helper to validate image URLs against CSP
 function isSafeImageUrl(url: string | undefined): boolean {
   if (!url) return false;
@@ -10,7 +38,7 @@ function isSafeImageUrl(url: string | undefined): boolean {
 }
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useEffect, useRef, useState, type JSX, type ChangeEvent } from "react";
-import type { Tour, Stop } from "../types";
+import type { Tour, Stop, ItineraryDay } from "../types";
 import { fetchTourBySlug, fetchTours } from "../api/tours";
 import React from "react";
 
@@ -606,10 +634,27 @@ export default function TourBuilder(): JSX.Element {
         .modal-backdrop { background: rgba(2,6,23,0.6); }
 
         /* Timeline highlight adjustments */
-        .timeline-section { padding: 24px; border-radius: 18px; }
+        .timeline-section { 
+          padding: 32px; 
+          border-radius: 24px; 
+          background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); 
+          backdrop-filter: blur(8px);
+        }
         .timeline-rail { background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); width: 2px; }
-        .timeline-row { transition: background .18s ease, transform .12s ease; border-bottom: 1px solid rgba(255,255,255,0.04); }
-        .timeline-row:hover { background: rgba(255,255,255,0.02); transform: translateY(-2px); }
+        .timeline-row { 
+          transition: all .25s ease; 
+          padding: 20px;
+          margin-bottom: 24px;
+          border-radius: 16px;
+          background: rgba(255,255,255,0.01);
+          border: 1px solid rgba(255,255,255,0.05);
+        }
+        .timeline-row:hover { 
+          background: rgba(255,255,255,0.03); 
+          transform: translateY(-4px); 
+          box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+          border-color: rgba(255,210,77,0.3);
+        }
         .timeline-card { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.04); }
         .timeline-marker { width: 44px; height: 44px; border-radius: 9999px; display: grid; place-items: center; }
         .timeline-marker.included { background: linear-gradient(180deg,#2563eb,#1e40af); box-shadow: 0 6px 20px rgba(2,6,23,0.5); color: white; border: 2px solid rgba(255,255,255,0.06); }
@@ -649,7 +694,37 @@ export default function TourBuilder(): JSX.Element {
                 </div>
               ) : (
                 <>
-                  <div className="space-y-8" ref={timelineRef}>
+                  {/* Visual connection bars and connectors */}
+                  <div className="relative">
+                    {verticalBars.map((bar, i) => (
+                      <div
+                        key={i}
+                        className="absolute timeline-bar"
+                        style={{
+                          top: `${bar.top}px`,
+                          height: `${bar.height}px`,
+                          left: `${bar.x}px`,
+                          width: '12px',
+                          backgroundColor: bar.color,
+                        }}
+                      />
+                    ))}
+                    {connectors.map((conn, i) => (
+                      <div
+                        key={i}
+                        className="absolute timeline-connector"
+                        style={{
+                          top: `${conn.top}px`,
+                          left: `${conn.left}px`,
+                          width: `${conn.width}px`,
+                          height: '6px',
+                          background: conn.gradient,
+                        }}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="space-y-6" ref={timelineRef}>
                     {Array.from({ length: finalLength }).map((_, idx) => {
                       // Use date formatting helpers
                       const dayDate = dateForDayIndex(idx);
@@ -659,24 +734,128 @@ export default function TourBuilder(): JSX.Element {
                       const places = finalPlacesPerDay[idx]?.map((p) => p.city).join(', ');
                       // Use lineColorClassMap for styling
                       const colorClass = lineColorClassMap[tour?.line ?? 'DEFAULT'] ?? lineColorClassMap.DEFAULT;
+                      // Get itinerary day details if available
+                      const itineraryDay = tour?.itinerary?.[idx] as (ItineraryDay & { image?: string }) | undefined;
+                      
                       return (
-                        <div key={idx} className={`timeline-row ${colorClass}`} onClick={() => onMarkerClick(idx)}>
-                          <div>{`Day ${idx + 1}: ${weekday}, ${monthDay}`}</div>
-                          <div>{`Places: ${places}`}</div>
-                          <button type="button" onClick={() => openInlineChangeAt(idx)}>Change Inline</button>
+                        <div 
+                          key={idx} 
+                          ref={(el) => { rowRefs.current[idx] = el; }}
+                          id={`tb-row-${idx}`}
+                          className={`timeline-row ${colorClass} cursor-pointer hover:shadow-lg transition-all duration-200`}
+                          onClick={() => onMarkerClick(idx)}
+                        >
+                          {/* Day Header */}
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <div className="bg-accent-yellow text-slate-900 rounded-full w-10 h-10 flex items-center justify-center font-bold text-sm">
+                                {idx + 1}
+                              </div>
+                              <div>
+                                <div className="text-lg font-bold text-white">
+                                  {itineraryDay?.title || `Day ${idx + 1}`}
+                                </div>
+                                <div className="text-sm text-slate-400">{weekday}, {monthDay}</div>
+                              </div>
+                            </div>
+                            <div className="text-sm text-slate-300 bg-white/5 px-3 py-1 rounded-full">
+                              {places || 'Location'}
+                            </div>
+                          </div>
+
+                          {/* Day Content Card */}
+                          <div className="bg-white/3 rounded-lg overflow-hidden border border-white/10 hover:border-accent-yellow/50 transition-colors">
+                            {/* Image Section */}
+                            {itineraryDay?.image && (
+                              <div className="relative h-48 overflow-hidden">
+                                <img 
+                                  src={itineraryDay.image} 
+                                  alt={itineraryDay.title || `Day ${idx + 1}`}
+                                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                              </div>
+                            )}
+
+                            {/* Description Section */}
+                            <div className="p-4">
+                              {itineraryDay?.description && (
+                                <p className="text-slate-200 text-sm leading-relaxed">
+                                  {itineraryDay.description}
+                                </p>
+                              )}
+                              
+                              {/* Actions */}
+                              <div className="mt-4 flex items-center gap-2">
+                                <button 
+                                  type="button" 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openInlineChangeAt(idx);
+                                  }}
+                                  className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded text-xs font-medium transition-colors"
+                                >
+                                  Customize Day
+                                </button>
+                                {places && (
+                                  <div className="text-xs text-slate-400">
+                                    📍 {places}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Inline Route Selector (if expanded) */}
+                          {expandedChangeAt === idx && (
+                            <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-accent-yellow/30">
+                              <h4 className="text-sm font-semibold text-white mb-3">Insert Alternative Route After Day {idx + 1}</h4>
+                              <select
+                                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white text-sm"
+                                onChange={(e) => {
+                                  if (e.target.value) {
+                                    insertRouteInline(e.target.value);
+                                  }
+                                }}
+                                defaultValue=""
+                              >
+                                <option value="">Select a route...</option>
+                                {allTours.filter(t => t.slug !== tour?.slug).map(t => (
+                                  <option key={t.slug} value={t.slug}>{t.title}</option>
+                                ))}
+                              </select>
+                              <button
+                                type="button"
+                                onClick={() => setExpandedChangeAt(null)}
+                                className="mt-2 text-xs text-slate-400 hover:text-white"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
                   </div>
-                  {/* Debug panel for verticalBars, connectors, finalPlacesPerDay */}
-                  <div className="mt-8 p-4 bg-slate-900 rounded-xl text-xs text-slate-300">
-                    <div><strong>Debug Panel</strong></div>
-                    <div>verticalBars: {JSON.stringify(verticalBars)}</div>
-                    <div>connectors: {JSON.stringify(connectors)}</div>
-                    <div>finalPlacesPerDay: {JSON.stringify(finalPlacesPerDay)}</div>
-                    <button type="button" onClick={removeInlineInsert}>Remove Inline Insert</button>
-                    <button type="button" onClick={() => insertRouteInline(allTours[0]?.slug ?? '')}>Insert First Route Inline</button>
-                  </div>
+
+                  {/* Inserted Route Indicator */}
+                  {inlineInsert && (
+                    <div className="mt-6 p-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl border border-purple-400/30">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-sm font-semibold text-white">Additional Route Inserted</div>
+                          <div className="text-xs text-slate-300 mt-1">{inlineInsert.tour.title}</div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={removeInlineInsert}
+                          className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-200 rounded text-xs font-medium transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
 

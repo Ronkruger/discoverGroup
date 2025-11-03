@@ -120,7 +120,7 @@ export const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
 
   return (
     <div className={`relative ${className}`}>
-      <form onSubmit={handleSubmit} className="flex">
+      <form onSubmit={handleSubmit} className="flex items-stretch">
         <div className="relative flex-1">
           <input
             ref={inputRef}
@@ -134,6 +134,88 @@ export const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
             autoComplete="off"
           />
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          
+          {/* Dropdown with suggestions - positioned relative to input */}
+          {isOpen && (
+            <div
+              ref={dropdownRef}
+              className="absolute top-full left-0 right-0 bg-white shadow-lg rounded-lg mt-2 z-50 max-h-96 overflow-y-auto"
+            >
+              {query.length === 0 && (
+                <>
+                  <div className="p-4 border-b">
+                    <h4 className="font-semibold text-gray-900 mb-3">Popular Destinations</h4>
+                    <div className="space-y-2">
+                      {popularDestinations.map((destination, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSuggestionClick(destination)}
+                          className="w-full flex items-center gap-3 p-2 rounded hover:bg-gray-50 text-left transition"
+                        >
+                          <div className="text-gray-400">{destination.icon}</div>
+                          <div>
+                            <div className="font-medium text-gray-900">{destination.title}</div>
+                            {destination.subtitle && (
+                              <div className="text-sm text-gray-500">{destination.subtitle}</div>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {recentSearches.length > 0 && (
+                    <div className="p-4">
+                      <h4 className="font-semibold text-gray-900 mb-3">Recent Searches</h4>
+                      <div className="space-y-2">
+                        {recentSearches.map((search, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleSuggestionClick(search)}
+                            className="w-full flex items-center gap-3 p-2 rounded hover:bg-gray-50 text-left transition"
+                          >
+                            <div className="text-gray-400">{search.icon}</div>
+                            <div>
+                              <div className="font-medium text-gray-900">{search.title}</div>
+                              <div className="text-sm text-gray-500">{search.subtitle}</div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {query.length > 0 && suggestions.length > 0 && (
+                <div className="p-4">
+                  <div className="space-y-2">
+                    {suggestions.map((suggestion, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className="w-full flex items-center gap-3 p-2 rounded hover:bg-gray-50 text-left transition"
+                      >
+                        <div className="text-gray-400">{suggestion.icon}</div>
+                        <div>
+                          <div className="font-medium text-gray-900">{suggestion.title}</div>
+                          {suggestion.subtitle && (
+                            <div className="text-sm text-gray-500">{suggestion.subtitle}</div>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {query.length > 0 && suggestions.length === 0 && (
+                <div className="p-4 text-center text-gray-500">
+                  No suggestions found. Press Enter to search for "{query}"
+                </div>
+              )}
+            </div>
+          )}
         </div>
         <button
           type="submit"
@@ -143,88 +225,6 @@ export const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
           Explore
         </button>
       </form>
-
-      {/* Dropdown with suggestions */}
-      {isOpen && (
-        <div
-          ref={dropdownRef}
-          className="absolute top-full left-0 right-12 bg-white shadow-lg rounded-lg mt-2 z-50 max-h-96 overflow-y-auto"
-        >
-          {query.length === 0 && (
-            <>
-              <div className="p-4 border-b">
-                <h4 className="font-semibold text-gray-900 mb-3">Popular Destinations</h4>
-                <div className="space-y-2">
-                  {popularDestinations.map((destination, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleSuggestionClick(destination)}
-                      className="w-full flex items-center gap-3 p-2 rounded hover:bg-gray-50 text-left transition"
-                    >
-                      <div className="text-gray-400">{destination.icon}</div>
-                      <div>
-                        <div className="font-medium text-gray-900">{destination.title}</div>
-                        {destination.subtitle && (
-                          <div className="text-sm text-gray-500">{destination.subtitle}</div>
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              
-              {recentSearches.length > 0 && (
-                <div className="p-4">
-                  <h4 className="font-semibold text-gray-900 mb-3">Recent Searches</h4>
-                  <div className="space-y-2">
-                    {recentSearches.map((search, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleSuggestionClick(search)}
-                        className="w-full flex items-center gap-3 p-2 rounded hover:bg-gray-50 text-left transition"
-                      >
-                        <div className="text-gray-400">{search.icon}</div>
-                        <div>
-                          <div className="font-medium text-gray-900">{search.title}</div>
-                          <div className="text-sm text-gray-500">{search.subtitle}</div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-
-          {query.length > 0 && suggestions.length > 0 && (
-            <div className="p-4">
-              <div className="space-y-2">
-                {suggestions.map((suggestion, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleSuggestionClick(suggestion)}
-                    className="w-full flex items-center gap-3 p-2 rounded hover:bg-gray-50 text-left transition"
-                  >
-                    <div className="text-gray-400">{suggestion.icon}</div>
-                    <div>
-                      <div className="font-medium text-gray-900">{suggestion.title}</div>
-                      {suggestion.subtitle && (
-                        <div className="text-sm text-gray-500">{suggestion.subtitle}</div>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {query.length > 0 && suggestions.length === 0 && (
-            <div className="p-4 text-center text-gray-500">
-              No suggestions found. Press Enter to search for "{query}"
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 };

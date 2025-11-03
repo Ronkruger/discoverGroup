@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f7fa;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+    }
+    .header {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      padding: 40px 20px;
+      text-align: center;
+    }
+    .header h1 {
+      color: #ffffff;
+      margin: 0;
+      font-size: 32px;
+      font-weight: 700;
+    }
+    .content {
+      padding: 40px 30px;
+    }
+    .greeting {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 16px;
+    }
+    .message {
+      font-size: 16px;
+      color: #4b5563;
+      margin-bottom: 24px;
+    }
+    .booking-card {
+      background-color: #f9fafb;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+    }
+    .booking-detail {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .booking-detail:last-child {
+      border-bottom: none;
+    }
+    .detail-label {
+      font-size: 14px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+    .detail-value {
+      font-size: 16px;
+      color: #111827;
+      font-weight: 600;
+      text-align: right;
+    }
+    .total-amount {
+      font-size: 24px;
+      color: #1e40af;
+      font-weight: bold;
+    }
+    .appointment-box {
+      background-color: #fef3c7;
+      border: 2px solid #fbbf24;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+    .appointment-box h3 {
+      color: #92400e;
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+    .appointment-box p {
+      color: #78350f;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .appointment-box strong {
+      color: #92400e;
+    }
+    .button {
+      display: inline-block;
+      background-color: #1e40af;
+      color: #ffffff;
+      text-decoration: none;
+      padding: 14px 32px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      margin: 24px 0;
+      text-align: center;
+    }
+    .button:hover {
+      background-color: #1e3a8a;
+    }
+    .info-box {
+      background-color: #dbeafe;
+      border-left: 4px solid #3b82f6;
+      padding: 16px;
+      margin: 24px 0;
+      border-radius: 4px;
+    }
+    .info-box h3 {
+      color: #1e40af;
+      margin: 0 0 12px;
+      font-size: 16px;
+    }
+    .info-box ol {
+      margin: 0;
+      padding-left: 20px;
+      color: #1f2937;
+    }
+    .info-box li {
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .footer {
+      background-color: #f9fafb;
+      padding: 30px;
+      text-align: center;
+      font-size: 14px;
+      color: #6b7280;
+    }
+    .footer-contact {
+      margin: 16px 0;
+    }
+    .footer-contact a {
+      color: #1e40af;
+      text-decoration: none;
+    }
+    @media only screen and (max-width: 600px) {
+      .content {
+        padding: 24px 16px;
+      }
+      .greeting {
+        font-size: 20px;
+      }
+      .header h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>🎉 Booking Confirmed!</h1>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <div class="greeting">Hi {{customerName}},</div>
+      <p class="message">
+        Thank you for booking with Discover Group! Your adventure awaits. We're excited to help you create unforgettable memories.
+      </p>
+
+      <!-- Booking Details Card -->
+      <div class="booking-card">
+        <div class="booking-detail">
+          <span class="detail-label">Booking ID</span>
+          <span class="detail-value">{{bookingId}}</span>
+        </div>
+        <div class="booking-detail">
+          <span class="detail-label">Tour</span>
+          <span class="detail-value">{{tourTitle}}</span>
+        </div>
+        <div class="booking-detail">
+          <span class="detail-label">Departure Date</span>
+          <span class="detail-value">{{tourDate}}</span>
+        </div>
+        <div class="booking-detail">
+          <span class="detail-label">Passengers</span>
+          <span class="detail-value">{{passengers}}</span>
+        </div>
+        <div class="booking-detail">
+          <span class="detail-label">Per Person</span>
+          <span class="detail-value">{{pricePerPerson}}</span>
+        </div>
+        <div class="booking-detail">
+          <span class="detail-label">Total Amount</span>
+          <span class="detail-value total-amount">{{totalAmount}}</span>
+        </div>
+      </div>
+
+      <!-- Appointment Box (conditional) -->
+      {{#if appointmentDate}}
+      <div class="appointment-box">
+        <h3>📅 Office Appointment Scheduled</h3>
+        <p><strong>Date:</strong> {{appointmentDate}}</p>
+        <p><strong>Time:</strong> {{appointmentTime}}</p>
+        <p><strong>Purpose:</strong> {{appointmentPurpose}}</p>
+        <p style="margin-top: 12px; font-style: italic;">
+          Please bring <strong>{{totalAmount}}</strong> cash to your appointment. Credit/debit cards also accepted at our office.
+        </p>
+      </div>
+      {{/if}}
+
+      <!-- Downpayment Info (conditional) -->
+      {{#if downpaymentAmount}}
+      <div class="info-box">
+        <h3>💳 Payment Terms</h3>
+        <p style="margin: 0;">
+          <strong>Downpayment Paid:</strong> {{downpaymentAmount}}<br>
+          <strong>Remaining Balance:</strong> {{remainingBalance}}<br>
+          <em>Balance due at least 7 days before departure</em>
+        </p>
+      </div>
+      {{/if}}
+
+      <!-- CTA Button -->
+      <center>
+        <a href="https://discovergroup.com/booking/{{bookingId}}" class="button">
+          View Booking Details
+        </a>
+      </center>
+
+      <!-- What's Next -->
+      <div class="info-box">
+        <h3>What happens next?</h3>
+        <ol>
+          <li>You'll receive a confirmation call within 24 hours</li>
+          <li>Our team will send you a detailed itinerary</li>
+          {{#if appointmentDate}}
+          <li>Visit our office on {{appointmentDate}} at {{appointmentTime}}</li>
+          {{else}}
+          <li>Complete any remaining payment 7 days before departure</li>
+          {{/if}}
+          <li>Get ready for an amazing adventure!</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p><strong>Discover Group Philippines</strong></p>
+      <p>22nd Floor, The Upper Class Tower<br>
+         Corner of Quezon Avenue and Sct. Reyes St.<br>
+         Diliman, Quezon City</p>
+      <div class="footer-contact">
+        <p>📞 <a href="tel:+6302852684 04">+63 02 8526 8404</a> | 
+           📧 <a href="mailto:reservations@discovergroup.com">reservations@discovergroup.com</a></p>
+      </div>
+      <p style="font-size: 12px; color: #9ca3af; margin-top: 16px;">
+        © 2025 Discover Group. All rights reserved.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

@@ -40,6 +40,9 @@ export interface Booking {
   bookingDate: string; // ISO date string
   paymentIntentId?: string;
   notes?: string;
+  appointmentDate?: string;
+  appointmentTime?: string;
+  appointmentPurpose?: string;
 }
 
 export interface BookingFilters {

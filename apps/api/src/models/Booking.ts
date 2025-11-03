@@ -20,6 +20,9 @@ export interface IBooking extends Document {
   bookingDate: string;
   paymentIntentId?: string;
   notes?: string;
+  appointmentDate?: string;
+  appointmentTime?: string;
+  appointmentPurpose?: string;
 }
 
 
@@ -42,6 +45,9 @@ const BookingSchema = new Schema<IBooking>({
   bookingDate: { type: String, required: true },
   paymentIntentId: { type: String },
   notes: { type: String },
+  appointmentDate: { type: String },
+  appointmentTime: { type: String },
+  appointmentPurpose: { type: String },
 }, { timestamps: true });
 
 export default mongoose.model<IBooking>('Booking', BookingSchema);

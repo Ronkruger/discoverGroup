@@ -36,7 +36,10 @@ router.post("/", async (req, res) => {
       bookingId,
       bookingDate,
       paymentIntentId,
-      notes
+      notes,
+      appointmentDate,
+      appointmentTime,
+      appointmentPurpose
     } = req.body;
 
     // Note: Tours are served from JSON files, not MongoDB
@@ -60,7 +63,10 @@ router.post("/", async (req, res) => {
       bookingId,
       bookingDate,
       paymentIntentId,
-      notes
+      notes,
+      appointmentDate,
+      appointmentTime,
+      appointmentPurpose
     });
 
     res.status(201).json(booking);

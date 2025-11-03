@@ -133,6 +133,9 @@ export default function BookingConfirmation(): JSX.Element {
     perPerson?: number;
     total?: number;
     customerEmail?: string;
+    appointmentDate?: string;
+    appointmentTime?: string;
+    appointmentPurpose?: string;
   };
 
   // Get booking ID from URL parameter or location state
@@ -404,12 +407,41 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
                   <div className="text-slate-400 text-sm mb-1">Travel Date</div>
                   <div className="text-white font-medium flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-green-400" />
-                    {state.date ? new Date(state.date).toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    }) : "—"}
+                    {(() => {
+                      if (!state.date) return "Date not specified";
+                      
+                      // Handle date ranges (e.g., "2025-05-13 - 2025-05-27")
+                      if (state.date.includes(' - ')) {
+                        const [startDate, endDate] = state.date.split(' - ').map(d => d.trim());
+                        const start = new Date(startDate);
+                        const end = new Date(endDate);
+                        
+                        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                          return "Date not specified";
+                        }
+                        
+                        return `${start.toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric',
+                          year: 'numeric'
+                        })} - ${end.toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}`;
+                      }
+                      
+                      // Handle single dates
+                      const date = new Date(state.date);
+                      if (isNaN(date.getTime())) return "Date not specified";
+                      
+                      return date.toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      });
+                    })()}
                   </div>
                 </div>
                 <div>
@@ -425,6 +457,36 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
                     PHP {(state.total ?? 0).toLocaleString("en-PH", { minimumFractionDigits: 2 })}
                   </div>
                 </div>
+                {state.appointmentDate && state.appointmentTime && !isNaN(new Date(state.appointmentDate).getTime()) && (
+                  <div className="mt-4 pt-4 border-t border-white/20">
+                    <div className="text-slate-400 text-sm mb-1">Office Appointment Scheduled</div>
+                    <div className="text-white font-medium flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-blue-400" />
+                      {new Date(state.appointmentDate).toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })} at {state.appointmentTime}
+                    </div>
+                    {state.appointmentPurpose && (
+                      <div className="text-slate-300 text-sm mt-2">
+                        Purpose: {state.appointmentPurpose.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      </div>
+                    )}
+                    <div className="mt-3 p-3 bg-blue-900/30 border border-blue-700/50 rounded-lg">
+                      <div className="text-blue-200 text-sm">
+                        <strong>📍 Location:</strong> 123 Travel Avenue, Makati City, Metro Manila
+                      </div>
+                      <div className="text-blue-200 text-sm mt-1">
+                        <strong>📞 Contact:</strong> +63 02 8526 8404
+                      </div>
+                      <div className="text-blue-300 text-xs mt-2">
+                        Please arrive 10 minutes early. A confirmation email has been sent with directions.
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

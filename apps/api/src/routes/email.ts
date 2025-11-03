@@ -13,6 +13,12 @@ interface BookingEmailRequest {
   pricePerPerson: number;
   totalAmount: number;
   country?: string;
+  downpaymentAmount?: number;
+  remainingBalance?: number;
+  isDownpaymentOnly?: boolean;
+  appointmentDate?: string;
+  appointmentTime?: string;
+  appointmentPurpose?: string;
 }
 
 // POST /api/send-booking-email
@@ -27,7 +33,13 @@ router.post('/send-booking-email', async (req: Request, res: Response) => {
       passengers,
       pricePerPerson,
       totalAmount,
-      country
+      country,
+      downpaymentAmount,
+      remainingBalance,
+      isDownpaymentOnly,
+      appointmentDate,
+      appointmentTime,
+      appointmentPurpose
     }: BookingEmailRequest = req.body;
 
     // Validate required fields
@@ -56,7 +68,13 @@ router.post('/send-booking-email', async (req: Request, res: Response) => {
       passengers,
       pricePerPerson,
       totalAmount,
-      country
+      country,
+      downpaymentAmount,
+      remainingBalance,
+      isDownpaymentOnly,
+      appointmentDate,
+      appointmentTime,
+      appointmentPurpose
     });
 
     if (result.success) {

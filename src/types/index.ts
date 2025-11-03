@@ -28,6 +28,17 @@ export type TravelWindow = {
   end: string;
 };
 
+export type DepartureDate = {
+  start: string;
+  end: string;
+  _id?: string;
+  // Availability tracking
+  maxCapacity?: number; // Maximum bookings allowed for this departure
+  currentBookings?: number; // Current number of bookings
+  isAvailable?: boolean; // Manually set availability (overrides capacity check)
+  price?: number; // Optional: override price for specific departure
+};
+
 export type Tour = {
   id: string;
   slug: string;
@@ -39,8 +50,8 @@ export type Tour = {
   images?: string[];
   guaranteedDeparture?: boolean;
   bookingPdfUrl?: string;
-  // departureDates can be legacy string[] or new structured {start, end, _id?}[]
-  departureDates?: (string | { start: string; end: string; _id?: string })[];
+  // departureDates can be legacy string[] or new structured DepartureDate[]
+  departureDates?: (string | DepartureDate)[];
   // New: travelWindow describes the start/end of the scheduled travel (when the tour runs)
   travelWindow?: TravelWindow;
   itinerary?: ItineraryDay[];
@@ -58,7 +69,7 @@ export type Tour = {
 
 export type BookingStatus = 'confirmed' | 'pending' | 'cancelled' | 'completed';
 
-export type PaymentType = 'full' | 'downpayment';
+export type PaymentType = 'full' | 'downpayment' | 'cash-appointment';
 
 export type Booking = {
   id: string;
@@ -78,4 +89,7 @@ export type Booking = {
   bookingDate: string; // ISO date string
   paymentIntentId?: string;
   notes?: string;
+  appointmentDate?: string;
+  appointmentTime?: string;
+  appointmentPurpose?: string;
 };

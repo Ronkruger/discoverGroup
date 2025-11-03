@@ -202,6 +202,195 @@ function BookingFilters({ filters, onFiltersChange, onGenerateReport }: FiltersP
   );
 }
 
+// Booking Detail Modal Component
+function BookingDetailModal({ booking, onClose }: { booking: Booking; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-gray-900">Booking Details</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        <div className="p-6 space-y-6">
+          {/* Booking Information */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Booking Information</h3>
+            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-gray-600">Booking ID:</span>
+                <span className="text-sm font-semibold text-gray-900">{booking.bookingId}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-gray-600">Booking Date:</span>
+                <span className="text-sm text-gray-900">{formatDate(booking.bookingDate)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-gray-600">Status:</span>
+                <StatusBadge status={booking.status} />
+              </div>
+            </div>
+          </div>
+
+          {/* Customer Information */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Customer Information</h3>
+            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-gray-600">Name:</span>
+                <span className="text-sm text-gray-900">{booking.customerName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-gray-600">Email:</span>
+                <span className="text-sm text-gray-900">{booking.customerEmail}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-gray-600">Phone:</span>
+                <span className="text-sm text-gray-900">{booking.customerPhone}</span>
+              </div>
+              {booking.customerPassport && (
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium text-gray-600">Passport:</span>
+                  <span className="text-sm text-gray-900">{booking.customerPassport}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Tour Information */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Tour Information</h3>
+            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-gray-600">Tour:</span>
+                <span className="text-sm text-gray-900 font-semibold">{booking.tour.title}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-gray-600">Duration:</span>
+                <span className="text-sm text-gray-900">{booking.tour.durationDays} days</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-gray-600">Travel Date:</span>
+                <span className="text-sm text-gray-900">
+                  {new Date(booking.selectedDate).toLocaleDateString('en-PH', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-gray-600">Passengers:</span>
+                <span className="text-sm text-gray-900">{booking.passengers}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Payment Information */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Payment Information</h3>
+            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-gray-600">Price per Person:</span>
+                <span className="text-sm text-gray-900">{formatCurrency(booking.perPerson)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-gray-600">Total Amount:</span>
+                <span className="text-sm font-bold text-gray-900">{formatCurrency(booking.totalAmount)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-gray-600">Paid Amount:</span>
+                <span className="text-sm text-green-700 font-semibold">{formatCurrency(booking.paidAmount)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm font-medium text-gray-600">Payment Type:</span>
+                <span className="text-sm text-gray-900 capitalize">
+                  {booking.paymentType}
+                  {booking.paymentType === 'downpayment' && ' (30%)'}
+                </span>
+              </div>
+              {booking.paidAmount < booking.totalAmount && (
+                <div className="flex justify-between pt-2 border-t">
+                  <span className="text-sm font-medium text-red-600">Balance Due:</span>
+                  <span className="text-sm font-bold text-red-700">
+                    {formatCurrency(booking.totalAmount - booking.paidAmount)}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Appointment Information */}
+          {booking.appointmentDate && booking.appointmentTime && (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Appointment Details</h3>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
+                <div className="flex items-center mb-2">
+                  <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span className="font-semibold text-blue-900">Office Appointment Scheduled</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium text-blue-800">Date:</span>
+                  <span className="text-sm text-blue-900 font-semibold">
+                    {new Date(booking.appointmentDate).toLocaleDateString('en-PH', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      weekday: 'long'
+                    })}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium text-blue-800">Time:</span>
+                  <span className="text-sm text-blue-900 font-semibold">{booking.appointmentTime}</span>
+                </div>
+                {booking.appointmentPurpose && (
+                  <div className="flex justify-between">
+                    <span className="text-sm font-medium text-blue-800">Purpose:</span>
+                    <span className="text-sm text-blue-900 capitalize">{booking.appointmentPurpose.replace(/_/g, ' ')}</span>
+                  </div>
+                )}
+                <div className="mt-3 pt-3 border-t border-blue-200 text-xs text-blue-700">
+                  <p>📍 Location: Discover Group Travel and Tours Office</p>
+                  <p className="mt-1">📞 Contact: +63 123 456 7890</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Notes */}
+          {booking.notes && (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Additional Notes</h3>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-sm text-gray-700">{booking.notes}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="sticky bottom-0 bg-gray-50 border-t px-6 py-4 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Main Component
 export default function ManageBookings() {
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
@@ -211,6 +400,7 @@ export default function ManageBookings() {
   const [filters, setFilters] = useState<BookingFilters>({});
   const [reportData, setReportData] = useState<BookingReportData[]>([]);
   const [showReports, setShowReports] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
   const loadBookings = useCallback(async () => {
     try {
@@ -284,7 +474,10 @@ export default function ManageBookings() {
       'Paid Amount',
       'Payment Type',
       'Status',
-      'Booking Date'
+      'Booking Date',
+      'Appointment Date',
+      'Appointment Time',
+      'Appointment Purpose'
     ];
 
     const csvData = filteredBookings.map(booking => [
@@ -298,7 +491,10 @@ export default function ManageBookings() {
       booking.paidAmount.toString(),
       booking.paymentType,
       booking.status,
-      new Date(booking.bookingDate).toLocaleDateString()
+      new Date(booking.bookingDate).toLocaleDateString(),
+      booking.appointmentDate || 'N/A',
+      booking.appointmentTime || 'N/A',
+      booking.appointmentPurpose || 'N/A'
     ]);
 
     const csvContent = [headers, ...csvData]
@@ -457,6 +653,14 @@ export default function ManageBookings() {
                         <div className="text-sm font-medium text-gray-900">{booking.bookingId}</div>
                         <div className="text-sm text-gray-500">{formatDate(booking.bookingDate)}</div>
                         <div className="text-xs text-gray-400">{booking.passengers} passenger{booking.passengers > 1 ? 's' : ''}</div>
+                        {booking.appointmentDate && booking.appointmentTime && (
+                          <div className="mt-2 inline-flex items-center px-2 py-1 rounded-md bg-blue-50 border border-blue-200">
+                            <svg className="w-3 h-3 text-blue-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span className="text-xs font-medium text-blue-700">Appointment Scheduled</span>
+                          </div>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -509,7 +713,7 @@ export default function ManageBookings() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div className="flex items-center space-x-2">
                         <button
-                          onClick={() => alert(`Viewing details for ${booking.bookingId}`)}
+                          onClick={() => setSelectedBooking(booking)}
                           className="text-blue-600 hover:text-blue-800"
                           title="View Details"
                         >
@@ -542,6 +746,14 @@ export default function ManageBookings() {
           <span>Showing {filteredBookings.length} booking{filteredBookings.length !== 1 ? 's' : ''}</span>
           <span>Total Revenue: {formatCurrency(filteredBookings.reduce((sum, b) => sum + b.totalAmount, 0))}</span>
         </div>
+      )}
+
+      {/* Booking Detail Modal */}
+      {selectedBooking && (
+        <BookingDetailModal 
+          booking={selectedBooking} 
+          onClose={() => setSelectedBooking(null)} 
+        />
       )}
     </div>
   );

@@ -57,76 +57,131 @@ export default function Home() {
 
   return (
     <main>
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-blue-700 to-blue-500 text-white py-24 overflow-hidden min-h-[60vh] flex items-center justify-center">
-        {/* Animated Background */}
-        <motion.div
-          className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_#3b82f6_40%,_transparent_70%),_radial-gradient(circle_at_bottom_right,_#1d4ed8_40%,_transparent_70%)] opacity-60"
-          animate={{ backgroundPosition: ["0% 0%", "100% 100%"] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-        />
-        {/* Floating Travel Icons */}
-        <motion.div
-          className="absolute top-10 left-20 text-4xl drop-shadow-xl"
-          animate={{ y: [0, 20, 0] }}
-          transition={{ duration: 6, repeat: Infinity }}
-        >
-          ✈️
-        </motion.div>
-        <motion.div
-          className="absolute bottom-16 right-24 text-4xl drop-shadow-xl"
-          animate={{ y: [0, -20, 0] }}
-          transition={{ duration: 8, repeat: Infinity }}
-        >
-          🗺️
-        </motion.div>
-        <motion.div
-          className="absolute top-1/2 left-1/3 text-4xl drop-shadow-xl"
-          animate={{ rotate: [0, 10, -10, 0] }}
-          transition={{ duration: 10, repeat: Infinity }}
-        >
-          🏰
-        </motion.div>
-        {/* Glassmorphism Card */}
-        <div className="relative z-10 w-full max-w-3xl mx-auto px-6">
+      {/* Hero Section - Enhanced */}
+      <section className="relative bg-gradient-to-br from-blue-900 via-blue-700 to-blue-500 text-white py-20 overflow-hidden min-h-[75vh] flex items-center justify-center">
+        {/* Animated Background with Particles */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Gradient Overlay */}
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-tr from-blue-950/50 via-transparent to-blue-800/30"
+            animate={{ 
+              backgroundPosition: ["0% 0%", "100% 100%"],
+              opacity: [0.3, 0.6, 0.3]
+            }}
+            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+          />
+          
+          {/* Floating Geometric Shapes */}
+          <motion.div
+            className="absolute top-20 left-10 w-32 h-32 bg-white/5 rounded-full blur-3xl"
+            animate={{ 
+              x: [0, 100, 0],
+              y: [0, 50, 0],
+              scale: [1, 1.2, 1]
+            }}
+            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute bottom-20 right-20 w-40 h-40 bg-yellow-300/10 rounded-full blur-3xl"
+            animate={{ 
+              x: [0, -80, 0],
+              y: [0, -60, 0],
+              scale: [1, 1.3, 1]
+            }}
+            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute top-1/3 right-1/4 w-24 h-24 bg-blue-300/10 rounded-full blur-2xl"
+            animate={{ 
+              x: [0, 60, 0],
+              y: [0, -40, 0]
+            }}
+            transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+          />
+          
+          {/* Subtle Grid Pattern */}
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]" />
+        </div>
+
+        {/* Main Content */}
+        <div className="relative z-10 w-full max-w-5xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-3xl shadow-2xl p-10 flex flex-col items-center"
+            className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl shadow-2xl p-8 md:p-12 flex flex-col items-center"
           >
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-4xl md:text-6xl font-bold mb-6 drop-shadow-lg"
+              transition={{ duration: 0.8, delay: 0.1 }}
+              className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 drop-shadow-lg text-center leading-tight"
             >
-              Discover Europe with <span className="text-yellow-300">Discover Group</span>
+              Discover Europe with <br />
+              <span className="text-yellow-300 inline-block mt-2">Discover Group</span>
             </motion.h1>
+            
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.2 }}
-              className="text-lg mb-8 max-w-2xl mx-auto opacity-90"
+              className="text-lg md:text-xl mb-10 max-w-2xl mx-auto text-center text-white/90 leading-relaxed"
             >
-              Explore iconic destinations with our guided tours — <br className="hidden md:inline" />
+              Explore iconic destinations with our guided tours — 
               guaranteed departures, flexible routes, and unforgettable experiences.
             </motion.p>
-            {/* Search / Explore Bar + CTA */}
+            
+            {/* Search Bar */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="flex w-full max-w-xl mx-auto gap-2"
+              className="w-full max-w-2xl mx-auto"
             >
               <EnhancedSearch 
                 placeholder="Where do you want to go?"
-                className="w-full rounded-l-full bg-white/80 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md"
+                className="w-full rounded-full bg-white text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-yellow-300/50 shadow-2xl px-6 py-4 text-lg"
                 tours={tours}
               />
             </motion.div>
+
+            {/* Quick Stats */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="mt-10 grid grid-cols-3 gap-6 md:gap-12 w-full max-w-2xl"
+            >
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold text-yellow-300">25K+</div>
+                <div className="text-xs md:text-sm text-white/80 mt-1">Happy Travelers</div>
+              </div>
+              <div className="text-center border-x border-white/20">
+                <div className="text-2xl md:text-3xl font-bold text-yellow-300">50+</div>
+                <div className="text-xs md:text-sm text-white/80 mt-1">Destinations</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold text-yellow-300">4.9★</div>
+                <div className="text-xs md:text-sm text-white/80 mt-1">Average Rating</div>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
+
+        {/* Scroll Indicator */}
+        <motion.div
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <div className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center p-2">
+            <motion.div
+              className="w-1.5 h-1.5 bg-white rounded-full"
+              animate={{ y: [0, 16, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+          </div>
+        </motion.div>
       </section>
 
       {/* Trust Signals & Social Proof */}

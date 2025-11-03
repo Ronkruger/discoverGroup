@@ -128,7 +128,14 @@ interface TourFormData {
 
   // Travel Details
   travelWindow: { start: string; end: string };
-  departureDates: { start: string; end: string }[];
+  departureDates: { 
+    start: string; 
+    end: string; 
+    maxCapacity?: number;
+    currentBookings?: number;
+    isAvailable?: boolean;
+    price?: number;
+  }[];
 
   // Content
   highlights: string[];
@@ -137,7 +144,7 @@ interface TourFormData {
   relatedImages: string[];
 
   // Itinerary
-  itinerary: { day: number; title: string; description: string }[];
+  itinerary: { day: number; title: string; description: string; image?: string }[];
 
   // Stops & Geography
   fullStops: { city: string; country: string; days?: number }[];
@@ -152,15 +159,27 @@ interface TourFormData {
 }
 
 export default function TourForm(): JSX.Element {
+  // Itinerary image upload handler
+  async function handleItineraryImageUpload(idx: number, file?: File | null) {
+    if (!file) return;
+    const url = await uploadImageToSupabase(file, 'itinerary-images', id || formData.slug, `day${idx + 1}`);
+    if (url) {
+      setFormData((prev) => {
+        const itinerary = [...prev.itinerary];
+        itinerary[idx] = { ...itinerary[idx], image: url };
+        return { ...prev, itinerary };
+      });
+    }
+  }
   // Departure Date Range Handlers
   function addDepartureDateRange() {
     setFormData((prev) => ({
       ...prev,
-      departureDates: [...prev.departureDates, { start: '', end: '' }],
+      departureDates: [...prev.departureDates, { start: '', end: '', maxCapacity: undefined, currentBookings: 0, isAvailable: true, price: undefined }],
     }));
   }
 
-  function updateDepartureDateRange(index: number, field: 'start' | 'end', value: string) {
+  function updateDepartureDateRange(index: number, field: 'start' | 'end' | 'maxCapacity' | 'currentBookings' | 'isAvailable' | 'price', value: string | number | boolean | undefined) {
     setFormData((prev) => {
       const updated = [...prev.departureDates];
       updated[index] = { ...updated[index], [field]: value };
@@ -768,29 +787,99 @@ export default function TourForm(): JSX.Element {
                 </p>
               </div>
 
-              {/* Departure Dates List */}
+              {/* Departure Dates List with Availability */}
               <div className="space-y-4">
                 <label className="block text-sm font-semibold text-gray-700">
-                  Departure Date Ranges
+                  Departure Date Ranges & Availability
                 </label>
                 {formData.departureDates.map((range, idx) => (
-                  <div key={idx} className="flex items-center gap-2 mb-2 bg-gray-50 rounded-lg p-4">
-                    <span className="text-sm font-medium text-gray-600 w-8">#{idx + 1}</span>
-                    <label className="text-sm">Start Date:</label>
-                    <input
-                      type="date"
-                      value={range.start}
-                      onChange={e => updateDepartureDateRange(idx, 'start', e.target.value)}
-                      className="border rounded px-2 py-1"
-                    />
-                    <label className="text-sm">End Date:</label>
-                    <input
-                      type="date"
-                      value={range.end}
-                      onChange={e => updateDepartureDateRange(idx, 'end', e.target.value)}
-                      className="border rounded px-2 py-1"
-                    />
-                    <button type="button" onClick={() => removeDepartureDateRange(idx)} className="text-red-500 ml-2">Remove</button>
+                  <div key={idx} className="bg-gray-50 rounded-lg p-4 space-y-3 border border-gray-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm font-medium text-gray-600 w-8">#{idx + 1}</span>
+                      <button type="button" onClick={() => removeDepartureDateRange(idx)} className="ml-auto text-red-500 hover:text-red-700 text-sm font-medium">Remove</button>
+                    </div>
+                    
+                    {/* Date Range */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Start Date</label>
+                        <input
+                          type="date"
+                          value={range.start}
+                          onChange={e => updateDepartureDateRange(idx, 'start', e.target.value)}
+                          className="w-full border rounded px-3 py-2"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">End Date</label>
+                        <input
+                          type="date"
+                          value={range.end}
+                          onChange={e => updateDepartureDateRange(idx, 'end', e.target.value)}
+                          className="w-full border rounded px-3 py-2"
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Capacity & Availability */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Max Capacity</label>
+                        <input
+                          type="number"
+                          min="1"
+                          value={range.maxCapacity || ''}
+                          placeholder="Unlimited"
+                          onChange={e => updateDepartureDateRange(idx, 'maxCapacity', e.target.value ? parseInt(e.target.value) : undefined)}
+                          className="w-full border rounded px-3 py-2"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Current Bookings</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={range.currentBookings || 0}
+                          onChange={e => updateDepartureDateRange(idx, 'currentBookings', parseInt(e.target.value) || 0)}
+                          className="w-full border rounded px-3 py-2 bg-gray-100"
+                          readOnly
+                          title="This will be auto-updated when bookings are made"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Override Price</label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={range.price || ''}
+                          placeholder="Use default"
+                          onChange={e => updateDepartureDateRange(idx, 'price', e.target.value ? parseFloat(e.target.value) : undefined)}
+                          className="w-full border rounded px-3 py-2"
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Availability Toggle */}
+                    <div className="flex items-center gap-3 pt-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={range.isAvailable !== false}
+                          onChange={e => updateDepartureDateRange(idx, 'isAvailable', e.target.checked)}
+                          className="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500"
+                        />
+                        <span className="text-sm font-medium text-gray-700">Available for Booking</span>
+                      </label>
+                      {range.maxCapacity && range.currentBookings !== undefined && (
+                        <span className="ml-auto text-xs font-medium text-gray-600">
+                          {range.currentBookings} / {range.maxCapacity} booked
+                          {range.currentBookings >= range.maxCapacity && (
+                            <span className="ml-2 text-red-600 font-semibold">(FULL)</span>
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 ))}
                 <button type="button" onClick={addDepartureDateRange} className="w-full border-2 border-dashed border-green-300 rounded-lg p-4 text-green-600 hover:border-green-400 hover:bg-green-50 transition-all">
@@ -838,7 +927,131 @@ export default function TourForm(): JSX.Element {
             </div>
           </div>
 
-          {/* Images Section */}
+          {/* Itinerary Section */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Itinerary</h2>
+                <p className="text-gray-600">Add day-by-day details and an image for each day.</p>
+              </div>
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setFormData((prev) => ({
+                    ...prev,
+                    itinerary: [...prev.itinerary, { day: prev.itinerary.length + 1, title: '', description: '', image: '' }]
+                  }))}
+                  className="px-4 py-2 rounded bg-gradient-to-r from-green-400 to-green-500 text-white font-semibold text-sm shadow hover:from-green-500 hover:to-green-600 transition"
+                >
+                  + Add Day
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {formData.itinerary.length > 0 ? (
+                formData.itinerary.map((it, idx) => (
+                  <div key={idx} className="grid grid-cols-1 md:grid-cols-6 gap-3 items-center bg-gray-50 p-3 rounded">
+                    <div className="md:col-span-1">
+                      <label className="block text-xs text-gray-600 mb-1">Day</label>
+                      <input
+                        type="number"
+                        min={1}
+                        value={it.day}
+                        onChange={e => {
+                          const day = Number(e.target.value);
+                          setFormData((prev) => {
+                            const itinerary = [...prev.itinerary];
+                            itinerary[idx] = { ...itinerary[idx], day };
+                            return { ...prev, itinerary };
+                          });
+                        }}
+                        className="w-full border border-gray-300 rounded px-3 py-2"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs text-gray-600 mb-1">Title</label>
+                      <input
+                        type="text"
+                        value={it.title}
+                        onChange={e => {
+                          const title = e.target.value;
+                          setFormData((prev) => {
+                            const itinerary = [...prev.itinerary];
+                            itinerary[idx] = { ...itinerary[idx], title };
+                            return { ...prev, itinerary };
+                          });
+                        }}
+                        placeholder="e.g., Arrival in Paris"
+                        className="w-full border border-gray-300 rounded px-3 py-2"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs text-gray-600 mb-1">Description</label>
+                      <textarea
+                        value={it.description}
+                        onChange={e => {
+                          const description = e.target.value;
+                          setFormData((prev) => {
+                            const itinerary = [...prev.itinerary];
+                            itinerary[idx] = { ...itinerary[idx], description };
+                            return { ...prev, itinerary };
+                          });
+                        }}
+                        rows={2}
+                        className="w-full border border-gray-300 rounded px-3 py-2"
+                        placeholder="Details for this day..."
+                      />
+                    </div>
+                    <div className="md:col-span-1 flex flex-col items-center gap-2">
+                      <label className="block text-xs text-gray-600 mb-1">Image</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={e => {
+                          const file = e.target.files && e.target.files[0];
+                          if (file) handleItineraryImageUpload(idx, file);
+                        }}
+                        className="mb-2"
+                      />
+                      {it.image ? (
+                        <img src={it.image} alt={`Itinerary Day ${it.day}`} className="w-24 h-16 object-cover rounded border" />
+                      ) : (
+                        <div className="w-24 h-16 bg-gray-100 rounded border flex items-center justify-center text-xs text-gray-400">No image</div>
+                      )}
+                      {it.image && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData((prev) => {
+                              const itinerary = [...prev.itinerary];
+                              itinerary[idx] = { ...itinerary[idx], image: '' };
+                              return { ...prev, itinerary };
+                            });
+                          }}
+                          className="px-2 py-1 bg-red-50 text-red-700 text-xs rounded hover:bg-red-100"
+                        >Remove</button>
+                      )}
+                    </div>
+                    <div className="md:col-span-1 flex items-center justify-end">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData((prev) => {
+                            const itinerary = prev.itinerary.filter((_, i) => i !== idx);
+                            return { ...prev, itinerary };
+                          });
+                        }}
+                        className="px-3 py-1 rounded bg-red-50 text-red-700 text-xs hover:bg-red-100"
+                      >Remove Day</button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-gray-500">No itinerary days added yet. Click \"Add Day\" to begin.</div>
+              )}
+            </div>
+          </div>
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
             <div className="flex items-center gap-3 mb-8">
               <div className="bg-purple-100 p-3 rounded-xl">

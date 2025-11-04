@@ -19,16 +19,28 @@ const app = express();
 connectDB();
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 app.use("/api/uploads", uploadsRouter);
-// During development allow any localhost origin to simplify running multiple dev servers on different ports.
+
+// CORS configuration
+const allowedOrigins = process.env.CORS_ORIGINS?.split(',') || [
+  'http://localhost:5173',  // Client dev
+  'http://localhost:5174',  // Admin dev
+  'http://localhost:5175',  // API dev
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+  'http://127.0.0.1:5175',
+];
+
 if (process.env.NODE_ENV === 'production') {
+  // Production: Only allow specific origins
   app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],
+    origin: allowedOrigins,
     credentials: true
   }));
 } else {
+  // Development: Allow any localhost origin
   app.use(cors({
     origin: (origin, callback) => {
-      // Allow requests from any localhost origin (ports vary during dev)
+      // Allow requests with no origin (like mobile apps, Postman)
       if (!origin) return callback(null, true);
       try {
         const u = new URL(origin);

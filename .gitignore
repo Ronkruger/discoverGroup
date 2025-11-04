@@ -25,3 +25,8 @@ apps/api/.env
 *.sw?
 .env 
 .env 
+
+# Deployment env bundles (keep secrets out of git)
+env/*.env
+render-*.env
+apps/*/.env

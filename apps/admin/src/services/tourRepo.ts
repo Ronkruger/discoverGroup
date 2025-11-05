@@ -20,7 +20,7 @@ export async function createTour(data: api.TourPayload): Promise<Tour> {
 }
 
 export async function updateTour(id: string | number, data: Partial<Tour>): Promise<Tour> {
-  const res = await fetch(`${(process.env.VITE_ADMIN_API_URL as string) ?? "http://localhost:4000"}/admin/tours/${id}`, {
+  const res = await fetch(`${import.meta.env.VITE_ADMIN_API_URL || import.meta.env.VITE_API_URL || "http://localhost:4000"}/admin/tours/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -33,7 +33,7 @@ export async function updateTour(id: string | number, data: Partial<Tour>): Prom
 }
 
 export async function deleteTour(id: string | number): Promise<void> {
-  const res = await fetch(`${(process.env.VITE_ADMIN_API_URL as string) ?? "http://localhost:4000"}/admin/tours/${id}`, {
+  const res = await fetch(`${import.meta.env.VITE_ADMIN_API_URL || import.meta.env.VITE_API_URL || "http://localhost:4000"}/admin/tours/${id}`, {
     method: "DELETE",
   });
   if (!res.ok) {

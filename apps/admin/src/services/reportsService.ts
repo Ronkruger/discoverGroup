@@ -15,7 +15,7 @@ import type {
   ReportFilter
 } from '../types/reports';
 
-const API_BASE_URL = (typeof process !== 'undefined' && process.env && process.env.VITE_API_URL) || 'http://localhost:4000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 function getToken() { return localStorage.getItem('token'); }
 
 class ReportsService {

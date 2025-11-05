@@ -1,6 +1,6 @@
 import { User, LoginCredentials, RegisterData, ROLE_PERMISSIONS, RolePermissions } from '../types/auth';
 
-const API_BASE_URL = (typeof process !== 'undefined' && process.env && process.env.VITE_API_URL) || 'http://localhost:4000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 // Utility to get auth token from localStorage (if you use JWT)
 function getToken() {

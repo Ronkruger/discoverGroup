@@ -1,10 +1,10 @@
 import express from 'express';
-import { requireAdmin } from '../../middleware/authMiddleware';
+import { requireAdmin } from '../../middleware/auth';
 
 const router = express.Router();
 
 // In-memory storage for settings (you can replace this with MongoDB if needed)
-let adminSettings = {
+const adminSettings = {
   bookingDepartmentEmail: process.env.BOOKING_DEPT_EMAIL || 'booking@discovergrp.com',
   emailFromAddress: process.env.SENDGRID_FROM_EMAIL || 'traveldesk@discovergrp.com',
   emailFromName: process.env.SENDGRID_FROM_NAME || 'Discover Group Travel Desk',

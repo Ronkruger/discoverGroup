@@ -25,6 +25,7 @@ import {
   Upload,
   Trash2
 } from 'lucide-react';
+import { getEmailSettings, updateEmailSettings } from '../services/settingsService';
 
 interface SystemSettings {
   // General Settings
@@ -51,6 +52,7 @@ interface SystemSettings {
   smtpSecure: boolean;
   emailFromName: string;
   emailFromAddress: string;
+  bookingDepartmentEmail: string;
   
   // Notification Settings
   emailNotifications: boolean;
@@ -107,6 +109,7 @@ const Settings: React.FC = () => {
     smtpSecure: true,
     emailFromName: 'DiscoverGroup',
     emailFromAddress: 'noreply@discovergroup.com',
+    bookingDepartmentEmail: 'booking@discovergrp.com',
     
     // Notification Settings
     emailNotifications: true,
@@ -142,7 +145,7 @@ const Settings: React.FC = () => {
   const [saved, setSaved] = useState(true); // Start as saved
   const [showPassword, setShowPassword] = useState(false);
 
-  // Load settings from localStorage on component mount
+  // Load settings from localStorage and API on component mount
   useEffect(() => {
     const savedSettings = localStorage.getItem('discovergroup-admin-settings');
     
@@ -162,6 +165,21 @@ const Settings: React.FC = () => {
     } else {
       setSaved(false); // No saved settings, mark as unsaved
     }
+
+    // Load email settings from API
+    getEmailSettings()
+      .then(emailSettings => {
+        setSettings(prev => ({
+          ...prev,
+          bookingDepartmentEmail: emailSettings.bookingDepartmentEmail,
+          emailFromAddress: emailSettings.emailFromAddress,
+          emailFromName: emailSettings.emailFromName,
+        }));
+        console.log('✅ Loaded email settings from API:', emailSettings);
+      })
+      .catch(error => {
+        console.error('Failed to load email settings from API:', error);
+      });
   }, []);
 
   const tabs = [
@@ -197,10 +215,15 @@ const Settings: React.FC = () => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      // Simulate API call to save settings
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Save email settings to API
+      await updateEmailSettings({
+        bookingDepartmentEmail: settings.bookingDepartmentEmail,
+        emailFromAddress: settings.emailFromAddress,
+        emailFromName: settings.emailFromName,
+      });
+      console.log('✅ Email settings saved to API');
       
-      // Store settings in localStorage for persistence
+      // Store all settings in localStorage for persistence
       localStorage.setItem('discovergroup-admin-settings', JSON.stringify(settings));
       
       setSaved(true);
@@ -514,6 +537,20 @@ const Settings: React.FC = () => {
               onChange={(e) => updateSetting('emailFromAddress', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Booking Department Email
+            </label>
+            <input
+              type="email"
+              value={settings.bookingDepartmentEmail}
+              onChange={(e) => updateSetting('bookingDepartmentEmail', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="booking@discovergrp.com"
+            />
+            <p className="text-xs text-gray-500 mt-1">Email address that receives booking notifications</p>
           </div>
           
           <div className="md:col-span-2">

@@ -1,12 +1,11 @@
 import nodemailer from 'nodemailer';
 import sgMail from '@sendgrid/mail';
 
+import { getBookingDepartmentEmail, getEmailFromAddress, getEmailFromName } from '../routes/admin/settings';
+
 // Initialize SendGrid
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 const SENDGRID_TEMPLATE_ID = process.env.SENDGRID_TEMPLATE_ID;
-const SENDGRID_FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'traveldesk@discovergrp.com';
-const SENDGRID_FROM_NAME = process.env.SENDGRID_FROM_NAME || 'Discover Group Travel Desk';
-const BOOKING_DEPT_EMAIL = process.env.BOOKING_DEPT_EMAIL || 'booking@discovergrp.com';
 
 if (SENDGRID_API_KEY) {
   sgMail.setApiKey(SENDGRID_API_KEY);
@@ -286,15 +285,20 @@ export const sendBookingConfirmationEmail = async (booking: BookingDetails): Pro
         }),
       };
 
+      // Get current settings
+      const bookingDeptEmail = getBookingDepartmentEmail();
+      const fromEmail = getEmailFromAddress();
+      const fromName = getEmailFromName();
+
       // Send email to both customer and booking department
       const msg = {
         to: [
           booking.customerEmail, // Customer email
-          BOOKING_DEPT_EMAIL     // Booking department email
+          bookingDeptEmail     // Booking department email (configurable)
         ],
         from: {
-          email: SENDGRID_FROM_EMAIL,
-          name: SENDGRID_FROM_NAME,
+          email: fromEmail,
+          name: fromName,
         },
         templateId: SENDGRID_TEMPLATE_ID,
         dynamicTemplateData: templateData,
@@ -306,7 +310,7 @@ export const sendBookingConfirmationEmail = async (booking: BookingDetails): Pro
       };
 
       console.log('📤 Sending email via SendGrid...');
-      console.log('📧 Recipients:', [booking.customerEmail, BOOKING_DEPT_EMAIL]);
+      console.log('📧 Recipients:', [booking.customerEmail, bookingDeptEmail]);
       console.log('📋 Template data:', JSON.stringify(templateData, null, 2));
       const [response] = await sgMail.send(msg);
       
@@ -324,9 +328,14 @@ export const sendBookingConfirmationEmail = async (booking: BookingDetails): Pro
     console.log('⚠️ SendGrid not configured, using Nodemailer fallback');
     const transporter = await createTransporter();
     
+    // Get current settings
+    const bookingDeptEmail = getBookingDepartmentEmail();
+    const fromEmail = getEmailFromAddress();
+    const fromName = getEmailFromName();
+    
     const mailOptions = {
-      from: `"${SENDGRID_FROM_NAME}" <${SENDGRID_FROM_EMAIL}>`,
-      to: [booking.customerEmail, BOOKING_DEPT_EMAIL], // Send to both customer and booking department
+      from: `"${fromName}" <${fromEmail}>`,
+      to: [booking.customerEmail, bookingDeptEmail], // Send to both customer and booking department
       subject: `Booking Confirmation - ${booking.tourTitle} (${booking.bookingId})`,
       html: generateBookingConfirmationEmail(booking),
       text: `

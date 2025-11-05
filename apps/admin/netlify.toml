@@ -5,7 +5,7 @@
 
 [build.environment]
   NODE_VERSION = "18"
-  VITE_ADMIN_API_URL = "https://api--discoverGroup.netlify.app"
+  VITE_API_URL = "https://discovergroup.onrender.com"
 
 [[redirects]]
   from = "/*"

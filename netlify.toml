@@ -2,3 +2,7 @@
   base = ""
   command = "npm run build"
   publish = "src/build"
+
+[build.environment]
+  NODE_VERSION = "18"
+  VITE_API_URL = "https://discovergroup.onrender.com"

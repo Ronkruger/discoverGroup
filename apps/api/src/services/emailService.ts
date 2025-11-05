@@ -4,8 +4,9 @@ import sgMail from '@sendgrid/mail';
 // Initialize SendGrid
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 const SENDGRID_TEMPLATE_ID = process.env.SENDGRID_TEMPLATE_ID;
-const SENDGRID_FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'bookings@discovergroup.com';
-const SENDGRID_FROM_NAME = process.env.SENDGRID_FROM_NAME || 'Discover Group';
+const SENDGRID_FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'traveldesk@discovergrp.com';
+const SENDGRID_FROM_NAME = process.env.SENDGRID_FROM_NAME || 'Discover Group Travel Desk';
+const BOOKING_DEPT_EMAIL = process.env.BOOKING_DEPT_EMAIL || 'booking@discovergrp.com';
 
 if (SENDGRID_API_KEY) {
   sgMail.setApiKey(SENDGRID_API_KEY);
@@ -285,8 +286,12 @@ export const sendBookingConfirmationEmail = async (booking: BookingDetails): Pro
         }),
       };
 
+      // Send email to both customer and booking department
       const msg = {
-        to: booking.customerEmail,
+        to: [
+          booking.customerEmail, // Customer email
+          BOOKING_DEPT_EMAIL     // Booking department email
+        ],
         from: {
           email: SENDGRID_FROM_EMAIL,
           name: SENDGRID_FROM_NAME,
@@ -301,10 +306,11 @@ export const sendBookingConfirmationEmail = async (booking: BookingDetails): Pro
       };
 
       console.log('📤 Sending email via SendGrid...');
+      console.log('📧 Recipients:', [booking.customerEmail, BOOKING_DEPT_EMAIL]);
       console.log('📋 Template data:', JSON.stringify(templateData, null, 2));
       const [response] = await sgMail.send(msg);
       
-      console.log('✅ Email sent successfully via SendGrid!');
+      console.log('✅ Email sent successfully via SendGrid to both customer and booking department!');
       console.log('✅ Status Code:', response.statusCode);
       console.log('✅ Message ID:', response.headers['x-message-id']);
 
@@ -319,8 +325,8 @@ export const sendBookingConfirmationEmail = async (booking: BookingDetails): Pro
     const transporter = await createTransporter();
     
     const mailOptions = {
-      from: '"Discover Group" <noreply@discovergroup.com>',
-      to: booking.customerEmail,
+      from: `"${SENDGRID_FROM_NAME}" <${SENDGRID_FROM_EMAIL}>`,
+      to: [booking.customerEmail, BOOKING_DEPT_EMAIL], // Send to both customer and booking department
       subject: `Booking Confirmation - ${booking.tourTitle} (${booking.bookingId})`,
       html: generateBookingConfirmationEmail(booking),
       text: `

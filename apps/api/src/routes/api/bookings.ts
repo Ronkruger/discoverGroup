@@ -1,6 +1,7 @@
 
 import express from "express";
 import Booking from "../../models/Booking";
+import { sendBookingConfirmationEmail } from "../../services/emailService";
 
 const router = express.Router();
 
@@ -68,6 +69,38 @@ router.post("/", async (req, res) => {
       appointmentTime,
       appointmentPurpose
     });
+
+    console.log('✅ Booking created successfully:', bookingId);
+
+    // Send confirmation email to customer and booking department
+    try {
+      console.log('📧 Sending booking confirmation emails...');
+      const emailResult = await sendBookingConfirmationEmail({
+        bookingId,
+        customerName,
+        customerEmail,
+        tourTitle: tourSlug, // Using tourSlug as title for now
+        tourDate: selectedDate,
+        passengers,
+        pricePerPerson: perPerson,
+        totalAmount,
+        downpaymentAmount: paidAmount < totalAmount ? paidAmount : undefined,
+        remainingBalance: paidAmount < totalAmount ? totalAmount - paidAmount : undefined,
+        isDownpaymentOnly: paidAmount < totalAmount,
+        appointmentDate,
+        appointmentTime,
+        appointmentPurpose
+      });
+
+      if (emailResult.success) {
+        console.log('✅ Confirmation emails sent to customer and booking department');
+      } else {
+        console.warn('⚠️ Failed to send confirmation email:', emailResult.error);
+      }
+    } catch (emailError) {
+      // Don't fail the booking if email fails
+      console.error('⚠️ Email sending error (non-critical):', emailError);
+    }
 
     res.status(201).json(booking);
   } catch (err) {

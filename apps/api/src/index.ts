@@ -21,7 +21,7 @@ app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 app.use("/api/uploads", uploadsRouter);
 
 // CORS configuration
-const allowedOrigins = process.env.CORS_ORIGINS?.split(',') || [
+const allowedOrigins = [
   'http://localhost:5173',  // Client dev
   'http://localhost:5174',  // Admin dev
   'http://localhost:5175',  // API dev
@@ -30,10 +30,32 @@ const allowedOrigins = process.env.CORS_ORIGINS?.split(',') || [
   'http://127.0.0.1:5175',
 ];
 
+// Add production URLs if they exist
+if (process.env.CLIENT_URL) allowedOrigins.push(process.env.CLIENT_URL);
+if (process.env.ADMIN_URL) allowedOrigins.push(process.env.ADMIN_URL);
+// Also add common Netlify admin URL patterns
+if (process.env.ADMIN_URL) {
+  const adminUrl = process.env.ADMIN_URL.replace('https://admin--', 'https://');
+  allowedOrigins.push(adminUrl);
+  allowedOrigins.push('https://admindiscovergrp.netlify.app');
+  allowedOrigins.push('https://admin--discovergrp.netlify.app');
+}
+
 if (process.env.NODE_ENV === 'production') {
   // Production: Only allow specific origins
   app.use(cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, Postman, server-to-server)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        console.log('CORS blocked origin:', origin);
+        console.log('Allowed origins:', allowedOrigins);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true
   }));
 } else {

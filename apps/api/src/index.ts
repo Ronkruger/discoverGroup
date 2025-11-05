@@ -28,30 +28,36 @@ const allowedOrigins = [
   'http://127.0.0.1:5173',
   'http://127.0.0.1:5174',
   'http://127.0.0.1:5175',
+  'https://discoverg.netlify.app',  // Client production
+  'https://admin--discovergrp.netlify.app',  // Admin production
+  'https://admindiscovergrp.netlify.app',  // Admin production (alternate)
 ];
 
-// Add production URLs if they exist
+// Add production URLs from environment variables
 if (process.env.CLIENT_URL) allowedOrigins.push(process.env.CLIENT_URL);
 if (process.env.ADMIN_URL) allowedOrigins.push(process.env.ADMIN_URL);
-// Also add common Netlify admin URL patterns
-if (process.env.ADMIN_URL) {
-  const adminUrl = process.env.ADMIN_URL.replace('https://admin--', 'https://');
-  allowedOrigins.push(adminUrl);
-  allowedOrigins.push('https://admindiscovergrp.netlify.app');
-  allowedOrigins.push('https://admin--discovergrp.netlify.app');
-}
+
+console.log('CORS Configuration:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('Allowed origins:', allowedOrigins);
 
 if (process.env.NODE_ENV === 'production') {
   // Production: Only allow specific origins
   app.use(cors({
     origin: (origin, callback) => {
+      console.log('CORS request from origin:', origin);
+      
       // Allow requests with no origin (like mobile apps, Postman, server-to-server)
-      if (!origin) return callback(null, true);
+      if (!origin) {
+        console.log('No origin - allowing');
+        return callback(null, true);
+      }
       
       if (allowedOrigins.indexOf(origin) !== -1) {
+        console.log('Origin allowed');
         callback(null, true);
       } else {
-        console.log('CORS blocked origin:', origin);
+        console.log('CORS BLOCKED! Origin not in allowed list');
         console.log('Allowed origins:', allowedOrigins);
         callback(new Error('Not allowed by CORS'));
       }

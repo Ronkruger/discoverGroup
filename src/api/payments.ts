@@ -1,5 +1,7 @@
 /// <reference lib="es2015" />
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
 type CreatePaymentIntentRequest = {
   amount: number; // in the smallest currency unit (centavos for PHP)
   currency: string; // e.g., "php"
@@ -14,12 +16,11 @@ type CreatePaymentIntentResponse = {
 export async function createPaymentIntent(
   payload: CreatePaymentIntentRequest
 ): Promise<CreatePaymentIntentResponse> {
-  console.log('� Creating payment intent for testing');
+  console.log('💳 Creating payment intent for testing');
   
   try {
-    // Try the real API with explicit localhost URL
-    const base = "http://localhost:4000";
-    const endpoint = `${base}/api/create-payment-intent`;
+    // Try the real API
+    const endpoint = `${API_BASE_URL}/api/create-payment-intent`;
     
     console.log('💳 Attempting Stripe payment intent at:', endpoint);
     

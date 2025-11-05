@@ -1,5 +1,7 @@
 import type { Booking, Tour, BookingStatus, PaymentType } from "../types";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
 // Removed mockBookings and all localStorage fallback. All booking operations use backend only.
 
 // Helper function to generate a booking ID
@@ -64,7 +66,7 @@ export async function createBooking(bookingData: {
     appointmentPurpose: bookingData.appointmentPurpose,
   };
 
-  const res = await fetch('http://localhost:4000/api/bookings', {
+  const res = await fetch(`${API_BASE_URL}/api/bookings`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -95,7 +97,7 @@ export async function createBooking(bookingData: {
 export async function fetchAllBookings(): Promise<Booking[]> {
   // Try to fetch from backend
   try {
-    const res = await fetch('http://localhost:4000/api/bookings');
+    const res = await fetch(`${API_BASE_URL}/api/bookings`);
     if (!res.ok) throw new Error('Failed to fetch bookings');
     const data = await res.json();
     // If backend returns bookings, map them to Booking type
@@ -163,7 +165,7 @@ export async function fetchBookingById(bookingId: string): Promise<Booking | nul
 // Update booking status (must be implemented via backend API)
 export async function updateBookingStatus(bookingId: string, status: BookingStatus): Promise<Booking | null> {
   // Call backend to update status for the given bookingId
-  const res = await fetch(`http://localhost:4000/api/bookings/${encodeURIComponent(bookingId)}/status`, {
+  const res = await fetch(`${API_BASE_URL}/api/bookings/${encodeURIComponent(bookingId)}/status`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status }),
@@ -180,7 +182,7 @@ export async function updateBookingStatus(bookingId: string, status: BookingStat
 
 // Delete booking (must be implemented via backend API)
 export async function deleteBooking(bookingId: string): Promise<boolean> {
-  const res = await fetch(`http://localhost:4000/api/bookings/${encodeURIComponent(bookingId)}`, {
+  const res = await fetch(`${API_BASE_URL}/api/bookings/${encodeURIComponent(bookingId)}`, {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
   });

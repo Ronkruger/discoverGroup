@@ -1,5 +1,5 @@
 import React, { JSX, useEffect, useState } from "react";
-import { Trash2, Plus, Edit2, Check, X } from "lucide-react";
+import { Trash2, Plus, Edit2, Check, X, Eye, EyeOff } from "lucide-react";
 
 interface MessengerAccount {
   id: string;
@@ -7,6 +7,7 @@ interface MessengerAccount {
   pageId: string;
   appId: string;
   email: string;
+  userId?: string; // Link to user account
   status: 'active' | 'inactive';
   createdAt: string;
 }
@@ -15,6 +16,8 @@ interface MetaMessengerConfig {
   enabled: boolean;
   accounts: MessengerAccount[];
 }
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 export default function SalesDepartment(): JSX.Element {
   const [config, setConfig] = useState<MetaMessengerConfig>({
@@ -29,10 +32,13 @@ export default function SalesDepartment(): JSX.Element {
     email: '',
   });
   
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<MessengerAccount>>({});
   const [showAddForm, setShowAddForm] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     // Load saved configuration from localStorage
@@ -76,33 +82,81 @@ export default function SalesDepartment(): JSX.Element {
     }
   }, []);
 
-  const handleAddAccount = () => {
+  const handleAddAccount = async () => {
     if (!newAccount.name || !newAccount.pageId || !newAccount.appId || !newAccount.email) {
       setMessage({ type: 'error', text: 'Please fill in all fields' });
+      setTimeout(() => setMessage(null), 5000);
       return;
     }
 
-    const account: MessengerAccount = {
-      id: Date.now().toString(),
-      name: newAccount.name,
-      pageId: newAccount.pageId,
-      appId: newAccount.appId,
-      email: newAccount.email || '',
-      status: 'active',
-      createdAt: new Date().toISOString()
-    };
+    if (!password || password.length < 6) {
+      setMessage({ type: 'error', text: 'Password must be at least 6 characters' });
+      setTimeout(() => setMessage(null), 5000);
+      return;
+    }
 
-    const updatedConfig = {
-      ...config,
-      accounts: [...config.accounts, account]
-    };
+    setIsCreating(true);
+    try {
+      // Create user account in the system
+      const token = localStorage.getItem('token');
+      const userResponse = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          email: newAccount.email,
+          password: password,
+          fullName: newAccount.name,
+          role: 'Sales Department',
+          isActive: true
+        })
+      });
 
-    setConfig(updatedConfig);
-    localStorage.setItem('metaMessengerConfig', JSON.stringify(updatedConfig));
-    
-    setNewAccount({ name: '', pageId: '', appId: '', email: '' });
-    setShowAddForm(false);
-    setMessage({ type: 'success', text: `Account "${account.name}" added successfully!` });
+      if (!userResponse.ok) {
+        const errorData = await userResponse.json();
+        throw new Error(errorData.message || 'Failed to create user account');
+      }
+
+      const userData = await userResponse.json();
+      const userId = userData.id || userData._id;
+
+      // Create messenger account
+      const account: MessengerAccount = {
+        id: Date.now().toString(),
+        name: newAccount.name,
+        pageId: newAccount.pageId,
+        appId: newAccount.appId,
+        email: newAccount.email || '',
+        userId: userId,
+        status: 'active',
+        createdAt: new Date().toISOString()
+      };
+
+      const updatedConfig = {
+        ...config,
+        accounts: [...config.accounts, account]
+      };
+
+      setConfig(updatedConfig);
+      localStorage.setItem('metaMessengerConfig', JSON.stringify(updatedConfig));
+      
+      setNewAccount({ name: '', pageId: '', appId: '', email: '' });
+      setPassword('');
+      setShowAddForm(false);
+      setMessage({ type: 'success', text: `Account "${account.name}" added successfully! User account created with email: ${account.email}` });
+      setTimeout(() => setMessage(null), 5000);
+    } catch (error) {
+      console.error('Error creating account:', error);
+      setMessage({ 
+        type: 'error', 
+        text: error instanceof Error ? error.message : 'Failed to create account. Please try again.' 
+      });
+      setTimeout(() => setMessage(null), 5000);
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const handleDeleteAccount = (id: string) => {
@@ -116,6 +170,7 @@ export default function SalesDepartment(): JSX.Element {
     setConfig(updatedConfig);
     localStorage.setItem('metaMessengerConfig', JSON.stringify(updatedConfig));
     setMessage({ type: 'success', text: 'Account deleted successfully' });
+    setTimeout(() => setMessage(null), 5000);
   };
 
   const handleToggleStatus = (id: string) => {
@@ -155,6 +210,7 @@ export default function SalesDepartment(): JSX.Element {
     setEditingId(null);
     setEditData({});
     setMessage({ type: 'success', text: 'Account updated successfully' });
+    setTimeout(() => setMessage(null), 5000);
   };
 
   const testMessenger = (pageId: string) => {
@@ -162,13 +218,22 @@ export default function SalesDepartment(): JSX.Element {
       window.open(`https://m.me/${pageId}`, '_blank', 'width=400,height=600');
     } else {
       setMessage({ type: 'error', text: 'No Page ID provided' });
+      setTimeout(() => setMessage(null), 5000);
     }
   };
 
   const activeAccounts = config.accounts.filter(acc => acc.status === 'active').length;
 
   return (
-    <div style={{ maxWidth: 1200, margin: "20px auto", padding: "0 20px" }}>
+    <>
+      <style>
+        {`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}
+      </style>
+      <div style={{ maxWidth: 1200, margin: "20px auto", padding: "0 20px" }}>
       <div style={{ marginBottom: 30 }}>
         <h1 style={{ fontSize: 28, fontWeight: 600, marginBottom: 8 }}>Sales Department</h1>
         <p style={{ color: "#666", fontSize: 15 }}>
@@ -322,6 +387,50 @@ export default function SalesDepartment(): JSX.Element {
                     fontSize: 14
                   }}
                 />
+                <div style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
+                  This email will be used as login credentials
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 500, marginBottom: 6, fontSize: 14 }}>
+                  Password *
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Minimum 6 characters"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      paddingRight: '40px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: 6,
+                      fontSize: 14
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '10px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: '#6b7280',
+                      padding: '4px'
+                    }}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                <div style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
+                  Password for login credentials (min 6 characters)
+                </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
@@ -364,23 +473,43 @@ export default function SalesDepartment(): JSX.Element {
               <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
                 <button
                   onClick={handleAddAccount}
+                  disabled={isCreating}
                   style={{
                     padding: '10px 20px',
-                    background: '#10b981',
+                    background: isCreating ? '#9ca3af' : '#10b981',
                     color: '#fff',
                     border: 'none',
                     borderRadius: 6,
                     fontWeight: 500,
-                    cursor: 'pointer'
+                    cursor: isCreating ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8
                   }}
                 >
-                  Add Account
+                  {isCreating ? (
+                    <>
+                      <div style={{
+                        width: 16,
+                        height: 16,
+                        border: '2px solid #fff',
+                        borderTopColor: 'transparent',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                      }} />
+                      Creating...
+                    </>
+                  ) : (
+                    'Add Account'
+                  )}
                 </button>
                 <button
                   onClick={() => {
                     setShowAddForm(false);
                     setNewAccount({ name: '', pageId: '', appId: '', email: '' });
+                    setPassword('');
                   }}
+                  disabled={isCreating}
                   style={{
                     padding: '10px 20px',
                     background: '#6b7280',
@@ -388,7 +517,8 @@ export default function SalesDepartment(): JSX.Element {
                     border: 'none',
                     borderRadius: 6,
                     fontWeight: 500,
-                    cursor: 'pointer'
+                    cursor: isCreating ? 'not-allowed' : 'pointer',
+                    opacity: isCreating ? 0.5 : 1
                   }}
                 >
                   Cancel
@@ -642,5 +772,6 @@ export default function SalesDepartment(): JSX.Element {
         </div>
       </div>
     </div>
+    </>
   );
 }

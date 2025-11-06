@@ -70,7 +70,7 @@ export default function SalesDepartment(): JSX.Element {
       // Save to localStorage
       localStorage.setItem('metaMessengerConfig', JSON.stringify(config));
       setMessage({ type: 'success', text: 'Meta Messenger configuration saved successfully!' });
-    } catch (e) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to save configuration' });
     } finally {
       setIsSaving(false);

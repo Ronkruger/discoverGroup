@@ -1,18 +1,37 @@
 import React, { JSX, useEffect, useState } from "react";
+import { Trash2, Plus, Edit2, Check, X } from "lucide-react";
 
-interface MetaMessengerConfig {
+interface MessengerAccount {
+  id: string;
+  name: string;
   pageId: string;
   appId: string;
+  email: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+}
+
+interface MetaMessengerConfig {
   enabled: boolean;
+  accounts: MessengerAccount[];
 }
 
 export default function SalesDepartment(): JSX.Element {
   const [config, setConfig] = useState<MetaMessengerConfig>({
-    pageId: "",
-    appId: "",
     enabled: false,
+    accounts: [],
   });
-  const [isSaving, setIsSaving] = useState(false);
+  
+  const [newAccount, setNewAccount] = useState<Partial<MessengerAccount>>({
+    name: '',
+    pageId: '',
+    appId: '',
+    email: '',
+  });
+  
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editData, setEditData] = useState<Partial<MessengerAccount>>({});
+  const [showAddForm, setShowAddForm] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   useEffect(() => {
@@ -20,85 +39,147 @@ export default function SalesDepartment(): JSX.Element {
     const savedConfig = localStorage.getItem('metaMessengerConfig');
     if (savedConfig) {
       try {
-        setConfig(JSON.parse(savedConfig));
+        const parsed = JSON.parse(savedConfig);
+        // Migrate old config format to new format
+        if (parsed.pageId && parsed.appId && !parsed.accounts) {
+          setConfig({
+            enabled: parsed.enabled || false,
+            accounts: [{
+              id: '1',
+              name: 'Default Account',
+              pageId: parsed.pageId,
+              appId: parsed.appId,
+              email: 'sales@discovergrp.com',
+              status: 'active',
+              createdAt: new Date().toISOString()
+            }]
+          });
+          // Save migrated config
+          localStorage.setItem('metaMessengerConfig', JSON.stringify({
+            enabled: parsed.enabled || false,
+            accounts: [{
+              id: '1',
+              name: 'Default Account',
+              pageId: parsed.pageId,
+              appId: parsed.appId,
+              email: 'sales@discovergrp.com',
+              status: 'active',
+              createdAt: new Date().toISOString()
+            }]
+          }));
+        } else {
+          setConfig(parsed);
+        }
       } catch (e) {
         console.error('Failed to load Meta Messenger config:', e);
       }
     }
   }, []);
 
-  useEffect(() => {
-    // Load Meta Business Suite SDK
-    if (config.enabled && config.appId && config.pageId) {
-      const script = document.createElement('script');
-      script.innerHTML = `
-        window.fbAsyncInit = function() {
-          FB.init({
-            xfbml: true,
-            version: 'v18.0'
-          });
-        };
-      `;
-      document.head.appendChild(script);
-
-      const sdk = document.createElement('script');
-      sdk.src = 'https://connect.facebook.net/en_US/sdk/xfbml.customerchat.js';
-      sdk.async = true;
-      sdk.defer = true;
-      sdk.crossOrigin = 'anonymous';
-      document.body.appendChild(sdk);
-
-      return () => {
-        document.head.removeChild(script);
-        document.body.removeChild(sdk);
-      };
-    }
-  }, [config.enabled, config.appId, config.pageId]);
-
-  const handleSave = () => {
-    setIsSaving(true);
-    setMessage(null);
-
-    // Validate inputs
-    if (config.enabled && (!config.pageId || !config.appId)) {
-      setMessage({ type: 'error', text: 'Please provide both Page ID and App ID when enabling messenger' });
-      setIsSaving(false);
+  const handleAddAccount = () => {
+    if (!newAccount.name || !newAccount.pageId || !newAccount.appId || !newAccount.email) {
+      setMessage({ type: 'error', text: 'Please fill in all fields' });
       return;
     }
 
-    try {
-      // Save to localStorage
-      localStorage.setItem('metaMessengerConfig', JSON.stringify(config));
-      setMessage({ type: 'success', text: 'Meta Messenger configuration saved successfully!' });
-    } catch {
-      setMessage({ type: 'error', text: 'Failed to save configuration' });
-    } finally {
-      setIsSaving(false);
+    const account: MessengerAccount = {
+      id: Date.now().toString(),
+      name: newAccount.name,
+      pageId: newAccount.pageId,
+      appId: newAccount.appId,
+      email: newAccount.email || '',
+      status: 'active',
+      createdAt: new Date().toISOString()
+    };
+
+    const updatedConfig = {
+      ...config,
+      accounts: [...config.accounts, account]
+    };
+
+    setConfig(updatedConfig);
+    localStorage.setItem('metaMessengerConfig', JSON.stringify(updatedConfig));
+    
+    setNewAccount({ name: '', pageId: '', appId: '', email: '' });
+    setShowAddForm(false);
+    setMessage({ type: 'success', text: `Account "${account.name}" added successfully!` });
+  };
+
+  const handleDeleteAccount = (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this account?')) return;
+
+    const updatedConfig = {
+      ...config,
+      accounts: config.accounts.filter(acc => acc.id !== id)
+    };
+
+    setConfig(updatedConfig);
+    localStorage.setItem('metaMessengerConfig', JSON.stringify(updatedConfig));
+    setMessage({ type: 'success', text: 'Account deleted successfully' });
+  };
+
+  const handleToggleStatus = (id: string) => {
+    const updatedConfig = {
+      ...config,
+      accounts: config.accounts.map(acc =>
+        acc.id === id
+          ? { ...acc, status: acc.status === 'active' ? 'inactive' as const : 'active' as const }
+          : acc
+      )
+    };
+
+    setConfig(updatedConfig);
+    localStorage.setItem('metaMessengerConfig', JSON.stringify(updatedConfig));
+  };
+
+  const startEdit = (account: MessengerAccount) => {
+    setEditingId(account.id);
+    setEditData({ ...account });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditData({});
+  };
+
+  const saveEdit = (id: string) => {
+    const updatedConfig = {
+      ...config,
+      accounts: config.accounts.map(acc =>
+        acc.id === id ? { ...acc, ...editData } as MessengerAccount : acc
+      )
+    };
+
+    setConfig(updatedConfig);
+    localStorage.setItem('metaMessengerConfig', JSON.stringify(updatedConfig));
+    setEditingId(null);
+    setEditData({});
+    setMessage({ type: 'success', text: 'Account updated successfully' });
+  };
+
+  const testMessenger = (pageId: string) => {
+    if (pageId) {
+      window.open(`https://m.me/${pageId}`, '_blank', 'width=400,height=600');
+    } else {
+      setMessage({ type: 'error', text: 'No Page ID provided' });
     }
   };
 
-  const testMessenger = () => {
-    if (config.enabled && config.pageId) {
-      // Open Facebook Messenger in new window
-      window.open(`https://m.me/${config.pageId}`, '_blank', 'width=400,height=600');
-    } else {
-      setMessage({ type: 'error', text: 'Please enable and configure messenger first' });
-    }
-  };
+  const activeAccounts = config.accounts.filter(acc => acc.status === 'active').length;
 
   return (
-    <div style={{ maxWidth: 1100, margin: "20px auto", padding: "0 20px" }}>
+    <div style={{ maxWidth: 1200, margin: "20px auto", padding: "0 20px" }}>
       <div style={{ marginBottom: 30 }}>
         <h1 style={{ fontSize: 28, fontWeight: 600, marginBottom: 8 }}>Sales Department</h1>
         <p style={{ color: "#666", fontSize: 15 }}>
-          Connect and manage your Meta Business Suite Messenger automation for sales inquiries
+          Manage multiple Meta Business Suite Messenger accounts for your sales team
         </p>
       </div>
 
       {/* Status Banner */}
       <div style={{
-        background: config.enabled ? '#d4edda' : '#fff3cd',
-        border: `1px solid ${config.enabled ? '#c3e6cb' : '#ffeaa7'}`,
+        background: config.enabled && activeAccounts > 0 ? '#d4edda' : '#fff3cd',
+        border: `1px solid ${config.enabled && activeAccounts > 0 ? '#c3e6cb' : '#ffeaa7'}`,
         borderRadius: 8,
         padding: 16,
         marginBottom: 24,
@@ -110,27 +191,29 @@ export default function SalesDepartment(): JSX.Element {
           width: 40,
           height: 40,
           borderRadius: '50%',
-          background: config.enabled ? '#28a745' : '#ffc107',
+          background: config.enabled && activeAccounts > 0 ? '#28a745' : '#ffc107',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           fontSize: 20
         }}>
-          {config.enabled ? '✓' : '⚠'}
+          {config.enabled && activeAccounts > 0 ? '✓' : '⚠'}
         </div>
         <div>
           <div style={{ fontWeight: 600, marginBottom: 4 }}>
-            {config.enabled ? 'Meta Messenger Integration Active' : 'Meta Messenger Integration Inactive'}
+            {config.enabled && activeAccounts > 0
+              ? `Meta Messenger Integration Active (${activeAccounts} ${activeAccounts === 1 ? 'Account' : 'Accounts'})`
+              : 'Meta Messenger Integration Inactive'}
           </div>
           <div style={{ fontSize: 14, color: '#666' }}>
-            {config.enabled 
-              ? 'Your sales team can receive and respond to customer messages via Facebook Messenger'
-              : 'Configure and enable Meta Messenger to start receiving customer inquiries'}
+            {config.enabled && activeAccounts > 0
+              ? `Your sales team can receive and respond to customer messages via ${activeAccounts} Facebook Messenger ${activeAccounts === 1 ? 'account' : 'accounts'}`
+              : 'Add sales team accounts and enable integration to start receiving customer inquiries'}
           </div>
         </div>
       </div>
 
-      {/* Configuration Section */}
+      {/* Global Enable/Disable */}
       <div style={{
         background: '#fff',
         border: '1px solid #e5e7eb',
@@ -138,130 +221,380 @@ export default function SalesDepartment(): JSX.Element {
         padding: 24,
         marginBottom: 24
       }}>
-        <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16 }}>Meta Business Suite Configuration</h2>
-
-        <div style={{ marginBottom: 20 }}>
-          <label style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            cursor: 'pointer',
-            padding: 12,
-            background: '#f9fafb',
-            borderRadius: 8,
-            border: '1px solid #e5e7eb'
-          }}>
-            <input
-              type="checkbox"
-              checked={config.enabled}
-              onChange={(e) => setConfig({ ...config, enabled: e.target.checked })}
-              style={{ width: 20, height: 20, cursor: 'pointer' }}
-            />
-            <div>
-              <div style={{ fontWeight: 600 }}>Enable Meta Messenger Integration</div>
-              <div style={{ fontSize: 13, color: '#666', marginTop: 2 }}>
-                Activate Facebook Messenger chat widget on your website
-              </div>
-            </div>
-          </label>
-        </div>
-
-        <div style={{ display: 'grid', gap: 16 }}>
+        <label style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          cursor: 'pointer'
+        }}>
+          <input
+            type="checkbox"
+            checked={config.enabled}
+            onChange={(e) => {
+              const updated = { ...config, enabled: e.target.checked };
+              setConfig(updated);
+              localStorage.setItem('metaMessengerConfig', JSON.stringify(updated));
+            }}
+            style={{ width: 20, height: 20, cursor: 'pointer' }}
+          />
           <div>
-            <label style={{ display: 'block', fontWeight: 500, marginBottom: 8, fontSize: 14 }}>
-              Facebook Page ID *
-            </label>
-            <input
-              type="text"
-              value={config.pageId}
-              onChange={(e) => setConfig({ ...config, pageId: e.target.value })}
-              placeholder="Enter your Facebook Page ID (e.g., 123456789012345)"
-              disabled={!config.enabled}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: 6,
-                fontSize: 14,
-                opacity: config.enabled ? 1 : 0.6
-              }}
-            />
-            <div style={{ fontSize: 12, color: '#6b7280', marginTop: 6 }}>
-              Find your Page ID in Meta Business Suite → Settings → Page Info
+            <div style={{ fontWeight: 600, fontSize: 16 }}>Enable Meta Messenger Integration</div>
+            <div style={{ fontSize: 13, color: '#666', marginTop: 2 }}>
+              Activate all configured Facebook Messenger accounts for your sales team
             </div>
           </div>
+        </label>
+      </div>
 
-          <div>
-            <label style={{ display: 'block', fontWeight: 500, marginBottom: 8, fontSize: 14 }}>
-              Facebook App ID *
-            </label>
-            <input
-              type="text"
-              value={config.appId}
-              onChange={(e) => setConfig({ ...config, appId: e.target.value })}
-              placeholder="Enter your Facebook App ID (e.g., 987654321098765)"
-              disabled={!config.enabled}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: 6,
-                fontSize: 14,
-                opacity: config.enabled ? 1 : 0.6
-              }}
-            />
-            <div style={{ fontSize: 12, color: '#6b7280', marginTop: 6 }}>
-              Create an app at developers.facebook.com and add Messenger platform
-            </div>
-          </div>
-        </div>
-
-        {message && (
-          <div style={{
-            marginTop: 16,
-            padding: 12,
-            borderRadius: 6,
-            background: message.type === 'success' ? '#d4edda' : '#f8d7da',
-            color: message.type === 'success' ? '#155724' : '#721c24',
-            border: `1px solid ${message.type === 'success' ? '#c3e6cb' : '#f5c6cb'}`
-          }}>
-            {message.text}
-          </div>
-        )}
-
-        <div style={{ marginTop: 20, display: 'flex', gap: 12 }}>
+      {/* Accounts List */}
+      <div style={{
+        background: '#fff',
+        border: '1px solid #e5e7eb',
+        borderRadius: 12,
+        padding: 24,
+        marginBottom: 24
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>Sales Team Accounts ({config.accounts.length})</h2>
           <button
-            onClick={handleSave}
-            disabled={isSaving}
+            onClick={() => setShowAddForm(!showAddForm)}
             style={{
-              padding: '10px 20px',
+              padding: '10px 16px',
               background: '#3b82f6',
               color: '#fff',
               border: 'none',
               borderRadius: 6,
               fontWeight: 500,
               cursor: 'pointer',
-              opacity: isSaving ? 0.7 : 1
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6
             }}
           >
-            {isSaving ? 'Saving...' : 'Save Configuration'}
-          </button>
-          <button
-            onClick={testMessenger}
-            style={{
-              padding: '10px 20px',
-              background: '#fff',
-              color: '#374151',
-              border: '1px solid #d1d5db',
-              borderRadius: 6,
-              fontWeight: 500,
-              cursor: 'pointer'
-            }}
-          >
-            Test Messenger
+            <Plus size={18} />
+            Add Account
           </button>
         </div>
+
+        {/* Add Account Form */}
+        {showAddForm && (
+          <div style={{
+            background: '#f9fafb',
+            border: '1px solid #e5e7eb',
+            borderRadius: 8,
+            padding: 20,
+            marginBottom: 20
+          }}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Add New Sales Account</h3>
+            <div style={{ display: 'grid', gap: 12 }}>
+              <div>
+                <label style={{ display: 'block', fontWeight: 500, marginBottom: 6, fontSize: 14 }}>
+                  Employee Name *
+                </label>
+                <input
+                  type="text"
+                  value={newAccount.name || ''}
+                  onChange={(e) => setNewAccount({ ...newAccount, name: e.target.value })}
+                  placeholder="e.g., John Doe"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: 6,
+                    fontSize: 14
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 500, marginBottom: 6, fontSize: 14 }}>
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  value={newAccount.email || ''}
+                  onChange={(e) => setNewAccount({ ...newAccount, email: e.target.value })}
+                  placeholder="e.g., john.doe@discovergrp.com"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: 6,
+                    fontSize: 14
+                  }}
+                />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 500, marginBottom: 6, fontSize: 14 }}>
+                    Facebook Page ID *
+                  </label>
+                  <input
+                    type="text"
+                    value={newAccount.pageId || ''}
+                    onChange={(e) => setNewAccount({ ...newAccount, pageId: e.target.value })}
+                    placeholder="123456789012345"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: 6,
+                      fontSize: 14
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 500, marginBottom: 6, fontSize: 14 }}>
+                    Facebook App ID *
+                  </label>
+                  <input
+                    type="text"
+                    value={newAccount.appId || ''}
+                    onChange={(e) => setNewAccount({ ...newAccount, appId: e.target.value })}
+                    placeholder="987654321098765"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: 6,
+                      fontSize: 14
+                    }}
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+                <button
+                  onClick={handleAddAccount}
+                  style={{
+                    padding: '10px 20px',
+                    background: '#10b981',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 6,
+                    fontWeight: 500,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Add Account
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setNewAccount({ name: '', pageId: '', appId: '', email: '' });
+                  }}
+                  style={{
+                    padding: '10px 20px',
+                    background: '#6b7280',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 6,
+                    fontWeight: 500,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Accounts Table */}
+        {config.accounts.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px 20px', color: '#6b7280' }}>
+            <p style={{ fontSize: 16, marginBottom: 8 }}>No sales accounts configured yet</p>
+            <p style={{ fontSize: 14 }}>Click "Add Account" to add your first sales team member</p>
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', fontSize: 14, fontWeight: 600, color: '#374151' }}>Name</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', fontSize: 14, fontWeight: 600, color: '#374151' }}>Email</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', fontSize: 14, fontWeight: 600, color: '#374151' }}>Page ID</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', fontSize: 14, fontWeight: 600, color: '#374151' }}>App ID</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'center', fontSize: 14, fontWeight: 600, color: '#374151' }}>Status</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'center', fontSize: 14, fontWeight: 600, color: '#374151' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {config.accounts.map((account) => (
+                  <tr key={account.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                    {editingId === account.id ? (
+                      <>
+                        <td style={{ padding: '12px 8px' }}>
+                          <input
+                            type="text"
+                            value={editData.name || ''}
+                            onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                            style={{ width: '100%', padding: '6px 8px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13 }}
+                          />
+                        </td>
+                        <td style={{ padding: '12px 8px' }}>
+                          <input
+                            type="email"
+                            value={editData.email || ''}
+                            onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                            style={{ width: '100%', padding: '6px 8px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13 }}
+                          />
+                        </td>
+                        <td style={{ padding: '12px 8px' }}>
+                          <input
+                            type="text"
+                            value={editData.pageId || ''}
+                            onChange={(e) => setEditData({ ...editData, pageId: e.target.value })}
+                            style={{ width: '100%', padding: '6px 8px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13 }}
+                          />
+                        </td>
+                        <td style={{ padding: '12px 8px' }}>
+                          <input
+                            type="text"
+                            value={editData.appId || ''}
+                            onChange={(e) => setEditData({ ...editData, appId: e.target.value })}
+                            style={{ width: '100%', padding: '6px 8px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13 }}
+                          />
+                        </td>
+                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                          <span style={{
+                            padding: '4px 8px',
+                            borderRadius: 12,
+                            fontSize: 12,
+                            fontWeight: 500,
+                            background: account.status === 'active' ? '#d4edda' : '#f8d7da',
+                            color: account.status === 'active' ? '#155724' : '#721c24'
+                          }}>
+                            {account.status}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 8px' }}>
+                          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                            <button
+                              onClick={() => saveEdit(account.id)}
+                              style={{
+                                padding: '6px 10px',
+                                background: '#10b981',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: 4,
+                                cursor: 'pointer',
+                                fontSize: 12
+                              }}
+                              title="Save"
+                            >
+                              <Check size={14} />
+                            </button>
+                            <button
+                              onClick={cancelEdit}
+                              style={{
+                                padding: '6px 10px',
+                                background: '#6b7280',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: 4,
+                                cursor: 'pointer',
+                                fontSize: 12
+                              }}
+                              title="Cancel"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td style={{ padding: '12px 8px', fontSize: 14, fontWeight: 500 }}>{account.name}</td>
+                        <td style={{ padding: '12px 8px', fontSize: 13, color: '#6b7280' }}>{account.email}</td>
+                        <td style={{ padding: '12px 8px', fontSize: 13, color: '#6b7280', fontFamily: 'monospace' }}>{account.pageId}</td>
+                        <td style={{ padding: '12px 8px', fontSize: 13, color: '#6b7280', fontFamily: 'monospace' }}>{account.appId}</td>
+                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                          <button
+                            onClick={() => handleToggleStatus(account.id)}
+                            style={{
+                              padding: '4px 8px',
+                              borderRadius: 12,
+                              fontSize: 12,
+                              fontWeight: 500,
+                              background: account.status === 'active' ? '#d4edda' : '#f8d7da',
+                              color: account.status === 'active' ? '#155724' : '#721c24',
+                              border: 'none',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {account.status}
+                          </button>
+                        </td>
+                        <td style={{ padding: '12px 8px' }}>
+                          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                            <button
+                              onClick={() => testMessenger(account.pageId)}
+                              style={{
+                                padding: '6px 10px',
+                                background: '#3b82f6',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: 4,
+                                cursor: 'pointer',
+                                fontSize: 12
+                              }}
+                              title="Test Messenger"
+                            >
+                              Test
+                            </button>
+                            <button
+                              onClick={() => startEdit(account)}
+                              style={{
+                                padding: '6px 10px',
+                                background: '#f59e0b',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: 4,
+                                cursor: 'pointer',
+                                fontSize: 12
+                              }}
+                              title="Edit"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteAccount(account.id)}
+                              style={{
+                                padding: '6px 10px',
+                                background: '#ef4444',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: 4,
+                                cursor: 'pointer',
+                                fontSize: 12
+                              }}
+                              title="Delete"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
+
+      {message && (
+        <div style={{
+          marginBottom: 24,
+          padding: 12,
+          borderRadius: 6,
+          background: message.type === 'success' ? '#d4edda' : '#f8d7da',
+          color: message.type === 'success' ? '#155724' : '#721c24',
+          border: `1px solid ${message.type === 'success' ? '#c3e6cb' : '#f5c6cb'}`
+        }}>
+          {message.text}
+        </div>
+      )}
 
       {/* Setup Instructions */}
       <div style={{
@@ -274,75 +607,40 @@ export default function SalesDepartment(): JSX.Element {
         
         <div style={{ fontSize: 14, color: '#374151', lineHeight: 1.7 }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, marginTop: 0, marginBottom: 12 }}>
-            Step 1: Create Facebook App
+            For Each Sales Team Member:
           </h3>
           <ol style={{ paddingLeft: 20, marginBottom: 20 }}>
-            <li>Go to <a href="https://developers.facebook.com" target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6' }}>developers.facebook.com</a></li>
-            <li>Click "My Apps" → "Create App"</li>
-            <li>Select "Business" as the app type</li>
-            <li>Add "Messenger" platform to your app</li>
-            <li>Copy your App ID from the dashboard</li>
+            <li>Each sales person needs their own Facebook Business Page</li>
+            <li>Create a Facebook App for each page at <a href="https://developers.facebook.com" target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6' }}>developers.facebook.com</a></li>
+            <li>Add "Messenger" platform to each app</li>
+            <li>Get the Page ID from Meta Business Suite → Settings → Page Info</li>
+            <li>Get the App ID from the app dashboard</li>
+            <li>Add each account using the form above</li>
           </ol>
 
           <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
-            Step 2: Connect Facebook Page
+            How It Works:
           </h3>
-          <ol style={{ paddingLeft: 20, marginBottom: 20 }}>
-            <li>Go to <a href="https://business.facebook.com" target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6' }}>Meta Business Suite</a></li>
-            <li>Select your business page</li>
-            <li>Go to Settings → Page Info</li>
-            <li>Copy your Page ID</li>
-            <li>In your app dashboard, add this page under Messenger → Settings</li>
-          </ol>
+          <ul style={{ paddingLeft: 20, marginBottom: 20 }}>
+            <li>Each active sales account can receive customer messages independently</li>
+            <li>Messages go to each salesperson's individual Meta Business Suite inbox</li>
+            <li>Sales team members manage their own conversations</li>
+            <li>Toggle accounts active/inactive as needed</li>
+            <li>Test each account individually before activating</li>
+          </ul>
 
           <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
-            Step 3: Configure Messenger
+            Benefits of Multiple Accounts:
           </h3>
-          <ol style={{ paddingLeft: 20, marginBottom: 20 }}>
-            <li>Enter your Page ID and App ID above</li>
-            <li>Enable the integration</li>
-            <li>Click "Save Configuration"</li>
-            <li>Test the messenger using "Test Messenger" button</li>
-          </ol>
-
-          <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
-            Step 4: Set Up Automation (Optional)
-          </h3>
-          <ol style={{ paddingLeft: 20, marginBottom: 0 }}>
-            <li>In Meta Business Suite, go to Inbox → Automated Responses</li>
-            <li>Set up instant replies for common sales inquiries</li>
-            <li>Configure away messages for off-hours</li>
-            <li>Create FAQ responses for tour packages</li>
-            <li>Set up lead qualification questions</li>
-          </ol>
+          <ul style={{ paddingLeft: 20, marginBottom: 0 }}>
+            <li><strong>Load Distribution:</strong> Spread customer inquiries across team</li>
+            <li><strong>Specialization:</strong> Assign specific regions/products to team members</li>
+            <li><strong>Flexibility:</strong> Enable/disable accounts based on availability</li>
+            <li><strong>Performance Tracking:</strong> Monitor individual team member metrics</li>
+            <li><strong>Backup Coverage:</strong> Multiple points of contact for customers</li>
+          </ul>
         </div>
       </div>
-
-      {/* Messenger Preview (if enabled) */}
-      {config.enabled && config.pageId && config.appId && (
-        <div style={{
-          marginTop: 24,
-          background: '#fff',
-          border: '1px solid #e5e7eb',
-          borderRadius: 12,
-          padding: 24
-        }}>
-          <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16 }}>Messenger Chat Widget Preview</h2>
-          <p style={{ color: '#666', marginBottom: 16 }}>
-            This is how the Messenger chat widget will appear on your website:
-          </p>
-          
-          {/* Facebook Messenger Customer Chat Plugin */}
-          <div id="fb-root"></div>
-          <div
-            className="fb-customerchat"
-            data-page-id={config.pageId}
-            data-theme-color="#0084ff"
-            data-logged-in-greeting="Hi! How can we help you with your travel plans today?"
-            data-logged-out-greeting="Hi! How can we help you with your travel plans today?"
-          ></div>
-        </div>
-      )}
     </div>
   );
 }

@@ -5,13 +5,6 @@ const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_u
 const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_zyols7w';
 const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'HDcNoEEoPzbJe9Yd-';
 
-// Debug: Log configuration (remove in production)
-console.log('📧 EmailJS Config:', {
-  serviceId: EMAILJS_SERVICE_ID,
-  templateId: EMAILJS_TEMPLATE_ID,
-  publicKey: EMAILJS_PUBLIC_KEY?.substring(0, 8) + '...' // Only show first 8 chars for security
-});
-
 interface BookingEmailData {
   bookingId: string;
   customerName: string;
@@ -52,33 +45,29 @@ export const sendBookingConfirmationEmailJS = async (data: BookingEmailData): Pr
       company_name: 'Discover Group'
     };
 
-    console.log('📧 Sending email via EmailJS to:', data.customerEmail);
-    console.log('📧 Template parameters:', templateParams);
-
     const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
       EMAILJS_TEMPLATE_ID,
       templateParams
     );
 
-    console.log('✅ Email sent successfully via EmailJS:', response);
-
     return {
       success: true,
       message: 'Email sent successfully via EmailJS'
     };
   } catch (error: unknown) {
-    console.error('❌ EmailJS sending failed:', error);
-    
     // More detailed error logging
     if (error && typeof error === 'object') {
       const errorObj = error as Record<string, unknown>;
-      console.error('❌ EmailJS error details:', {
-        name: errorObj.name,
-        text: errorObj.text,
-        status: errorObj.status,
-        message: errorObj.message
-      });
+      // Log error details only in development
+      if (import.meta.env.DEV) {
+        console.error('❌ EmailJS error details:', {
+          name: errorObj.name,
+          text: errorObj.text,
+          status: errorObj.status,
+          message: errorObj.message
+        });
+      }
     }
     
     return {
@@ -108,37 +97,30 @@ export const testEmailJS = async (testEmail: string): Promise<{
       company_name: 'Discover Group'
     };
 
-    console.log('🧪 Testing EmailJS with minimal config:', {
-      serviceId: EMAILJS_SERVICE_ID,
-      templateId: EMAILJS_TEMPLATE_ID,
-      publicKey: EMAILJS_PUBLIC_KEY?.substring(0, 8) + '...'
-    });
-    console.log('🧪 Test data:', testData);
-
     const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
       EMAILJS_TEMPLATE_ID,
       testData
     );
 
-    console.log('✅ Test email sent successfully:', response);
     return {
       success: true,
       message: 'Test email sent successfully'
     };
   } catch (error: unknown) {
-    console.error('❌ Test email failed:', error);
-    
     // More detailed error logging for EmailJS
     if (error && typeof error === 'object') {
       const errorObj = error as Record<string, unknown>;
-      console.error('❌ Test email error details:', {
-        name: errorObj.name,
-        text: errorObj.text,
-        status: errorObj.status,
-        message: errorObj.message,
-        fullError: error
-      });
+      // Only log in development
+      if (import.meta.env.DEV) {
+        console.error('❌ Test email error details:', {
+          name: errorObj.name,
+          text: errorObj.text,
+          status: errorObj.status,
+          message: errorObj.message,
+          fullError: error
+        });
+      }
     }
     
     // Try to extract meaningful error message
@@ -170,8 +152,6 @@ export const testEmailJSSimple = async (testEmail: string): Promise<{
   error?: string;
 }> => {
   try {
-    console.log('🧪 Simple EmailJS test starting...');
-    
     // Initialize EmailJS
     emailjs.init(EMAILJS_PUBLIC_KEY);
     
@@ -182,30 +162,24 @@ export const testEmailJSSimple = async (testEmail: string): Promise<{
       to_name: 'Test User'
     };
 
-    console.log('🧪 Using config:', {
-      serviceId: EMAILJS_SERVICE_ID,
-      templateId: EMAILJS_TEMPLATE_ID,
-      publicKey: EMAILJS_PUBLIC_KEY?.substring(0, 8) + '...',
-      data: testData
-    });
-
     const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
       EMAILJS_TEMPLATE_ID,
       testData
     );
 
-    console.log('✅ Simple test email sent successfully:', response);
     return {
       success: true,
       message: 'Simple test email sent successfully'
     };
   } catch (error: unknown) {
-    console.error('❌ Simple test email failed:', error);
-    
     if (error && typeof error === 'object') {
       const errorObj = error as Record<string, unknown>;
-      console.error('❌ Simple test error details:', errorObj);
+      // Only log in development
+      if (import.meta.env.DEV) {
+        console.error('❌ Simple test email failed:', error);
+        console.error('❌ Simple test error details:', errorObj);
+      }
     }
     
     return {
@@ -250,7 +224,9 @@ export const sendBookingConfirmationEmailFallback = async (data: BookingEmailDat
       throw new Error(result.error || 'Server API failed');
     }
   } catch (serverError) {
-    console.error('❌ Both EmailJS and server API failed');
+    if (import.meta.env.DEV) {
+      console.error('❌ Both EmailJS and server API failed');
+    }
     return {
       success: false,
       error: `EmailJS: ${emailJSResult.error}, Server: ${serverError instanceof Error ? serverError.message : 'Unknown error'}`

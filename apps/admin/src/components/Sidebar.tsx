@@ -9,7 +9,8 @@ import {
   Settings, 
   HeadphonesIcon,
   Plane,
-  BarChart3
+  BarChart3,
+  MessageSquare
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { authService } from "../services/authService";
@@ -58,6 +59,12 @@ const navigationItems: NavItem[] = [
     label: "Customer Service",
     icon: HeadphonesIcon,
     permission: "canAccessCustomerService",
+  },
+  {
+    to: "/sales",
+    label: "Sales Department",
+    icon: MessageSquare,
+    permission: "canAccessSales",
   },
   {
     to: "/reports",

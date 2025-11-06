@@ -58,6 +58,7 @@ export interface RolePermissions {
   canAccessTours: boolean;
   canAccessVisaAssistance: boolean;
   canAccessCustomerService: boolean;
+  canAccessSales: boolean;
   canAccessReports: boolean;
   canAccessUserManagement: boolean;
   canAccessSettings: boolean;
@@ -80,6 +81,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
     canAccessTours: true,
     canAccessVisaAssistance: true,
     canAccessCustomerService: true,
+    canAccessSales: true,
     canAccessReports: true,
     canAccessUserManagement: true,
     canAccessSettings: true,
@@ -100,6 +102,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
     canAccessTours: true,
     canAccessVisaAssistance: true,
     canAccessCustomerService: true,
+    canAccessSales: true,
     canAccessReports: true,
     canAccessUserManagement: true,
     canAccessSettings: true,
@@ -120,6 +123,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
     canAccessTours: true,
     canAccessVisaAssistance: true,
     canAccessCustomerService: true,
+    canAccessSales: true,
     canAccessReports: true,
     canAccessUserManagement: true,
     canAccessSettings: true,
@@ -140,6 +144,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
     canAccessTours: true,
     canAccessVisaAssistance: false,
     canAccessCustomerService: true,
+    canAccessSales: true,
     canAccessReports: true,
     canAccessUserManagement: false,
     canAccessSettings: false,
@@ -160,6 +165,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
     canAccessTours: false,
     canAccessVisaAssistance: true,
     canAccessCustomerService: true,
+    canAccessSales: false,
     canAccessReports: true,
     canAccessUserManagement: false,
     canAccessSettings: false,
@@ -180,6 +186,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
     canAccessTours: false,
     canAccessVisaAssistance: false,
     canAccessCustomerService: true,
+    canAccessSales: false,
     canAccessReports: false,
     canAccessUserManagement: false,
     canAccessSettings: false,

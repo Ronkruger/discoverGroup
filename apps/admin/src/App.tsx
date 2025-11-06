@@ -15,6 +15,7 @@ import UserManagement from "./pages/UserManagement";
 import CustomerService from "./pages/customer-service";
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import SalesDepartment from './pages/SalesDepartment';
 import { UserRole } from "./types/auth";
 
 // Loading component
@@ -149,6 +150,19 @@ const AppRouter: React.FC = () => {
                   allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.CSR_DEPARTMENT, UserRole.VISA_DEPARTMENT]}
                 >
                   <CustomerService />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Sales Department - Meta Business Suite Integration */}
+            <Route
+              path="/sales"
+              element={
+                <ProtectedRoute 
+                  requiredPermission="canAccessSales"
+                  allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.BOOKING_DEPARTMENT]}
+                >
+                  <SalesDepartment />
                 </ProtectedRoute>
               }
             />

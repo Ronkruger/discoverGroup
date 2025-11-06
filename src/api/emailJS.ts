@@ -230,7 +230,8 @@ export const sendBookingConfirmationEmailFallback = async (data: BookingEmailDat
 
   // If EmailJS fails, try the server-side API
   try {
-    const response = await fetch('http://localhost:4000/api/send-booking-email', {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+    const response = await fetch(`${API_BASE_URL}/api/send-booking-email`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

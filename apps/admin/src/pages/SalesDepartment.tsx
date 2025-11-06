@@ -19,7 +19,209 @@ interface MetaMessengerConfig {
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
+interface Message {
+  id: string;
+  sender: 'customer' | 'agent';
+  text: string;
+  timestamp: string;
+}
+
+interface MessengerConversation {
+  id: string;
+  customerName: string;
+  customerMessengerId: string;
+  status: 'new' | 'in-progress' | 'converted' | 'closed';
+  assignedAgent: string;
+  messages: Message[];
+  lastMessageAt: string;
+  createdAt: string;
+}
+
+interface ExtractedTransaction {
+  id: string;
+  conversationId: string;
+  customerName: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  tourInterest: string;
+  preferredDates?: string;
+  numberOfPeople?: number;
+  estimatedBudget?: string;
+  extractedAt: string;
+  status: 'lead' | 'quoted' | 'booked' | 'lost';
+  assignedAgent: string;
+  notes?: string;
+}
+
+// Dummy data for conversations
+const DUMMY_CONVERSATIONS: MessengerConversation[] = [
+  {
+    id: 'conv_001',
+    customerName: 'Maria Santos',
+    customerMessengerId: 'fb_12345',
+    status: 'new',
+    assignedAgent: 'John Doe',
+    lastMessageAt: '2025-11-06T14:30:00Z',
+    createdAt: '2025-11-06T14:25:00Z',
+    messages: [
+      {
+        id: 'msg_001',
+        sender: 'customer',
+        text: 'Hi! I\'m interested in booking a tour to Boracay for my family.',
+        timestamp: '2025-11-06T14:25:00Z'
+      },
+      {
+        id: 'msg_002',
+        sender: 'agent',
+        text: 'Hello Maria! Thank you for your interest. How many people will be traveling and what dates are you looking at?',
+        timestamp: '2025-11-06T14:27:00Z'
+      },
+      {
+        id: 'msg_003',
+        sender: 'customer',
+        text: 'We are 4 people - 2 adults and 2 kids. We\'re looking at December 15-20. What\'s the price range?',
+        timestamp: '2025-11-06T14:30:00Z'
+      }
+    ]
+  },
+  {
+    id: 'conv_002',
+    customerName: 'James Chen',
+    customerMessengerId: 'fb_67890',
+    status: 'converted',
+    assignedAgent: 'John Doe',
+    lastMessageAt: '2025-11-05T16:45:00Z',
+    createdAt: '2025-11-05T10:15:00Z',
+    messages: [
+      {
+        id: 'msg_004',
+        sender: 'customer',
+        text: 'Good morning! Do you have any packages for Palawan in January?',
+        timestamp: '2025-11-05T10:15:00Z'
+      },
+      {
+        id: 'msg_005',
+        sender: 'agent',
+        text: 'Good morning James! Yes, we have several Palawan packages. Can you share your budget and group size?',
+        timestamp: '2025-11-05T10:20:00Z'
+      },
+      {
+        id: 'msg_006',
+        sender: 'customer',
+        text: 'It\'s just me and my wife. Budget is around 50,000 PHP for 5 days.',
+        timestamp: '2025-11-05T10:25:00Z'
+      },
+      {
+        id: 'msg_007',
+        sender: 'agent',
+        text: 'Perfect! I have a 5D4N El Nido package that fits your budget. Let me send you the details.',
+        timestamp: '2025-11-05T10:30:00Z'
+      },
+      {
+        id: 'msg_008',
+        sender: 'customer',
+        text: 'Great! How do I book?',
+        timestamp: '2025-11-05T16:40:00Z'
+      },
+      {
+        id: 'msg_009',
+        sender: 'agent',
+        text: 'I\'ll send you the booking link. You can pay online or via bank transfer.',
+        timestamp: '2025-11-05T16:45:00Z'
+      }
+    ]
+  },
+  {
+    id: 'conv_003',
+    customerName: 'Ana Rodriguez',
+    customerMessengerId: 'fb_11223',
+    status: 'in-progress',
+    assignedAgent: 'John Doe',
+    lastMessageAt: '2025-11-06T09:15:00Z',
+    createdAt: '2025-11-04T15:30:00Z',
+    messages: [
+      {
+        id: 'msg_010',
+        sender: 'customer',
+        text: 'Hi! I saw your Siargao tour. Is it still available for November 20?',
+        timestamp: '2025-11-04T15:30:00Z'
+      },
+      {
+        id: 'msg_011',
+        sender: 'agent',
+        text: 'Hi Ana! Yes, we still have slots for November 20. How many people?',
+        timestamp: '2025-11-04T15:35:00Z'
+      },
+      {
+        id: 'msg_012',
+        sender: 'customer',
+        text: '6 people. What\'s included in the package?',
+        timestamp: '2025-11-04T15:40:00Z'
+      },
+      {
+        id: 'msg_013',
+        sender: 'agent',
+        text: 'The package includes accommodation, island hopping, surfing lessons, and airport transfers. Total is 35,000 PHP per person.',
+        timestamp: '2025-11-06T09:10:00Z'
+      },
+      {
+        id: 'msg_014',
+        sender: 'customer',
+        text: 'That sounds good. Can I get a group discount?',
+        timestamp: '2025-11-06T09:15:00Z'
+      }
+    ]
+  }
+];
+
+// Dummy data for extracted transactions
+const DUMMY_TRANSACTIONS: ExtractedTransaction[] = [
+  {
+    id: 'trans_001',
+    conversationId: 'conv_002',
+    customerName: 'James Chen',
+    customerEmail: 'james.chen@email.com',
+    customerPhone: '+639171234567',
+    tourInterest: 'Palawan - El Nido Package',
+    preferredDates: 'January 10-15, 2026',
+    numberOfPeople: 2,
+    estimatedBudget: '₱50,000',
+    extractedAt: '2025-11-05T16:50:00Z',
+    status: 'booked',
+    assignedAgent: 'John Doe',
+    notes: 'Paid full amount via bank transfer. Booking confirmed.'
+  },
+  {
+    id: 'trans_002',
+    conversationId: 'conv_001',
+    customerName: 'Maria Santos',
+    tourInterest: 'Boracay Family Package',
+    preferredDates: 'December 15-20, 2025',
+    numberOfPeople: 4,
+    estimatedBudget: '₱80,000 - ₱100,000',
+    extractedAt: '2025-11-06T14:32:00Z',
+    status: 'lead',
+    assignedAgent: 'John Doe',
+    notes: 'Waiting for customer response on package details.'
+  },
+  {
+    id: 'trans_003',
+    conversationId: 'conv_003',
+    customerName: 'Ana Rodriguez',
+    customerPhone: '+639189876543',
+    tourInterest: 'Siargao Surfing Package',
+    preferredDates: 'November 20-24, 2025',
+    numberOfPeople: 6,
+    estimatedBudget: '₱210,000 (₱35,000 x 6)',
+    extractedAt: '2025-11-06T09:17:00Z',
+    status: 'quoted',
+    assignedAgent: 'John Doe',
+    notes: 'Negotiating group discount. Customer interested.'
+  }
+];
+
 export default function SalesDepartment(): JSX.Element {
+  const [activeTab, setActiveTab] = useState<'accounts' | 'conversations' | 'transactions'>('accounts');
   const [config, setConfig] = useState<MetaMessengerConfig>({
     enabled: false,
     accounts: [],
@@ -39,6 +241,11 @@ export default function SalesDepartment(): JSX.Element {
   const [showAddForm, setShowAddForm] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  
+  // Conversation states
+  const [conversations] = useState<MessengerConversation[]>(DUMMY_CONVERSATIONS);
+  const [selectedConversation, setSelectedConversation] = useState<MessengerConversation | null>(null);
+  const [transactions] = useState<ExtractedTransaction[]>(DUMMY_TRANSACTIONS);
 
   useEffect(() => {
     // Load saved configuration from localStorage
@@ -241,6 +448,84 @@ export default function SalesDepartment(): JSX.Element {
         </p>
       </div>
 
+      {/* Tabs */}
+      <div style={{
+        display: 'flex',
+        gap: 4,
+        borderBottom: '2px solid #e5e7eb',
+        marginBottom: 24
+      }}>
+        <button
+          onClick={() => setActiveTab('accounts')}
+          style={{
+            padding: '12px 24px',
+            background: activeTab === 'accounts' ? '#fff' : 'transparent',
+            border: 'none',
+            borderBottom: activeTab === 'accounts' ? '2px solid #3b82f6' : '2px solid transparent',
+            marginBottom: '-2px',
+            fontWeight: activeTab === 'accounts' ? 600 : 400,
+            color: activeTab === 'accounts' ? '#3b82f6' : '#6b7280',
+            cursor: 'pointer',
+            fontSize: 15
+          }}
+        >
+          📱 Accounts Setup
+        </button>
+        <button
+          onClick={() => setActiveTab('conversations')}
+          style={{
+            padding: '12px 24px',
+            background: activeTab === 'conversations' ? '#fff' : 'transparent',
+            border: 'none',
+            borderBottom: activeTab === 'conversations' ? '2px solid #3b82f6' : '2px solid transparent',
+            marginBottom: '-2px',
+            fontWeight: activeTab === 'conversations' ? 600 : 400,
+            color: activeTab === 'conversations' ? '#3b82f6' : '#6b7280',
+            cursor: 'pointer',
+            fontSize: 15,
+            position: 'relative'
+          }}
+        >
+          💬 Conversations
+          <span style={{
+            position: 'absolute',
+            top: 4,
+            right: 4,
+            background: '#ef4444',
+            color: '#fff',
+            borderRadius: '50%',
+            width: 20,
+            height: 20,
+            fontSize: 11,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 600
+          }}>
+            {conversations.filter(c => c.status === 'new').length}
+          </span>
+        </button>
+        <button
+          onClick={() => setActiveTab('transactions')}
+          style={{
+            padding: '12px 24px',
+            background: activeTab === 'transactions' ? '#fff' : 'transparent',
+            border: 'none',
+            borderBottom: activeTab === 'transactions' ? '2px solid #3b82f6' : '2px solid transparent',
+            marginBottom: '-2px',
+            fontWeight: activeTab === 'transactions' ? 600 : 400,
+            color: activeTab === 'transactions' ? '#3b82f6' : '#6b7280',
+            cursor: 'pointer',
+            fontSize: 15
+          }}
+        >
+          💰 Transactions
+        </button>
+      </div>
+
+      {/* Accounts Tab */}
+      {activeTab === 'accounts' && (
+        <>
       {/* Status Banner */}
       <div style={{
         background: config.enabled && activeAccounts > 0 ? '#d4edda' : '#fff3cd',
@@ -771,6 +1056,319 @@ export default function SalesDepartment(): JSX.Element {
           </ul>
         </div>
       </div>
+      </>
+      )}
+
+      {/* Conversations Tab */}
+      {activeTab === 'conversations' && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 20, height: 'calc(100vh - 300px)' }}>
+          {/* Conversations List */}
+          <div style={{
+            background: '#fff',
+            border: '1px solid #e5e7eb',
+            borderRadius: 12,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            <div style={{ padding: 16, borderBottom: '1px solid #e5e7eb', background: '#f9fafb' }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
+                Conversations ({conversations.length})
+              </h3>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              {conversations.map((conv) => (
+                <div
+                  key={conv.id}
+                  onClick={() => setSelectedConversation(conv)}
+                  style={{
+                    padding: 16,
+                    borderBottom: '1px solid #f3f4f6',
+                    cursor: 'pointer',
+                    background: selectedConversation?.id === conv.id ? '#eff6ff' : '#fff',
+                    transition: 'background 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedConversation?.id !== conv.id) {
+                      e.currentTarget.style.background = '#f9fafb';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedConversation?.id !== conv.id) {
+                      e.currentTarget.style.background = '#fff';
+                    }
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 8 }}>
+                    <div style={{ fontWeight: 600, fontSize: 14 }}>{conv.customerName}</div>
+                    <span style={{
+                      fontSize: 11,
+                      padding: '2px 8px',
+                      borderRadius: 12,
+                      background: 
+                        conv.status === 'new' ? '#fecaca' :
+                        conv.status === 'in-progress' ? '#fde68a' :
+                        conv.status === 'converted' ? '#bbf7d0' : '#e5e7eb',
+                      color: 
+                        conv.status === 'new' ? '#991b1b' :
+                        conv.status === 'in-progress' ? '#92400e' :
+                        conv.status === 'converted' ? '#14532d' : '#374151',
+                      fontWeight: 500
+                    }}>
+                      {conv.status}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 4 }}>
+                    {conv.messages[conv.messages.length - 1].text.slice(0, 60)}...
+                  </div>
+                  <div style={{ fontSize: 11, color: '#9ca3af' }}>
+                    {new Date(conv.lastMessageAt).toLocaleString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Conversation Detail */}
+          <div style={{
+            background: '#fff',
+            border: '1px solid #e5e7eb',
+            borderRadius: 12,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            {selectedConversation ? (
+              <>
+                {/* Header */}
+                <div style={{ padding: 16, borderBottom: '1px solid #e5e7eb', background: '#f9fafb' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>{selectedConversation.customerName}</h3>
+                      <div style={{ fontSize: 13, color: '#6b7280', marginTop: 4 }}>
+                        Assigned to: {selectedConversation.assignedAgent}
+                      </div>
+                    </div>
+                    <button
+                      style={{
+                        padding: '8px 16px',
+                        background: '#10b981',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 6,
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        fontSize: 13
+                      }}
+                    >
+                      🤖 Extract Transaction
+                    </button>
+                  </div>
+                </div>
+
+                {/* Messages */}
+                <div style={{ flex: 1, overflowY: 'auto', padding: 20, background: '#f9fafb' }}>
+                  {selectedConversation.messages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      style={{
+                        marginBottom: 16,
+                        display: 'flex',
+                        justifyContent: msg.sender === 'customer' ? 'flex-start' : 'flex-end'
+                      }}
+                    >
+                      <div style={{
+                        maxWidth: '70%',
+                        padding: '12px 16px',
+                        borderRadius: 12,
+                        background: msg.sender === 'customer' ? '#fff' : '#3b82f6',
+                        color: msg.sender === 'customer' ? '#374151' : '#fff',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                      }}>
+                        <div style={{ fontSize: 14, lineHeight: 1.5 }}>{msg.text}</div>
+                        <div style={{
+                          fontSize: 11,
+                          marginTop: 4,
+                          opacity: 0.7
+                        }}>
+                          {new Date(msg.timestamp).toLocaleTimeString()}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Reply Input */}
+                <div style={{ padding: 16, borderTop: '1px solid #e5e7eb', background: '#fff' }}>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <input
+                      type="text"
+                      placeholder="Type a message..."
+                      style={{
+                        flex: 1,
+                        padding: '10px 14px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: 8,
+                        fontSize: 14
+                      }}
+                    />
+                    <button
+                      style={{
+                        padding: '10px 20px',
+                        background: '#3b82f6',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 8,
+                        fontWeight: 500,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Send
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#9ca3af',
+                fontSize: 14
+              }}>
+                Select a conversation to view messages
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Transactions Tab */}
+      {activeTab === 'transactions' && (
+        <div style={{
+          background: '#fff',
+          border: '1px solid #e5e7eb',
+          borderRadius: 12,
+          padding: 24
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+            <h2 style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>Extracted Transactions ({transactions.length})</h2>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <select style={{
+                padding: '8px 12px',
+                border: '1px solid #d1d5db',
+                borderRadius: 6,
+                fontSize: 14
+              }}>
+                <option>All Status</option>
+                <option>Lead</option>
+                <option>Quoted</option>
+                <option>Booked</option>
+                <option>Lost</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Stats Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+            <div style={{ padding: 16, background: '#eff6ff', borderRadius: 8, border: '1px solid #bfdbfe' }}>
+              <div style={{ fontSize: 12, color: '#1e40af', marginBottom: 4, fontWeight: 500 }}>Total Leads</div>
+              <div style={{ fontSize: 24, fontWeight: 600, color: '#1e3a8a' }}>
+                {transactions.filter(t => t.status === 'lead').length}
+              </div>
+            </div>
+            <div style={{ padding: 16, background: '#fef3c7', borderRadius: 8, border: '1px solid #fde68a' }}>
+              <div style={{ fontSize: 12, color: '#92400e', marginBottom: 4, fontWeight: 500 }}>Quoted</div>
+              <div style={{ fontSize: 24, fontWeight: 600, color: '#78350f' }}>
+                {transactions.filter(t => t.status === 'quoted').length}
+              </div>
+            </div>
+            <div style={{ padding: 16, background: '#d1fae5', borderRadius: 8, border: '1px solid #a7f3d0' }}>
+              <div style={{ fontSize: 12, color: '#065f46', marginBottom: 4, fontWeight: 500 }}>Booked</div>
+              <div style={{ fontSize: 24, fontWeight: 600, color: '#064e3b' }}>
+                {transactions.filter(t => t.status === 'booked').length}
+              </div>
+            </div>
+            <div style={{ padding: 16, background: '#fee2e2', borderRadius: 8, border: '1px solid #fecaca' }}>
+              <div style={{ fontSize: 12, color: '#991b1b', marginBottom: 4, fontWeight: 500 }}>Lost</div>
+              <div style={{ fontSize: 24, fontWeight: 600, color: '#7f1d1d' }}>
+                {transactions.filter(t => t.status === 'lost').length}
+              </div>
+            </div>
+          </div>
+
+          {/* Transactions Table */}
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid #e5e7eb', background: '#f9fafb' }}>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: '#374151' }}>Customer</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: '#374151' }}>Tour Interest</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: '#374151' }}>Dates</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: '#374151' }}>People</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: '#374151' }}>Budget</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'center', fontSize: 13, fontWeight: 600, color: '#374151' }}>Status</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: '#374151' }}>Agent</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.map((trans) => (
+                  <tr key={trans.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                    <td style={{ padding: '16px 8px' }}>
+                      <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{trans.customerName}</div>
+                      {trans.customerEmail && (
+                        <div style={{ fontSize: 12, color: '#6b7280' }}>{trans.customerEmail}</div>
+                      )}
+                      {trans.customerPhone && (
+                        <div style={{ fontSize: 12, color: '#6b7280' }}>{trans.customerPhone}</div>
+                      )}
+                    </td>
+                    <td style={{ padding: '16px 8px', fontSize: 14 }}>{trans.tourInterest}</td>
+                    <td style={{ padding: '16px 8px', fontSize: 13, color: '#6b7280' }}>
+                      {trans.preferredDates || '-'}
+                    </td>
+                    <td style={{ padding: '16px 8px', fontSize: 14, textAlign: 'center' }}>
+                      {trans.numberOfPeople || '-'}
+                    </td>
+                    <td style={{ padding: '16px 8px', fontSize: 14, fontWeight: 500 }}>
+                      {trans.estimatedBudget || '-'}
+                    </td>
+                    <td style={{ padding: '16px 8px', textAlign: 'center' }}>
+                      <span style={{
+                        padding: '4px 12px',
+                        borderRadius: 12,
+                        fontSize: 12,
+                        fontWeight: 500,
+                        background: 
+                          trans.status === 'lead' ? '#dbeafe' :
+                          trans.status === 'quoted' ? '#fef3c7' :
+                          trans.status === 'booked' ? '#d1fae5' : '#fee2e2',
+                        color: 
+                          trans.status === 'lead' ? '#1e40af' :
+                          trans.status === 'quoted' ? '#92400e' :
+                          trans.status === 'booked' ? '#065f46' : '#991b1b'
+                      }}>
+                        {trans.status}
+                      </span>
+                    </td>
+                    <td style={{ padding: '16px 8px', fontSize: 13, color: '#6b7280' }}>
+                      {trans.assignedAgent}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {transactions.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '40px 20px', color: '#6b7280' }}>
+              <p style={{ fontSize: 16, marginBottom: 8 }}>No transactions extracted yet</p>
+              <p style={{ fontSize: 14 }}>Conversations will be analyzed to extract transaction data automatically</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
     </>
   );

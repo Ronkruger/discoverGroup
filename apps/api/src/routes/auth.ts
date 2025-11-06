@@ -142,19 +142,28 @@ router.post('/resend-verification', async (req, res) => {
     await user.save();
     
     // Send verification email
+    console.log('📧 Attempting to send verification email to:', email);
     const emailResult = await sendVerificationEmail(email, user.fullName, verificationToken);
     
     if (!emailResult.success) {
-      return res.status(500).json({ error: 'Failed to send verification email' });
+      console.error('❌ Email sending failed:', emailResult.error);
+      return res.status(500).json({ 
+        error: 'Failed to send verification email. Please contact support.',
+        details: process.env.NODE_ENV === 'development' ? emailResult.error : undefined
+      });
     }
     
+    console.log('✅ Verification email sent successfully');
     res.json({
       success: true,
       message: 'Verification email sent! Please check your inbox.',
     });
   } catch (error) {
-    console.error('Resend verification error:', error);
-    res.status(500).json({ error: 'Failed to resend verification email' });
+    console.error('❌ Resend verification error:', error);
+    res.status(500).json({ 
+      error: 'Failed to resend verification email',
+      details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
+    });
   }
 });
 

@@ -9,6 +9,9 @@ export interface IUser extends Document {
   phone?: string;
   birthDate?: string;
   gender?: string;
+  isEmailVerified: boolean;
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -20,6 +23,9 @@ const UserSchema = new Schema<IUser>({
   phone: { type: String },
   birthDate: { type: String },
   gender: { type: String },
+  isEmailVerified: { type: Boolean, default: false },
+  emailVerificationToken: { type: String },
+  emailVerificationExpires: { type: Date },
 }, { timestamps: true });
 
 export default mongoose.model<IUser>('User', UserSchema);

@@ -21,6 +21,7 @@ const DestinationCountry = lazy(() => import("./pages/DestinationCountry"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const Profile = lazy(() => import("./pages/Profile"));
 const UserSettings = lazy(() => import("./pages/UserSettings"));
 const AboutUs = lazy(() => import("./pages/AboutUs"));
@@ -59,6 +60,7 @@ export default function AppRouter() {
           {/* Auth routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<UserSettings />} />
 

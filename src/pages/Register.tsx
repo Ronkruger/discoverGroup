@@ -15,9 +15,11 @@ export default function Register() {
     gender: '',
   });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [registrationComplete, setRegistrationComplete] = useState(false);
   const navigate = useNavigate();
   const { setUser, user } = useAuth();
 
@@ -35,13 +37,14 @@ export default function Register() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    setSuccess('');
     if (form.password !== form.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
     setLoading(true);
     try {
-  const res = await fetch(`${API_BASE_URL}/auth/register`, {
+      const res = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -56,14 +59,17 @@ export default function Register() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Registration failed');
       
-      // Store token and user info in localStorage
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      
-      // Update AuthContext state
-      setUser(data.user);
-      
-      navigate('/');
+      // Show success message and verification instructions
+      if (data.requiresVerification) {
+        setSuccess(data.message || 'Registration successful! Please check your email to verify your account.');
+        setRegistrationComplete(true);
+      } else {
+        // Old flow (shouldn't happen with new backend)
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setUser(data.user);
+        navigate('/');
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -78,8 +84,36 @@ export default function Register() {
   return (
     <div className="max-w-md mx-auto mt-12 p-6 bg-white rounded shadow">
       <h2 className="text-2xl font-bold mb-4">Client Registration</h2>
-      {error && <div className="mb-3 text-red-600">{error}</div>}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      
+      {registrationComplete ? (
+        <div className="text-center py-8">
+          <div className="mb-6 text-green-600 text-6xl">✉️</div>
+          <h3 className="text-xl font-bold mb-4 text-green-600">Registration Successful!</h3>
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+            <p className="text-gray-700 mb-2">{success}</p>
+            <p className="text-sm text-gray-600">
+              We've sent a verification email to <strong>{form.email}</strong>
+            </p>
+          </div>
+          <div className="space-y-3 text-sm text-gray-600">
+            <p>📧 Check your inbox (and spam folder)</p>
+            <p>🔗 Click the verification link in the email</p>
+            <p>✅ Then you can login to your account</p>
+          </div>
+          <div className="mt-6">
+            <Link 
+              to="/login" 
+              className="inline-block bg-blue-600 text-white px-6 py-2 rounded font-semibold hover:bg-blue-700"
+            >
+              Go to Login
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <>
+          {error && <div className="mb-3 p-3 bg-red-50 border border-red-200 text-red-600 rounded">{error}</div>}
+          {success && <div className="mb-3 p-3 bg-green-50 border border-green-200 text-green-600 rounded">{success}</div>}
+          <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block mb-1 font-medium">Full Name</label>
           <input type="text" name="fullName" className="w-full border rounded px-3 py-2" value={form.fullName} onChange={handleChange} required />
@@ -156,6 +190,8 @@ export default function Register() {
         Already have an account?{' '}
         <Link to="/login" className="text-blue-600 hover:underline">Login</Link>
       </div>
+        </>
+      )}
     </div>
   );
 }

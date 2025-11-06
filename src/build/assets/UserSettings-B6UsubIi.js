@@ -1,0 +1,1 @@
+import{j as e}from"./index-7zN7D-LI.js";function t(){return e.jsxs("main",{className:"max-w-lg mx-auto mt-12 p-6 bg-white rounded shadow",children:[e.jsx("h1",{className:"text-2xl font-bold mb-4",children:"User Settings"}),e.jsx("p",{children:"This is a placeholder for the user settings page (change client info)."})]})}export{t as default};

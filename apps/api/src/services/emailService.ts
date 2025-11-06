@@ -383,3 +383,211 @@ Phone: +63 02 8555 1234
     };
   }
 };
+
+/**
+ * Send email verification email
+ */
+export const sendVerificationEmail = async (
+  email: string,
+  fullName: string,
+  verificationToken: string
+): Promise<{ success: boolean; messageId?: string; previewUrl?: string; error?: string }> => {
+  try {
+    console.log('📧 Sending verification email to:', email);
+    
+    const verificationUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}`;
+    
+    // Try SendGrid first
+    if (SENDGRID_API_KEY) {
+      console.log('📧 Using SendGrid for verification email');
+      
+      const fromEmail = getEmailFromAddress();
+      const fromName = getEmailFromName();
+      
+      const msg = {
+        to: email,
+        from: {
+          email: fromEmail,
+          name: fromName,
+        },
+        subject: 'Verify Your Email - Discover Group',
+        html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Email</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            line-height: 1.6; 
+            color: #333; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+        .header { 
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6); 
+            color: white; 
+            padding: 30px; 
+            text-align: center; 
+            border-radius: 10px 10px 0 0; 
+        }
+        .content { 
+            background: #f8fafc; 
+            padding: 30px; 
+            border-radius: 0 0 10px 10px; 
+        }
+        .verify-btn { 
+            display: inline-block; 
+            background: #3b82f6; 
+            color: white; 
+            padding: 15px 30px; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            font-weight: bold; 
+            margin: 20px 0; 
+        }
+        .footer { 
+            text-align: center; 
+            margin-top: 30px; 
+            padding-top: 20px; 
+            border-top: 1px solid #e2e8f0; 
+            color: #64748b; 
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>✉️ Verify Your Email</h1>
+    </div>
+    
+    <div class="content">
+        <p>Hello ${fullName},</p>
+        
+        <p>Thank you for registering with Discover Group! To complete your registration and start booking amazing tours, please verify your email address.</p>
+        
+        <div style="text-align: center;">
+            <a href="${verificationUrl}" class="verify-btn">Verify Email Address</a>
+        </div>
+        
+        <p>Or copy and paste this link into your browser:</p>
+        <p style="word-break: break-all; color: #3b82f6;">${verificationUrl}</p>
+        
+        <p><strong>This link will expire in 24 hours.</strong></p>
+        
+        <p>If you didn't create an account with Discover Group, please ignore this email.</p>
+        
+        <p>Best regards,<br>
+        <strong>The Discover Group Team</strong></p>
+    </div>
+    
+    <div class="footer">
+        <p>© 2025 Discover Group. All rights reserved.</p>
+        <p>This is an automated message. Please do not reply to this email.</p>
+    </div>
+</body>
+</html>
+        `,
+        text: `
+Hello ${fullName},
+
+Thank you for registering with Discover Group!
+
+Please verify your email address by clicking the link below:
+${verificationUrl}
+
+This link will expire in 24 hours.
+
+If you didn't create an account with Discover Group, please ignore this email.
+
+Best regards,
+The Discover Group Team
+        `.trim(),
+      };
+
+      const [response] = await sgMail.send(msg);
+      
+      console.log('✅ Verification email sent via SendGrid!');
+      return {
+        success: true,
+        messageId: response.headers['x-message-id'] as string,
+      };
+    }
+    
+    // Fallback to Nodemailer
+    console.log('⚠️ SendGrid not configured, using Nodemailer fallback');
+    const transporter = await createTransporter();
+    
+    const fromEmail = getEmailFromAddress();
+    const fromName = getEmailFromName();
+    
+    const mailOptions = {
+      from: `"${fromName}" <${fromEmail}>`,
+      to: email,
+      subject: 'Verify Your Email - Discover Group',
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f8fafc; padding: 30px; }
+        .verify-btn { display: inline-block; background: #3b82f6; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✉️ Verify Your Email</h1>
+        </div>
+        <div class="content">
+            <p>Hello ${fullName},</p>
+            <p>Thank you for registering with Discover Group! Please verify your email address:</p>
+            <div style="text-align: center;">
+                <a href="${verificationUrl}" class="verify-btn">Verify Email Address</a>
+            </div>
+            <p>This link will expire in 24 hours.</p>
+        </div>
+    </div>
+</body>
+</html>
+      `,
+      text: `
+Hello ${fullName},
+
+Please verify your email address by clicking this link:
+${verificationUrl}
+
+This link will expire in 24 hours.
+
+Best regards,
+The Discover Group Team
+      `.trim(),
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    
+    if (previewUrl) {
+      console.log('📧 Verification Email Preview URL: %s', previewUrl);
+    }
+
+    console.log('✅ Verification email sent! Message ID:', info.messageId);
+
+    return {
+      success: true,
+      messageId: info.messageId,
+      previewUrl: previewUrl || undefined,
+    };
+  } catch (error) {
+    console.error('❌ Verification email sending failed:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+};

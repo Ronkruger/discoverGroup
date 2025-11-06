@@ -229,9 +229,16 @@ export const sendBookingConfirmationEmail = async (booking: BookingDetails): Pro
       appointmentPurpose: booking.appointmentPurpose
     });
     
+    console.log('🔧 Environment check:');
+    console.log('- SENDGRID_API_KEY:', SENDGRID_API_KEY ? '✅ Set' : '❌ Not set');
+    console.log('- SENDGRID_TEMPLATE_ID:', SENDGRID_TEMPLATE_ID ? '✅ Set' : '❌ Not set');
+    console.log('- EMAIL_USER:', process.env.EMAIL_USER ? '✅ Set' : '❌ Not set');
+    console.log('- EMAIL_PASS:', process.env.EMAIL_PASS ? '✅ Set' : '❌ Not set');
+    
     // Try SendGrid first
     if (SENDGRID_API_KEY && SENDGRID_TEMPLATE_ID) {
-      console.log('📧 Using SendGrid for email delivery');
+      try {
+        console.log('📧 Using SendGrid for email delivery');
       
       // Format tour date - handle both single dates and date ranges
       let formattedTourDate: string;
@@ -322,16 +329,23 @@ export const sendBookingConfirmationEmail = async (booking: BookingDetails): Pro
         success: true,
         messageId: response.headers['x-message-id'] as string,
       };
+      } catch (sendGridError) {
+        console.error('❌ SendGrid error:', sendGridError);
+        console.error('SendGrid error details:', JSON.stringify(sendGridError, null, 2));
+        // Don't return error yet, try Nodemailer fallback
+      }
     }
     
-    // Fallback to Nodemailer if SendGrid is not configured
-    console.log('⚠️ SendGrid not configured, using Nodemailer fallback');
-    const transporter = await createTransporter();
+    // Fallback to Nodemailer if SendGrid is not configured or fails
+    console.log('⚠️ SendGrid not configured or failed, using Nodemailer fallback');
     
-    // Get current settings
-    const bookingDeptEmail = getBookingDepartmentEmail();
-    const fromEmail = getEmailFromAddress();
-    const fromName = getEmailFromName();
+    try {
+      const transporter = await createTransporter();
+      
+      // Get current settings
+      const bookingDeptEmail = getBookingDepartmentEmail();
+      const fromEmail = getEmailFromAddress();
+      const fromName = getEmailFromName();
     
     const mailOptions = {
       from: `"${fromName}" <${fromEmail}>`,
@@ -361,22 +375,29 @@ Phone: +63 02 8555 1234
       `.trim(),
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    const previewUrl = nodemailer.getTestMessageUrl(info);
-    
-    if (previewUrl) {
-      console.log('📧 Email Preview URL: %s', previewUrl);
+      const info = await transporter.sendMail(mailOptions);
+      const previewUrl = nodemailer.getTestMessageUrl(info);
+      
+      if (previewUrl) {
+        console.log('📧 Email Preview URL: %s', previewUrl);
+      }
+
+      console.log('✅ Email sent successfully! Message ID:', info.messageId);
+
+      return {
+        success: true,
+        messageId: info.messageId,
+        previewUrl: previewUrl || undefined,
+      };
+    } catch (nodemailerError) {
+      console.error('❌ Nodemailer also failed:', nodemailerError);
+      return {
+        success: false,
+        error: nodemailerError instanceof Error ? nodemailerError.message : 'Failed to send email via Nodemailer',
+      };
     }
-
-    console.log('✅ Email sent successfully! Message ID:', info.messageId);
-
-    return {
-      success: true,
-      messageId: info.messageId,
-      previewUrl: previewUrl || undefined,
-    };
   } catch (error) {
-    console.error('❌ Email sending failed:', error);
+    console.error('❌ Email sending failed with critical error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -394,12 +415,16 @@ export const sendVerificationEmail = async (
 ): Promise<{ success: boolean; messageId?: string; previewUrl?: string; error?: string }> => {
   try {
     console.log('📧 Sending verification email to:', email);
+    console.log('🔧 Environment check for verification email:');
+    console.log('- SENDGRID_API_KEY:', SENDGRID_API_KEY ? '✅ Set' : '❌ Not set');
+    console.log('- EMAIL_USER:', process.env.EMAIL_USER ? '✅ Set' : '❌ Not set');
     
     const verificationUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}`;
     
     // Try SendGrid first
     if (SENDGRID_API_KEY) {
-      console.log('📧 Using SendGrid for verification email');
+      try {
+        console.log('📧 Using SendGrid for verification email');
       
       const fromEmail = getEmailFromAddress();
       const fromName = getEmailFromName();
@@ -514,11 +539,17 @@ The Discover Group Team
         success: true,
         messageId: response.headers['x-message-id'] as string,
       };
+      } catch (sendGridError) {
+        console.error('❌ SendGrid verification email error:', sendGridError);
+        // Don't return error yet, try Nodemailer fallback
+      }
     }
     
     // Fallback to Nodemailer
-    console.log('⚠️ SendGrid not configured, using Nodemailer fallback');
-    const transporter = await createTransporter();
+    console.log('⚠️ SendGrid not configured or failed, using Nodemailer fallback for verification email');
+    
+    try {
+      const transporter = await createTransporter();
     
     const fromEmail = getEmailFromAddress();
     const fromName = getEmailFromName();
@@ -569,22 +600,29 @@ The Discover Group Team
       `.trim(),
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    const previewUrl = nodemailer.getTestMessageUrl(info);
-    
-    if (previewUrl) {
-      console.log('📧 Verification Email Preview URL: %s', previewUrl);
+      const info = await transporter.sendMail(mailOptions);
+      const previewUrl = nodemailer.getTestMessageUrl(info);
+      
+      if (previewUrl) {
+        console.log('📧 Verification Email Preview URL: %s', previewUrl);
+      }
+
+      console.log('✅ Verification email sent! Message ID:', info.messageId);
+
+      return {
+        success: true,
+        messageId: info.messageId,
+        previewUrl: previewUrl || undefined,
+      };
+    } catch (nodemailerError) {
+      console.error('❌ Nodemailer verification email also failed:', nodemailerError);
+      return {
+        success: false,
+        error: nodemailerError instanceof Error ? nodemailerError.message : 'Failed to send verification email via Nodemailer',
+      };
     }
-
-    console.log('✅ Verification email sent! Message ID:', info.messageId);
-
-    return {
-      success: true,
-      messageId: info.messageId,
-      previewUrl: previewUrl || undefined,
-    };
   } catch (error) {
-    console.error('❌ Verification email sending failed:', error);
+    console.error('❌ Verification email sending failed with critical error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

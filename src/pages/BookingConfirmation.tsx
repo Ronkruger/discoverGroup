@@ -3,7 +3,6 @@ import type { JSX } from "react";
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
-import { testEmailJS, testEmailJSSimple } from "../api/emailJS";
 import { 
   CheckCircle2, 
   Calendar, 
@@ -122,7 +121,6 @@ export default function BookingConfirmation(): JSX.Element {
   const location = useLocation();
   const { bookingId: urlBookingId } = useParams<{ bookingId?: string }>();
   const [activeTab, setActiveTab] = useState("details");
-  const [testingEmail, setTestingEmail] = useState(false);
   
   const state = (location.state ?? {}) as {
     bookingId?: string;
@@ -151,38 +149,6 @@ export default function BookingConfirmation(): JSX.Element {
     tourTitle: state.tourTitle,
     allStateKeys: Object.keys(state)
   });
-
-  // Test email function
-  const handleTestEmail = async () => {
-    const testEmail = prompt('Enter your email address to test:');
-    if (!testEmail) return;
-    
-    setTestingEmail(true);
-    try {
-      console.log('🧪 Starting EmailJS test...');
-      
-      // Try simple test first
-      const result = await testEmailJSSimple(testEmail);
-      if (result.success) {
-        alert('✅ Test email sent successfully! Check your inbox.');
-      } else {
-        alert('❌ Test email failed: ' + result.error);
-        console.error('Test failed, trying full test...');
-        
-        // If simple test fails, try full test for more details
-        const fullResult = await testEmailJS(testEmail);
-        if (fullResult.success) {
-          alert('✅ Full test email sent successfully!');
-        } else {
-          alert('❌ Both tests failed: ' + fullResult.error);
-        }
-      }
-    } catch (error) {
-      alert('❌ Test email error: ' + error);
-      console.error('Test email catch error:', error);
-    }
-    setTestingEmail(false);
-  };
 
   // Confetti burst on mount!
   useEffect(() => {
@@ -357,14 +323,6 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
             >
               <Calendar className="w-5 h-5" />
               Add to Calendar
-            </button>
-            <button
-              onClick={handleTestEmail}
-              disabled={testingEmail}
-              className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-500 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-            >
-              <Mail className="w-5 h-5" />
-              {testingEmail ? 'Testing...' : 'Test Email'}
             </button>
           </motion.div>
         </div>

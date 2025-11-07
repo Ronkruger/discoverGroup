@@ -1,8 +1,7 @@
 import type { Booking, Tour, BookingStatus, PaymentType } from "../types";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-
-// Removed mockBookings and all localStorage fallback. All booking operations use backend only.
+// Use VITE_API_BASE_URL (consistent with .env files) or VITE_API_URL as fallback
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 // Helper function to generate a booking ID
 function generateBookingId(): string {

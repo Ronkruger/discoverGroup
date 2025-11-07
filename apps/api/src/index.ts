@@ -4,7 +4,6 @@ import cors from "cors";
 
 import adminToursRouter from "./routes/admin/tours";
 import publicToursRouter from "./routes/public/tours";
-import paymentsRouter from "./routes/payments";
 import emailRouter from "./routes/email";
 import authRouter from "./routes/auth";
 import { connectDB } from "./db";
@@ -12,7 +11,6 @@ import path from "path";
 import uploadsRouter from "./routes/uploads";
 
 console.log("Server starting, environment variables:");
-console.log("STRIPE_SECRET_KEY:", process.env.STRIPE_SECRET_KEY ? "Available" : "Missing");
 console.log("PORT:", process.env.PORT || "4000 (default)");
 
 const app = express();
@@ -90,7 +88,7 @@ app.use(express.json());
 app.get("/", (_req: Request, res: Response) =>
   res.json({
     message: "API running",
-    endpoints: ["/admin/tours", "/public/tours", "/api/create-payment-intent", "/health"],
+    endpoints: ["/admin/tours", "/public/tours", "/health"],
   })
 );
 
@@ -111,7 +109,6 @@ app.use("/admin/settings", adminSettingsRouter);
 app.use("/admin/dashboard", adminDashboardRouter);
 app.use("/public/tours", publicToursRouter);
 app.use("/api/bookings", apiBookingsRouter);
-app.use("/api", paymentsRouter);
 app.use("/api", emailRouter);
 app.use("/auth", authRouter);
 

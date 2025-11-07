@@ -3,10 +3,10 @@ import { Link, useNavigate, useParams, useLocation, Navigate } from "react-route
 import { useAuth } from "../context/useAuth";
 import type { Tour } from "../types";
 import { fetchTourBySlug } from "../api/tours";
-import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import type { Stripe } from "@stripe/stripe-js";
-import { stripePromise, isStripeAvailable, processManualPayment } from "../lib/stripe";
-import { createPaymentIntent } from "../api/payments";
+// Payment Gateway Integration - Mockup for PayMongo & Dragonpay
+import { PaymentGateway, PaymentMethodSelector } from "../lib/payment-gateway";
+import type { PaymentMethod } from "../lib/payment-gateway";
+import { PayMongoMockup, DragonpayMockup } from "../components/PaymentMockup";
 import { createBooking } from "../api/bookings";
 import React from "react";
 import ProgressIndicator from "../components/ProgressIndicator";
@@ -67,30 +67,9 @@ export default function Booking(): JSX.Element {
   const [downpaymentPercentage, setDownpaymentPercentage] = useState<number>(30); // 30% default
   const [customPaymentTerms, setCustomPaymentTerms] = useState<string>("30"); // "30", "50", "70", or custom
 
-  // Stripe state
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [initializingPayment, setInitializingPayment] = useState(false);
-  const [stripeAvailable, setStripeAvailable] = useState<boolean | null>(null); // null = loading
-
-  // Check Stripe availability on component mount
-  useEffect(() => {
-    const checkStripe = async () => {
-      try {
-        console.log('🔍 Checking Stripe availability...');
-        const available = await isStripeAvailable();
-        setStripeAvailable(available);
-        if (!available) {
-          console.warn('Stripe.js failed to load - check network connectivity');
-        } else {
-          console.log('✅ Stripe.js is available');
-        }
-      } catch (error) {
-        setStripeAvailable(false);
-        console.error('Stripe availability check error:', error);
-      }
-    };
-    checkStripe();
-  }, []);
+  // Payment Gateway state (PayMongo & Dragonpay)
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | null>(null);
 
   // Auto-check appointment if cash-appointment payment is selected
   useEffect(() => {
@@ -199,70 +178,6 @@ export default function Booking(): JSX.Element {
     console.warn('Invalid downpayment amount:', downpaymentAmount, 'Total:', total);
   }
 
-  // Initialize PaymentIntent when entering Step 3 (Payment)
-  useEffect(() => {
-    let cancelled = false;
-
-    async function initPayment() {
-      if (step !== 3) return;
-      
-      // Skip payment initialization if cash-appointment is selected
-      if (paymentType === "cash-appointment") {
-        setInitializingPayment(false);
-        setClientSecret(null);
-        return;
-      }
-      
-      setError(null);
-      setInitializingPayment(true);
-      setClientSecret(null);
-
-      try {
-        const { clientSecret: cs } = await createPaymentIntent({
-          amount: Math.round(paymentAmount * 100), // PHP in centavos
-          currency: "php",
-          metadata: {
-            slug: slug ?? "",
-            tourTitle: tour?.title ?? "",
-            date: selectedDate ?? "",
-            passengers: String(passengers ?? 1),
-            paymentType: paymentType,
-            ...(paymentType === "downpayment" && {
-              downpaymentAmount: String(downpaymentAmount),
-              remainingBalance: String(remainingBalance),
-              downpaymentPercentage: String(downpaymentPercentage)
-            })
-          },
-        });
-        if (!cancelled) {
-          // Validate client secret format before setting it
-          if (cs && typeof cs === 'string' && cs.includes('_secret_')) {
-            setClientSecret(cs);
-          } else {
-            console.error('Invalid client secret format received:', cs);
-            setError('Payment system error. Please try again.');
-          }
-        }
-      } catch (e: unknown) {
-        if (!cancelled) {
-          console.error('Payment intent creation failed:', e);
-          const message =
-            e instanceof Error ? e.message :
-            typeof e === "string" ? e :
-            JSON.stringify(e as object) || "Unable to initialize payment. Please try again.";
-          setError(message);
-        }
-      } finally {
-        if (!cancelled) setInitializingPayment(false);
-      }
-    }
-
-    void initPayment();
-    return () => {
-      cancelled = true;
-    };
-  }, [step, total, paymentAmount, paymentType, downpaymentAmount, remainingBalance, downpaymentPercentage, selectedDate, passengers, slug, tour?.title]);
-
   function validateStep(current: number): string | null {
     if (current === 0) {
       if (!selectedDate) return "Please choose a travel date before continuing.";
@@ -293,13 +208,10 @@ export default function Booking(): JSX.Element {
       if (paymentType === "cash-appointment") {
         return null; // No online payment needed
       }
-      // In test mode or when Stripe fails, allow proceeding without strict validation
-      if (!stripeAvailable) {
-        console.log('🧪 Validation: Stripe unavailable, test mode allowed');
-        return null; // Allow proceeding in test mode
+      // Payment method must be selected for online payment
+      if (!selectedPaymentMethod) {
+        return "Please select a payment method to continue.";
       }
-      if (initializingPayment) return "Initializing payment, please wait…";
-      if (!clientSecret) return "Payment is not ready yet. Please wait a moment.";
       return null;
     }
     return null;
@@ -503,47 +415,6 @@ export default function Booking(): JSX.Element {
     );
   }
 
-  const elementsAppearance = {
-    theme: "night" as const,
-    variables: {
-      colorPrimary: "#3b82f6", // blue
-      colorText: "#ffffff", // white text
-      colorBackground: "#1e293b", // lighter dark background
-      colorTextSecondary: "#cbd5e1", // light gray
-      colorDanger: "#ef4444", // red for errors
-      borderRadius: "8px",
-      fontFamily: "system-ui, -apple-system, sans-serif",
-      spacingUnit: "4px",
-    },
-    rules: {
-      ".Input": {
-        border: "2px solid #475569", // visible border
-        backgroundColor: "#334155", // darker input background
-        padding: "12px",
-        fontSize: "16px",
-        color: "#ffffff",
-      },
-      ".Input:focus": {
-        border: "2px solid #3b82f6", // blue focus border
-        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-      },
-      ".Label": { 
-        color: "#e2e8f0", // light text for labels
-        fontSize: "14px",
-        marginBottom: "8px",
-      },
-      ".Tab": {
-        backgroundColor: "#475569",
-        color: "#e2e8f0",
-        border: "1px solid #64748b",
-      },
-      ".Tab--selected": {
-        backgroundColor: "#3b82f6",
-        color: "#ffffff",
-      },
-    },
-  };
-
   return (
     <main style={themeStyle} className="min-h-screen py-10">
       <style>{`
@@ -607,259 +478,146 @@ export default function Booking(): JSX.Element {
               />
             </div>
             <div className="card-glass rounded-lg p-6">
-              {/* Check if Stripe is available first */}
-              {!stripeAvailable && (step === 3 || step === 4 || step === 5) && (
-                <div className="text-center py-8">
-                  <div className="text-yellow-400 text-4xl mb-4">⚠️</div>
-                  <h3 className="text-lg font-semibold mb-3 text-slate-100">Payment System Temporarily Unavailable</h3>
-                  <p className="text-slate-300 mb-6">
-                    We're experiencing network issues with the payment form. You can still complete your booking using one of these options:
-                  </p>
-                  <div className="flex flex-col gap-3 max-w-md mx-auto">
-                    <button 
-                      onClick={async () => {
-                        try {
-                          setError(null);
-                          console.log('🔄 Processing manual payment...');
-                          
-                          const result = await processManualPayment({
-                            amount: Math.round(paymentAmount * 100),
-                            currency: "php",
-                            metadata: {
-                              slug: slug ?? "",
-                              tourTitle: tour?.title ?? "",
-                              date: selectedDate ?? "",
-                              passengers: String(passengers ?? 1),
-                              paymentType: paymentType,
-                            }
-                          });
-                          
-                          if (result.success) {
-                            handlePaymentSuccess(result.paymentIntentId);
-                          }
-                        } catch (error) {
-                          setError('Manual payment failed. Please try refreshing or contact support.');
-                          console.error('Manual payment error:', error);
-                        }
-                      }}
-                      className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
-                    >
-                      💳 Complete Payment (Test Mode)
-                    </button>
-                    <button 
-                      onClick={() => window.location.reload()} 
-                      className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-                    >
-                      🔄 Refresh Page
-                    </button>
-                    <button onClick={handleBack} className="px-6 py-3 btn-secondary rounded-lg">
-                      ← Go Back
-                    </button>
-                  </div>
-                  <div className="mt-6 text-sm text-slate-400">
-                    <p className="mb-2">Alternative payment options:</p>
-                    <p>📞 Call: +63 02 8526 8404</p>
-                    <p>📧 Email: reservations@example.com</p>
-                  </div>
-                  {error && <div className="mt-4 text-rose-400 font-medium">{error}</div>}
-                </div>
-              )}
-              
-              {/* Show loading state while checking Stripe */}
-              {stripeAvailable === null && (
-                <div className="mb-4 p-4 bg-blue-900/30 rounded text-blue-300 border border-blue-600">
-                  <div className="flex items-center gap-3">
-                    <div className="animate-spin h-5 w-5 border-2 border-blue-400 border-t-transparent rounded-full"></div>
-                    <span>Loading Stripe.js payment system...</span>
-                  </div>
-                  <div className="text-xs mt-2 text-blue-400">
-                    This may take a few moments due to network connectivity
-                  </div>
-                </div>
-              )}
-              
-              {/* Show error state if Stripe failed to load */}
-              {stripeAvailable === false && (
-                <div className="mb-4 p-4 bg-red-900/30 rounded text-red-300 border border-red-600">
-                  <div className="font-semibold mb-2">⚠️ Payment System Loading Failed</div>
-                  <div className="text-sm mb-3">
-                    Unable to load Stripe.js from CDN. This is likely due to:
-                  </div>
-                  <ul className="text-xs space-y-1 ml-4 list-disc">
-                    <li>Network connectivity issues</li>
-                    <li>Firewall blocking external requests</li>
-                    <li>DNS resolution problems</li>
-                  </ul>
-                  <div className="mt-3 text-xs">
-                    <strong>Solutions:</strong> Check internet connection, try different network, or contact support
+              {/* Step 3: Payment Method Selection */}
+              {step === 3 && paymentType !== "cash-appointment" && (
+                <section aria-labelledby="payment-heading">
+                  <h2 id="payment-heading" className="text-lg font-semibold mb-3 text-slate-100">Select Payment Method</h2>
+                  
+                  {/* Trust signals before payment form */}
+                  <div className="mb-6">
+                    <TrustSignals />
+                    <div className="mt-4">
+                      <UrgencyIndicators />
+                    </div>
+                    <div className="mt-4">
+                      <BookingProtection />
+                    </div>
                   </div>
                   
-                  {/* Add test mode button */}
-                  <div className="mt-4 p-3 bg-green-900/30 rounded border border-green-600">
-                    <div className="text-green-300 font-semibold mb-2">🧪 Test Mode Available</div>
-                    <div className="text-xs text-green-400 mb-3">
-                      You can complete your booking using test mode to verify the system works.
-                      Your booking will be saved to the database.
-                    </div>
+                  <PaymentMethodSelector 
+                    onSelect={(method) => {
+                      setSelectedPaymentMethod(method);
+                      setSelectedGateway(method.gateway);
+                    }}
+                    selectedMethod={selectedPaymentMethod || undefined}
+                  />
+                  
+                  {error && <div className="mt-3 text-rose-400">{error}</div>}
+                  <div className="mt-6 flex justify-between items-center">
+                    <button onClick={handleBack} className="px-4 py-2 btn-secondary rounded">Back</button>
                     <button
-                      onClick={async () => {
-                        try {
-                          const paymentIntentId = `pi_test_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-                          console.log('🧪 Test mode payment initiated:', paymentIntentId);
-                          handlePaymentSuccess(paymentIntentId);
-                        } catch (error) {
-                          console.error('Test payment failed:', error);
-                          setError('Test payment failed: ' + error);
-                        }
-                      }}
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+                      onClick={handleNext}
+                      className="px-4 py-2 btn-primary rounded"
+                      disabled={!selectedPaymentMethod}
                     >
-                      💳 Complete Payment (Test Mode)
+                      Review booking
                     </button>
                   </div>
-                </div>
+                </section>
               )}
-              
-              {stripeAvailable === true && (step === 3 || step === 4 || step === 5) && clientSecret && !initializingPayment && paymentType !== "cash-appointment" ? (
-                <Elements stripe={stripePromise as unknown as Promise<Stripe | null>} options={{ clientSecret, appearance: elementsAppearance }}>
-                  <div className="mb-4 p-3 bg-blue-900/30 rounded text-xs text-blue-300">
-                    ✅ STRIPE ELEMENTS ACTIVE
-                  </div>
-                  
-                  {/* Single PaymentElement - always mounted but positioned for step 2 */}
-                  <div style={{ display: step === 3 ? "block" : "none" }}>
-                    <section aria-labelledby="payment-heading">
-                      <h2 id="payment-heading" className="text-lg font-semibold mb-3 text-slate-100">Payment</h2>
-                      
-                      {/* Trust signals before payment form */}
-                      <div className="mb-6">
-                        <TrustSignals />
-                        <div className="mt-4">
-                          <UrgencyIndicators />
-                        </div>
-                        <div className="mt-4">
-                          <BookingProtection />
-                        </div>
+
+              {/* Step 4: Review Booking */}
+              {step === 4 && (
+                <section aria-labelledby="review-confirm-heading">
+                  <h2 id="review-confirm-heading" className="text-lg font-semibold mb-3 text-slate-100">
+                    Review your booking
+                  </h2>
+                  <div className="bg-white/6 border rounded p-4">
+                    <div className="flex justify-between">
+                      <div>
+                        <div className="text-xs text-slate-300">Tour</div>
+                        <div className="font-semibold text-slate-100">{tour.title}</div>
+                        <div className="text-sm text-slate-300 mt-1">{tour.summary}</div>
                       </div>
-                      
-                      <div className="text-sm text-slate-300 mb-3">Enter your card details below. Test mode is enabled.</div>
-                      
-                      {/* Stripe Payment Element - this is the card form */}
-                      <div className="my-6 p-6 bg-slate-800 border-2 border-slate-600 rounded-lg">
-                        <div className="mb-3 text-sm font-medium text-slate-200">Payment Information</div>
-                        <div className="mb-4 text-xs text-slate-400">PaymentElement should render below:</div>
-                        <div className="min-h-[120px] bg-slate-700 p-4 rounded border">
-                          <PaymentElement options={{ layout: "tabs" }} />
-                        </div>
-                        <div className="mt-4 text-xs text-slate-400">PaymentElement should render above ↑</div>
-                        <div className="mt-3 text-xs text-slate-500">
-                          Secure payment powered by Stripe • Test mode enabled
-                        </div>
+                      <div className="text-right">
+                        <div className="text-xs text-slate-300">Departure Date</div>
+                        <div className="font-semibold text-slate-100">{selectedDate || "—"}</div>
+                        <div className="text-xs text-slate-300 mt-2">Passengers</div>
+                        <div className="font-semibold text-slate-100">{passengers}</div>
                       </div>
-                      
-                      {error && <div className="mt-3 text-rose-400">{error}</div>}
-                      <div className="mt-6 flex justify-between items-center">
-                        <button onClick={handleBack} className="px-4 py-2 btn-secondary rounded">Back</button>
-                        <button
-                          onClick={handleNext}
-                          className="px-4 py-2 btn-primary rounded"
-                          disabled={!clientSecret || initializingPayment}
-                        >
-                          Review booking
-                        </button>
+                    </div>
+                    {wantsAppointment && (
+                      <div className="mt-4 pt-4 border-t border-white/10">
+                        <div className="text-xs text-slate-300 mb-2">Office Appointment</div>
+                        <div className="flex items-center gap-2 text-sm text-slate-100">
+                          <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span>{new Date(appointmentDate).toLocaleDateString()} at {appointmentTime}</span>
+                        </div>
+                        <div className="text-xs text-slate-400 mt-1">Purpose: {appointmentPurpose.replace('-', ' ')}</div>
                       </div>
-                    </section>
-                  </div>
-                  
-                  {step === 4 && (
-                    <section aria-labelledby="review-confirm-heading">
-                      <h2 id="review-confirm-heading" className="text-lg font-semibold mb-3 text-slate-100">
-                        Review your booking
-                      </h2>
-                      <div className="bg-white/6 border rounded p-4">
-                        <div className="flex justify-between">
+                    )}
+                    {selectedPaymentMethod && (
+                      <div className="mt-4 pt-4 border-t border-white/10">
+                        <div className="text-xs text-slate-300 mb-2">Payment Method</div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{selectedPaymentMethod.icon}</span>
                           <div>
-                            <div className="text-xs text-slate-300">Tour</div>
-                            <div className="font-semibold text-slate-100">{tour.title}</div>
-                            <div className="text-sm text-slate-300 mt-1">{tour.summary}</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-xs text-slate-300">Departure Date</div>
-                            <div className="font-semibold text-slate-100">{selectedDate || "—"}</div>
-                            <div className="text-xs text-slate-300 mt-2">Passengers</div>
-                            <div className="font-semibold text-slate-100">{passengers}</div>
-                          </div>
-                        </div>
-                        {wantsAppointment && (
-                          <div className="mt-4 pt-4 border-t border-white/10">
-                            <div className="text-xs text-slate-300 mb-2">Office Appointment</div>
-                            <div className="flex items-center gap-2 text-sm text-slate-100">
-                              <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                              <span>{new Date(appointmentDate).toLocaleDateString()} at {appointmentTime}</span>
-                            </div>
-                            <div className="text-xs text-slate-400 mt-1">Purpose: {appointmentPurpose.replace('-', ' ')}</div>
-                          </div>
-                        )}
-                        <div className="card-divider">
-                          <div className="flex justify-between items-center">
-                            <div className="text-sm text-slate-300">Per person</div>
-                            <div className="font-semibold text-slate-100">{formatCurrencyPHP(perPerson)}</div>
-                          </div>
-                          <div className="mt-2 flex justify-between items-center">
-                            <div className="text-sm text-slate-300">Total</div>
-                            <div className="text-2xl font-bold price-highlight">{formatCurrencyPHP(total)}</div>
+                            <div className="font-semibold text-slate-100">{selectedPaymentMethod.name}</div>
+                            <div className="text-xs text-slate-400">{selectedPaymentMethod.description}</div>
                           </div>
                         </div>
                       </div>
-                      <div className="mt-6 flex justify-between items-center">
-                        <button onClick={handleBack} className="px-4 py-2 btn-secondary rounded">Back</button>
-                        <button
-                          onClick={() => setStep(5)}
-                          className="px-4 py-2 btn-primary rounded"
-                        >
-                          Confirm Booking & Pay
-                        </button>
+                    )}
+                    <div className="card-divider">
+                      <div className="flex justify-between items-center">
+                        <div className="text-sm text-slate-300">Per person</div>
+                        <div className="font-semibold text-slate-100">{formatCurrencyPHP(perPerson)}</div>
                       </div>
-                    </section>
-                  )}
-                  {step === 5 && (
-                    <>
-                      <StripeConfirmSection
-                        tour={tour}
-                        slug={slug}
-                        selectedDate={selectedDate}
-                        passengers={passengers}
-                        perPerson={perPerson}
-                        total={total}
-                        onBack={handleBack}
-                        onSuccess={handlePaymentSuccess}
-                      />
-                    </>
-                  )}
-                </Elements>
-              ) : (
-                <>
-                  {/* Show different message based on Stripe availability */}
-                  {stripeAvailable === null ? (
-                    <div className="mb-4 p-3 bg-blue-900/30 rounded text-xs text-blue-300 border border-blue-600">
-                      ⏳ Waiting for Stripe.js to load...
+                      <div className="mt-2 flex justify-between items-center">
+                        <div className="text-sm text-slate-300">Total</div>
+                        <div className="text-2xl font-bold price-highlight">{formatCurrencyPHP(total)}</div>
+                      </div>
                     </div>
-                  ) : stripeAvailable === false ? (
-                    <div className="mb-4 p-3 bg-red-900/30 rounded text-xs text-red-300 border border-red-600">
-                      ❌ Stripe.js failed to load - payment form unavailable
-                    </div>
-                  ) : (
-                    <div className="mb-4 p-3 bg-yellow-900/30 rounded text-xs text-yellow-300 border border-yellow-600">
-                      ⚠️ Payment form not ready - complete previous steps first
-                    </div>
+                  </div>
+                  <div className="mt-6 flex justify-between items-center">
+                    <button onClick={handleBack} className="px-4 py-2 btn-secondary rounded">Back</button>
+                    <button
+                      onClick={() => setStep(5)}
+                      className="px-4 py-2 btn-primary rounded"
+                    >
+                      Proceed to Payment
+                    </button>
+                  </div>
+                </section>
+              )}
+
+              {/* Step 5: Payment Gateway Mockup */}
+              {step === 5 && selectedPaymentMethod && (
+                <section aria-labelledby="confirm-heading">
+                  <h2 id="confirm-heading" className="text-lg font-semibold mb-3 text-slate-100">Complete Payment</h2>
+                  
+                  {selectedGateway === PaymentGateway.PAYMONGO && (
+                    <PayMongoMockup 
+                      amount={total}
+                      paymentMethod={selectedPaymentMethod}
+                      onComplete={() => {
+                        const paymentId = `pm_${selectedPaymentMethod.type}_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+                        console.log('✅ PayMongo mockup payment completed:', paymentId);
+                        handlePaymentSuccess(paymentId);
+                      }}
+                      onBack={handleBack}
+                    />
                   )}
-                </>
+                  
+                  {selectedGateway === PaymentGateway.DRAGONPAY && (
+                    <DragonpayMockup 
+                      amount={total}
+                      paymentMethod={selectedPaymentMethod}
+                      onComplete={() => {
+                        const paymentId = `dp_${selectedPaymentMethod.type}_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+                        console.log('✅ Dragonpay mockup payment completed:', paymentId);
+                        handlePaymentSuccess(paymentId);
+                      }}
+                      onBack={handleBack}
+                    />
+                  )}
+                </section>
               )}
               
-              {/* Regular booking steps when Stripe isn't needed or not available */}
-              {(!stripeAvailable || step < 3 || paymentType === "cash-appointment") && (
+              {/* Regular booking steps for early steps or cash payment */}
+              {(step < 3 || paymentType === "cash-appointment") && (
                 <>
                   {step === 0 && (
                     <section aria-labelledby="review-heading">
@@ -1584,105 +1342,5 @@ export default function Booking(): JSX.Element {
         </div>
       </div>
     </main>
-  );
-}
-
-function StripeConfirmSection(props: {
-  tour: Tour;
-  slug?: string;
-  selectedDate: string | null;
-  passengers: number;
-  perPerson: number;
-  total: number;
-  onBack: () => void;
-  onSuccess: (confirmationId: string) => void;
-}) {
-  const { selectedDate, passengers, perPerson, total, onBack, onSuccess, tour } = props;
-  const stripe = useStripe();
-  const elements = useElements();
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-
-    if (!stripe || !elements) {
-      setError("Payment SDK not ready. Please wait a moment.");
-      return;
-    }
-
-    try {
-      setSubmitting(true);
-      const result = await stripe.confirmPayment({
-        elements,
-        redirect: "if_required",
-        confirmParams: {
-          payment_method_data: {
-            billing_details: {},
-          },
-        },
-      });
-
-      if (result.error) {
-        setError(result.error.message ?? "Payment failed. Please try again.");
-        setSubmitting(false);
-        return;
-      }
-
-      const pi = result.paymentIntent;
-      if (pi && (pi.status === "succeeded" || pi.status === "processing" || pi.status === "requires_capture")) {
-        onSuccess(pi.id);
-      } else {
-        setError("Unable to confirm payment. Please try another payment method.");
-        setSubmitting(false);
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Payment failed. Please try again.");
-      setSubmitting(false);
-    }
-  }
-
-  return (
-    <section aria-labelledby="confirm-heading">
-      <h2 id="confirm-heading" className="text-lg font-semibold mb-3 text-slate-100">Processing payment…</h2>
-      <div className="bg-white/6 border rounded p-4">
-        <div className="flex justify-between">
-          <div>
-            <div className="text-xs text-slate-300">Tour</div>
-            <div className="font-semibold text-slate-100">{tour.title}</div>
-            <div className="text-sm text-slate-300 mt-1">{tour.summary}</div>
-          </div>
-          <div className="text-right">
-            <div className="text-xs text-slate-300">Departure Date</div>
-            <div className="font-semibold text-slate-100">{selectedDate || "—"}</div>
-            <div className="text-xs text-slate-300 mt-2">Passengers</div>
-            <div className="font-semibold text-slate-100">{passengers}</div>
-          </div>
-        </div>
-        <div className="card-divider">
-          <div className="flex justify-between items-center">
-            <div className="text-sm text-slate-300">Per person</div>
-            <div className="font-semibold text-slate-100">{formatCurrencyPHP(perPerson)}</div>
-          </div>
-          <div className="mt-2 flex justify-between items-center">
-            <div className="text-sm text-slate-300">Total</div>
-            <div className="text-2xl font-bold price-highlight">{formatCurrencyPHP(total)}</div>
-          </div>
-        </div>
-      </div>
-      <form onSubmit={handleSubmit}>
-        <div className="mt-6 flex justify-between items-center">
-          <button type="button" onClick={onBack} className="px-4 py-2 btn-secondary rounded">Back</button>
-          <div className="flex items-center gap-3">
-            {error && <div className="text-rose-400 mr-2">{error}</div>}
-            <button type="submit" disabled={submitting || !stripe || !elements} className="px-4 py-2 btn-primary rounded">
-              {submitting ? "Confirming…" : `Pay — ${formatCurrencyPHP(total)}`}
-            </button>
-          </div>
-        </div>
-      </form>
-    </section>
   );
 }

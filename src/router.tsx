@@ -25,6 +25,7 @@ const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const Profile = lazy(() => import("./pages/Profile"));
 const UserSettings = lazy(() => import("./pages/UserSettings"));
 const AboutUs = lazy(() => import("./pages/AboutUs"));
+const Favorites = lazy(() => import("./pages/Favorites"));
 
 export default function AppRouter() {
   return (
@@ -63,6 +64,7 @@ export default function AppRouter() {
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<UserSettings />} />
+          <Route path="/favorites" element={<Favorites />} />
 
           {/* Redirect plural → singular for compatibility */}
           <Route path="/tours/:slug" element={<Navigate to="/tour/:slug" replace />} />

@@ -100,6 +100,7 @@ import adminCustomerServiceRouter from "./routes/admin/customer-service";
 import adminSettingsRouter from "./routes/admin/settings";
 import adminDashboardRouter from "./routes/admin/dashboard";
 import apiBookingsRouter from "./routes/api/bookings";
+import favoritesRouter from "./routes/favorites";
 app.use("/admin/tours", adminToursRouter);
 app.use("/admin/users", adminUsersRouter);
 app.use("/admin/bookings", adminBookingsRouter);
@@ -109,6 +110,7 @@ app.use("/admin/settings", adminSettingsRouter);
 app.use("/admin/dashboard", adminDashboardRouter);
 app.use("/public/tours", publicToursRouter);
 app.use("/api/bookings", apiBookingsRouter);
+app.use("/api/favorites", favoritesRouter);
 app.use("/api", emailRouter);
 app.use("/auth", authRouter);
 

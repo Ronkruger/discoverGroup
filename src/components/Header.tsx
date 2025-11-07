@@ -379,6 +379,11 @@ export default function Header(): React.ReactElement {
                         </Link>
                       </li>
                       <li>
+                        <Link to="/favorites" className="block px-5 py-3 hover:bg-blue-50 rounded-xl transition-all" onClick={() => setUserMenuOpen(false)}>
+                          ❤️ My Favorites
+                        </Link>
+                      </li>
+                      <li>
                         <Link to="/profile" className="block px-5 py-3 hover:bg-blue-50 rounded-xl transition-all" onClick={() => setUserMenuOpen(false)}>
                           See Profile
                         </Link>

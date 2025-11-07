@@ -1,5 +1,7 @@
 import * as React from "react";
 import { fetchTours } from "../api/tours";
+import { toggleFavorite, getFavorites } from "../api/favorites";
+import { useAuth } from "../context/useAuth";
 import type { Tour } from "../types";
 import TourCard from "../components/TourCard";
 import { Link } from "react-router-dom";
@@ -19,6 +21,17 @@ export default function Home() {
   const [tours, setTours] = React.useState<Tour[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [favorites, setFavorites] = React.useState<string[]>([]);
+  const { user } = useAuth();
+
+  // Load user's favorites when component mounts
+  React.useEffect(() => {
+    if (user) {
+      getFavorites()
+        .then(data => setFavorites(data.favorites))
+        .catch(err => console.warn('Could not load favorites:', err));
+    }
+  }, [user]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -373,9 +386,20 @@ export default function Home() {
                 <motion.div whileHover={{ scale: 1.02 }} className="h-full">
                   <TourCard 
                     tour={tour} 
-                    onWishlist={(tourId, isWishlisted) => {
-                      console.log('Wishlist action:', tourId, isWishlisted);
-                      // TODO: Implement wishlist functionality
+                    isWishlisted={favorites.includes(tour.slug)}
+                    onWishlist={async (tourSlug) => {
+                      if (!user) {
+                        alert('Please log in to add favorites');
+                        return;
+                      }
+                      try {
+                        const result = await toggleFavorite(tourSlug);
+                        setFavorites(result.favorites);
+                        console.log(`${result.action === 'added' ? '❤️ Added to' : '💔 Removed from'} favorites:`, tourSlug);
+                      } catch (error) {
+                        console.error('Failed to toggle favorite:', error);
+                        alert('Failed to update favorites. Please try again.');
+                      }
                     }}
                     onShare={(tour) => {
                       console.log('Share tour:', tour.title);

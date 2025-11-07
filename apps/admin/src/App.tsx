@@ -16,6 +16,7 @@ import CustomerService from "./pages/customer-service";
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import SalesDepartment from './pages/SalesDepartment';
+import MapMarkersManagement from './pages/MapMarkersManagement';
 import { UserRole } from "./types/auth";
 
 // Loading component
@@ -163,6 +164,19 @@ const AppRouter: React.FC = () => {
                   allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.BOOKING_DEPARTMENT]}
                 >
                   <SalesDepartment />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Map Markers Management - Administrator & Web Developer */}
+            <Route
+              path="/map-markers"
+              element={
+                <ProtectedRoute 
+                  requiredPermission="canAccessSettings"
+                  allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.WEB_DEVELOPER]}
+                >
+                  <MapMarkersManagement />
                 </ProtectedRoute>
               }
             />

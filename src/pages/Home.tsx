@@ -1,6 +1,8 @@
 import * as React from "react";
 import { fetchTours } from "../api/tours";
 import { toggleFavorite, getFavorites } from "../api/favorites";
+import { fetchMapMarkers } from "../lib/supabase-map-markers";
+import type { MapMarker } from "../lib/supabase-map-markers";
 import { useAuth } from "../context/useAuth";
 import type { Tour } from "../types";
 import TourCard from "../components/TourCard";
@@ -22,6 +24,7 @@ export default function Home() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [favorites, setFavorites] = React.useState<string[]>([]);
+  const [mapMarkers, setMapMarkers] = React.useState<MapMarker[]>([]);
   const { user } = useAuth();
 
   // Load user's favorites when component mounts
@@ -32,6 +35,19 @@ export default function Home() {
         .catch(err => console.warn('Could not load favorites:', err));
     }
   }, [user]);
+
+  // Load map markers from Supabase
+  React.useEffect(() => {
+    const loadMapMarkers = async () => {
+      try {
+        const markers = await fetchMapMarkers();
+        setMapMarkers(markers);
+      } catch (err) {
+        console.warn('Could not load map markers:', err);
+      }
+    };
+    loadMapMarkers();
+  }, []);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -442,20 +458,20 @@ export default function Home() {
               alt="Europe Map"
               className="w-full rounded-lg shadow-lg"
             />
-            {[
-              { city: "Paris", top: "40%", left: "35%" },
-              { city: "Rome", top: "70%", left: "50%" },
-              { city: "Lucerne", top: "55%", left: "42%" },
-              { city: "Florence", top: "65%", left: "48%" },
-            ].map((point, i) => (
+            {mapMarkers.map((point) => (
               <motion.div
-                key={i}
+                key={point.id}
                 className="absolute w-4 h-4 bg-blue-600 rounded-full cursor-pointer group"
                 style={{ top: point.top, left: point.left }}
                 whileHover={{ scale: 1.5 }}
               >
-                <span className="absolute left-6 top-0 bg-white text-sm text-gray-800 px-2 py-1 rounded shadow opacity-0 group-hover:opacity-100 transition">
-                  {point.city}
+                <span className="absolute left-6 top-0 bg-white text-sm text-gray-800 px-2 py-1 rounded shadow opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-10">
+                  {point.city}{point.country ? `, ${point.country}` : ''}
+                  {point.description && (
+                    <span className="block text-xs text-gray-600 mt-1">
+                      {point.description}
+                    </span>
+                  )}
                 </span>
               </motion.div>
             ))}

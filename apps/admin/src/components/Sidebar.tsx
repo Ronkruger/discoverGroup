@@ -10,7 +10,8 @@ import {
   HeadphonesIcon,
   Plane,
   BarChart3,
-  MessageSquare
+  MessageSquare,
+  Map
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { authService } from "../services/authService";
@@ -65,6 +66,12 @@ const navigationItems: NavItem[] = [
     label: "Sales Department",
     icon: MessageSquare,
     permission: "canAccessSales",
+  },
+  {
+    to: "/map-markers",
+    label: "Map Markers",
+    icon: Map,
+    permission: "canAccessSettings",
   },
   {
     to: "/reports",

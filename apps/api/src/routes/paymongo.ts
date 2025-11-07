@@ -7,18 +7,6 @@ const router = express.Router();
 const PAYMONGO_SECRET_KEY = process.env.PAYMONGO_SECRET_KEY || '';
 const PAYMONGO_API_BASE = 'https://api.paymongo.com/v1';
 
-// PayMongo API Types
-interface PayMongoError {
-  errors?: Array<{ detail: string }>;
-}
-
-interface PayMongoResponse {
-  data: {
-    id: string;
-    attributes: Record<string, unknown>;
-  };
-}
-
 // Helper to create Basic Auth header
 function getPayMongoAuthHeader(): string {
   return `Basic ${Buffer.from(PAYMONGO_SECRET_KEY + ':').toString('base64')}`;
@@ -64,7 +52,10 @@ router.post('/payment-intent', async (req: Request, res: Response) => {
       })
     });
 
-    const data = await response.json() as any;
+    const data = await response.json() as {
+      data?: { id: string; attributes: Record<string, unknown> };
+      errors?: Array<{ detail: string }>;
+    };
 
     if (!response.ok) {
       console.error('❌ PayMongo API error:', data);
@@ -73,20 +64,21 @@ router.post('/payment-intent', async (req: Request, res: Response) => {
       });
     }
 
-    console.log('✅ Payment intent created:', data.data.id);
+    console.log('✅ Payment intent created:', data.data?.id);
 
     // Return formatted response
     return res.json({
-      id: data.data.id,
-      clientKey: data.data.attributes.client_key,
-      status: data.data.attributes.status,
-      amount: data.data.attributes.amount,
-      currency: data.data.attributes.currency,
+      id: data.data?.id,
+      clientKey: data.data?.attributes.client_key,
+      status: data.data?.attributes.status,
+      amount: data.data?.attributes.amount,
+      currency: data.data?.attributes.currency,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Payment intent creation error:', error);
-    return res.status(500).json({ error: error.message || 'Internal server error' });
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    return res.status(500).json({ error: message });
   }
 });
 
@@ -108,7 +100,15 @@ router.post('/payment-method', async (req: Request, res: Response) => {
 
     console.log('💳 Creating PayMongo payment method:', type);
 
-    const payload: any = {
+    const payload: {
+      data: {
+        attributes: {
+          type: string;
+          details: Record<string, unknown>;
+          billing?: Record<string, unknown>;
+        };
+      };
+    } = {
       data: {
         attributes: {
           type,
@@ -145,7 +145,10 @@ router.post('/payment-method', async (req: Request, res: Response) => {
       body: JSON.stringify(payload)
     });
 
-    const data = await response.json() as any;
+    const data = await response.json() as {
+      data?: { id: string; attributes: Record<string, unknown> };
+      errors?: Array<{ detail: string }>;
+    };
 
     if (!response.ok) {
       console.error('❌ PayMongo payment method error:', data);
@@ -154,17 +157,18 @@ router.post('/payment-method', async (req: Request, res: Response) => {
       });
     }
 
-    console.log('✅ Payment method created:', data.data.id);
+    console.log('✅ Payment method created:', data.data?.id);
 
     return res.json({
-      id: data.data.id,
-      type: data.data.attributes.type,
+      id: data.data?.id,
+      type: data.data?.attributes.type,
       status: 'active',
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Payment method creation error:', error);
-    return res.status(500).json({ error: error.message || 'Internal server error' });
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    return res.status(500).json({ error: message });
   }
 });
 
@@ -206,7 +210,10 @@ router.post('/attach', async (req: Request, res: Response) => {
       }
     );
 
-    const data = await response.json() as any;
+    const data = await response.json() as {
+      data?: { id: string; attributes: Record<string, unknown> };
+      errors?: Array<{ detail: string }>;
+    };
 
     if (!response.ok) {
       console.error('❌ PayMongo attach error:', data);
@@ -215,25 +222,33 @@ router.post('/attach', async (req: Request, res: Response) => {
       });
     }
 
-    console.log('✅ Payment method attached:', data.data.attributes.status);
+    console.log('✅ Payment method attached:', data.data?.attributes.status);
 
-    const result: any = {
-      status: data.data.attributes.status,
+    const result: {
+      status: unknown;
+      nextAction?: {
+        type: unknown;
+        redirect: unknown;
+      };
+    } = {
+      status: data.data?.attributes.status,
     };
 
     // Check if there's a next action (e.g., redirect for 3D Secure)
-    if (data.data.attributes.next_action) {
+    const nextAction = data.data?.attributes.next_action as { type?: unknown; redirect?: unknown } | undefined;
+    if (nextAction) {
       result.nextAction = {
-        type: data.data.attributes.next_action.type,
-        redirect: data.data.attributes.next_action.redirect,
+        type: nextAction.type,
+        redirect: nextAction.redirect,
       };
     }
 
     return res.json(result);
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Payment attachment error:', error);
-    return res.status(500).json({ error: error.message || 'Internal server error' });
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    return res.status(500).json({ error: message });
   }
 });
 
@@ -262,7 +277,10 @@ router.get('/verify/:paymentIntentId', async (req: Request, res: Response) => {
       }
     );
 
-    const data = await response.json() as any;
+    const data = await response.json() as {
+      data?: { id: string; attributes: Record<string, unknown> };
+      errors?: Array<{ detail: string }>;
+    };
 
     if (!response.ok) {
       console.error('❌ PayMongo verification error:', data);
@@ -271,7 +289,7 @@ router.get('/verify/:paymentIntentId', async (req: Request, res: Response) => {
       });
     }
 
-    const status = data.data.attributes.status;
+    const status = data.data?.attributes.status;
     const paid = status === 'succeeded' || status === 'awaiting_payment_method';
 
     console.log('✅ Payment verified:', status, paid ? '(paid)' : '(unpaid)');
@@ -279,13 +297,14 @@ router.get('/verify/:paymentIntentId', async (req: Request, res: Response) => {
     return res.json({
       status,
       paid,
-      amount: data.data.attributes.amount,
-      currency: data.data.attributes.currency,
+      amount: data.data?.attributes.amount,
+      currency: data.data?.attributes.currency,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Verification error:', error);
-    return res.status(500).json({ error: error.message || 'Internal server error' });
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    return res.status(500).json({ error: message });
   }
 });
 
@@ -300,9 +319,10 @@ router.get('/payment-methods', async (_req: Request, res: Response) => {
     return res.json({
       methods: ['card', 'gcash', 'grab_pay', 'paymaya']
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Payment methods fetch error:', error);
-    return res.status(500).json({ error: error.message || 'Internal server error' });
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    return res.status(500).json({ error: message });
   }
 });
 
@@ -312,7 +332,7 @@ router.get('/payment-methods', async (_req: Request, res: Response) => {
  */
 router.post('/source', async (req: Request, res: Response) => {
   try {
-    const { type, amount, currency = 'PHP', redirect } = req.body;
+    const { type, amount, currency = 'PHP', redirect: redirectUrls } = req.body;
 
     if (!type || !amount) {
       return res.status(400).json({ error: 'Type and amount are required' });
@@ -342,15 +362,18 @@ router.post('/source', async (req: Request, res: Response) => {
             amount,
             currency: currency.toUpperCase(),
             redirect: {
-              success: redirect?.success || `${process.env.CLIENT_URL}/booking/success`,
-              failed: redirect?.failed || `${process.env.CLIENT_URL}/booking/failed`,
+              success: redirectUrls?.success || `${process.env.CLIENT_URL}/booking/success`,
+              failed: redirectUrls?.failed || `${process.env.CLIENT_URL}/booking/failed`,
             },
           }
         }
       })
     });
 
-    const data = await response.json() as any;
+    const data = await response.json() as {
+      data?: { id: string; attributes: Record<string, unknown> };
+      errors?: Array<{ detail: string }>;
+    };
 
     if (!response.ok) {
       console.error('❌ PayMongo source error:', data);
@@ -359,17 +382,20 @@ router.post('/source', async (req: Request, res: Response) => {
       });
     }
 
-    console.log('✅ Source created:', data.data.id);
+    console.log('✅ Source created:', data.data?.id);
+
+    const redirectData = data.data?.attributes.redirect as { checkout_url?: string } | undefined;
 
     return res.json({
-      id: data.data.id,
-      checkoutUrl: data.data.attributes.redirect?.checkout_url,
-      status: data.data.attributes.status,
+      id: data.data?.id,
+      checkoutUrl: redirectData?.checkout_url,
+      status: data.data?.attributes.status,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Source creation error:', error);
-    return res.status(500).json({ error: error.message || 'Internal server error' });
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    return res.status(500).json({ error: message });
   }
 });
 
@@ -407,9 +433,10 @@ router.post('/webhook', async (req: Request, res: Response) => {
     // Always return 200 to acknowledge receipt
     return res.status(200).json({ received: true });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Webhook processing error:', error);
-    return res.status(500).json({ error: error.message || 'Internal server error' });
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    return res.status(500).json({ error: message });
   }
 });
 

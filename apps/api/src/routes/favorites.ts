@@ -16,7 +16,7 @@ function authenticateUser(req: Request, res: Response, next: () => void) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'changeme') as { id: string };
     (req as Request & { userId: string }).userId = decoded.id;
     next();
-  } catch (error) {
+  } catch {
     return res.status(401).json({ error: 'Invalid token' });
   }
 }

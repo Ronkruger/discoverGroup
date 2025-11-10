@@ -146,8 +146,8 @@ export default function Home() {
               transition={{ duration: 0.8, delay: 0.1 }}
               className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 drop-shadow-lg text-center leading-tight"
             >
-              Discover Europe with <br />
-              <span className="text-yellow-300 inline-block mt-2">Discover Group</span>
+              Experience the Magic of <br />
+              <span className="text-yellow-300 inline-block mt-2">European Adventures</span>
             </motion.h1>
             
             <motion.p
@@ -156,8 +156,8 @@ export default function Home() {
               transition={{ duration: 1, delay: 0.2 }}
               className="text-lg md:text-xl mb-10 max-w-2xl mx-auto text-center text-white/90 leading-relaxed"
             >
-              Explore iconic destinations with our guided tours — 
-              guaranteed departures, flexible routes, and unforgettable experiences.
+              Join thousands of travelers exploring Europe's most stunning destinations — 
+              expert guides, guaranteed departures, and memories that last a lifetime.
             </motion.p>
             
             {/* Search Bar */}
@@ -182,16 +182,16 @@ export default function Home() {
               className="mt-10 grid grid-cols-3 gap-6 md:gap-12 w-full max-w-2xl"
             >
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-yellow-300">25K+</div>
+                <div className="text-2xl md:text-3xl font-bold text-yellow-300">30K+</div>
                 <div className="text-xs md:text-sm text-white/80 mt-1">Happy Travelers</div>
               </div>
               <div className="text-center border-x border-white/20">
-                <div className="text-2xl md:text-3xl font-bold text-yellow-300">50+</div>
-                <div className="text-xs md:text-sm text-white/80 mt-1">Destinations</div>
+                <div className="text-2xl md:text-3xl font-bold text-yellow-300">75+</div>
+                <div className="text-xs md:text-sm text-white/80 mt-1">Tour Packages</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl md:text-3xl font-bold text-yellow-300">4.9★</div>
-                <div className="text-xs md:text-sm text-white/80 mt-1">Average Rating</div>
+                <div className="text-xs md:text-sm text-white/80 mt-1">Customer Rating</div>
               </div>
             </motion.div>
           </motion.div>
@@ -276,8 +276,8 @@ export default function Home() {
             <div className="flex items-center gap-3">
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
               <div className="text-sm">
-                <span className="font-medium">Maria from Italy</span> just booked 
-                <span className="font-medium"> Prague to Vienna Explorer</span> • 3 min ago
+                <span className="font-medium">Sarah from London</span> just booked 
+                <span className="font-medium"> Mediterranean Grand Tour</span> • 5 min ago
               </div>
             </div>
           </motion.div>
@@ -288,9 +288,9 @@ export default function Home() {
       <section className="bg-white py-20">
         <div className="container mx-auto px-6 grid md:grid-cols-3 gap-12 text-center">
           {[
-            { label: "Happy Travelers", value: 25000 },
-            { label: "Tours Completed", value: 1200 },
-            { label: "Years of Experience", value: 20 },
+            { label: "Happy Travelers", value: 30000 },
+            { label: "Tours Completed", value: 1500 },
+            { label: "Years of Experience", value: 25 },
           ].map((stat, i) => (
             <motion.div
               key={i}
@@ -326,18 +326,18 @@ export default function Home() {
             {[
               {
                 icon: <Map className="w-10 h-10 text-blue-600 mx-auto" />,
-                title: "Flexible Routes",
-                desc: "Multiple route options tailored for every traveler.",
+                title: "Customizable Itineraries",
+                desc: "Tailor-made routes designed to match your travel style and preferences.",
               },
               {
                 icon: <Users className="w-10 h-10 text-blue-600 mx-auto" />,
-                title: "Expert Guides",
-                desc: "Knowledgeable guides ensuring unforgettable experiences.",
+                title: "Professional Guides",
+                desc: "Passionate local experts bringing history and culture to life.",
               },
               {
                 icon: <CheckCircle className="w-10 h-10 text-blue-600 mx-auto" />,
-                title: "Trusted Service",
-                desc: "20+ years of experience with thousands of happy travelers.",
+                title: "Guaranteed Excellence",
+                desc: "25+ years delivering exceptional European travel experiences.",
               },
             ].map((f, i) => (
               <motion.div
@@ -495,18 +495,18 @@ export default function Home() {
             {[
               {
                 quote:
-                  "The Paris to Rome route was a dream come true. Everything was perfectly organized!",
-                name: "Maria G.",
+                  "An absolutely incredible journey through Europe! Every detail was perfectly planned and executed.",
+                name: "Emma Thompson",
               },
               {
                 quote:
-                  "Our guide was amazing — so knowledgeable and friendly. Highly recommend Discover Group!",
-                name: "John P.",
+                  "Our guide was phenomenal — truly passionate and knowledgeable. This trip exceeded all expectations!",
+                name: "Michael Chen",
               },
               {
                 quote:
-                  "Loved the flexibility and the hotels. Can't wait to book my next trip!",
-                name: "Sophia L.",
+                  "The accommodations were stunning and the itinerary was perfectly paced. Already planning our next adventure!",
+                name: "Isabella Rodriguez",
               },
             ].map((t, i) => (
               <motion.div
@@ -536,7 +536,7 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-3xl font-bold mb-4 text-gray-900"
           >
-            Ready to Start Your Journey?
+            Ready for Your European Adventure?
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -545,8 +545,8 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-gray-600 mb-8 max-w-xl mx-auto"
           >
-            Book your European adventure today with guaranteed departures and
-            flexible itineraries.
+            Start planning your dream European journey today. Expert guidance, 
+            guaranteed departures, and unforgettable experiences await.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}

@@ -72,7 +72,7 @@ export const PayMongoPaymentForm: React.FC<{
   }, 
     React.createElement('div', { className: 'text-center' },
       React.createElement('div', { className: 'text-4xl mb-4' }, '💳'),
-      React.createElement('h3', { className: 'text-lg font-semibold mb-2 text-blue-900' }, 
+      React.createElement('h3', { classonName: 'text-lg font-semibold mb-2 text-blue-900' }, 
         'PayMongo Integration Coming Soon'
       ),
       React.createElement('p', { className: 'text-sm text-blue-700 mb-4' },

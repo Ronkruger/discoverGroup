@@ -17,6 +17,7 @@ import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import SalesDepartment from './pages/SalesDepartment';
 import MapMarkersManagement from './pages/MapMarkersManagement';
+import HomepageManagement from './pages/HomepageManagement';
 import { UserRole } from "./types/auth";
 
 // Loading component
@@ -213,6 +214,19 @@ const AppRouter: React.FC = () => {
                   allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.WEB_DEVELOPER]}
                 >
                   <Settings />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Homepage Management - Administrator & Web Developer */}
+            <Route
+              path="/homepage"
+              element={
+                <ProtectedRoute 
+                  requiredPermission="canAccessSettings"
+                  allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.WEB_DEVELOPER]}
+                >
+                  <HomepageManagement />
                 </ProtectedRoute>
               }
             />

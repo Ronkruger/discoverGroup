@@ -11,7 +11,8 @@ import {
   Plane,
   BarChart3,
   MessageSquare,
-  Map
+  Map,
+  Globe
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { authService } from "../services/authService";
@@ -84,6 +85,12 @@ const navigationItems: NavItem[] = [
     label: "User Management",
     icon: Users,
     permission: "canAccessUserManagement",
+  },
+  {
+    to: "/homepage",
+    label: "Homepage",
+    icon: Globe,
+    permission: "canAccessSettings",
   },
   {
     to: "/settings",

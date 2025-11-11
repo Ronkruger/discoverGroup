@@ -30,6 +30,10 @@ interface BookingDetails {
   appointmentDate?: string;
   appointmentTime?: string;
   appointmentPurpose?: string;
+  paymentMethod?: string;
+  paymentMethodDescription?: string;
+  paymentMethodIcon?: string;
+  paymentGateway?: string;
 }
 
 // Create transporter - using Gmail for real email sending
@@ -242,28 +246,40 @@ export const sendBookingConfirmationEmail = async (booking: BookingDetails): Pro
       
       // Format tour date - handle both single dates and date ranges
       let formattedTourDate: string;
-      if (booking.tourDate.includes(' - ')) {
+      if (!booking.tourDate || booking.tourDate === '') {
+        formattedTourDate = 'Date to be confirmed';
+      } else if (booking.tourDate.includes(' - ')) {
         // Handle date range (e.g., "2025-05-13 - 2025-05-27")
         const [startDate, endDate] = booking.tourDate.split(' - ').map(d => d.trim());
         const start = new Date(startDate);
         const end = new Date(endDate);
-        formattedTourDate = `${start.toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        })} - ${end.toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        })}`;
+        
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          formattedTourDate = booking.tourDate; // Use original if invalid
+        } else {
+          formattedTourDate = `${start.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+          })} - ${end.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+          })}`;
+        }
       } else {
         // Handle single date
-        formattedTourDate = new Date(booking.tourDate).toLocaleDateString('en-US', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        });
+        const date = new Date(booking.tourDate);
+        if (isNaN(date.getTime())) {
+          formattedTourDate = booking.tourDate; // Use original if invalid
+        } else {
+          formattedTourDate = date.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+        }
       }
 
       // Prepare template data
@@ -275,18 +291,34 @@ export const sendBookingConfirmationEmail = async (booking: BookingDetails): Pro
         passengers: booking.passengers.toString(),
         pricePerPerson: formatCurrency(booking.pricePerPerson),
         totalAmount: formatCurrency(booking.totalAmount),
-        // Optional fields
+        isDownpaymentOnly: booking.isDownpaymentOnly || false,
+        bookingDetailsUrl: `${process.env.CLIENT_URL || 'http://localhost:5173'}/booking-confirmation/${booking.bookingId}`,
+        // Payment method details
+        ...(booking.paymentMethod && {
+          paymentMethod: booking.paymentMethod,
+          paymentMethodIcon: booking.paymentMethodIcon || '💳',
+          paymentMethodDescription: booking.paymentMethodDescription || '',
+          paymentGateway: booking.paymentGateway || 'Online Payment',
+        }),
+        // Downpayment details
         ...(booking.downpaymentAmount && {
           downpaymentAmount: formatCurrency(booking.downpaymentAmount),
           remainingBalance: formatCurrency(booking.remainingBalance || 0),
         }),
+        // Appointment details
         ...(booking.appointmentDate && booking.appointmentTime && {
-          appointmentDate: new Date(booking.appointmentDate).toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          }),
+          appointmentDate: (() => {
+            const date = new Date(booking.appointmentDate);
+            if (isNaN(date.getTime())) {
+              return booking.appointmentDate; // Use original if invalid
+            }
+            return date.toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            });
+          })(),
           appointmentTime: booking.appointmentTime,
           appointmentPurpose: formatAppointmentPurpose(booking.appointmentPurpose),
         }),

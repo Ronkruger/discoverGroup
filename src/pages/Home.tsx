@@ -15,6 +15,7 @@ import { Autoplay, Pagination } from "swiper/modules";
 import { EnhancedSearch } from "../components/EnhancedSearch";
 import { SkeletonCard } from "../components/LoadingComponents";
 import { NetworkError } from "../components/ErrorComponents";
+import { getHomepageSettings, subscribeToSettingsChanges } from "../services/homepageSettings";
 
 import "swiper/css";
 import "swiper/css/pagination";
@@ -25,7 +26,19 @@ export default function Home() {
   const [error, setError] = React.useState<string | null>(null);
   const [favorites, setFavorites] = React.useState<string[]>([]);
   const [mapMarkers, setMapMarkers] = React.useState<MapMarker[]>([]);
+  const [homepageSettings, setHomepageSettings] = React.useState(getHomepageSettings());
   const { user } = useAuth();
+
+  // Load homepage settings and subscribe to changes
+  React.useEffect(() => {
+    setHomepageSettings(getHomepageSettings());
+    
+    const unsubscribe = subscribeToSettingsChanges((newSettings) => {
+      setHomepageSettings(newSettings);
+    });
+    
+    return unsubscribe;
+  }, []);
 
   // Load user's favorites when component mounts
   React.useEffect(() => {
@@ -288,9 +301,9 @@ export default function Home() {
       <section className="bg-white py-20">
         <div className="container mx-auto px-6 grid md:grid-cols-3 gap-12 text-center">
           {[
-            { label: "Happy Travelers", value: 30000 },
-            { label: "Tours Completed", value: 1500 },
-            { label: "Years of Experience", value: 25 },
+            { label: "Happy Travelers", value: homepageSettings.statistics.travelers },
+            { label: "Tours Completed", value: homepageSettings.statistics.packages },
+            { label: "Years of Experience", value: homepageSettings.statistics.destinations },
           ].map((stat, i) => (
             <motion.div
               key={i}

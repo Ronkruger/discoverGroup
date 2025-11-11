@@ -28,6 +28,12 @@ export interface MapMarker {
  */
 export async function fetchMapMarkers(): Promise<MapMarker[]> {
   try {
+    // Check if Supabase is configured
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.warn('⚠️ Supabase not configured, using fallback markers');
+      return getFallbackMarkers();
+    }
+
     const { data, error } = await supabase
       .from('map_markers')
       .select('*')
@@ -35,16 +41,33 @@ export async function fetchMapMarkers(): Promise<MapMarker[]> {
       .order('city', { ascending: true });
 
     if (error) {
+      // If table doesn't exist (404), silently use fallback
+      if (error.message?.includes('does not exist') || error.code === 'PGRST204' || error.code === '42P01') {
+        console.warn('⚠️ Map markers table not found, using fallback markers');
+        return getFallbackMarkers();
+      }
       console.error('❌ Failed to fetch map markers:', error);
-      throw error;
+      return getFallbackMarkers();
     }
 
     console.log('✅ Loaded map markers from Supabase:', data?.length || 0);
-    return data || [];
+    return data || getFallbackMarkers();
   } catch (error) {
-    console.error('❌ Error fetching map markers:', error);
-    return [];
+    console.warn('⚠️ Error fetching map markers, using fallback:', error);
+    return getFallbackMarkers();
   }
+}
+
+/**
+ * Get fallback markers when Supabase is not available
+ */
+function getFallbackMarkers(): MapMarker[] {
+  return [
+    { id: 1, city: 'Paris', country: 'France', top: '40%', left: '35%', is_active: true },
+    { id: 2, city: 'Rome', country: 'Italy', top: '70%', left: '50%', is_active: true },
+    { id: 3, city: 'Lucerne', country: 'Switzerland', top: '55%', left: '42%', is_active: true },
+    { id: 4, city: 'Florence', country: 'Italy', top: '65%', left: '48%', is_active: true },
+  ];
 }
 
 /**

@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation - Discover Group</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6; 
+            color: #333; 
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .email-container {
+            max-width: 650px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: white; 
+            padding: 40px 30px; 
+            text-align: center; 
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+        
+        .content { 
+            padding: 40px 30px;
+        }
+        
+        .greeting {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 20px;
+        }
+        
+        .intro-text {
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+        
+        .booking-card { 
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            padding: 25px; 
+            border-radius: 12px; 
+            border-left: 5px solid #667eea;
+            margin: 25px 0; 
+        }
+        
+        .booking-card h3 {
+            color: #2d3748;
+            font-size: 18px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .detail-row { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 12px 0; 
+            border-bottom: 1px solid #e2e8f0; 
+        }
+        
+        .detail-row:last-child { 
+            border-bottom: none; 
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            color: #1a202c;
+            font-size: 14px;
+            text-align: right;
+            max-width: 60%;
+        }
+        
+        .payment-method-card {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border: 2px solid #667eea40;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .payment-method-card h4 {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .payment-icon {
+            font-size: 24px;
+        }
+        
+        .payment-terms {
+            background: #fff7ed;
+            border: 2px solid #fed7aa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .payment-terms h4 {
+            color: #ea580c;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .payment-terms ul {
+            margin-left: 20px;
+            color: #7c2d12;
+        }
+        
+        .payment-terms li {
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        
+        .appointment-card {
+            background: #fffbeb;
+            border: 2px solid #fcd34d;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .appointment-card h4 {
+            color: #d97706;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .total-section { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+        }
+        
+        .total-section .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .total-section .total-label {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .total-section .total-amount {
+            font-size: 32px;
+            font-weight: 700;
+        }
+        
+        .info-card {
+            background: #f0fdf4;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+        }
+        
+        .info-card h3 {
+            color: #065f46;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .info-card ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .info-card li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            color: #047857;
+            font-size: 14px;
+        }
+        
+        .info-card li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .contact-card {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+        }
+        
+        .contact-card h3 {
+            color: #1e40af;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .contact-card ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .contact-card li {
+            padding: 6px 0;
+            color: #1e40af;
+            font-size: 14px;
+        }
+        
+        .contact-card a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        
+        .contact-card a:hover {
+            text-decoration: underline;
+        }
+        
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 32px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+        }
+        
+        .button:hover {
+            box-shadow: 0 6px 8px rgba(102, 126, 234, 0.4);
+        }
+        
+        .closing {
+            margin-top: 30px;
+            color: #4a5568;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+        
+        .signature {
+            margin-top: 20px;
+            color: #1a202c;
+            font-weight: 600;
+        }
+        
+        .footer { 
+            background: #f7fafc;
+            text-align: center; 
+            padding: 30px; 
+            border-top: 1px solid #e2e8f0; 
+            color: #718096;
+            font-size: 13px;
+        }
+        
+        .footer p {
+            margin: 8px 0;
+        }
+        
+        .footer .social-links {
+            margin: 15px 0;
+        }
+        
+        .footer .social-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .badge-warning {
+            background: #fed7aa;
+            color: #7c2d12;
+        }
+        
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                border-radius: 0;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 26px;
+            }
+            
+            .content {
+                padding: 25px 20px;
+            }
+            
+            .detail-row {
+                flex-direction: column;
+                gap: 4px;
+            }
+            
+            .detail-value {
+                text-align: left;
+                max-width: 100%;
+            }
+            
+            .total-section .total-amount {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎉 Booking Confirmed!</h1>
+            <p>Thank you for choosing Discover Group for your adventure</p>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="content">
+            <div class="greeting">Hi {{customerName}},</div>
+            
+            <p class="intro-text">
+                We're thrilled to confirm your booking! Your European adventure awaits, and we can't wait to help you create unforgettable memories. Below are your complete booking details.
+            </p>
+            
+            <!-- Booking Details Card -->
+            <div class="booking-card">
+                <h3>📋 Booking Information</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Booking ID:</span>
+                    <span class="detail-value"><strong>{{bookingId}}</strong></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Tour Package:</span>
+                    <span class="detail-value"><strong>{{tourTitle}}</strong></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Travel Date:</span>
+                    <span class="detail-value">{{tourDate}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Number of Passengers:</span>
+                    <span class="detail-value">{{passengers}} {{#if_eq passengers "1"}}person{{else}}people{{/if_eq}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Price per Person:</span>
+                    <span class="detail-value">{{pricePerPerson}}</span>
+                </div>
+            </div>
+            
+            <!-- Payment Method Card -->
+            {{#if paymentMethod}}
+            <div class="payment-method-card">
+                <h4><span class="payment-icon">{{paymentMethodIcon}}</span> Payment Method</h4>
+                <div class="detail-row">
+                    <span class="detail-label">Selected Method:</span>
+                    <span class="detail-value"><strong>{{paymentMethod}}</strong></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Gateway:</span>
+                    <span class="detail-value">{{paymentGateway}}</span>
+                </div>
+                {{#if paymentMethodDescription}}
+                <div class="detail-row">
+                    <span class="detail-label">Details:</span>
+                    <span class="detail-value">{{paymentMethodDescription}}</span>
+                </div>
+                {{/if}}
+            </div>
+            {{/if}}
+            
+            <!-- Payment Terms (for Downpayment) -->
+            {{#if isDownpaymentOnly}}
+            <div class="payment-terms">
+                <h4>💰 Payment Terms - Downpayment Option</h4>
+                <div class="detail-row">
+                    <span class="detail-label">Downpayment Amount:</span>
+                    <span class="detail-value"><strong>{{downpaymentAmount}}</strong></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Remaining Balance:</span>
+                    <span class="detail-value"><strong>{{remainingBalance}}</strong></span>
+                </div>
+                <ul style="margin-top: 15px;">
+                    <li>The downpayment secures your booking and holds your reservation</li>
+                    <li>Remaining balance must be paid <strong>30 days before departure</strong></li>
+                    <li>Payment reminders will be sent via email and SMS</li>
+                    <li>You can pay the balance online or visit our office</li>
+                    <li>Flexible payment options available for the remaining balance</li>
+                </ul>
+            </div>
+            {{/if}}
+            
+            <!-- Office Appointment (if scheduled) -->
+            {{#if appointmentDate}}
+            <div class="appointment-card">
+                <h4>🏢 Office Appointment Scheduled</h4>
+                <div class="detail-row">
+                    <span class="detail-label">Date:</span>
+                    <span class="detail-value"><strong>{{appointmentDate}}</strong></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Time:</span>
+                    <span class="detail-value"><strong>{{appointmentTime}}</strong></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Purpose:</span>
+                    <span class="detail-value">{{appointmentPurpose}}</span>
+                </div>
+                <p style="margin-top: 15px; color: #92400e; font-size: 14px;">
+                    📍 <strong>Office Address:</strong> Quezon Avenue cor. Sct. Reyes St, Diliman, Quezon City, 1103 Metro Manila<br>
+                    💰 Please bring <strong>{{totalAmount}}</strong> in cash. Credit/debit cards also accepted at our office.
+                </p>
+            </div>
+            {{/if}}
+            
+            <!-- Total Amount Section -->
+            <div class="total-section">
+                <div class="total-row">
+                    <div>
+                        <div class="total-label">Total Amount {{#if isDownpaymentOnly}}<span class="badge badge-warning">Downpayment</span>{{else}}<span class="badge badge-success">Full Payment</span>{{/if}}</div>
+                    </div>
+                    <div class="total-amount">{{totalAmount}}</div>
+                </div>
+            </div>
+            
+            <!-- What's Next Section -->
+            <div class="info-card">
+                <h3>📍 What's Next?</h3>
+                <ul>
+                    <li><strong>Documentation:</strong> Ensure your passport is valid for at least 6 months from travel date</li>
+                    <li><strong>Preparation:</strong> We'll send you a detailed itinerary 2 weeks before departure</li>
+                    <li><strong>Contact:</strong> Our team will reach out with important travel information</li>
+                    {{#if isDownpaymentOnly}}
+                    <li><strong>Balance Payment:</strong> Reminder will be sent 45 days before departure</li>
+                    {{/if}}
+                    <li><strong>Cancellation:</strong> Free cancellation up to 30 days before departure</li>
+                    <li><strong>Travel Insurance:</strong> Included in your package for peace of mind</li>
+                </ul>
+            </div>
+            
+            <!-- View Booking Button -->
+            <div style="text-align: center;">
+                <a href="{{bookingDetailsUrl}}" class="button">View Booking Details</a>
+            </div>
+            
+            <!-- Contact Section -->
+            <div class="contact-card">
+                <h3>📞 Need Help?</h3>
+                <p style="margin-bottom: 15px; color: #1e3a8a;">Our customer service team is here to assist you:</p>
+                <ul>
+                    <li>📧 Email: <a href="mailto:reservations@discovergrp.com">reservations@discovergrp.com</a></li>
+                    <li>📱 Phone: <a href="tel:+6328555123">+63 02 8555 1234</a></li>
+                    <li>💬 Live Chat: Available on our website</li>
+                    <li>🕒 Hours: Monday - Friday, 9:00 AM - 6:00 PM (PHT)</li>
+                    <li>📍 Office: Quezon Avenue cor. Sct. Reyes St, Diliman, QC</li>
+                </ul>
+            </div>
+            
+            <!-- Closing -->
+            <p class="closing">
+                Thank you for trusting us with your travel dreams. We're committed to making this an incredible experience you'll treasure forever!
+            </p>
+            
+            <p class="signature">
+                Safe travels,<br>
+                <strong>The Discover Group Team</strong>
+            </p>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Discover Group - European Travel Specialists</strong></p>
+            <div class="social-links">
+                <a href="https://facebook.com/discovergroup">Facebook</a> | 
+                <a href="https://instagram.com/discovergroup">Instagram</a> | 
+                <a href="https://twitter.com/discovergroup">Twitter</a>
+            </div>
+            <p>© 2025 Discover Group. All rights reserved.</p>
+            <p style="margin-top: 15px; font-size: 12px;">
+                This is an automated confirmation email. Please do not reply to this message.<br>
+                If you did not make this booking, please contact us immediately.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

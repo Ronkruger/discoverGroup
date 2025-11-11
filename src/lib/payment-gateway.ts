@@ -125,11 +125,11 @@ export interface GatewayConfig {
  * Check which gateways are available
  */
 export const getAvailableGateways = (): GatewayConfig[] => {
-  // TODO: Check actual configuration/API keys
+  // Demo mode - all gateways enabled for testing
   return [
     {
       gateway: PaymentGateway.PAYMONGO,
-      enabled: false, // Will be true when implemented
+      enabled: true, // Demo mode - all methods available
       name: 'PayMongo',
       description: 'Modern payment gateway for cards and e-wallets',
       supportedMethods: [
@@ -141,7 +141,7 @@ export const getAvailableGateways = (): GatewayConfig[] => {
     },
     {
       gateway: PaymentGateway.DRAGONPAY,
-      enabled: false, // Will be true when implemented
+      enabled: true, // Demo mode - all methods available
       name: 'Dragonpay',
       description: 'Wide range of payment options including OTC',
       supportedMethods: [
@@ -222,38 +222,53 @@ export const PaymentMethodSelector: React.FC<{
 }> = ({ onSelect, selectedMethod }) => {
   const gateways = getAvailableGateways();
   
-  return React.createElement('div', { className: 'payment-method-selector' },
-    React.createElement('h3', { className: 'text-lg font-semibold mb-4' }, 
-      'Choose Payment Method'
-    ),
+  return React.createElement('div', { className: 'payment-method-selector space-y-6' },
     
     // Group by gateway
     gateways.map(gateway =>
-      React.createElement('div', { key: gateway.gateway, className: 'mb-6' },
-        React.createElement('div', { className: 'text-sm font-medium text-gray-600 mb-2' },
-          gateway.name,
-          !gateway.enabled && React.createElement('span', { className: 'ml-2 text-xs text-yellow-600' }, '(Coming Soon)')
+      React.createElement('div', { key: gateway.gateway, className: 'space-y-3' },
+        React.createElement('div', { className: 'flex items-center gap-2 mb-3' },
+          React.createElement('h3', { className: 'text-lg font-bold text-white' },
+            gateway.name
+          ),
+          gateway.enabled && React.createElement('span', { 
+            className: 'px-2 py-1 text-xs font-semibold bg-green-500/20 text-green-300 rounded-full border border-green-500/30' 
+          }, '✓ Available')
         ),
         
-        React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-3' },
+        React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-4' },
           getPaymentMethodsByGateway(gateway.gateway).map(method =>
             React.createElement('button', {
               key: method.id,
               onClick: () => gateway.enabled && onSelect(method),
               disabled: !gateway.enabled,
-              className: `p-4 border-2 rounded-lg text-left transition-all ${
+              className: `p-4 border-2 rounded-xl text-left transition-all transform hover:scale-[1.02] ${
                 selectedMethod?.id === method.id
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                  ? 'border-blue-400 bg-blue-500/20 shadow-lg shadow-blue-500/30'
+                  : 'border-white/20 bg-white/5 hover:border-white/40 hover:bg-white/10'
               } ${!gateway.enabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`
             },
               React.createElement('div', { className: 'flex items-start gap-3' },
-                React.createElement('div', { className: 'text-2xl' }, method.icon),
-                React.createElement('div', { className: 'flex-1' },
-                  React.createElement('div', { className: 'font-medium' }, method.name),
-                  React.createElement('div', { className: 'text-xs text-gray-600 mt-1' }, method.description),
-                  method.processingTime && React.createElement('div', { className: 'text-xs text-gray-500 mt-1' }, 
-                    `⏱️ ${method.processingTime}`
+                React.createElement('div', { className: 'text-3xl flex-shrink-0' }, method.icon),
+                React.createElement('div', { className: 'flex-1 min-w-0' },
+                  React.createElement('div', { className: 'font-semibold text-white text-lg mb-1' }, method.name),
+                  React.createElement('div', { className: 'text-sm text-white/70 break-words' }, method.description),
+                  method.processingTime && React.createElement('div', { className: 'text-xs text-white/60 mt-2 flex items-center gap-1' }, 
+                    React.createElement('span', {}, '⏱️'),
+                    React.createElement('span', {}, method.processingTime)
+                  )
+                ),
+                selectedMethod?.id === method.id && React.createElement('div', { className: 'flex-shrink-0' },
+                  React.createElement('svg', { 
+                    className: 'w-6 h-6 text-blue-400',
+                    fill: 'currentColor',
+                    viewBox: '0 0 20 20'
+                  },
+                    React.createElement('path', {
+                      fillRule: 'evenodd',
+                      d: 'M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z',
+                      clipRule: 'evenodd'
+                    })
                   )
                 )
               )
@@ -261,14 +276,7 @@ export const PaymentMethodSelector: React.FC<{
           )
         )
       )
-    ),
-    
-    !gateways.some(g => g.enabled) && 
-      React.createElement('div', { className: 'mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded' },
-        React.createElement('p', { className: 'text-sm text-yellow-800' },
-          '⚠️ Payment gateways are not yet configured. Please contact support to complete your booking.'
-        )
-      )
+    )
   );
 };
 

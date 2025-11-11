@@ -19,6 +19,10 @@ interface BookingEmailRequest {
   appointmentDate?: string;
   appointmentTime?: string;
   appointmentPurpose?: string;
+  paymentMethod?: string;
+  paymentMethodDescription?: string;
+  paymentMethodIcon?: string;
+  paymentGateway?: string;
 }
 
 // POST /api/send-booking-email
@@ -39,7 +43,11 @@ router.post('/send-booking-email', async (req: Request, res: Response) => {
       isDownpaymentOnly,
       appointmentDate,
       appointmentTime,
-      appointmentPurpose
+      appointmentPurpose,
+      paymentMethod,
+      paymentMethodDescription,
+      paymentMethodIcon,
+      paymentGateway
     }: BookingEmailRequest = req.body;
 
     // Validate required fields
@@ -74,7 +82,11 @@ router.post('/send-booking-email', async (req: Request, res: Response) => {
       isDownpaymentOnly,
       appointmentDate,
       appointmentTime,
-      appointmentPurpose
+      appointmentPurpose,
+      paymentMethod,
+      paymentMethodDescription,
+      paymentMethodIcon,
+      paymentGateway
     });
 
     if (result.success) {

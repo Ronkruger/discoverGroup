@@ -324,10 +324,12 @@ export default function Booking(): JSX.Element {
     if (customerName && customerEmail && tour) {
       console.log('📧 Sending confirmation email to:', customerEmail);
       
-      // Fire and forget - don't block the UI
+      // Fire and forget - don't block the UI or user experience
       setTimeout(async () => {
         try {
-          const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+          const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:4000';
+          console.log('📡 Using API URL:', API_BASE_URL);
+          
           const response = await fetch(`${API_BASE_URL}/api/send-booking-email`, {
             method: 'POST',
             headers: {
@@ -346,6 +348,13 @@ export default function Booking(): JSX.Element {
               remainingBalance: paymentType === "downpayment" ? remainingBalance : undefined,
               isDownpaymentOnly: paymentType === "downpayment",
               country: tour.additionalInfo?.countriesVisited?.[0] || '',
+              // Include payment method details
+              ...(selectedPaymentMethod && {
+                paymentMethod: selectedPaymentMethod.name,
+                paymentMethodIcon: selectedPaymentMethod.icon,
+                paymentMethodDescription: selectedPaymentMethod.description,
+                paymentGateway: selectedGateway === PaymentGateway.PAYMONGO ? 'PayMongo' : 'Dragonpay',
+              }),
               // Include appointment details if scheduled
               ...(wantsAppointment && {
                 appointmentDate,
@@ -355,16 +364,29 @@ export default function Booking(): JSX.Element {
             }),
           });
 
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ Backend API email sending failed:', response.status, errorText);
+            console.warn('⚠️ Email delivery failed, but booking was saved successfully');
+            return;
+          }
+
           const result = await response.json();
 
           if (result.success) {
             console.log('✅ Booking confirmation email sent successfully via backend API');
             console.log('✅ Message ID:', result.messageId);
+            if (result.previewUrl) {
+              console.log('📧 Email preview:', result.previewUrl);
+            }
           } else {
             console.error('❌ Backend API email sending failed:', result.error);
+            console.warn('⚠️ Email delivery failed, but booking was saved successfully');
           }
         } catch (error) {
           console.error('❌ Failed to send email via backend API:', error);
+          console.warn('⚠️ Email service unavailable, but booking was saved successfully');
+          console.info('💡 The booking team will contact you via email or phone shortly');
         }
       }, 100); // Small delay to ensure navigation happens first
     } else {
@@ -378,7 +400,7 @@ export default function Booking(): JSX.Element {
 
   const themeStyle: React.CSSProperties = {
     background:
-      "linear-gradient(180deg, rgba(2,18,51,1) 0%, rgba(8,42,102,1) 35%, rgba(4,18,55,1) 100%)",
+      "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
     ["--accent-yellow" as string]: "#FFD24D",
     ["--accent-yellow-600" as string]: "#FFC107",
     ["--muted-slate" as string]: "#94a3b8",
@@ -416,82 +438,258 @@ export default function Booking(): JSX.Element {
   }
 
   return (
-    <main style={themeStyle} className="min-h-screen py-10">
+    <main style={themeStyle} className="min-h-screen py-12 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-white/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      </div>
+      
       <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideInLeft {
+          from { opacity: 0; transform: translateX(-30px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes slideInRight {
+          from { opacity: 0; transform: translateX(30px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes scaleIn {
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes shimmer {
+          0% { background-position: -1000px 0; }
+          100% { background-position: 1000px 0; }
+        }
+        
         .card-glass {
-          background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.018));
-          backdrop-filter: blur(8px);
-          border: 1px solid rgba(255,255,255,0.12);
-          box-shadow: 0 18px 40px rgba(2, 6, 23, 0.6);
-          color: #e6eefc;
+          background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+          backdrop-filter: blur(20px) saturate(180%);
+          border: 1px solid rgba(255,255,255,0.18);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+          color: #ffffff;
+          animation: fadeIn 0.6s ease-out;
+        }
+        .card-glass:hover {
+          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+          border-color: rgba(255,255,255,0.25);
+          transform: translateY(-2px);
+          transition: all 0.3s ease;
         }
         .card-glass .text-xs,
         .card-glass .text-sm {
           font-size: 105% !important;
-          line-height: 1.32;
-          color: #dbeafe;
+          line-height: 1.5;
+          color: rgba(255,255,255,0.95);
         }
         input, select, textarea {
-          background: rgba(255,255,255,0.045);
-          border: 1px solid rgba(255,255,255,0.16);
-          color: #e6eefc;
+          background: rgba(255,255,255,0.08);
+          border: 1.5px solid rgba(255,255,255,0.2);
+          color: #ffffff;
+          backdrop-filter: blur(10px);
+          transition: all 0.3s ease;
         }
         input::placeholder, select::placeholder, textarea::placeholder {
-          color: rgba(230,238,252,0.56);
+          color: rgba(255,255,255,0.5);
         }
         input:focus, select:focus, textarea:focus {
           outline: none;
-          box-shadow: 0 6px 24px rgba(2,6,23,0.55), 0 0 0 4px rgba(255,210,77,0.08);
-          border-color: rgba(255,255,255,0.22);
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+          border-color: rgba(255,255,255,0.4);
+          background: rgba(255,255,255,0.12);
+          transform: scale(1.01);
         }
         .btn-primary {
-          background: linear-gradient(180deg,#ef4444,#dc2626);
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
           border: none;
-          box-shadow: 0 8px 24px rgba(220,38,38,0.18);
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+          font-weight: 600;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
         }
-        .btn-primary:hover { transform: translateY(-1px); }
+        .btn-primary::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+          transition: left 0.5s;
+        }
+        .btn-primary:hover::before {
+          left: 100%;
+        }
+        .btn-primary:hover { 
+          transform: translateY(-2px); 
+          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        .btn-primary:active {
+          transform: translateY(0);
+        }
+        .btn-primary:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          transform: none;
+        }
         .btn-secondary {
-          background: transparent;
-          color: #e6eefc;
-          border: 1px solid rgba(255,255,255,0.14);
+          background: rgba(255,255,255,0.1);
+          color: #ffffff;
+          border: 1.5px solid rgba(255,255,255,0.3);
+          backdrop-filter: blur(10px);
+          font-weight: 500;
+          transition: all 0.3s ease;
         }
-        .btn-accent { background: var(--accent-yellow); color: #12263a; }
-        .price-highlight { color: #ff6b6b; font-weight: 700; }
-        .step-dot { background: rgba(255,255,255,0.06); color: #e6eefc; }
+        .btn-secondary:hover {
+          background: rgba(255,255,255,0.15);
+          border-color: rgba(255,255,255,0.4);
+          transform: translateX(-2px);
+        }
+        .btn-accent { 
+          background: linear-gradient(135deg, #FFD24D, #FFC107); 
+          color: #1a202c; 
+          font-weight: 700;
+          box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+        }
+        .btn-accent:hover {
+          box-shadow: 0 6px 20px rgba(255, 193, 7, 0.6);
+          transform: translateY(-2px);
+        }
+        .price-highlight { 
+          background: linear-gradient(135deg, #667eea, #764ba2);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          font-weight: 800;
+          animation: shimmer 3s infinite;
+          background-size: 1000px 100%;
+        }
+        .step-dot { 
+          background: rgba(255,255,255,0.1); 
+          color: rgba(255,255,255,0.7);
+          border: 2px solid rgba(255,255,255,0.2);
+          transition: all 0.3s ease;
+        }
         .step-dot.active {
-          background: #ef4444; color: white;
-          box-shadow: 0 6px 18px rgba(239,68,68,0.18);
+          background: linear-gradient(135deg, #667eea, #764ba2);
+          color: white;
+          border-color: #667eea;
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
+          transform: scale(1.1);
+          animation: scaleIn 0.5s ease-out;
         }
-        .card-divider { border-top: 1px solid rgba(255,255,255,0.06); margin-top: 0.6rem; padding-top: 0.6rem; }
-        a { color: var(--accent-yellow); }
+        .card-divider { 
+          border-top: 1px solid rgba(255,255,255,0.15); 
+          margin-top: 1rem; 
+          padding-top: 1rem; 
+        }
+        a { 
+          color: #FFD24D;
+          transition: color 0.3s ease;
+        }
+        a:hover {
+          color: #FFC107;
+        }
+        .info-card {
+          background: rgba(255,255,255,0.08);
+          border: 1px solid rgba(255,255,255,0.15);
+          backdrop-filter: blur(10px);
+          border-radius: 12px;
+          padding: 1.5rem;
+          animation: slideInLeft 0.5s ease-out;
+        }
+        .success-badge {
+          background: linear-gradient(135deg, #10b981, #059669);
+          animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.8; transform: scale(1.02); }
+        }
+        .payment-option {
+          animation: fadeIn 0.4s ease-out;
+          animation-fill-mode: both;
+        }
+        .payment-option:nth-child(1) { animation-delay: 0.1s; }
+        .payment-option:nth-child(2) { animation-delay: 0.2s; }
+        .payment-option:nth-child(3) { animation-delay: 0.3s; }
+        .payment-option:hover {
+          transform: translateX(4px);
+        }
+        .section-header {
+          animation: slideInLeft 0.5s ease-out;
+        }
+        .form-field {
+          animation: fadeIn 0.4s ease-out;
+          animation-fill-mode: both;
+        }
+        .form-field:nth-child(1) { animation-delay: 0.1s; }
+        .form-field:nth-child(2) { animation-delay: 0.2s; }
       `}</style>
 
-      <div className="container mx-auto px-5">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="container mx-auto px-5 relative z-10">
+        {/* Page Header */}
+        <div className="text-center mb-10">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 drop-shadow-lg">
+            Complete Your Booking
+          </h1>
+          <p className="text-lg text-white/90 max-w-2xl mx-auto">
+            You're just a few steps away from your dream European adventure!
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
           <div className="lg:col-span-8 space-y-6">
-            <div className="card-glass rounded-lg p-4">
+            <div className="card-glass rounded-2xl p-5 shadow-2xl overflow-x-auto">
               <ProgressIndicator 
                 steps={bookingSteps}
                 currentStep={step + 1}
-                className="mb-2"
+                className="mb-0 min-w-max"
               />
             </div>
-            <div className="card-glass rounded-lg p-6">
+            <div className="card-glass rounded-2xl p-6 md:p-8 shadow-2xl">{/* Step 3: Payment Method Selection */}
               {/* Step 3: Payment Method Selection */}
               {step === 3 && paymentType !== "cash-appointment" && (
                 <section aria-labelledby="payment-heading">
-                  <h2 id="payment-heading" className="text-lg font-semibold mb-3 text-slate-100">Select Payment Method</h2>
+                  <div className="flex items-center gap-3 mb-6 section-header">
+                    <div className="p-3 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl">
+                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h2 id="payment-heading" className="text-2xl font-bold text-white">Select Payment Method</h2>
+                      <p className="text-white/80 text-sm">Choose how you'd like to complete your booking</p>
+                    </div>
+                  </div>
+
+                  {/* Demo Mode Notice */}
+                  <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl flex items-start gap-3">
+                    <svg className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div className="text-sm">
+                      <div className="font-semibold text-yellow-300 mb-1">Demo Mode Active</div>
+                      <p className="text-yellow-200/80">This is a demonstration booking flow. No actual payment will be processed. Select any method to see how the payment experience works!</p>
+                    </div>
+                  </div>
                   
                   {/* Trust signals before payment form */}
-                  <div className="mb-6">
+                  <div className="mb-6 space-y-4">
                     <TrustSignals />
-                    <div className="mt-4">
-                      <UrgencyIndicators />
-                    </div>
-                    <div className="mt-4">
-                      <BookingProtection />
-                    </div>
+                    <UrgencyIndicators />
+                    <BookingProtection />
                   </div>
                   
                   <PaymentMethodSelector 
@@ -502,15 +700,31 @@ export default function Booking(): JSX.Element {
                     selectedMethod={selectedPaymentMethod || undefined}
                   />
                   
-                  {error && <div className="mt-3 text-rose-400">{error}</div>}
+                  {error && (
+                    <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3">
+                      <svg className="w-5 h-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <div className="text-sm text-red-200">{error}</div>
+                    </div>
+                  )}
+                  
                   <div className="mt-6 flex justify-between items-center">
-                    <button onClick={handleBack} className="px-4 py-2 btn-secondary rounded">Back</button>
+                    <button onClick={handleBack} className="px-5 py-3 btn-secondary rounded-xl flex items-center gap-2 font-semibold">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                      Back
+                    </button>
                     <button
                       onClick={handleNext}
-                      className="px-4 py-2 btn-primary rounded"
+                      className="px-6 py-3 btn-primary rounded-xl flex items-center gap-2 font-semibold disabled:opacity-50"
                       disabled={!selectedPaymentMethod}
                     >
-                      Review booking
+                      Continue to Payment
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </button>
                   </div>
                 </section>
@@ -519,64 +733,87 @@ export default function Booking(): JSX.Element {
               {/* Step 4: Review Booking */}
               {step === 4 && (
                 <section aria-labelledby="review-confirm-heading">
-                  <h2 id="review-confirm-heading" className="text-lg font-semibold mb-3 text-slate-100">
-                    Review your booking
-                  </h2>
-                  <div className="bg-white/6 border rounded p-4">
-                    <div className="flex justify-between">
+                  <div className="flex items-center gap-3 mb-6 section-header">
+                    <div className="p-3 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl">
+                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h2 id="review-confirm-heading" className="text-2xl font-bold text-white">Review Your Booking</h2>
+                      <p className="text-white/80 text-sm">Double-check everything before proceeding</p>
+                    </div>
+                  </div>
+                  
+                  <div className="info-card border-2 border-white/20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <div className="text-xs text-slate-300">Tour</div>
-                        <div className="font-semibold text-slate-100">{tour.title}</div>
-                        <div className="text-sm text-slate-300 mt-1">{tour.summary}</div>
+                        <div className="text-xs text-white/60 uppercase tracking-wider mb-1">Tour Package</div>
+                        <div className="font-bold text-white text-lg">{tour.title}</div>
+                        <div className="text-sm text-white/80 mt-2">{tour.summary}</div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-xs text-slate-300">Departure Date</div>
-                        <div className="font-semibold text-slate-100">{selectedDate || "—"}</div>
-                        <div className="text-xs text-slate-300 mt-2">Passengers</div>
-                        <div className="font-semibold text-slate-100">{passengers}</div>
+                      <div>
+                        <div className="text-xs text-white/60 uppercase tracking-wider mb-1">Departure Date</div>
+                        <div className="font-semibold text-white">{selectedDate || "—"}</div>
+                        <div className="text-xs text-white/60 uppercase tracking-wider mt-3 mb-1">Passengers</div>
+                        <div className="font-semibold text-white">{passengers} {passengers === 1 ? 'person' : 'people'}</div>
                       </div>
                     </div>
                     {wantsAppointment && (
-                      <div className="mt-4 pt-4 border-t border-white/10">
-                        <div className="text-xs text-slate-300 mb-2">Office Appointment</div>
-                        <div className="flex items-center gap-2 text-sm text-slate-100">
+                      <div className="mt-6 pt-6 border-t border-white/20">
+                        <div className="text-xs text-white/60 uppercase tracking-wider mb-2">Office Appointment</div>
+                        <div className="flex items-center gap-2 text-sm text-white">
                           <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                           <span>{new Date(appointmentDate).toLocaleDateString()} at {appointmentTime}</span>
                         </div>
-                        <div className="text-xs text-slate-400 mt-1">Purpose: {appointmentPurpose.replace('-', ' ')}</div>
+                        <div className="text-xs text-white/60 mt-1">Purpose: {appointmentPurpose.replace('-', ' ')}</div>
                       </div>
                     )}
                     {selectedPaymentMethod && (
-                      <div className="mt-4 pt-4 border-t border-white/10">
-                        <div className="text-xs text-slate-300 mb-2">Payment Method</div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl">{selectedPaymentMethod.icon}</span>
-                          <div>
-                            <div className="font-semibold text-slate-100">{selectedPaymentMethod.name}</div>
-                            <div className="text-xs text-slate-400">{selectedPaymentMethod.description}</div>
+                      <div className="mt-6 pt-6 border-t border-white/20">
+                        <div className="text-xs text-white/60 uppercase tracking-wider mb-3">Selected Payment Method</div>
+                        <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-400/30">
+                          <span className="text-3xl">{selectedPaymentMethod.icon}</span>
+                          <div className="flex-1">
+                            <div className="font-bold text-white text-lg">{selectedPaymentMethod.name}</div>
+                            <div className="text-sm text-white/70">{selectedPaymentMethod.description}</div>
+                            <div className="mt-2 flex items-center gap-2 text-xs text-white/60">
+                              <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              {selectedPaymentMethod.processingTime}
+                            </div>
                           </div>
                         </div>
                       </div>
                     )}
-                    <div className="card-divider">
-                      <div className="flex justify-between items-center">
-                        <div className="text-sm text-slate-300">Per person</div>
-                        <div className="font-semibold text-slate-100">{formatCurrencyPHP(perPerson)}</div>
+                    <div className="mt-6 pt-6 border-t border-white/20">
+                      <div className="flex justify-between items-center mb-3">
+                        <div className="text-sm text-white/70">Per person</div>
+                        <div className="font-semibold text-white text-lg">{formatCurrencyPHP(perPerson)}</div>
                       </div>
-                      <div className="mt-2 flex justify-between items-center">
-                        <div className="text-sm text-slate-300">Total</div>
-                        <div className="text-2xl font-bold price-highlight">{formatCurrencyPHP(total)}</div>
+                      <div className="flex justify-between items-center">
+                        <div className="text-base text-white font-semibold">Total Amount</div>
+                        <div className="text-3xl font-bold price-highlight">{formatCurrencyPHP(total)}</div>
                       </div>
                     </div>
                   </div>
                   <div className="mt-6 flex justify-between items-center">
-                    <button onClick={handleBack} className="px-4 py-2 btn-secondary rounded">Back</button>
+                    <button onClick={handleBack} className="px-5 py-3 btn-secondary rounded-xl flex items-center gap-2 font-semibold">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                      Back
+                    </button>
                     <button
                       onClick={() => setStep(5)}
-                      className="px-4 py-2 btn-primary rounded"
+                      className="px-6 py-3 btn-accent rounded-xl flex items-center gap-2 font-bold shadow-lg hover:shadow-xl transition-all"
                     >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
                       Proceed to Payment
                     </button>
                   </div>
@@ -586,7 +823,28 @@ export default function Booking(): JSX.Element {
               {/* Step 5: Payment Gateway Mockup */}
               {step === 5 && selectedPaymentMethod && (
                 <section aria-labelledby="confirm-heading">
-                  <h2 id="confirm-heading" className="text-lg font-semibold mb-3 text-slate-100">Complete Payment</h2>
+                  <div className="flex items-center gap-3 mb-6 section-header">
+                    <div className="p-3 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-xl">
+                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h2 id="confirm-heading" className="text-2xl font-bold text-white">Complete Your Payment</h2>
+                      <p className="text-white/80 text-sm">Secure demo payment - No actual charges will be made</p>
+                    </div>
+                  </div>
+
+                  {/* Demo Payment Notice */}
+                  <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-start gap-3">
+                    <svg className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div className="text-sm">
+                      <div className="font-semibold text-blue-300 mb-1">Demo Payment Gateway</div>
+                      <p className="text-blue-200/80">This is a simulated payment interface. Click "Complete Payment" to see a successful booking confirmation. No real transactions will occur.</p>
+                    </div>
+                  </div>
                   
                   {selectedGateway === PaymentGateway.PAYMONGO && (
                     <PayMongoMockup 
@@ -621,19 +879,38 @@ export default function Booking(): JSX.Element {
                 <>
                   {step === 0 && (
                     <section aria-labelledby="review-heading">
-                      <h2 id="review-heading" className="text-lg font-semibold mb-3 text-slate-100">Review your selection</h2>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <div className="text-xs text-slate-300">Tour</div>
-                          <div className="font-semibold text-slate-100">{tour.title}</div>
-                          <div className="text-sm text-slate-300 mt-1">{tour.summary}</div>
+                      <div className="flex items-center gap-3 mb-6 section-header">
+                        <div className="p-3 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-xl">
+                          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                          </svg>
                         </div>
                         <div>
-                          <div className="text-xs text-slate-300">Travel Date</div>
+                          <h2 id="review-heading" className="text-2xl font-bold text-white">Review Your Selection</h2>
+                          <p className="text-white/80 text-sm">Confirm your tour details and travel date</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div className="info-card form-field">
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 bg-blue-500/20 rounded-lg flex-shrink-0">
+                              <svg className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-xs text-white/60 uppercase tracking-wider mb-1">Tour Package</div>
+                              <div className="font-bold text-white text-lg break-words">{tour.title}</div>
+                              <div className="text-sm text-white/80 mt-2">{tour.summary}</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="info-card form-field">
+                          <div className="text-xs text-white/60 uppercase tracking-wider mb-2">Travel Date</div>
                           <select 
                             value={selectedDate ?? ""} 
                             onChange={(e) => setSelectedDate(e.target.value)} 
-                            className="mt-1 w-full rounded px-3 py-2 bg-white/10 border border-white/20 text-white focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20"
+                            className="mt-1 w-full rounded-xl px-4 py-3 bg-white/10 border-2 border-white/20 text-white focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 font-medium"
                           >
                             <option value="" className="bg-slate-800 text-slate-300">Select departure date</option>
                             {tour.departureDates && tour.departureDates.length > 0 ? (
@@ -661,41 +938,71 @@ export default function Booking(): JSX.Element {
                             )}
                           </select>
                           {!selectedDate && (
-                            <div className="text-xs text-red-400 mt-1">Please select a departure date to continue</div>
+                            <div className="mt-2 flex items-center gap-2 text-sm text-red-300 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                              </svg>
+                              Please select a departure date to continue
+                            </div>
                           )}
-                          <div className="text-xs text-slate-300 mt-3">Passengers</div>
-                          <input type="number" min={1} value={passengers} onChange={(e) => setPassengers(Math.max(1, Number(e.target.value)))} className="mt-1 w-32 rounded px-3 py-2" />
+                          <div className="text-xs text-white/60 uppercase tracking-wider mt-4 mb-2">Number of Passengers</div>
+                          <input 
+                            type="number" 
+                            min={1} 
+                            value={passengers} 
+                            onChange={(e) => setPassengers(Math.max(1, Number(e.target.value)))} 
+                            className="mt-1 w-full md:w-40 rounded-xl px-4 py-3 bg-white/10 border-2 border-white/20 text-white font-bold text-lg text-center focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20" 
+                          />
                         </div>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm text-slate-300">Per person</div>
-                        <div className="text-lg font-semibold text-slate-100">{formatCurrencyPHP(perPerson)}</div>
+                      <div className="mt-6 p-5 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl border border-white/20">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="text-sm text-white/70">Price per person</div>
+                          <div className="text-xl font-bold text-white">{formatCurrencyPHP(perPerson)}</div>
+                        </div>
+                        <div className="flex items-center justify-between pt-3 border-t border-white/20">
+                          <div className="text-base font-semibold text-white">Total Amount</div>
+                          <div className="text-2xl font-bold price-highlight">{formatCurrencyPHP(total)}</div>
+                        </div>
                       </div>
                       
                       {/* Payment Options */}
-                      <div className="mt-6 p-4 bg-slate-800/50 rounded-lg">
-                        <h3 className="text-md font-semibold mb-3 text-slate-100">Payment Options</h3>
-                        <div className="space-y-3">
-                          <label className="flex items-center space-x-3 cursor-pointer">
+                      <div className="mt-8 p-6 info-card">
+                        <div className="flex items-center gap-3 mb-5">
+                          <div className="p-2 bg-yellow-500/20 rounded-lg">
+                            <svg className="w-6 h-6 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                          </div>
+                          <h3 className="text-xl font-bold text-white">Choose Payment Method</h3>
+                        </div>
+                        <div className="space-y-4">
+                          <label className="payment-option flex items-start gap-4 cursor-pointer p-4 rounded-xl border-2 border-white/20 hover:border-white/40 transition-all bg-white/5 hover:bg-white/10 group">
                             <input
                               type="radio"
                               name="paymentType"
                               value="full"
                               checked={paymentType === "full"}
                               onChange={(e) => setPaymentType(e.target.value as "full" | "downpayment" | "cash-appointment")}
-                              className="text-blue-600 focus:ring-blue-500"
+                              className="mt-1 w-5 h-5 text-blue-600 focus:ring-blue-500 flex-shrink-0"
                             />
-                            <div className="flex-1">
-                              <div className="text-slate-100 font-medium">Full Payment (Online)</div>
-                              <div className="text-sm text-slate-300">
-                                Pay the complete amount now: {formatCurrencyPHP(total)}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <svg className="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <div className="text-white font-bold text-lg">Full Payment (Online)</div>
                               </div>
+                              <div className="text-sm text-white/80 break-words">
+                                Pay the complete amount now: <span className="font-bold text-green-300">{formatCurrencyPHP(total)}</span>
+                              </div>
+                              <div className="mt-2 text-xs text-white/60">✓ Instant confirmation</div>
                             </div>
                           </label>
-                          
+
                           {tour.allowsDownpayment && (
-                            <div className="space-y-3">
-                              <label className="flex items-center space-x-3 cursor-pointer">
+                            <div className="space-y-4">
+                              <label className="payment-option flex items-start gap-4 cursor-pointer p-4 rounded-xl border-2 border-white/20 hover:border-white/40 transition-all bg-white/5 hover:bg-white/10 group">
                                 <input
                                   type="radio"
                                   name="paymentType"
@@ -704,17 +1011,21 @@ export default function Booking(): JSX.Element {
                                   onChange={(e) => {
                                     setPaymentType(e.target.value as "full" | "downpayment" | "cash-appointment");
                                   }}
-                                  className="text-blue-600 focus:ring-blue-500"
+                                  className="mt-1 w-5 h-5 text-blue-600 focus:ring-blue-500 flex-shrink-0"
                                 />
-                                <div className="flex-1">
-                                  <div className="text-slate-100 font-medium">Downpayment (Online Payment)</div>
-                                  <div className="text-sm text-slate-300">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                    <svg className="w-5 h-5 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div className="text-white font-bold text-lg">Downpayment (Online Payment)</div>
+                                  </div>
+                                  <div className="text-sm text-white/80">
                                     Pay partial amount now, remaining before departure
                                   </div>
+                                  <div className="mt-2 text-xs text-white/60">✓ Flexible payment terms</div>
                                 </div>
-                              </label>
-                              
-                              {paymentType === "downpayment" && (
+                              </label>                              {paymentType === "downpayment" && (
                                 <div className="ml-8 p-4 bg-slate-900/50 rounded-lg space-y-4">
                                   <div>
                                     <label className="block text-slate-300 text-sm mb-2">Select Payment Terms</label>
@@ -778,6 +1089,25 @@ export default function Booking(): JSX.Element {
                                       <span className="text-slate-300">Remaining Balance:</span>
                                       <span className="text-yellow-400 font-semibold">{formatCurrencyPHP(remainingBalance)}</span>
                                     </div>
+                                    
+                                    {/* Payment Terms Information */}
+                                    <div className="mt-4 p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+                                      <div className="flex items-start gap-2 mb-2">
+                                        <svg className="w-4 h-4 text-orange-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <div className="flex-1">
+                                          <div className="text-sm font-semibold text-orange-300 mb-1">Payment Terms</div>
+                                          <ul className="text-xs text-orange-200/90 space-y-1 list-disc list-inside">
+                                            <li>Pay downpayment now to secure your booking</li>
+                                            <li>Remaining balance due <strong>30 days before departure</strong></li>
+                                            <li>Payment reminders will be sent via email & SMS</li>
+                                            <li>Flexible payment options for remaining balance</li>
+                                          </ul>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    
                                     <div className="text-xs text-slate-400 mt-2 flex items-start gap-1">
                                       <svg className="w-3 h-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -790,22 +1120,27 @@ export default function Booking(): JSX.Element {
                             </div>
                           )}
                           
-                          <label className="flex items-center space-x-3 cursor-pointer">
+                          <label className="payment-option flex items-start gap-4 cursor-pointer p-4 rounded-xl border-2 border-white/20 hover:border-white/40 transition-all bg-white/5 hover:bg-white/10 group">
                             <input
                               type="radio"
                               name="paymentType"
                               value="cash-appointment"
                               checked={paymentType === "cash-appointment"}
                               onChange={(e) => setPaymentType(e.target.value as "full" | "downpayment" | "cash-appointment")}
-                              className="text-blue-600 focus:ring-blue-500"
+                              className="mt-1 w-5 h-5 text-blue-600 focus:ring-blue-500 flex-shrink-0"
                             />
-                            <div className="flex-1">
-                              <div className="text-slate-100 font-medium">Cash on Hand (During Office Appointment)</div>
-                              <div className="text-sm text-slate-300">
-                                Pay in person at our office: {formatCurrencyPHP(total)}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <svg className="w-5 h-5 text-yellow-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <div className="text-white font-bold text-lg">Cash on Hand (Office Visit)</div>
                               </div>
-                              <div className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="text-sm text-white/80 break-words">
+                                Pay in person at our office: <span className="font-bold text-yellow-300">{formatCurrencyPHP(total)}</span>
+                              </div>
+                              <div className="mt-2 text-xs text-white/60 flex items-center gap-1">
+                                <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 Requires scheduling an office appointment
@@ -834,46 +1169,81 @@ export default function Booking(): JSX.Element {
                         </div>
                       </div>
                       
-                      {error && <div className="mt-4 text-rose-400 font-medium">{error}</div>}
+                      {error && (
+                        <div className="mt-6 p-4 bg-red-500/10 border-2 border-red-500/30 rounded-xl flex items-center gap-3">
+                          <svg className="w-6 h-6 text-red-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <div className="text-red-200 font-medium">{error}</div>
+                        </div>
+                      )}
                       
-                      <div className="mt-6 flex justify-end gap-3">
-                        <button onClick={() => navigate(-1)} className="px-4 py-2 btn-secondary rounded">Back</button>
-                        <button onClick={handleNext} className="px-4 py-2 btn-primary rounded">Continue</button>
+                      <div className="mt-8 flex justify-between items-center gap-4">
+                        <button onClick={() => navigate(-1)} className="px-6 py-3 btn-secondary rounded-xl font-semibold flex items-center gap-2">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                          </svg>
+                          Back
+                        </button>
+                        <button onClick={handleNext} className="px-8 py-3 btn-primary rounded-xl font-bold flex items-center gap-2">
+                          Continue
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                          </svg>
+                        </button>
                       </div>
                     </section>
                   )}
 
                   {step === 1 && (
                     <section aria-labelledby="lead-heading">
-                      <h2 id="lead-heading" className="text-lg font-semibold mb-3 text-slate-100">Lead passenger details</h2>
+                      <div className="flex items-center gap-3 mb-6 section-header">
+                        <div className="p-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl">
+                          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h2 id="lead-heading" className="text-2xl font-bold text-white">Your Information</h2>
+                          <p className="text-white/80 text-sm">Tell us about the lead passenger</p>
+                        </div>
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input 
-                          placeholder="Full name" 
-                          value={customerName}
-                          onChange={(e) => setCustomerName(e.target.value)}
-                          className="rounded px-3 py-2" 
-                          required
-                        />
-                        <input 
-                          placeholder="Email address" 
-                          type="email" 
-                          value={customerEmail}
-                          onChange={(e) => setCustomerEmail(e.target.value)}
-                          className="rounded px-3 py-2" 
-                          required
-                        />
-                        <input 
-                          placeholder="Phone (optional)" 
-                          value={customerPhone}
-                          onChange={(e) => setCustomerPhone(e.target.value)}
-                          className="rounded px-3 py-2" 
-                        />
-                        <input 
-                          placeholder="Passport or ID" 
-                          value={customerPassport}
-                          onChange={(e) => setCustomerPassport(e.target.value)}
-                          className="rounded px-3 py-2" 
-                        />
+                        <div className="form-field">
+                          <input 
+                            placeholder="Full name" 
+                            value={customerName}
+                            onChange={(e) => setCustomerName(e.target.value)}
+                            className="w-full rounded-xl px-4 py-3" 
+                            required
+                          />
+                        </div>
+                        <div className="form-field">
+                          <input 
+                            placeholder="Email address" 
+                            type="email" 
+                            value={customerEmail}
+                            onChange={(e) => setCustomerEmail(e.target.value)}
+                            className="w-full rounded-xl px-4 py-3" 
+                            required
+                          />
+                        </div>
+                        <div className="form-field">
+                          <input 
+                            placeholder="Phone (optional)" 
+                            value={customerPhone}
+                            onChange={(e) => setCustomerPhone(e.target.value)}
+                            className="w-full rounded-xl px-4 py-3" 
+                          />
+                        </div>
+                        <div className="form-field">
+                          <input 
+                            placeholder="Passport or ID" 
+                            value={customerPassport}
+                            onChange={(e) => setCustomerPassport(e.target.value)}
+                            className="w-full rounded-xl px-4 py-3" 
+                          />
+                        </div>
                       </div>
                       <div className="mt-6 flex justify-between">
                         <button onClick={handleBack} className="px-4 py-2 btn-secondary rounded">Back</button>
@@ -1277,9 +1647,9 @@ export default function Booking(): JSX.Element {
               )}
             </div>
           </div>
-          <aside className="lg:col-span-4 space-y-6">
-            <div className="sticky top-24">
-              <div className="card-glass rounded-lg p-5">
+          <aside className="lg:col-span-4 space-y-6 order-first lg:order-last">
+            <div className="lg:sticky lg:top-24">
+              <div className="card-glass rounded-2xl p-5 shadow-2xl">
                 <img src={tour.images?.[0] ?? "/assets/placeholder.jpg"} alt={tour.title} className="w-full h-40 object-cover rounded" />
                 <div className="mt-4">
                   <div className="text-xs text-slate-300">Your booking</div>
@@ -1332,8 +1702,13 @@ export default function Booking(): JSX.Element {
                   </div>
                 </div>
               </div>
-              <div className="mt-4 card-glass rounded p-4 text-sm text-slate-300">
-                <div className="font-semibold mb-2 text-slate-100">Need help?</div>
+              <div className="mt-4 card-glass rounded-xl p-4 text-sm text-slate-300 shadow-xl">
+                <div className="font-semibold mb-2 text-slate-100 flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Need help?
+                </div>
                 <div>Call reservations: <strong className="text-slate-100">+63 02 8526 8404</strong></div>
                 <div className="mt-2">Email: <a href="mailto:reservations@example.com" className="text-accent-yellow underline">reservations@example.com</a></div>
               </div>

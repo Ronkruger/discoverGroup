@@ -73,6 +73,47 @@
       color: #1e40af;
       font-weight: bold;
     }
+    .payment-method-box {
+      background-color: #ede9fe;
+      border: 2px solid #a78bfa;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+    .payment-method-box h3 {
+      color: #5b21b6;
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+    .payment-method-box p {
+      color: #6b21a8;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .payment-method-box strong {
+      color: #5b21b6;
+    }
+    .payment-terms-box {
+      background-color: #ffedd5;
+      border: 2px solid #fb923c;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+    .payment-terms-box h3 {
+      color: #9a3412;
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+    .payment-terms-box ul {
+      margin: 12px 0;
+      padding-left: 20px;
+      color: #7c2d12;
+    }
+    .payment-terms-box li {
+      margin: 8px 0;
+      font-size: 14px;
+    }
     .appointment-box {
       background-color: #fef3c7;
       border: 2px solid #fbbf24;
@@ -198,27 +239,53 @@
         </div>
       </div>
 
-      <!-- Appointment Box (conditional) -->
-      {{#if appointmentDate}}
-      <div class="appointment-box">
-        <h3>📅 Office Appointment Scheduled</h3>
-        <p><strong>Date:</strong> {{appointmentDate}}</p>
-        <p><strong>Time:</strong> {{appointmentTime}}</p>
-        <p><strong>Purpose:</strong> {{appointmentPurpose}}</p>
-        <p style="margin-top: 12px; font-style: italic;">
-          Please bring <strong>{{totalAmount}}</strong> cash to your appointment. Credit/debit cards also accepted at our office.
-        </p>
+      <!-- Payment Method Box (conditional) -->
+      {{#if paymentMethod}}
+      <div class="payment-method-box">
+        <h3>💳 Payment Method</h3>
+        <p><strong>Selected Method:</strong> {{paymentMethodIcon}} {{paymentMethod}}</p>
+        <p><strong>Gateway:</strong> {{paymentGateway}}</p>
+        {{#if paymentMethodDescription}}
+        <p><strong>Details:</strong> {{paymentMethodDescription}}</p>
+        {{/if}}
       </div>
       {{/if}}
 
       <!-- Downpayment Info (conditional) -->
-      {{#if downpaymentAmount}}
-      <div class="info-box">
-        <h3>💳 Payment Terms</h3>
-        <p style="margin: 0;">
-          <strong>Downpayment Paid:</strong> {{downpaymentAmount}}<br>
-          <strong>Remaining Balance:</strong> {{remainingBalance}}<br>
-          <em>Balance due at least 7 days before departure</em>
+      {{#if isDownpaymentOnly}}
+      <div class="payment-terms-box">
+        <h3>💰 Payment Terms - Downpayment Option</h3>
+        <div class="booking-detail" style="border: none; padding: 8px 0;">
+          <span class="detail-label">Downpayment Paid:</span>
+          <span class="detail-value" style="color: #2563eb;">{{downpaymentAmount}}</span>
+        </div>
+        <div class="booking-detail" style="border: none; padding: 8px 0;">
+          <span class="detail-label">Remaining Balance:</span>
+          <span class="detail-value" style="color: #ea580c;">{{remainingBalance}}</span>
+        </div>
+        <ul>
+          <li>The downpayment secures your booking and holds your reservation</li>
+          <li>Remaining balance must be paid <strong>30 days before departure</strong></li>
+          <li>Payment reminders will be sent via email and SMS</li>
+          <li>You can pay the balance online or visit our office</li>
+          <li>Flexible payment options available for the remaining balance</li>
+        </ul>
+      </div>
+      {{/if}}
+
+      <!-- Appointment Box (conditional) -->
+      {{#if appointmentDate}}
+      <div class="appointment-box">
+        <h3>🏢 Office Appointment Scheduled</h3>
+        <p><strong>Date:</strong> {{appointmentDate}}</p>
+        <p><strong>Time:</strong> {{appointmentTime}}</p>
+        <p><strong>Purpose:</strong> {{appointmentPurpose}}</p>
+        <p style="margin-top: 12px;">
+          📍 <strong>Office Address:</strong><br>
+          Quezon Avenue cor. Sct. Reyes St, Diliman, Quezon City, 1103 Metro Manila
+        </p>
+        <p style="margin-top: 12px; font-style: italic;">
+          💰 Please bring <strong>{{totalAmount}}</strong> in cash to your appointment. Credit/debit cards also accepted at our office.
         </p>
       </div>
       {{/if}}
@@ -232,32 +299,57 @@
 
       <!-- What's Next -->
       <div class="info-box">
-        <h3>What happens next?</h3>
+        <h3>📍 What's Next?</h3>
         <ol>
-          <li>You'll receive a confirmation call within 24 hours</li>
-          <li>Our team will send you a detailed itinerary</li>
-          {{#if appointmentDate}}
-          <li>Visit our office on {{appointmentDate}} at {{appointmentTime}}</li>
-          {{else}}
-          <li>Complete any remaining payment 7 days before departure</li>
+          <li><strong>Documentation:</strong> Ensure your passport is valid for at least 6 months from travel date</li>
+          <li><strong>Preparation:</strong> We'll send you a detailed itinerary 2 weeks before departure</li>
+          <li><strong>Contact:</strong> Our team will reach out with important travel information</li>
+          {{#if isDownpaymentOnly}}
+          <li><strong>Balance Payment:</strong> Reminder will be sent 45 days before departure</li>
           {{/if}}
-          <li>Get ready for an amazing adventure!</li>
+          {{#if appointmentDate}}
+          <li><strong>Office Visit:</strong> Don't forget your appointment on {{appointmentDate}} at {{appointmentTime}}</li>
+          {{/if}}
+          <li><strong>Cancellation:</strong> Free cancellation up to 30 days before departure</li>
+          <li><strong>Travel Insurance:</strong> Included in your package for peace of mind</li>
         </ol>
       </div>
+
+      <!-- Contact Section -->
+      <div class="info-box">
+        <h3>📞 Need Help?</h3>
+        <p style="margin: 0;">Our customer service team is here to assist you:</p>
+        <ul style="margin-top: 12px; padding-left: 20px;">
+          <li>📧 Email: <a href="mailto:reservations@discovergrp.com" style="color: #1e40af;">reservations@discovergrp.com</a></li>
+          <li>📱 Phone: <a href="tel:+6328555123" style="color: #1e40af;">+63 02 8555 1234</a></li>
+          <li>💬 Live Chat: Available on our website</li>
+          <li>🕒 Hours: Monday - Friday, 9:00 AM - 6:00 PM (PHT)</li>
+          <li>📍 Office: Quezon Avenue cor. Sct. Reyes St, Diliman, QC</li>
+        </ul>
+      </div>
+
+      <p style="margin-top: 30px; color: #4b5563; font-size: 15px;">
+        Thank you for trusting us with your travel dreams. We're committed to making this an incredible experience you'll treasure forever!
+      </p>
+
+      <p style="margin-top: 20px; color: #1f2937; font-weight: 600;">
+        Safe travels,<br>
+        <strong>The Discover Group Team</strong>
+      </p>
     </div>
 
     <!-- Footer -->
     <div class="footer">
-      <p><strong>Discover Group Philippines</strong></p>
-      <p>22nd Floor, The Upper Class Tower<br>
-         Corner of Quezon Avenue and Sct. Reyes St.<br>
-         Diliman, Quezon City</p>
+      <p><strong>Discover Group - European Travel Specialists</strong></p>
+      <p>Quezon Avenue cor. Sct. Reyes St<br>
+         Diliman, Quezon City, 1103 Metro Manila</p>
       <div class="footer-contact">
-        <p>📞 <a href="tel:+6302852684 04">+63 02 8526 8404</a> | 
-           📧 <a href="mailto:reservations@discovergroup.com">reservations@discovergroup.com</a></p>
+        <p>📞 <a href="tel:+6302855512 34">+63 02 8555 1234</a> | 
+           📧 <a href="mailto:reservations@discovergrp.com">reservations@discovergrp.com</a></p>
       </div>
       <p style="font-size: 12px; color: #9ca3af; margin-top: 16px;">
-        © 2025 Discover Group. All rights reserved.
+        © 2025 Discover Group. All rights reserved.<br>
+        This is an automated confirmation email. Please do not reply to this message.
       </p>
     </div>
   </div>

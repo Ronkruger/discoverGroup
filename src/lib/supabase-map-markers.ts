@@ -4,11 +4,18 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('❌ Supabase credentials missing! Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
+// Only create client if credentials are available
+// If not available, map markers will use fallback data
+let supabase: ReturnType<typeof createClient> | null = null;
+
+if (supabaseUrl && supabaseAnonKey) {
+  supabase = createClient(supabaseUrl, supabaseAnonKey);
+  console.log('✅ Supabase client initialized for map markers');
+} else {
+  console.warn('⚠️ Supabase credentials not configured - using fallback map markers');
 }
 
-export const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
+export { supabase };
 
 export interface MapMarker {
   id?: number;
@@ -29,8 +36,7 @@ export interface MapMarker {
 export async function fetchMapMarkers(): Promise<MapMarker[]> {
   try {
     // Check if Supabase is configured
-    if (!supabaseUrl || !supabaseAnonKey) {
-      console.warn('⚠️ Supabase not configured, using fallback markers');
+    if (!supabase) {
       return getFallbackMarkers();
     }
 
@@ -74,6 +80,11 @@ function getFallbackMarkers(): MapMarker[] {
  * Create a new map marker in Supabase
  */
 export async function createMapMarker(marker: Omit<MapMarker, 'id' | 'created_at' | 'updated_at'>): Promise<MapMarker | null> {
+  if (!supabase) {
+    console.warn('⚠️ Supabase not configured, cannot create marker');
+    return null;
+  }
+  
   try {
     const { data, error } = await supabase
       .from('map_markers')
@@ -98,6 +109,11 @@ export async function createMapMarker(marker: Omit<MapMarker, 'id' | 'created_at
  * Update an existing map marker in Supabase
  */
 export async function updateMapMarker(id: number, updates: Partial<MapMarker>): Promise<MapMarker | null> {
+  if (!supabase) {
+    console.warn('⚠️ Supabase not configured, cannot update marker');
+    return null;
+  }
+  
   try {
     const { data, error } = await supabase
       .from('map_markers')
@@ -123,6 +139,11 @@ export async function updateMapMarker(id: number, updates: Partial<MapMarker>): 
  * Delete a map marker from Supabase
  */
 export async function deleteMapMarker(id: number): Promise<boolean> {
+  if (!supabase) {
+    console.warn('⚠️ Supabase not configured, cannot delete marker');
+    return false;
+  }
+  
   try {
     const { error } = await supabase
       .from('map_markers')
@@ -146,6 +167,11 @@ export async function deleteMapMarker(id: number): Promise<boolean> {
  * Toggle marker active status
  */
 export async function toggleMapMarkerStatus(id: number, isActive: boolean): Promise<boolean> {
+  if (!supabase) {
+    console.warn('⚠️ Supabase not configured, cannot toggle marker status');
+    return false;
+  }
+  
   try {
     const { error } = await supabase
       .from('map_markers')

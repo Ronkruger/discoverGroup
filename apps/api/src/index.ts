@@ -31,6 +31,7 @@ const allowedOrigins = [
   'https://discovergrp.netlify.app',  // Client production (alternate)
   'https://admin--discovergrp.netlify.app',  // Admin production
   'https://admindiscovergrp.netlify.app',  // Admin production (alternate)
+  'https://lambent-dodol-2486cc.netlify.app',  // Admin preview
 ];
 
 // Add production URLs from environment variables

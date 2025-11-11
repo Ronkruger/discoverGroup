@@ -5,6 +5,16 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  # Production API URL (Render)
+  VITE_API_BASE_URL = "https://discovergroup.onrender.com"
+  VITE_API_URL = "https://discovergroup.onrender.com"
+  # Admin URL
+  VITE_ADMIN_URL = "https://admin--discovergrp.netlify.app"
+  # Stripe (Test Mode)
+  VITE_STRIPE_PUBLISHABLE_KEY = "pk_test_51SAiMZ1jrkeQVBHG8zXBFJ3PZXKK6gY6M3rTnqJeSivpgJwlQo27luLhQLPnp6tYce1Qei1ep8BdOmlNxMJwZSAS004VJ16G8s"
+  # Supabase (Optional - uncomment when ready)
+  # VITE_SUPABASE_URL = "https://awcwijvsncfmdvmobiey.supabase.co"
+  # VITE_SUPABASE_ANON_KEY = "your_anon_key_here"
 
 [[redirects]]
   from = "/*"

@@ -965,6 +965,38 @@ useEffect(() => {
                 )}
               </div> {/* Close .text-sm .text-slate-200 */}
             </section> {/* Close Tour overview section */}
+
+            {/* Chat with Agent Card */}
+            <section className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 card-glass rounded-lg p-5 border-2 border-blue-400/30 shadow-lg">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-base font-semibold text-white mb-1">Have Questions?</h4>
+                  <p className="text-xs text-slate-200 mb-3">Chat with our travel experts to learn more about this tour, customize your itinerary, or get personalized recommendations.</p>
+                  <a 
+                    href="https://m.me/YourFacebookPage" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 0C5.373 0 0 4.975 0 11.111c0 3.497 1.745 6.616 4.472 8.652V24l4.086-2.242c1.09.301 2.246.464 3.442.464 6.627 0 12-4.974 12-11.111C24 4.975 18.627 0 12 0zm1.191 14.963l-3.055-3.26-5.963 3.26L10.732 8l3.131 3.259L19.752 8l-6.561 6.963z"/>
+                    </svg>
+                    Chat with Sales Agent
+                  </a>
+                  <div className="mt-2 flex items-center gap-2 text-xs text-slate-300">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span>Usually replies within minutes</span>
+                  </div>
+                </div>
+              </div>
+            </section> {/* Close Chat with Agent section */}
           </aside> {/* Close aside */}
         </div> {/* Close grid-cols-1 lg:grid-cols-3 */}
       </div> {/* Close container mx-auto */}

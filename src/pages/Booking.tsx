@@ -11,6 +11,7 @@ import { createBooking } from "../api/bookings";
 import React from "react";
 import ProgressIndicator from "../components/ProgressIndicator";
 import { TrustSignals, UrgencyIndicators, BookingProtection } from "../components/TrustSignals";
+import BackToTop from "../components/BackToTop";
 
 function formatCurrencyPHP(amount: number) {
   return `PHP ${amount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -47,22 +48,6 @@ export default function Booking(): JSX.Element {
   const [passengers, setPassengers] = useState<number>(() => navState?.passengers ?? 1);
   const [perPerson, setPerPerson] = useState<number>(() => navState?.perPerson ?? 0);
   
-  // Custom routes state (from TourBuilder inlineInsert)
-  const [customRoutes, setCustomRoutes] = useState<CustomRoute[]>(() => {
-    if (navState?.inlineInsert) {
-      const insertedTour = navState.inlineInsert.tour;
-      return [{
-        tourSlug: insertedTour.slug,
-        tourTitle: insertedTour.title,
-        tourLine: insertedTour.line,
-        durationDays: insertedTour.durationDays,
-        pricePerPerson: getEffectivePriceForTour(insertedTour as ExtendedTour),
-        insertAfterDay: navState.inlineInsert.insertAfterIndex + 1
-      }];
-    }
-    return [];
-  });
-  
   // Helper function to get effective price for any tour (moved outside so it can be used in initialization)
   function getEffectivePriceForTour(tourData: ExtendedTour): number {
     const saleDate = tourData.saleEndDate ? new Date(tourData.saleEndDate) : null;
@@ -85,6 +70,22 @@ export default function Booking(): JSX.Element {
       return computed;
     }
   }
+  
+  // Custom routes state (from TourBuilder inlineInsert) - computed directly, no setter needed
+  const customRoutes: CustomRoute[] = (() => {
+    if (navState?.inlineInsert) {
+      const insertedTour = navState.inlineInsert.tour;
+      return [{
+        tourSlug: insertedTour.slug,
+        tourTitle: insertedTour.title,
+        tourLine: insertedTour.line,
+        durationDays: insertedTour.durationDays,
+        pricePerPerson: getEffectivePriceForTour(insertedTour as ExtendedTour),
+        insertAfterDay: navState.inlineInsert.insertAfterIndex + 1
+      }];
+    }
+    return [];
+  })();
 
   // Booking flow state
   const [step, setStep] = useState<number>(0); // 0: review, 1: lead, 2: payment, 3: review, 4: confirm/pay
@@ -1785,6 +1786,7 @@ export default function Booking(): JSX.Element {
           </aside>
         </div>
       </div>
+      <BackToTop />
     </main>
   );
 }

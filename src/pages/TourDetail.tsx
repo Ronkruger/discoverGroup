@@ -32,6 +32,7 @@ import { useParams, Link } from "react-router-dom";
 import { fetchTourBySlug } from "../api/tours";
 import type { Tour, ItineraryDay, Stop, DepartureDate } from "../types";
 import { DepartureDateCalendar } from "../components/DepartureDateCalendar";
+import BackToTop from "../components/BackToTop";
 // Gallery image with fallback and debug info
 function GalleryImageWithFallback({ src }: { src: string }) {
   const [error, setError] = useState(false);
@@ -1063,6 +1064,7 @@ useEffect(() => {
           </div>
         </div>
       )}
+      <BackToTop />
     </div>
   );
   }

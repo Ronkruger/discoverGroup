@@ -17,6 +17,7 @@ import { EnhancedSearch } from "../components/EnhancedSearch";
 import { SkeletonCard } from "../components/LoadingComponents";
 import { NetworkError } from "../components/ErrorComponents";
 import { getHomepageSettings, subscribeToSettingsChanges } from "../services/homepageSettings";
+import BackToTop from "../components/BackToTop";
 
 import "swiper/css";
 import "swiper/css/pagination";
@@ -625,6 +626,7 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+      <BackToTop />
     </main>
   );
 }

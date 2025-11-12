@@ -41,6 +41,7 @@ import { useEffect, useRef, useState, type JSX, type ChangeEvent } from "react";
 import type { Tour, Stop, ItineraryDay } from "../types";
 import { fetchTourBySlug, fetchTours } from "../api/tours";
 import React from "react";
+import BackToTop from "../components/BackToTop";
 
 export default function TourBuilder(): JSX.Element {
   const { slug } = useParams<{ slug: string }>();
@@ -1057,6 +1058,7 @@ export default function TourBuilder(): JSX.Element {
           </aside>
         </div>
       </div>
+      <BackToTop />
     </div>
   );
 }

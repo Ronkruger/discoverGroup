@@ -1,6 +1,7 @@
 import * as React from "react";
 import { fetchTours } from "../api/tours";
 import { toggleFavorite, getFavorites } from "../api/favorites";
+import { fetchRecentBookingNotification } from "../api/bookings";
 import { fetchMapMarkers } from "../lib/supabase-map-markers";
 import type { MapMarker } from "../lib/supabase-map-markers";
 import { useAuth } from "../context/useAuth";
@@ -20,6 +21,28 @@ import { getHomepageSettings, subscribeToSettingsChanges } from "../services/hom
 import "swiper/css";
 import "swiper/css/pagination";
 
+// Hash name function: e.g., "Ron" -> "R*n", "Sarah" -> "S***h"
+function hashName(name: string): string {
+  if (!name || name.length <= 2) return name;
+  const firstChar = name[0];
+  const lastChar = name[name.length - 1];
+  const middleStars = '*'.repeat(name.length - 2);
+  return `${firstChar}${middleStars}${lastChar}`;
+}
+
+// Get tour title from slug
+function getTourTitle(slug: string): string {
+  const tourMap: Record<string, string> = {
+    'route-a-preferred': 'Route A Preferred',
+    'route-b-classic': 'Route B Classic',
+    'route-c-premium': 'Route C Premium',
+    'mediterranean-grand-tour': 'Mediterranean Grand Tour',
+  };
+  return tourMap[slug] || slug.split('-').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ');
+}
+
 export default function Home() {
   const [tours, setTours] = React.useState<Tour[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -27,6 +50,11 @@ export default function Home() {
   const [favorites, setFavorites] = React.useState<string[]>([]);
   const [mapMarkers, setMapMarkers] = React.useState<MapMarker[]>([]);
   const [homepageSettings, setHomepageSettings] = React.useState(getHomepageSettings());
+  const [recentBooking, setRecentBooking] = React.useState<{
+    customerName: string;
+    tourSlug: string;
+    timeAgo: string;
+  } | null>(null);
   const { user } = useAuth();
 
   // Load homepage settings and subscribe to changes
@@ -60,6 +88,25 @@ export default function Home() {
       }
     };
     loadMapMarkers();
+  }, []);
+
+  // Load recent booking notification
+  React.useEffect(() => {
+    const loadRecentBooking = async () => {
+      try {
+        const booking = await fetchRecentBookingNotification();
+        if (booking) {
+          setRecentBooking(booking);
+        }
+      } catch (err) {
+        console.warn('Could not load recent booking:', err);
+      }
+    };
+    loadRecentBooking();
+    
+    // Refresh every 2 minutes
+    const interval = setInterval(loadRecentBooking, 2 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
   React.useEffect(() => {
@@ -280,20 +327,22 @@ export default function Home() {
           </div>
           
           {/* Recently Booked Notification */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 1 }}
-            className="mt-6 bg-white border border-green-200 rounded-lg p-4 shadow-sm max-w-md mx-auto"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-              <div className="text-sm">
-                <span className="font-medium">Sarah from London</span> just booked 
-                <span className="font-medium"> Mediterranean Grand Tour</span> • 5 min ago
+          {recentBooking && (
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 1 }}
+              className="mt-6 bg-white border border-green-200 rounded-lg p-4 shadow-sm max-w-md mx-auto"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <div className="text-sm">
+                  <span className="font-medium">{hashName(recentBooking.customerName)}</span> just booked 
+                  <span className="font-medium"> {getTourTitle(recentBooking.tourSlug)}</span> • {recentBooking.timeAgo}
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          )}
         </div>
       </section>
 

@@ -169,4 +169,44 @@ router.delete("/:bookingId", async (req, res) => {
   }
 });
 
+// GET /api/bookings/recent/notification - get most recent booking for notification
+router.get("/recent/notification", async (req, res) => {
+  try {
+    const recentBooking = await Booking.findOne({ status: 'confirmed' })
+      .sort({ createdAt: -1 })
+      .limit(1);
+    
+    if (!recentBooking) {
+      return res.json(null);
+    }
+
+    // Calculate time ago
+    const bookingTime = new Date(recentBooking.createdAt);
+    const now = new Date();
+    const diffMinutes = Math.floor((now.getTime() - bookingTime.getTime()) / (1000 * 60));
+    
+    let timeAgo = '';
+    if (diffMinutes < 1) {
+      timeAgo = 'just now';
+    } else if (diffMinutes < 60) {
+      timeAgo = `${diffMinutes} min ago`;
+    } else if (diffMinutes < 1440) {
+      const hours = Math.floor(diffMinutes / 60);
+      timeAgo = `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else {
+      const days = Math.floor(diffMinutes / 1440);
+      timeAgo = `${days} day${days > 1 ? 's' : ''} ago`;
+    }
+
+    res.json({
+      customerName: recentBooking.customerName,
+      tourSlug: recentBooking.tourSlug,
+      timeAgo
+    });
+  } catch (err) {
+    console.error("Error fetching recent booking:", err);
+    res.status(500).json({ error: "Failed to fetch recent booking" });
+  }
+});
+
 export default router;

@@ -204,3 +204,21 @@ export async function fetchBookingsByStatus(status: BookingStatus): Promise<Book
   const bookings = await fetchAllBookings();
   return bookings.filter(booking => booking.status === status);
 }
+
+// Get recent booking for notification
+export async function fetchRecentBookingNotification(): Promise<{
+  customerName: string;
+  tourSlug: string;
+  timeAgo: string;
+} | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/bookings/recent/notification`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.warn('Could not fetch recent booking notification:', error);
+    return null;
+  }
+}
+

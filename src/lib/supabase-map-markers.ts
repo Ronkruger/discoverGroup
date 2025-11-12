@@ -1,6 +1,22 @@
 // Supabase Client for Map Markers
 import { createClient } from '@supabase/supabase-js';
 
+// Database types
+export interface MapMarker {
+  id?: number;
+  city: string;
+  country?: string;
+  top: string; // e.g., "40%"
+  left: string; // e.g., "35%"
+  description?: string;
+  tour_slug?: string; // Link to a tour if applicable
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+type MapMarkerUpdate = Partial<Omit<MapMarker, 'id' | 'created_at' | 'updated_at'>> & { updated_at?: string };
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
@@ -16,19 +32,6 @@ if (supabaseUrl && supabaseAnonKey) {
 }
 
 export { supabase };
-
-export interface MapMarker {
-  id?: number;
-  city: string;
-  country?: string;
-  top: string; // e.g., "40%"
-  left: string; // e.g., "35%"
-  description?: string;
-  tour_slug?: string; // Link to a tour if applicable
-  is_active: boolean;
-  created_at?: string;
-  updated_at?: string;
-}
 
 /**
  * Fetch all map markers from Supabase
@@ -88,6 +91,7 @@ export async function createMapMarker(marker: Omit<MapMarker, 'id' | 'created_at
   try {
     const { data, error } = await supabase
       .from('map_markers')
+      // @ts-expect-error - Supabase type inference issue with optional table
       .insert([marker])
       .select()
       .single();
@@ -98,7 +102,7 @@ export async function createMapMarker(marker: Omit<MapMarker, 'id' | 'created_at
     }
 
     console.log('✅ Map marker created:', data);
-    return data;
+    return data as MapMarker;
   } catch (error) {
     console.error('❌ Error creating map marker:', error);
     return null;
@@ -115,9 +119,11 @@ export async function updateMapMarker(id: number, updates: Partial<MapMarker>): 
   }
   
   try {
-    const { data, error } = await supabase
+    const updateData: MapMarkerUpdate = { ...updates, updated_at: new Date().toISOString() };
+    const { data, error} = await supabase
       .from('map_markers')
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      // @ts-expect-error - Supabase type inference issue with optional table
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();
@@ -128,7 +134,7 @@ export async function updateMapMarker(id: number, updates: Partial<MapMarker>): 
     }
 
     console.log('✅ Map marker updated:', data);
-    return data;
+    return data as MapMarker;
   } catch (error) {
     console.error('❌ Error updating map marker:', error);
     return null;
@@ -173,9 +179,11 @@ export async function toggleMapMarkerStatus(id: number, isActive: boolean): Prom
   }
   
   try {
+    const updateData: MapMarkerUpdate = { is_active: isActive, updated_at: new Date().toISOString() };
     const { error } = await supabase
       .from('map_markers')
-      .update({ is_active: isActive, updated_at: new Date().toISOString() })
+      // @ts-expect-error - Supabase type inference issue with optional table
+      .update(updateData)
       .eq('id', id);
 
     if (error) {

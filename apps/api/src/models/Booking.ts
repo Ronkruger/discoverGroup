@@ -23,6 +23,8 @@ export interface IBooking extends Document {
   appointmentDate?: string;
   appointmentTime?: string;
   appointmentPurpose?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 

@@ -1,4 +1,4 @@
-import type { Booking, Tour, BookingStatus, PaymentType } from "../types";
+import type { Booking, Tour, BookingStatus, PaymentType, CustomRoute } from "../types";
 
 // Use VITE_API_BASE_URL (consistent with .env files) or VITE_API_URL as fallback
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:4000';
@@ -36,6 +36,7 @@ export async function createBooking(bookingData: {
   appointmentDate?: string;
   appointmentTime?: string;
   appointmentPurpose?: string;
+  customRoutes?: CustomRoute[];
 }): Promise<Booking> {
   const bookingId = generateBookingId();
   const totalAmount = bookingData.perPerson * bookingData.passengers;
@@ -63,6 +64,7 @@ export async function createBooking(bookingData: {
     appointmentDate: bookingData.appointmentDate,
     appointmentTime: bookingData.appointmentTime,
     appointmentPurpose: bookingData.appointmentPurpose,
+    customRoutes: bookingData.customRoutes || [],
   };
 
   const res = await fetch(`${API_BASE_URL}/api/bookings`, {

@@ -1,7 +1,7 @@
 import { useEffect, useState, type JSX } from "react";
 import { Link, useNavigate, useParams, useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
-import type { Tour } from "../types";
+import type { Tour, CustomRoute } from "../types";
 import { fetchTourBySlug } from "../api/tours";
 // Payment Gateway Integration - Mockup for PayMongo & Dragonpay
 import { PaymentGateway, PaymentMethodSelector } from "../lib/payment-gateway";
@@ -37,6 +37,7 @@ export default function Booking(): JSX.Element {
     selectedDate?: string;
     passengers?: number;
     perPerson?: number;
+    inlineInsert?: { tour: Tour; insertAfterIndex: number } | null;
   } | undefined;
   const navigate = useNavigate();
 
@@ -45,6 +46,45 @@ export default function Booking(): JSX.Element {
   const [selectedDate, setSelectedDate] = useState<string | null>(() => navState?.selectedDate ?? null);
   const [passengers, setPassengers] = useState<number>(() => navState?.passengers ?? 1);
   const [perPerson, setPerPerson] = useState<number>(() => navState?.perPerson ?? 0);
+  
+  // Custom routes state (from TourBuilder inlineInsert)
+  const [customRoutes, setCustomRoutes] = useState<CustomRoute[]>(() => {
+    if (navState?.inlineInsert) {
+      const insertedTour = navState.inlineInsert.tour;
+      return [{
+        tourSlug: insertedTour.slug,
+        tourTitle: insertedTour.title,
+        tourLine: insertedTour.line,
+        durationDays: insertedTour.durationDays,
+        pricePerPerson: getEffectivePriceForTour(insertedTour as ExtendedTour),
+        insertAfterDay: navState.inlineInsert.insertAfterIndex + 1
+      }];
+    }
+    return [];
+  });
+  
+  // Helper function to get effective price for any tour (moved outside so it can be used in initialization)
+  function getEffectivePriceForTour(tourData: ExtendedTour): number {
+    const saleDate = tourData.saleEndDate ? new Date(tourData.saleEndDate) : null;
+    const isSaleActive = tourData.isSaleEnabled &&
+                         typeof tourData.promoPricePerPerson === 'number' &&
+                         (!saleDate || saleDate > new Date());
+
+    const regular = typeof tourData.regularPricePerPerson === "number" ? tourData.regularPricePerPerson : undefined;
+    const promo = typeof tourData.promoPricePerPerson === "number" ? tourData.promoPricePerPerson : undefined;
+    const days = tourData.durationDays ?? (tourData.itinerary?.length ?? 0);
+    const computed = Math.round((tourData.basePricePerDay ?? 0) * days);
+
+    if (isSaleActive && promo !== undefined) {
+      return promo;
+    } else if (regular !== undefined) {
+      return regular;
+    } else if (promo !== undefined) {
+      return promo;
+    } else {
+      return computed;
+    }
+  }
 
   // Booking flow state
   const [step, setStep] = useState<number>(0); // 0: review, 1: lead, 2: payment, 3: review, 4: confirm/pay
@@ -162,7 +202,14 @@ export default function Booking(): JSX.Element {
     };
   }, [navState?.passengers, navState?.selectedDate, perPerson, slug, tour]); // Dependencies remain the same
 
-  const total = (perPerson ?? 0) * Math.max(1, passengers);
+  // Calculate custom routes total price per person
+  const customRoutesTotalPerPerson = customRoutes.reduce((sum, route) => sum + route.pricePerPerson, 0);
+  
+  // Combined price per person (base tour + custom routes)
+  const combinedPerPerson = (perPerson ?? 0) + customRoutesTotalPerPerson;
+  
+  // Total for all passengers
+  const total = combinedPerPerson * Math.max(1, passengers);
   
   // Calculate payment amounts based on payment type with safety checks
   const safePercentage = Math.max(10, Math.min(90, downpaymentPercentage)); // Clamp between 10-90%
@@ -262,10 +309,11 @@ export default function Booking(): JSX.Element {
         customerEmail,
         selectedDate,
         passengers,
-        perPerson,
+        perPerson: combinedPerPerson,
         total,
         paymentType,
-        paymentIntentId: confirmationId
+        paymentIntentId: confirmationId,
+        customRoutes: customRoutes.length > 0 ? customRoutes : undefined
       });
       
       createBooking({
@@ -276,9 +324,10 @@ export default function Booking(): JSX.Element {
         customerPassport,
         selectedDate,
         passengers,
-        perPerson,
+        perPerson: combinedPerPerson, // Combined price with custom routes
         paymentType,
         paymentIntentId: confirmationId,
+        customRoutes: customRoutes.length > 0 ? customRoutes : undefined,
         // Include appointment details if user requested one
         ...(wantsAppointment && {
           appointmentDate,
@@ -1557,9 +1606,29 @@ export default function Booking(): JSX.Element {
 
                         <div className="pt-4 border-t border-white/10">
                           <div className="flex justify-between items-center">
-                            <span className="text-slate-300">Per person:</span>
+                            <span className="text-slate-300">Base tour per person:</span>
                             <span className="text-slate-100 font-semibold">{formatCurrencyPHP(perPerson)}</span>
                           </div>
+                          
+                          {/* Display custom routes if any */}
+                          {customRoutes.length > 0 && (
+                            <>
+                              {customRoutes.map((route, index) => (
+                                <div key={index} className="flex justify-between items-center mt-2 pl-4 border-l-2 border-purple-500/50">
+                                  <div className="flex flex-col">
+                                    <span className="text-purple-300 text-sm">+{route.tourTitle}</span>
+                                    <span className="text-xs text-slate-400">{route.durationDays} days • {route.tourLine || 'Additional route'}</span>
+                                  </div>
+                                  <span className="text-purple-300 font-semibold text-sm">{formatCurrencyPHP(route.pricePerPerson)}</span>
+                                </div>
+                              ))}
+                              <div className="flex justify-between items-center mt-3 pt-2 border-t border-white/10">
+                                <span className="text-slate-200 font-semibold">Combined per person:</span>
+                                <span className="text-slate-100 font-bold">{formatCurrencyPHP(combinedPerPerson)}</span>
+                              </div>
+                            </>
+                          )}
+                          
                           <div className="flex justify-between items-center mt-2">
                             <span className="text-white font-semibold">Total Amount:</span>
                             <span className="text-2xl font-bold text-blue-400">{formatCurrencyPHP(total)}</span>

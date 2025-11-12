@@ -1,5 +1,14 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+// Custom route added to a booking
+export interface ICustomRoute {
+  tourSlug: string;
+  tourTitle: string;
+  tourLine?: string;
+  durationDays: number;
+  pricePerPerson: number;
+  insertAfterDay: number;
+}
 
 export interface IBooking extends Document {
   user?: mongoose.Types.ObjectId;
@@ -23,6 +32,7 @@ export interface IBooking extends Document {
   appointmentDate?: string;
   appointmentTime?: string;
   appointmentPurpose?: string;
+  customRoutes?: ICustomRoute[]; // Custom routes added to base tour
   createdAt: Date;
   updatedAt: Date;
 }
@@ -50,6 +60,14 @@ const BookingSchema = new Schema<IBooking>({
   appointmentDate: { type: String },
   appointmentTime: { type: String },
   appointmentPurpose: { type: String },
+  customRoutes: [{
+    tourSlug: { type: String, required: true },
+    tourTitle: { type: String, required: true },
+    tourLine: { type: String },
+    durationDays: { type: Number, required: true },
+    pricePerPerson: { type: Number, required: true },
+    insertAfterDay: { type: Number, required: true }
+  }],
 }, { timestamps: true });
 
 export default mongoose.model<IBooking>('Booking', BookingSchema);

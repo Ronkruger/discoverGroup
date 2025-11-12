@@ -71,6 +71,16 @@ export type BookingStatus = 'confirmed' | 'pending' | 'cancelled' | 'completed';
 
 export type PaymentType = 'full' | 'downpayment' | 'cash-appointment';
 
+// Custom route added to a booking
+export type CustomRoute = {
+  tourSlug: string;
+  tourTitle: string;
+  tourLine?: string;
+  durationDays: number;
+  pricePerPerson: number;
+  insertAfterDay: number;
+};
+
 export type Booking = {
   id: string;
   bookingId: string;
@@ -92,4 +102,6 @@ export type Booking = {
   appointmentDate?: string;
   appointmentTime?: string;
   appointmentPurpose?: string;
+  // Custom routes added to base tour
+  customRoutes?: CustomRoute[];
 };

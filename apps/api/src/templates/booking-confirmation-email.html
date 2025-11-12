@@ -395,6 +395,21 @@
                     <span class="detail-label">Tour Package:</span>
                     <span class="detail-value"><strong>{{tourTitle}}</strong></span>
                 </div>
+                {{#if hasCustomRoutes}}
+                <div class="detail-row">
+                    <span class="detail-label">Custom Routes Added:</span>
+                    <span class="detail-value">
+                        {{#each customRoutes}}
+                        <div style="margin-top: 4px; padding: 6px 12px; background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); border-left: 3px solid #9c27b0; border-radius: 6px; font-size: 13px;">
+                            <strong style="color: #6a1b9a;">{{this.tourTitle}}</strong>
+                            <div style="color: #7b1fa2; font-size: 12px; margin-top: 2px;">
+                                {{this.durationDays}} days • {{this.tourLine}} • PHP {{this.pricePerPerson}}/person
+                            </div>
+                        </div>
+                        {{/each}}
+                    </span>
+                </div>
+                {{/if}}
                 <div class="detail-row">
                     <span class="detail-label">Travel Date:</span>
                     <span class="detail-value">{{tourDate}}</span>
@@ -407,6 +422,12 @@
                     <span class="detail-label">Price per Person:</span>
                     <span class="detail-value">{{pricePerPerson}}</span>
                 </div>
+                {{#if hasCustomRoutes}}
+                <div class="detail-row">
+                    <span class="detail-label">Combined Per Person:</span>
+                    <span class="detail-value"><strong>{{combinedPricePerPerson}}</strong></span>
+                </div>
+                {{/if}}
             </div>
             
             <!-- Payment Method Card -->

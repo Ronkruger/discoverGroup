@@ -249,9 +249,17 @@ export default function Login() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 }}
                 >
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Password
-                  </label>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-sm font-semibold text-gray-700">
+                      Password
+                    </label>
+                    <Link
+                      to="/forgot-password"
+                      className="text-sm font-semibold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
+                    >
+                      Forgot Password?
+                    </Link>
+                  </div>
                   <div className="relative group">
                     <motion.div
                       animate={passwordFocused ? { scale: 1 } : { scale: 0.95 }}

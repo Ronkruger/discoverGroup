@@ -1,10 +1,97 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
-import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, User, Phone, Calendar, Users, Sparkles, MapPin, CheckCircle2, ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, Lock, Eye, EyeOff, User, Phone, Calendar, Users, Sparkles, MapPin, CheckCircle2, ArrowRight, Check, X, AlertCircle } from 'lucide-react';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
+// Password strength calculator
+function calculatePasswordStrength(password: string): {
+  score: number;
+  label: string;
+  color: string;
+  requirements: { met: boolean; text: string }[];
+} {
+  const requirements = [
+    { met: password.length >= 8, text: 'At least 8 characters' },
+    { met: /[A-Z]/.test(password), text: 'One uppercase letter' },
+    { met: /[a-z]/.test(password), text: 'One lowercase letter' },
+    { met: /[0-9]/.test(password), text: 'One number' },
+    { met: /[^A-Za-z0-9]/.test(password), text: 'One special character' },
+  ];
+
+  const metCount = requirements.filter(r => r.met).length;
+  
+  let score = 0;
+  let label = 'Very Weak';
+  let color = 'bg-red-500';
+
+  if (metCount >= 5) {
+    score = 100;
+    label = 'Very Strong';
+    color = 'bg-green-500';
+  } else if (metCount >= 4) {
+    score = 80;
+    label = 'Strong';
+    color = 'bg-green-400';
+  } else if (metCount >= 3) {
+    score = 60;
+    label = 'Medium';
+    color = 'bg-yellow-500';
+  } else if (metCount >= 2) {
+    score = 40;
+    label = 'Weak';
+    color = 'bg-orange-500';
+  } else if (metCount >= 1) {
+    score = 20;
+    label = 'Very Weak';
+    color = 'bg-red-500';
+  }
+
+  return { score, label, color, requirements };
+}
+
+// Field validation functions
+function validateEmail(email: string): string | null {
+  if (!email) return 'Email is required';
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) return 'Please enter a valid email address';
+  return null;
+}
+
+function validatePhone(phone: string): string | null {
+  if (!phone) return 'Phone number is required';
+  // Philippine phone number format: +639xxxxxxxxx or 09xxxxxxxxx
+  const phoneRegex = /^(\+639|09)\d{9}$/;
+  if (!phoneRegex.test(phone.replace(/\s|-/g, ''))) {
+    return 'Please enter a valid Philippine phone number (e.g., +639123456789 or 09123456789)';
+  }
+  return null;
+}
+
+function validateFullName(name: string): string | null {
+  if (!name) return 'Full name is required';
+  if (name.trim().length < 2) return 'Name must be at least 2 characters';
+  if (!/^[a-zA-Z\s]+$/.test(name)) return 'Name should only contain letters';
+  return null;
+}
+
+function validateBirthDate(birthDate: string): string | null {
+  if (!birthDate) return 'Birth date is required';
+  const today = new Date();
+  const birth = new Date(birthDate);
+  const age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    if (age - 1 < 18) return 'You must be at least 18 years old';
+  } else {
+    if (age < 18) return 'You must be at least 18 years old';
+  }
+  
+  return null;
+}
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -18,11 +105,13 @@ export default function Register() {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [passwordStrength, setPasswordStrength] = useState(calculatePasswordStrength(''));
   const navigate = useNavigate();
   const { setUser, user } = useAuth();
 
@@ -33,18 +122,66 @@ export default function Register() {
     }
   }, [user, navigate]);
 
+  // Update password strength when password changes
+  useEffect(() => {
+    if (form.password) {
+      setPasswordStrength(calculatePasswordStrength(form.password));
+    }
+  }, [form.password]);
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-    setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    setForm(f => ({ ...f, [name]: value }));
+    
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  }
+
+  function validateAllFields(): boolean {
+    const errors: Record<string, string> = {};
+    
+    const emailError = validateEmail(form.email);
+    if (emailError) errors.email = emailError;
+    
+    const phoneError = validatePhone(form.phone);
+    if (phoneError) errors.phone = phoneError;
+    
+    const nameError = validateFullName(form.fullName);
+    if (nameError) errors.fullName = nameError;
+    
+    const birthError = validateBirthDate(form.birthDate);
+    if (birthError) errors.birthDate = birthError;
+    
+    if (!form.gender) errors.gender = 'Please select your gender';
+    
+    if (!form.password) {
+      errors.password = 'Password is required';
+    } else if (passwordStrength.requirements.some(r => !r.met)) {
+      errors.password = 'Password does not meet all requirements';
+    }
+    
+    if (!form.confirmPassword) {
+      errors.confirmPassword = 'Please confirm your password';
+    } else if (form.password !== form.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+    
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setSuccess('');
-    if (form.password !== form.confirmPassword) {
-      setError('Passwords do not match');
+    
+    if (!validateAllFields()) {
+      setError('Please fix the errors in the form');
       return;
     }
+    
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/auth/register`, {
@@ -270,7 +407,7 @@ export default function Register() {
                       transition={{ delay: 0.5 }}
                     >
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Full Name
+                        Full Name <span className="text-red-500">*</span>
                       </label>
                       <div className="relative group">
                         <motion.div
@@ -283,7 +420,9 @@ export default function Register() {
                             whileFocus={{ scale: 1.01 }}
                             type="text"
                             name="fullName"
-                            className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition-all duration-300"
+                            className={`w-full pl-12 pr-4 py-3 bg-white border-2 ${
+                              fieldErrors.fullName ? 'border-red-500' : 'border-gray-200'
+                            } rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition-all duration-300`}
                             placeholder="John Doe"
                             value={form.fullName}
                             onChange={handleChange}
@@ -293,6 +432,16 @@ export default function Register() {
                           />
                         </div>
                       </div>
+                      {fieldErrors.fullName && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-2 flex items-center gap-2 text-red-600 text-sm"
+                        >
+                          <AlertCircle size={16} />
+                          <span>{fieldErrors.fullName}</span>
+                        </motion.div>
+                      )}
                     </motion.div>
 
                     {/* Email */}
@@ -302,7 +451,7 @@ export default function Register() {
                       transition={{ delay: 0.55 }}
                     >
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Email Address
+                        Email Address <span className="text-red-500">*</span>
                       </label>
                       <div className="relative group">
                         <motion.div
@@ -315,7 +464,9 @@ export default function Register() {
                             whileFocus={{ scale: 1.01 }}
                             type="email"
                             name="email"
-                            className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:border-pink-500 focus:ring-4 focus:ring-pink-100 outline-none transition-all duration-300"
+                            className={`w-full pl-12 pr-4 py-3 bg-white border-2 ${
+                              fieldErrors.email ? 'border-red-500' : 'border-gray-200'
+                            } rounded-xl focus:border-pink-500 focus:ring-4 focus:ring-pink-100 outline-none transition-all duration-300`}
                             placeholder="you@example.com"
                             value={form.email}
                             onChange={handleChange}
@@ -325,6 +476,16 @@ export default function Register() {
                           />
                         </div>
                       </div>
+                      {fieldErrors.email && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-2 flex items-center gap-2 text-red-600 text-sm"
+                        >
+                          <AlertCircle size={16} />
+                          <span>{fieldErrors.email}</span>
+                        </motion.div>
+                      )}
                     </motion.div>
 
                     {/* Phone */}
@@ -334,7 +495,7 @@ export default function Register() {
                       transition={{ delay: 0.6 }}
                     >
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Phone Number
+                        Phone Number <span className="text-red-500">*</span>
                       </label>
                       <div className="relative group">
                         <motion.div
@@ -347,7 +508,9 @@ export default function Register() {
                             whileFocus={{ scale: 1.01 }}
                             type="tel"
                             name="phone"
-                            className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all duration-300"
+                            className={`w-full pl-12 pr-4 py-3 bg-white border-2 ${
+                              fieldErrors.phone ? 'border-red-500' : 'border-gray-200'
+                            } rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all duration-300`}
                             placeholder="+63 912 345 6789"
                             value={form.phone}
                             onChange={handleChange}
@@ -357,6 +520,16 @@ export default function Register() {
                           />
                         </div>
                       </div>
+                      {fieldErrors.phone && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-2 flex items-center gap-2 text-red-600 text-sm"
+                        >
+                          <AlertCircle size={16} />
+                          <span>{fieldErrors.phone}</span>
+                        </motion.div>
+                      )}
                     </motion.div>
 
                     {/* Birth Date */}
@@ -366,7 +539,7 @@ export default function Register() {
                       transition={{ delay: 0.65 }}
                     >
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Birth Date
+                        Birth Date <span className="text-red-500">*</span>
                       </label>
                       <div className="relative group">
                         <motion.div
@@ -379,7 +552,9 @@ export default function Register() {
                             whileFocus={{ scale: 1.01 }}
                             type="date"
                             name="birthDate"
-                            className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition-all duration-300"
+                            className={`w-full pl-12 pr-4 py-3 bg-white border-2 ${
+                              fieldErrors.birthDate ? 'border-red-500' : 'border-gray-200'
+                            } rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition-all duration-300`}
                             value={form.birthDate}
                             onChange={handleChange}
                             onFocus={() => setFocusedField('birthDate')}
@@ -388,6 +563,16 @@ export default function Register() {
                           />
                         </div>
                       </div>
+                      {fieldErrors.birthDate && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-2 flex items-center gap-2 text-red-600 text-sm"
+                        >
+                          <AlertCircle size={16} />
+                          <span>{fieldErrors.birthDate}</span>
+                        </motion.div>
+                      )}
                     </motion.div>
                   </div>
 
@@ -398,7 +583,7 @@ export default function Register() {
                     transition={{ delay: 0.7 }}
                   >
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Gender
+                      Gender <span className="text-red-500">*</span>
                     </label>
                     <div className="relative group">
                       <motion.div
@@ -410,7 +595,9 @@ export default function Register() {
                         <motion.select
                           whileFocus={{ scale: 1.01 }}
                           name="gender"
-                          className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:border-pink-500 focus:ring-4 focus:ring-pink-100 outline-none transition-all duration-300 appearance-none cursor-pointer"
+                          className={`w-full pl-12 pr-4 py-3 bg-white border-2 ${
+                            fieldErrors.gender ? 'border-red-500' : 'border-gray-200'
+                          } rounded-xl focus:border-pink-500 focus:ring-4 focus:ring-pink-100 outline-none transition-all duration-300 appearance-none cursor-pointer`}
                           value={form.gender}
                           onChange={handleChange}
                           onFocus={() => setFocusedField('gender')}
@@ -425,6 +612,16 @@ export default function Register() {
                         </motion.select>
                       </div>
                     </div>
+                    {fieldErrors.gender && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-2 flex items-center gap-2 text-red-600 text-sm"
+                      >
+                        <AlertCircle size={16} />
+                        <span>{fieldErrors.gender}</span>
+                      </motion.div>
+                    )}
                   </motion.div>
 
                   <div className="grid md:grid-cols-2 gap-5">
@@ -433,9 +630,10 @@ export default function Register() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.75 }}
+                      className="md:col-span-2"
                     >
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Password
+                        Password <span className="text-red-500">*</span>
                       </label>
                       <div className="relative group">
                         <motion.div
@@ -448,7 +646,9 @@ export default function Register() {
                             whileFocus={{ scale: 1.01 }}
                             type={showPassword ? "text" : "password"}
                             name="password"
-                            className="w-full pl-12 pr-12 py-3 bg-white border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all duration-300"
+                            className={`w-full pl-12 pr-12 py-3 bg-white border-2 ${
+                              fieldErrors.password ? 'border-red-500' : 'border-gray-200'
+                            } rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all duration-300`}
                             placeholder="••••••••"
                             value={form.password}
                             onChange={handleChange}
@@ -467,6 +667,67 @@ export default function Register() {
                           </motion.button>
                         </div>
                       </div>
+                      
+                      {/* Password Strength Indicator */}
+                      <AnimatePresence>
+                        {form.password && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="mt-3"
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-semibold text-gray-600">Password Strength:</span>
+                              <span className={`text-xs font-bold ${
+                                passwordStrength.score >= 80 ? 'text-green-600' :
+                                passwordStrength.score >= 60 ? 'text-yellow-600' :
+                                'text-red-600'
+                              }`}>
+                                {passwordStrength.label}
+                              </span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${passwordStrength.score}%` }}
+                                className={`h-full ${passwordStrength.color} transition-all duration-300`}
+                              />
+                            </div>
+                            <div className="mt-3 space-y-2">
+                              {passwordStrength.requirements.map((req, index) => (
+                                <motion.div
+                                  key={index}
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: index * 0.05 }}
+                                  className="flex items-center gap-2 text-xs"
+                                >
+                                  {req.met ? (
+                                    <Check className="text-green-500" size={14} />
+                                  ) : (
+                                    <X className="text-gray-400" size={14} />
+                                  )}
+                                  <span className={req.met ? 'text-green-600' : 'text-gray-500'}>
+                                    {req.text}
+                                  </span>
+                                </motion.div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                      
+                      {fieldErrors.password && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-2 flex items-center gap-2 text-red-600 text-sm"
+                        >
+                          <AlertCircle size={16} />
+                          <span>{fieldErrors.password}</span>
+                        </motion.div>
+                      )}
                     </motion.div>
 
                     {/* Confirm Password */}
@@ -474,9 +735,10 @@ export default function Register() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.8 }}
+                      className="md:col-span-2"
                     >
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Confirm Password
+                        Confirm Password <span className="text-red-500">*</span>
                       </label>
                       <div className="relative group">
                         <motion.div
@@ -489,7 +751,9 @@ export default function Register() {
                             whileFocus={{ scale: 1.01 }}
                             type={showConfirm ? "text" : "password"}
                             name="confirmPassword"
-                            className="w-full pl-12 pr-12 py-3 bg-white border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition-all duration-300"
+                            className={`w-full pl-12 pr-12 py-3 bg-white border-2 ${
+                              fieldErrors.confirmPassword ? 'border-red-500' : 'border-gray-200'
+                            } rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition-all duration-300`}
                             placeholder="••••••••"
                             value={form.confirmPassword}
                             onChange={handleChange}
@@ -508,6 +772,41 @@ export default function Register() {
                           </motion.button>
                         </div>
                       </div>
+                      
+                      {/* Password Match Indicator */}
+                      <AnimatePresence>
+                        {form.confirmPassword && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="mt-2 flex items-center gap-2 text-sm"
+                          >
+                            {form.password === form.confirmPassword ? (
+                              <>
+                                <Check className="text-green-500" size={16} />
+                                <span className="text-green-600">Passwords match</span>
+                              </>
+                            ) : (
+                              <>
+                                <X className="text-red-500" size={16} />
+                                <span className="text-red-600">Passwords do not match</span>
+                              </>
+                            )}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                      
+                      {fieldErrors.confirmPassword && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-2 flex items-center gap-2 text-red-600 text-sm"
+                        >
+                          <AlertCircle size={16} />
+                          <span>{fieldErrors.confirmPassword}</span>
+                        </motion.div>
+                      )}
                     </motion.div>
                   </div>
 

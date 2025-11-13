@@ -1,3 +1,4 @@
+// Supabase Featured Videos Service
 import { supabase } from './supabase-map-markers';
 
 export interface FeaturedVideo {
@@ -80,7 +81,8 @@ export async function createFeaturedVideo(
 
   const { data, error } = await supabase
     .from('featured_videos')
-    .insert([video as any])
+    // @ts-expect-error - Supabase type inference issue with optional table
+    .insert([video])
     .select()
     .single();
 
@@ -105,7 +107,8 @@ export async function updateFeaturedVideo(
 
   const { data, error } = await supabase
     .from('featured_videos')
-    .update(updates as any)
+    // @ts-expect-error - Supabase type inference issue with optional table
+    .update(updates)
     .eq('id', id)
     .select()
     .single();
@@ -150,7 +153,8 @@ export async function reorderFeaturedVideos(
   const promises = videos.map((video) =>
     supabase!
       .from('featured_videos')
-      .update({ display_order: video.display_order } as any)
+      // @ts-expect-error - Supabase type inference issue with optional table
+      .update({ display_order: video.display_order })
       .eq('id', video.id)
   );
 

@@ -98,13 +98,15 @@ export async function createFeaturedVideo(
   }
 
   try {
+    const insertData: Record<string, unknown> = {
+      ...videoData,
+      display_order: videoData.display_order ?? 0,
+      is_active: videoData.is_active ?? true,
+    };
+
     const { data, error } = await supabase
       .from('featured_videos')
-      .insert([{
-        ...videoData,
-        display_order: videoData.display_order ?? 0,
-        is_active: videoData.is_active ?? true,
-      }])
+      .insert(insertData as never)
       .select()
       .single();
 
@@ -113,7 +115,7 @@ export async function createFeaturedVideo(
       return { success: false, error: error.message };
     }
 
-    return { success: true, video: data };
+    return { success: true, video: data as FeaturedVideo };
   } catch (error) {
     console.error('Error creating featured video:', error);
     return {
@@ -137,7 +139,7 @@ export async function updateFeaturedVideo(
   try {
     const { data, error } = await supabase
       .from('featured_videos')
-      .update(updates)
+      .update(updates as never)
       .eq('id', id)
       .select()
       .single();
@@ -147,7 +149,7 @@ export async function updateFeaturedVideo(
       return { success: false, error: error.message };
     }
 
-    return { success: true, video: data };
+    return { success: true, video: data as FeaturedVideo };
   } catch (error) {
     console.error('Error updating featured video:', error);
     return {
@@ -200,10 +202,11 @@ export async function reorderFeaturedVideos(
 
   try {
     // Update each video's display_order
+    const supabaseClient = supabase; // Store reference to avoid null issues
     const updates = videos.map((video) =>
-      supabase
+      supabaseClient
         .from('featured_videos')
-        .update({ display_order: video.display_order })
+        .update({ display_order: video.display_order } as never)
         .eq('id', video.id)
     );
 

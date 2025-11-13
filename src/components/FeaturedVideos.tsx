@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { Play, Pause } from 'lucide-react';
-import { fetchFeaturedVideos, type FeaturedVideo } from '../lib/supabase-featured-videos';
 import { motion } from 'framer-motion';
+
+// Import featured videos service
+import { fetchFeaturedVideos, type FeaturedVideo } from '../lib/featured-videos-service';
 
 import 'swiper/css';
 import 'swiper/css/pagination';

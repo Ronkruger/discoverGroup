@@ -19,8 +19,7 @@ import {
   Globe,
   Film,
   Eye,
-  EyeOff,
-  GripVertical
+  EyeOff
 } from 'lucide-react';
 import FileUpload from '../components/FileUpload';
 import {
@@ -154,6 +153,23 @@ const HomepageManagement: React.FC = () => {
   // Featured Videos state
   const [featuredVideos, setFeaturedVideos] = useState<FeaturedVideo[]>([]);
   const [loadingVideos, setLoadingVideos] = useState(false);
+  
+  // New video form state
+  const [newVideo, setNewVideo] = useState<{
+    title: string;
+    description: string;
+    video_url: string;
+    thumbnail_url: string;
+    is_active: boolean;
+  }>({
+    title: '',
+    description: '',
+    video_url: '',
+    thumbnail_url: '',
+    is_active: true,
+  });
+  const [isAdding, setIsAdding] = useState(false);
+  const [savingVideo, setSavingVideo] = useState(false);
 
   // Load settings from localStorage on component mount
   useEffect(() => {
@@ -501,22 +517,6 @@ const HomepageManagement: React.FC = () => {
   );
 
   const renderFeaturedVideosSection = () => {
-    const [newVideo, setNewVideo] = useState<{
-      title: string;
-      description: string;
-      video_url: string;
-      thumbnail_url: string;
-      is_active: boolean;
-    }>({
-      title: '',
-      description: '',
-      video_url: '',
-      thumbnail_url: '',
-      is_active: true,
-    });
-    const [isAdding, setIsAdding] = useState(false);
-    const [savingVideo, setSavingVideo] = useState(false);
-
     const handleCreateVideo = async () => {
       if (!newVideo.title || !newVideo.video_url) {
         alert('Please provide at least a title and video');

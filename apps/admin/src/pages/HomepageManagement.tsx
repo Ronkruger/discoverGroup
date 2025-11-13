@@ -16,8 +16,27 @@ import {
   Shield,
   Headphones,
   Award,
-  Globe
+  Globe,
+  Film,
+  Eye,
+  EyeOff,
+  GripVertical
 } from 'lucide-react';
+import FileUpload from '../components/FileUpload';
+import {
+  uploadLogo,
+  uploadFeaturedVideo,
+  uploadVideoThumbnail,
+  deleteFile,
+  extractFilePathFromUrl,
+} from '../lib/supabase';
+import {
+  fetchAllFeaturedVideos,
+  createFeaturedVideo,
+  updateFeaturedVideo,
+  deleteFeaturedVideo,
+  type FeaturedVideo,
+} from '../lib/featured-videos';
 
 interface HomepageSettings {
   logo: {
@@ -131,6 +150,10 @@ const HomepageManagement: React.FC = () => {
   const [activeSection, setActiveSection] = useState('logo');
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(true);
+  
+  // Featured Videos state
+  const [featuredVideos, setFeaturedVideos] = useState<FeaturedVideo[]>([]);
+  const [loadingVideos, setLoadingVideos] = useState(false);
 
   // Load settings from localStorage on component mount
   useEffect(() => {
@@ -145,11 +168,27 @@ const HomepageManagement: React.FC = () => {
         console.error('Error loading saved homepage settings:', error);
       }
     }
+    
+    // Load featured videos from Supabase
+    loadFeaturedVideos();
   }, []);
+  
+  const loadFeaturedVideos = async () => {
+    setLoadingVideos(true);
+    try {
+      const videos = await fetchAllFeaturedVideos();
+      setFeaturedVideos(videos);
+    } catch (error) {
+      console.error('Error loading featured videos:', error);
+    } finally {
+      setLoadingVideos(false);
+    }
+  };
 
   const sections = [
     { id: 'logo', name: 'Logo & Branding', icon: Image },
     { id: 'hero', name: 'Hero Section', icon: Type },
+    { id: 'videos', name: 'Featured Videos', icon: Film },
     { id: 'statistics', name: 'Statistics', icon: BarChart },
     { id: 'features', name: 'Features', icon: Star },
     { id: 'testimonials', name: 'Testimonials', icon: Users },
@@ -316,17 +355,23 @@ const HomepageManagement: React.FC = () => {
         <h3 className="text-lg font-medium text-gray-900 mb-4">Logo Configuration</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Logo URL
-            </label>
-            <input
-              type="text"
+            <FileUpload
+              label="Logo Image"
               value={settings.logo.url}
-              onChange={(e) => updateLogoSetting('url', e.target.value)}
-              placeholder="/logo.png or https://example.com/logo.png"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(url) => updateLogoSetting('url', url || '/logo.png')}
+              onUpload={uploadLogo}
+              onDelete={async (url) => {
+                const path = extractFilePathFromUrl(url, 'homepage-media');
+                if (path) {
+                  await deleteFile('homepage-media', path);
+                }
+              }}
+              accept="image/*"
+              maxSize={5}
+              type="image"
+              placeholder="Upload your logo"
             />
-            <p className="text-xs text-gray-500 mt-1">URL to your logo image file</p>
+            <p className="text-xs text-gray-500 mt-2">Recommended: PNG or SVG format with transparent background</p>
           </div>
           
           <div>
@@ -454,6 +499,299 @@ const HomepageManagement: React.FC = () => {
       </div>
     </div>
   );
+
+  const renderFeaturedVideosSection = () => {
+    const [newVideo, setNewVideo] = useState<{
+      title: string;
+      description: string;
+      video_url: string;
+      thumbnail_url: string;
+      is_active: boolean;
+    }>({
+      title: '',
+      description: '',
+      video_url: '',
+      thumbnail_url: '',
+      is_active: true,
+    });
+    const [isAdding, setIsAdding] = useState(false);
+    const [savingVideo, setSavingVideo] = useState(false);
+
+    const handleCreateVideo = async () => {
+      if (!newVideo.title || !newVideo.video_url) {
+        alert('Please provide at least a title and video');
+        return;
+      }
+
+      setSavingVideo(true);
+      try {
+        const result = await createFeaturedVideo({
+          title: newVideo.title,
+          description: newVideo.description,
+          video_url: newVideo.video_url,
+          thumbnail_url: newVideo.thumbnail_url,
+          display_order: featuredVideos.length,
+          is_active: newVideo.is_active,
+        });
+
+        if (result.success) {
+          await loadFeaturedVideos();
+          setNewVideo({ title: '', description: '', video_url: '', thumbnail_url: '', is_active: true });
+          setIsAdding(false);
+          alert('Video added successfully!');
+        } else {
+          alert(`Error: ${result.error}`);
+        }
+      } catch (error) {
+        console.error('Error creating video:', error);
+        alert('Failed to create video');
+      } finally {
+        setSavingVideo(false);
+      }
+    };
+
+    const handleToggleActive = async (video: FeaturedVideo) => {
+      const result = await updateFeaturedVideo(video.id, { is_active: !video.is_active });
+      if (result.success) {
+        await loadFeaturedVideos();
+      } else {
+        alert(`Error: ${result.error}`);
+      }
+    };
+
+    const handleDeleteVideo = async (video: FeaturedVideo) => {
+      if (!confirm(`Are you sure you want to delete "${video.title}"?`)) {
+        return;
+      }
+
+      try {
+        // Delete video file from storage
+        if (video.video_url) {
+          const videoPath = extractFilePathFromUrl(video.video_url, 'homepage-media');
+          if (videoPath) {
+            await deleteFile('homepage-media', videoPath);
+          }
+        }
+
+        // Delete thumbnail from storage
+        if (video.thumbnail_url) {
+          const thumbPath = extractFilePathFromUrl(video.thumbnail_url, 'homepage-media');
+          if (thumbPath) {
+            await deleteFile('homepage-media', thumbPath);
+          }
+        }
+
+        // Delete from database
+        const result = await deleteFeaturedVideo(video.id);
+        if (result.success) {
+          await loadFeaturedVideos();
+          alert('Video deleted successfully');
+        } else {
+          alert(`Error: ${result.error}`);
+        }
+      } catch (error) {
+        console.error('Error deleting video:', error);
+        alert('Failed to delete video');
+      }
+    };
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-lg font-medium text-gray-900">Featured Videos</h3>
+            <p className="text-sm text-gray-600 mt-1">Manage videos shown in the homepage carousel</p>
+          </div>
+          <button
+            onClick={() => setIsAdding(!isAdding)}
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            <span>{isAdding ? 'Cancel' : 'Add Video'}</span>
+          </button>
+        </div>
+
+        {/* Add New Video Form */}
+        {isAdding && (
+          <div className="border border-blue-200 rounded-lg p-6 bg-blue-50">
+            <h4 className="font-medium text-gray-900 mb-4">Add New Featured Video</h4>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <FileUpload
+                    label="Video File"
+                    value={newVideo.video_url}
+                    onChange={(url) => setNewVideo({ ...newVideo, video_url: url || '' })}
+                    onUpload={uploadFeaturedVideo}
+                    accept="video/mp4,video/webm,video/quicktime"
+                    maxSize={100}
+                    type="video"
+                    placeholder="Upload video (max 100MB)"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <FileUpload
+                    label="Thumbnail Image"
+                    value={newVideo.thumbnail_url}
+                    onChange={(url) => setNewVideo({ ...newVideo, thumbnail_url: url || '' })}
+                    onUpload={uploadVideoThumbnail}
+                    accept="image/*"
+                    maxSize={5}
+                    type="image"
+                    placeholder="Upload thumbnail"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Video Title <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newVideo.title}
+                  onChange={(e) => setNewVideo({ ...newVideo, title: e.target.value })}
+                  placeholder="e.g., Explore the Swiss Alps"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={newVideo.description}
+                  onChange={(e) => setNewVideo({ ...newVideo, description: e.target.value })}
+                  placeholder="Brief description of the video..."
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="newVideoActive"
+                  checked={newVideo.is_active}
+                  onChange={(e) => setNewVideo({ ...newVideo, is_active: e.target.checked })}
+                  className="w-4 h-4 text-blue-600"
+                />
+                <label htmlFor="newVideoActive" className="text-sm text-gray-700">
+                  Active (show on homepage)
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-3 pt-4">
+                <button
+                  onClick={handleCreateVideo}
+                  disabled={savingVideo || !newVideo.title || !newVideo.video_url}
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {savingVideo ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="h-4 w-4" />
+                      <span>Save Video</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    setIsAdding(false);
+                    setNewVideo({ title: '', description: '', video_url: '', thumbnail_url: '', is_active: true });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Existing Videos List */}
+        <div className="space-y-4">
+          {loadingVideos ? (
+            <div className="text-center py-8 text-gray-500">
+              <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2" />
+              <p>Loading videos...</p>
+            </div>
+          ) : featuredVideos.length === 0 ? (
+            <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+              <Film className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+              <p className="text-gray-600">No featured videos yet</p>
+              <p className="text-sm text-gray-500">Click "Add Video" to create your first featured video</p>
+            </div>
+          ) : (
+            featuredVideos.map((video) => (
+              <div key={video.id} className="border border-gray-200 rounded-lg p-4 bg-white">
+                <div className="flex items-start gap-4">
+                  {/* Thumbnail */}
+                  <div className="w-48 h-28 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                    {video.thumbnail_url ? (
+                      <img
+                        src={video.thumbnail_url}
+                        alt={video.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Film className="h-8 w-8 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="font-medium text-gray-900">{video.title}</h4>
+                        {video.description && (
+                          <p className="text-sm text-gray-600 mt-1">{video.description}</p>
+                        )}
+                        <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                          <span>Order: {video.display_order}</span>
+                          <span className={`px-2 py-1 rounded ${video.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                            {video.is_active ? 'Active' : 'Inactive'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleToggleActive(video)}
+                          className="p-2 text-gray-600 hover:text-blue-600 rounded-md hover:bg-blue-50"
+                          title={video.is_active ? 'Deactivate' : 'Activate'}
+                        >
+                          {video.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteVideo(video)}
+                          className="p-2 text-gray-600 hover:text-red-600 rounded-md hover:bg-red-50"
+                          title="Delete"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    );
+  };
 
   const renderStatisticsSection = () => (
     <div className="space-y-6">
@@ -711,6 +1049,7 @@ const HomepageManagement: React.FC = () => {
     switch (activeSection) {
       case 'logo': return renderLogoSection();
       case 'hero': return renderHeroSection();
+      case 'videos': return renderFeaturedVideosSection();
       case 'statistics': return renderStatisticsSection();
       case 'features': return renderFeaturesSection();
       case 'testimonials': return renderTestimonialsSection();

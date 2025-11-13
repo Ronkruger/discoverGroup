@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS map_markers (
   city TEXT NOT NULL,
   country TEXT,
   top TEXT NOT NULL,
-  left TEXT NOT NULL,
+  "left" TEXT NOT NULL,
   description TEXT,
   tour_slug TEXT,
   is_active BOOLEAN DEFAULT true,
@@ -29,7 +29,7 @@ CREATE TRIGGER update_map_markers_updated_at
   EXECUTE FUNCTION update_updated_at_column();
 
 -- Insert initial marker data (from existing Home.tsx hardcoded values)
-INSERT INTO map_markers (city, country, top, left, is_active) VALUES
+INSERT INTO map_markers (city, country, top, "left", is_active) VALUES
   ('Paris', 'France', '40%', '35%', true),
   ('Rome', 'Italy', '70%', '50%', true),
   ('Lucerne', 'Switzerland', '55%', '42%', true),

@@ -18,6 +18,7 @@ import { SkeletonCard } from "../components/LoadingComponents";
 import { NetworkError } from "../components/ErrorComponents";
 import { getHomepageSettings, subscribeToSettingsChanges } from "../services/homepageSettings";
 import BackToTop from "../components/BackToTop";
+import FeaturedVideos from "../components/FeaturedVideos";
 
 import "swiper/css";
 import "swiper/css/pagination";
@@ -273,6 +274,9 @@ export default function Home() {
           </div>
         </motion.div>
       </section>
+
+      {/* Featured Videos Section */}
+      <FeaturedVideos />
 
       {/* Trust Signals & Social Proof */}
       <section className="bg-blue-50 py-12">

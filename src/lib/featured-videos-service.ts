@@ -23,11 +23,12 @@ export interface FeaturedVideoInput {
 }
 
 /**
- * Fetch all active featured videos
+ * Fetch all active featured videos for homepage display
+ * Returns empty array if Supabase is not configured
  */
 export async function fetchFeaturedVideos(): Promise<FeaturedVideo[]> {
   if (!supabase) {
-    console.error('Supabase client not initialized');
+    console.warn('⚠️ Supabase client not initialized - featured videos disabled');
     return [];
   }
 

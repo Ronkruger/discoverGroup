@@ -52,8 +52,11 @@ class AuthService {
   }
 
   // Get all users from API
-  async getAllUsers(): Promise<User[]> {
-    const res = await fetch(`${API_BASE_URL}/admin/users`, {
+  async getAllUsers(includeArchived = false): Promise<User[]> {
+    const url = includeArchived 
+      ? `${API_BASE_URL}/admin/users?includeArchived=true`
+      : `${API_BASE_URL}/admin/users`;
+    const res = await fetch(url, {
       headers: { 'Authorization': `Bearer ${getToken()}` },
     });
     if (!res.ok) throw new Error('Failed to fetch users');
@@ -69,6 +72,37 @@ class AuthService {
     });
     if (!res.ok) throw new Error('Failed to update user');
     return await res.json();
+  }
+
+  // Archive user (soft delete)
+  async archiveUser(userId: string): Promise<User> {
+    const res = await fetch(`${API_BASE_URL}/admin/users/${userId}/archive`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${getToken()}` },
+    });
+    if (!res.ok) throw new Error('Failed to archive user');
+    const data = await res.json();
+    return data.user;
+  }
+
+  // Unarchive user (restore)
+  async unarchiveUser(userId: string): Promise<User> {
+    const res = await fetch(`${API_BASE_URL}/admin/users/${userId}/unarchive`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${getToken()}` },
+    });
+    if (!res.ok) throw new Error('Failed to unarchive user');
+    const data = await res.json();
+    return data.user;
+  }
+
+  // Permanently delete user
+  async deleteUser(userId: string): Promise<void> {
+    const res = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${getToken()}` },
+    });
+    if (!res.ok) throw new Error('Failed to delete user');
   }
 
   logout(): void {

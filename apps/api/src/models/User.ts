@@ -6,6 +6,7 @@ export interface IUser extends Document {
   fullName: string;
   role: string;
   isActive: boolean;
+  isArchived: boolean;
   phone?: string;
   birthDate?: string;
   gender?: string;
@@ -21,6 +22,7 @@ const UserSchema = new Schema<IUser>({
   fullName: { type: String, required: true },
   role: { type: String, required: true },
   isActive: { type: Boolean, default: true },
+  isArchived: { type: Boolean, default: false },
   phone: { type: String },
   birthDate: { type: String },
   gender: { type: String },

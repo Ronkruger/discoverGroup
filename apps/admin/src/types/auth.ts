@@ -25,6 +25,7 @@ export interface User {
   role: UserRole;
   department?: string;
   isActive: boolean;
+  isArchived?: boolean;
   createdAt: string;
   updatedAt: string;
 }

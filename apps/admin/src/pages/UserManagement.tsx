@@ -11,7 +11,11 @@ import {
   Eye,
   EyeOff,
   Save,
-  X
+  X,
+  Archive,
+  ArchiveRestore,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { 
   User as UserType, 
@@ -31,6 +35,13 @@ const UserManagement: React.FC = () => {
   const [editingUser, setEditingUser] = useState<UserType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    type: 'archive' | 'unarchive' | 'delete';
+    userId: string;
+    userName: string;
+  } | null>(null);
 
   const [createForm, setCreateForm] = useState<RegisterData>({
     email: '',
@@ -53,7 +64,7 @@ const UserManagement: React.FC = () => {
     let mounted = true;
     (async () => {
       try {
-        const all = await authService.getAllUsers();
+        const all = await authService.getAllUsers(showArchived);
         if (mounted) setUsers(all);
       } catch {
         // swallow here; component-level error state can be used if desired
@@ -62,7 +73,7 @@ const UserManagement: React.FC = () => {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [showArchived]);
   const handleEditUser = (user: UserType) => {
     setEditingUser(user);
     setIsEditModalOpen(true);
@@ -105,7 +116,7 @@ const UserManagement: React.FC = () => {
     setError(null);
     try {
       await authService.register(createForm);
-      setUsers(await authService.getAllUsers());
+      setUsers(await authService.getAllUsers(showArchived));
       setIsCreateModalOpen(false);
       resetCreateForm();
     } catch (err) {
@@ -115,12 +126,42 @@ const UserManagement: React.FC = () => {
     }
   };
 
+  const handleArchiveUser = async (userId: string) => {
+    try {
+      await authService.archiveUser(userId);
+      setUsers(await authService.getAllUsers(showArchived));
+      setConfirmDialog(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to archive user');
+    }
+  };
+
+  const handleUnarchiveUser = async (userId: string) => {
+    try {
+      await authService.unarchiveUser(userId);
+      setUsers(await authService.getAllUsers(showArchived));
+      setConfirmDialog(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to unarchive user');
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      await authService.deleteUser(userId);
+      setUsers(await authService.getAllUsers(showArchived));
+      setConfirmDialog(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete user');
+    }
+  };
+
   const handleToggleUserStatus = async (userId: string) => {
     try {
       const user = users.find((u) => u.id === userId);
       if (user) {
         await authService.updateUser(userId, { isActive: !user.isActive });
-        setUsers(await authService.getAllUsers());
+        setUsers(await authService.getAllUsers(showArchived));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update user');
@@ -156,7 +197,7 @@ const UserManagement: React.FC = () => {
     setError(null);
     try {
       await authService.updateUser(editingUser.id, updatedData);
-      setUsers(await authService.getAllUsers());
+      setUsers(await authService.getAllUsers(showArchived));
       setIsEditModalOpen(false);
       setEditingUser(null);
     } catch (err) {
@@ -199,13 +240,26 @@ const UserManagement: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
           <p className="text-gray-600">Manage system users and their access permissions</p>
         </div>
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Create User</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => setShowArchived(!showArchived)}
+            className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
+              showArchived 
+                ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <Archive className="w-4 h-4" />
+            <span>{showArchived ? 'Hide Archived' : 'Show Archived'}</span>
+          </button>
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Create User</span>
+          </button>
+        </div>
       </div>
 
       {/* Search */}
@@ -282,11 +336,13 @@ const UserManagement: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      user.isActive 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
+                      user.isArchived
+                        ? 'bg-gray-100 text-gray-800'
+                        : user.isActive 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
                     }`}>
-                      {user.isActive ? 'Active' : 'Inactive'}
+                      {user.isArchived ? 'Archived' : user.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -297,20 +353,65 @@ const UserManagement: React.FC = () => {
                       <button
                         onClick={() => handleEditUser(user)}
                         className="text-blue-600 hover:text-blue-900 transition-colors flex items-center space-x-1"
+                        disabled={user.isArchived}
                       >
                         <Edit3 className="w-4 h-4" />
                         <span>Edit</span>
                       </button>
-                      <button
-                        onClick={() => handleToggleUserStatus(user.id)}
-                        className={`${
-                          user.isActive 
-                            ? 'text-red-600 hover:text-red-900' 
-                            : 'text-green-600 hover:text-green-900'
-                        } transition-colors`}
-                      >
-                        {user.isActive ? 'Deactivate' : 'Activate'}
-                      </button>
+                      
+                      {user.isArchived ? (
+                        <>
+                          <button
+                            onClick={() => setConfirmDialog({
+                              isOpen: true,
+                              type: 'unarchive',
+                              userId: user.id,
+                              userName: user.fullName
+                            })}
+                            className="text-green-600 hover:text-green-900 transition-colors flex items-center space-x-1"
+                          >
+                            <ArchiveRestore className="w-4 h-4" />
+                            <span>Restore</span>
+                          </button>
+                          <button
+                            onClick={() => setConfirmDialog({
+                              isOpen: true,
+                              type: 'delete',
+                              userId: user.id,
+                              userName: user.fullName
+                            })}
+                            className="text-red-600 hover:text-red-900 transition-colors flex items-center space-x-1"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            <span>Delete</span>
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleToggleUserStatus(user.id)}
+                            className={`${
+                              user.isActive 
+                                ? 'text-orange-600 hover:text-orange-900' 
+                                : 'text-green-600 hover:text-green-900'
+                            } transition-colors`}
+                          >
+                            {user.isActive ? 'Deactivate' : 'Activate'}
+                          </button>
+                          <button
+                            onClick={() => setConfirmDialog({
+                              isOpen: true,
+                              type: 'archive',
+                              userId: user.id,
+                              userName: user.fullName
+                            })}
+                            className="text-gray-600 hover:text-gray-900 transition-colors flex items-center space-x-1"
+                          >
+                            <Archive className="w-4 h-4" />
+                            <span>Archive</span>
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -688,6 +789,103 @@ const UserManagement: React.FC = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Dialog */}
+      {confirmDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className={`p-2 rounded-full ${
+                confirmDialog.type === 'delete' 
+                  ? 'bg-red-100' 
+                  : confirmDialog.type === 'archive'
+                    ? 'bg-orange-100'
+                    : 'bg-green-100'
+              }`}>
+                {confirmDialog.type === 'delete' ? (
+                  <Trash2 className="w-6 h-6 text-red-600" />
+                ) : confirmDialog.type === 'archive' ? (
+                  <Archive className="w-6 h-6 text-orange-600" />
+                ) : (
+                  <ArchiveRestore className="w-6 h-6 text-green-600" />
+                )}
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">
+                  {confirmDialog.type === 'delete' 
+                    ? 'Delete User' 
+                    : confirmDialog.type === 'archive'
+                      ? 'Archive User'
+                      : 'Restore User'}
+                </h3>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              {confirmDialog.type === 'delete' && (
+                <>
+                  <div className="flex items-start space-x-2 mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-red-800">
+                      <strong>Warning:</strong> This action is permanent and cannot be undone.
+                    </p>
+                  </div>
+                  <p className="text-gray-600">
+                    Are you sure you want to permanently delete <strong>{confirmDialog.userName}</strong>? 
+                    All associated data will be removed from the system.
+                  </p>
+                </>
+              )}
+              {confirmDialog.type === 'archive' && (
+                <p className="text-gray-600">
+                  Are you sure you want to archive <strong>{confirmDialog.userName}</strong>? 
+                  This user will be hidden from the active users list and their account will be deactivated. 
+                  You can restore them later if needed.
+                </p>
+              )}
+              {confirmDialog.type === 'unarchive' && (
+                <p className="text-gray-600">
+                  Are you sure you want to restore <strong>{confirmDialog.userName}</strong>? 
+                  This user will be moved back to active users and their account will be reactivated.
+                </p>
+              )}
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setConfirmDialog(null)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (confirmDialog.type === 'delete') {
+                    handleDeleteUser(confirmDialog.userId);
+                  } else if (confirmDialog.type === 'archive') {
+                    handleArchiveUser(confirmDialog.userId);
+                  } else {
+                    handleUnarchiveUser(confirmDialog.userId);
+                  }
+                }}
+                className={`flex-1 px-4 py-2 rounded-lg text-white transition-colors ${
+                  confirmDialog.type === 'delete'
+                    ? 'bg-red-600 hover:bg-red-700'
+                    : confirmDialog.type === 'archive'
+                      ? 'bg-orange-600 hover:bg-orange-700'
+                      : 'bg-green-600 hover:bg-green-700'
+                }`}
+              >
+                {confirmDialog.type === 'delete' 
+                  ? 'Delete Permanently' 
+                  : confirmDialog.type === 'archive'
+                    ? 'Archive User'
+                    : 'Restore User'}
+              </button>
             </div>
           </div>
         </div>

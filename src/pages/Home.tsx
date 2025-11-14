@@ -2,8 +2,6 @@ import * as React from "react";
 import { fetchTours } from "../api/tours";
 import { toggleFavorite, getFavorites } from "../api/favorites";
 import { fetchRecentBookingNotification } from "../api/bookings";
-import { fetchMapMarkers } from "../lib/supabase-map-markers";
-import type { MapMarker } from "../lib/supabase-map-markers";
 import { useAuth } from "../context/useAuth";
 import type { Tour } from "../types";
 import TourCard from "../components/TourCard";
@@ -50,7 +48,6 @@ export default function Home() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [favorites, setFavorites] = React.useState<string[]>([]);
-  const [mapMarkers, setMapMarkers] = React.useState<MapMarker[]>([]);
   const [homepageSettings, setHomepageSettings] = React.useState(getHomepageSettings());
   const [recentBooking, setRecentBooking] = React.useState<{
     customerName: string;
@@ -78,19 +75,6 @@ export default function Home() {
         .catch(err => console.warn('Could not load favorites:', err));
     }
   }, [user]);
-
-  // Load map markers from Supabase
-  React.useEffect(() => {
-    const loadMapMarkers = async () => {
-      try {
-        const markers = await fetchMapMarkers();
-        setMapMarkers(markers);
-      } catch (err) {
-        console.warn('Could not load map markers:', err);
-      }
-    };
-    loadMapMarkers();
-  }, []);
 
   // Load recent booking notification
   React.useEffect(() => {
@@ -505,45 +489,6 @@ export default function Home() {
             </Link>
           </div>
         )}
-      </section>
-
-      {/* Interactive Map Preview */}
-      <section className="relative bg-gray-100 py-20">
-        <div className="container mx-auto px-6 text-center">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-3xl font-bold mb-12"
-          >
-            Explore Europe at a Glance
-          </motion.h2>
-          <div className="relative w-full max-w-4xl mx-auto">
-            <img
-              src="/europe-map.png"
-              alt="Europe Map"
-              className="w-full rounded-lg shadow-lg"
-            />
-            {mapMarkers.map((point) => (
-              <motion.div
-                key={point.id}
-                className="absolute w-4 h-4 bg-blue-600 rounded-full cursor-pointer group"
-                style={{ top: point.top, left: point.left }}
-                whileHover={{ scale: 1.5 }}
-              >
-                <span className="absolute left-6 top-0 bg-white text-sm text-gray-800 px-2 py-1 rounded shadow opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-10">
-                  {point.city}{point.country ? `, ${point.country}` : ''}
-                  {point.description && (
-                    <span className="block text-xs text-gray-600 mt-1">
-                      {point.description}
-                    </span>
-                  )}
-                </span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
       </section>
 
       {/* Testimonials */}

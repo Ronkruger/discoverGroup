@@ -22,11 +22,14 @@ import {
   Plus
 } from "lucide-react";
 
+// Import CustomRoute type
+import type { CustomRoute } from "../types";
+
 /**
  * Booking confirmation page
  * - Route: /booking/confirmation
  * - Expects location.state with booking summary:
- *   { bookingId, tourTitle, country, date, passengers, perPerson, total }
+ *   { bookingId, tourTitle, country, date, passengers, perPerson, total, customRoutes }
  */
 
 // Sample itinerary data - in a real app this would come from an API
@@ -134,6 +137,7 @@ export default function BookingConfirmation(): JSX.Element {
     appointmentDate?: string;
     appointmentTime?: string;
     appointmentPurpose?: string;
+    customRoutes?: CustomRoute[];
   };
 
   // Get booking ID from URL parameter or location state
@@ -348,6 +352,36 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
                   <div className="text-slate-400 text-sm mb-1">Tour</div>
                   <div className="text-white text-lg font-semibold">{state.tourTitle}</div>
                 </div>
+                
+                {/* Custom Routes Display */}
+                {state.customRoutes && state.customRoutes.length > 0 && (
+                  <div>
+                    <div className="text-slate-400 text-sm mb-2">Combined Tour Package</div>
+                    <div className="space-y-2">
+                      {state.customRoutes.map((route, index) => (
+                        <div 
+                          key={index}
+                          className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 rounded-lg p-3"
+                        >
+                          <div className="flex items-start gap-2">
+                            <Plus className="w-4 h-4 text-purple-300 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1">
+                              <div className="text-purple-100 font-semibold text-sm">{route.tourTitle}</div>
+                              <div className="text-purple-200/80 text-xs mt-1">
+                                {route.durationDays} days • {route.tourLine} • PHP {route.pricePerPerson.toLocaleString()}/person
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="text-slate-300 text-xs mt-2 flex items-center gap-1">
+                        <Star className="w-3 h-3 text-yellow-400" />
+                        <span>Combined package includes all routes above</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
                 <div>
                   <div className="text-slate-400 text-sm mb-1">Destination</div>
                   <div className="text-white font-medium flex items-center gap-2">

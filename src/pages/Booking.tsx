@@ -367,6 +367,7 @@ export default function Booking(): JSX.Element {
         appointmentDate: wantsAppointment ? appointmentDate : undefined,
         appointmentTime: wantsAppointment ? appointmentTime : undefined,
         appointmentPurpose: wantsAppointment ? appointmentPurpose : undefined,
+        customRoutes: customRoutes.length > 0 ? customRoutes : undefined,
       },
     });
     
@@ -398,6 +399,17 @@ export default function Booking(): JSX.Element {
               remainingBalance: paymentType === "downpayment" ? remainingBalance : undefined,
               isDownpaymentOnly: paymentType === "downpayment",
               country: tour.additionalInfo?.countriesVisited?.[0] || '',
+              // Include custom routes for combined tours
+              ...(customRoutes.length > 0 && {
+                customRoutes: customRoutes.map(route => ({
+                  tourSlug: route.tourSlug,
+                  tourTitle: route.tourTitle,
+                  tourLine: route.tourLine,
+                  durationDays: route.durationDays,
+                  pricePerPerson: route.pricePerPerson,
+                  insertAfterDay: route.insertAfterDay,
+                })),
+              }),
               // Include payment method details
               ...(selectedPaymentMethod && {
                 paymentMethod: selectedPaymentMethod.name,
@@ -1724,7 +1736,43 @@ export default function Booking(): JSX.Element {
                 <div className="mt-4">
                   <div className="text-xs text-slate-300">Your booking</div>
                   <div className="text-lg font-semibold text-slate-100">{tour.title}</div>
-                  <div className="text-sm text-slate-300 mt-1">{tour.line ?? ""} • {tour.durationDays ?? tour.itinerary?.length ?? 0} days</div>
+                  <div className="text-sm text-slate-300 mt-1">
+                    {tour.line ?? ""} • {(() => {
+                      const baseDays = tour.durationDays ?? tour.itinerary?.length ?? 0;
+                      const additionalDays = customRoutes.reduce((sum, route) => sum + route.durationDays, 0);
+                      const totalDays = baseDays + additionalDays;
+                      
+                      if (customRoutes.length > 0) {
+                        return (
+                          <>
+                            <span className="font-semibold text-yellow-400">{totalDays} days</span>
+                            <span className="text-xs text-slate-400"> ({baseDays} + {additionalDays} combined)</span>
+                          </>
+                        );
+                      }
+                      return `${baseDays} days`;
+                    })()}
+                  </div>
+                  
+                  {/* Show additional routes if any */}
+                  {customRoutes.length > 0 && (
+                    <div className="mt-3 p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                      <div className="text-xs text-purple-300 font-semibold mb-2 flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Additional Route Included
+                      </div>
+                      {customRoutes.map((route, idx) => (
+                        <div key={idx} className="text-sm text-slate-200 flex items-center gap-2">
+                          <span className="text-purple-400">+</span>
+                          <span>{route.tourTitle}</span>
+                          <span className="text-xs text-slate-400">({route.durationDays} days)</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
                   <div className="mt-4 text-sm text-slate-300 space-y-2">
                     <div><strong className="text-slate-100">Departure:</strong> <span className="ml-2">
                       {(() => {

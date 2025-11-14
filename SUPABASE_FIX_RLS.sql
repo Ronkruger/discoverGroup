@@ -1,4 +1,4 @@
--- Fix RLS policies to allow public uploads
+-- Fix RLS policies t                                                                                                   o allow public uploads
 -- This allows anyone to upload/delete files (suitable for admin-only features)
 
 -- Drop existing restrictive policies

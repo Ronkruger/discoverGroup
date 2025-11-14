@@ -14,6 +14,15 @@ if (SENDGRID_API_KEY) {
   console.warn('⚠️ SendGrid API key not found - email sending will use fallback');
 }
 
+interface CustomRoute {
+  tourSlug: string;
+  tourTitle: string;
+  tourLine?: string;
+  durationDays: number;
+  pricePerPerson: number;
+  insertAfterDay: number;
+}
+
 interface BookingDetails {
   bookingId: string;
   customerName: string;
@@ -34,6 +43,7 @@ interface BookingDetails {
   paymentMethodDescription?: string;
   paymentMethodIcon?: string;
   paymentGateway?: string;
+  customRoutes?: CustomRoute[];
 }
 
 // Create transporter - using Gmail for real email sending
@@ -282,6 +292,19 @@ export const sendBookingConfirmationEmail = async (booking: BookingDetails): Pro
         }
       }
 
+      // Calculate combined tour details
+      const hasCustomRoutes = booking.customRoutes && booking.customRoutes.length > 0;
+      const baseDurationDays = parseInt(booking.tourTitle.match(/\d+/)?.[0] || '0');
+      const additionalDays = hasCustomRoutes 
+        ? booking.customRoutes.reduce((sum, route) => sum + route.durationDays, 0)
+        : 0;
+      const totalDays = baseDurationDays + additionalDays;
+      
+      // Calculate combined price per person
+      const combinedPricePerPerson = hasCustomRoutes
+        ? booking.pricePerPerson + booking.customRoutes.reduce((sum, route) => sum + route.pricePerPerson, 0)
+        : booking.pricePerPerson;
+
       // Prepare template data
       const templateData = {
         customerName: booking.customerName,
@@ -293,6 +316,18 @@ export const sendBookingConfirmationEmail = async (booking: BookingDetails): Pro
         totalAmount: formatCurrency(booking.totalAmount),
         isDownpaymentOnly: booking.isDownpaymentOnly || false,
         bookingDetailsUrl: `${process.env.CLIENT_URL || 'http://localhost:5173'}/booking-confirmation/${booking.bookingId}`,
+        // Combined tour details
+        hasCustomRoutes,
+        ...(hasCustomRoutes && {
+          customRoutes: booking.customRoutes?.map(route => ({
+            tourTitle: route.tourTitle,
+            tourLine: route.tourLine || '',
+            durationDays: route.durationDays,
+            pricePerPerson: formatCurrency(route.pricePerPerson),
+          })),
+          combinedDurationDays: totalDays,
+          combinedPricePerPerson: formatCurrency(combinedPricePerPerson),
+        }),
         // Payment method details
         ...(booking.paymentMethod && {
           paymentMethod: booking.paymentMethod,

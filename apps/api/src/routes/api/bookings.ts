@@ -40,12 +40,16 @@ router.post("/", async (req, res) => {
       notes,
       appointmentDate,
       appointmentTime,
-      appointmentPurpose
+      appointmentPurpose,
+      customRoutes
     } = req.body;
 
     // Note: Tours are served from JSON files, not MongoDB
     // So we'll store the tour slug directly instead of a MongoDB reference
     console.log('📝 Creating booking for tour slug:', tourSlug);
+    if (customRoutes && customRoutes.length > 0) {
+      console.log('📋 Combined tour with', customRoutes.length, 'custom route(s)');
+    }
 
     // Create the booking
     const booking = await Booking.create({
@@ -67,7 +71,8 @@ router.post("/", async (req, res) => {
       notes,
       appointmentDate,
       appointmentTime,
-      appointmentPurpose
+      appointmentPurpose,
+      customRoutes: customRoutes || []
     });
 
     console.log('✅ Booking created successfully:', bookingId);
@@ -89,7 +94,8 @@ router.post("/", async (req, res) => {
         isDownpaymentOnly: paidAmount < totalAmount,
         appointmentDate,
         appointmentTime,
-        appointmentPurpose
+        appointmentPurpose,
+        customRoutes: customRoutes || []
       });
 
       if (emailResult.success) {

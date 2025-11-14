@@ -9,6 +9,7 @@
       script-src 'self' https://js.stripe.com 'unsafe-eval' 'unsafe-inline';
       style-src 'self' 'unsafe-inline' https://js.stripe.com;
       img-src 'self' data: blob: https://*.stripe.com https://*.stripecdn.com https://*.stripe.network https://js.stripe.com https://q.stripe.com https://b.stripecdn.com https://m.stripe.network https://m.stripe.com https://*.supabase.co;
+      media-src 'self' https://*.supabase.co blob: data:;
       connect-src 'self' ws://localhost:5173 http://localhost:4000 https://discovergroup.onrender.com https://*.stripe.com https://*.stripecdn.com https://*.stripe.network https://*.supabase.co;
       frame-src 'self' https://*.stripe.com;
       worker-src 'self' blob:;

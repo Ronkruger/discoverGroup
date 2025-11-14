@@ -362,19 +362,46 @@ export default function DestinationCountry(): JSX.Element {
   return (
     <main className="container mx-auto px-5 py-10">
       {/* HERO + CAROUSEL + SUMMARY */}
-      <header className="mb-8">
-        <div className="rounded-lg overflow-hidden bg-slate-50 shadow-sm">
+      <header className="mb-12">
+        <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-slate-50 to-blue-50 shadow-2xl border border-white/20">
           <div className="md:flex">
             {/* Carousel (left) */}
-            <div className="md:w-3/5 relative bg-gray-200">
-              <div className="h-56 md:h-64 overflow-hidden relative">
-                <img src={carouselImages[currentIndex]} alt={`${country} image ${currentIndex + 1}`} className="w-full h-full object-cover transition-opacity duration-300" loading="lazy" />
-                <button onClick={prevImage} aria-label="Previous image" className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-slate-800 rounded-full w-9 h-9 grid place-items-center">‹</button>
-                <button onClick={nextImage} aria-label="Next image" className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-slate-800 rounded-full w-9 h-9 grid place-items-center">›</button>
+            <div className="md:w-3/5 relative bg-gradient-to-br from-slate-800 to-slate-900">
+              <div className="h-72 md:h-96 overflow-hidden relative group">
+                <img 
+                  src={carouselImages[currentIndex]} 
+                  alt={`${country} image ${currentIndex + 1}`} 
+                  className="w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-110 group-hover:brightness-75" 
+                  loading="lazy" 
+                />
+                
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                
+                {/* Navigation buttons with improved styling */}
+                <button 
+                  onClick={prevImage} 
+                  aria-label="Previous image" 
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white rounded-full w-12 h-12 grid place-items-center transition-all duration-300 hover:scale-110 shadow-xl"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <button 
+                  onClick={nextImage} 
+                  aria-label="Next image" 
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white rounded-full w-12 h-12 grid place-items-center transition-all duration-300 hover:scale-110 shadow-xl"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </button>
 
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 backdrop-blur-sm bg-black/20 px-3 py-2 rounded-full">
                   {carouselImages.map((_, i) => (
-                    <button key={i} onClick={() => gotoImage(i)} aria-label={`Show image ${i + 1}`} className={`w-2 h-2 rounded-full ${i === currentIndex ? "bg-white" : "bg-white/60"}`} />
+                    <button 
+                      key={i} 
+                      onClick={() => gotoImage(i)} 
+                      aria-label={`Show image ${i + 1}`} 
+                      className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${i === currentIndex ? "bg-white w-8" : "bg-white/60 hover:bg-white/80"}`} 
+                    />
                   ))}
                 </div>
               </div>

@@ -147,6 +147,7 @@ export default function FeaturedVideos() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           viewport={{ once: true }}
+          className="overflow-hidden"
         >
           <Swiper
             modules={[Autoplay, Pagination, Navigation]}
@@ -229,6 +230,19 @@ export default function FeaturedVideos() {
       </div>
 
       <style>{`
+        .featured-videos-swiper {
+          overflow: visible;
+          padding-bottom: 50px;
+        }
+
+        .featured-videos-swiper .swiper-wrapper {
+          padding-bottom: 20px;
+        }
+
+        .featured-videos-swiper .swiper-slide {
+          height: auto;
+        }
+
         .featured-videos-swiper .swiper-button-next,
         .featured-videos-swiper .swiper-button-prev {
           color: white;
@@ -251,6 +265,10 @@ export default function FeaturedVideos() {
         .featured-videos-swiper .swiper-button-next:after,
         .featured-videos-swiper .swiper-button-prev:after {
           font-size: 20px;
+        }
+
+        .featured-videos-swiper .swiper-pagination {
+          bottom: 0 !important;
         }
 
         .featured-videos-swiper .swiper-pagination-bullet {

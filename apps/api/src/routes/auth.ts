@@ -4,11 +4,13 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { sendVerificationEmail } from '../services/emailService';
+import logger from '../utils/logger';
 
 const router = express.Router();
 
 // POST /auth/register
 router.post('/register', async (req, res) => {
+  try {
   const { email, password, fullName, role, phone, birthDate, gender } = req.body;
   if (!email || !password || !fullName) {
     return res.status(400).json({ error: 'Email, password, and full name are required' });
@@ -41,10 +43,10 @@ router.post('/register', async (req, res) => {
   try {
     const emailResult = await sendVerificationEmail(email, fullName, verificationToken);
     if (!emailResult.success) {
-      console.error('Failed to send verification email:', emailResult.error);
+      logger.error('Failed to send verification email:', emailResult.error);
     }
   } catch (error) {
-    console.error('Error sending verification email:', error);
+    logger.error('Error sending verification email:', error);
   }
 
   // Don't create JWT token yet - user needs to verify email first
@@ -59,6 +61,10 @@ router.post('/register', async (req, res) => {
       isEmailVerified: false,
     },
   });
+  } catch (error) {
+    logger.error(`Registration error: ${error}`);
+    res.status(500).json({ error: 'Registration failed' });
+  }
 });
 
 // GET /auth/verify-email
@@ -142,24 +148,24 @@ router.post('/resend-verification', async (req, res) => {
     await user.save();
     
     // Send verification email
-    console.log('📧 Attempting to send verification email to:', email);
+    logger.info(`Attempting to send verification email to: ${email}`);
     const emailResult = await sendVerificationEmail(email, user.fullName, verificationToken);
     
     if (!emailResult.success) {
-      console.error('❌ Email sending failed:', emailResult.error);
+      logger.error(`Email sending failed: ${emailResult.error}`);
       return res.status(500).json({ 
         error: 'Failed to send verification email. Please contact support.',
         details: process.env.NODE_ENV === 'development' ? emailResult.error : undefined
       });
     }
     
-    console.log('✅ Verification email sent successfully');
+    logger.info('Verification email sent successfully');
     res.json({
       success: true,
       message: 'Verification email sent! Please check your inbox.',
     });
   } catch (error) {
-    console.error('❌ Resend verification error:', error);
+    logger.error(`Resend verification error: ${error}`);
     res.status(500).json({ 
       error: 'Failed to resend verification email',
       details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
@@ -202,22 +208,24 @@ router.get('/me', async (req, res) => {
 
 // POST /auth/login
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-  console.log('LOGIN ATTEMPT:', { email, password });
+  try {
+    const { email, password } = req.body;
+    logger.info(`Login attempt for email: ${email}`);
+  
   if (!email || !password) {
-    console.log('Missing email or password');
+    logger.warn('Login attempt with missing credentials');
     return res.status(400).json({ error: 'Email and password are required' });
   }
+  
   const user = await User.findOne({ email });
-  console.log('User found in DB:', user);
   if (!user) {
-    console.log('No user found for email:', email);
+    logger.warn(`Login attempt for non-existent email: ${email}`);
     return res.status(401).json({ error: 'Invalid email or password' });
   }
+  
   const isMatch = await bcrypt.compare(password, user.password);
-  console.log('Password match:', isMatch);
   if (!isMatch) {
-    console.log('Password mismatch for user:', email);
+    logger.warn(`Failed login attempt for email: ${email}`);
     return res.status(401).json({ error: 'Invalid email or password' });
   }
 
@@ -232,6 +240,7 @@ router.post('/login', async (req, res) => {
 
   const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'changeme', { expiresIn: '7d' });
 
+  logger.info(`Login successful for email: ${email}`);
   res.json({
     token,
     user: {
@@ -243,6 +252,10 @@ router.post('/login', async (req, res) => {
       isEmailVerified: user.isEmailVerified,
     },
   });
+  } catch (error) {
+    logger.error(`Login error: ${error}`);
+    res.status(500).json({ error: 'An error occurred during login' });
+  }
 });
 
 export default router;

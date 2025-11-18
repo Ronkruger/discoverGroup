@@ -1,0 +1,6 @@
+# Lint staged files
+npx lint-staged
+
+# Note: Tests are skipped in pre-commit to allow faster commits
+# Run 'npm test' manually before pushing
+echo "✅ Pre-commit checks passed. Remember to run 'npm test' before pushing!"

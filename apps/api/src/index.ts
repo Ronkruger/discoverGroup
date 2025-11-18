@@ -1,6 +1,9 @@
 import "dotenv/config";
 import express, { Request, Response } from "express";
 import cors from "cors";
+import helmet from "helmet";
+import logger from "./utils/logger";
+import { errorHandler } from "./middleware/errorHandler";
 
 import adminToursRouter from "./routes/admin/tours";
 import publicToursRouter from "./routes/public/tours";
@@ -10,10 +13,14 @@ import { connectDB } from "./db";
 import path from "path";
 import uploadsRouter from "./routes/uploads";
 
-console.log("Server starting, environment variables:");
-console.log("PORT:", process.env.PORT || "4000 (default)");
+logger.info("Server starting, environment variables:");
+logger.info(`PORT: ${process.env.PORT || "4000 (default)"}`);
 
 const app = express();
+
+// Security middleware
+app.use(helmet());
+
 connectDB();
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 app.use("/api/uploads", uploadsRouter);
@@ -38,28 +45,28 @@ const allowedOrigins = [
 if (process.env.CLIENT_URL) allowedOrigins.push(process.env.CLIENT_URL);
 if (process.env.ADMIN_URL) allowedOrigins.push(process.env.ADMIN_URL);
 
-console.log('CORS Configuration:');
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('Allowed origins:', allowedOrigins);
+logger.info('CORS Configuration:');
+logger.info(`NODE_ENV: ${process.env.NODE_ENV}`);
+logger.info(`Allowed origins: ${allowedOrigins.join(', ')}`);
 
 if (process.env.NODE_ENV === 'production') {
   // Production: Only allow specific origins
   app.use(cors({
     origin: (origin, callback) => {
-      console.log('CORS request from origin:', origin);
+      logger.http(`CORS request from origin: ${origin}`);
       
       // Allow requests with no origin (like mobile apps, Postman, server-to-server)
       if (!origin) {
-        console.log('No origin - allowing');
+        logger.http('No origin - allowing');
         return callback(null, true);
       }
       
       if (allowedOrigins.indexOf(origin) !== -1) {
-        console.log('Origin allowed');
+        logger.http('Origin allowed');
         callback(null, true);
       } else {
-        console.log('CORS BLOCKED! Origin not in allowed list');
-        console.log('Allowed origins:', allowedOrigins);
+        logger.warn(`CORS BLOCKED! Origin not in allowed list: ${origin}`);
+        logger.warn(`Allowed origins: ${allowedOrigins.join(', ')}`);
         callback(new Error('Not allowed by CORS'));
       }
     },
@@ -117,7 +124,10 @@ app.use("/auth", authRouter);
 
 app.get("/health", (_req: Request, res: Response) => res.json({ ok: true }));
 
+// Error handling middleware (must be last)
+app.use(errorHandler);
+
 const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`API server listening on http://localhost:${PORT}`);
+  logger.info(`✅ API server listening on http://localhost:${PORT}`);
 });

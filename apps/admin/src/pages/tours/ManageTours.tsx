@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { fetchTours, deleteTour, type Tour } from "../../services/apiClient";
 import { Link } from "react-router-dom";
+import { Plus, Edit2, Trash2, ExternalLink, Loader2 } from "lucide-react";
 
 // Extended Tour type to include pricing and sale fields and bookingPdfUrl
 interface ExtendedTour extends Tour {
@@ -53,150 +54,192 @@ export default function ManageTours(): React.ReactElement {
   };
 
   return (
-    <div className="min-h-screen bg-[#fcfcfc] flex flex-col">
-      {/* Top nav bar */}
-      <header className="w-full px-8 py-4 border-b border-gray-200 bg-white flex items-center justify-between">
-        <div className="font-bold text-lg">Admin UI</div>
-        <nav className="flex gap-6 items-center text-sm">
-          <Link to="/" className="hover:text-pink-500">Home</Link>
-          <Link to="/tours" className="font-semibold text-pink-600">Tours</Link>
-          <Link to="/tours/create" className="hover:text-pink-500">Create</Link>
-        </nav>
-        <div className="text-xs text-gray-500">You're signed in</div>
-      </header>
-
-      <div className="flex flex-1">
-        {/* Sidebar */}
-        <aside className="hidden md:block w-48 bg-[#fafafa] border-r border-gray-100 pt-8 min-h-screen">
-          <nav className="flex flex-col gap-2 px-4">
-            <Link
-              to="/"
-              className="block py-2 px-4 rounded bg-white text-gray-700 hover:bg-pink-50 transition"
-            >
-              Home
-            </Link>
-            <Link
-              to="/tours"
-              className="block py-2 px-4 rounded bg-pink-100 text-pink-600 font-medium"
-            >
-              Tours
-            </Link>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Tours</h1>
+              <p className="text-gray-600">Manage your tour packages and itineraries</p>
+            </div>
             <Link
               to="/tours/create"
-              className="block py-2 px-4 rounded bg-pink-50 text-pink-500 font-medium"
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-semibold rounded-xl shadow-lg shadow-pink-500/30 hover:shadow-xl hover:shadow-pink-500/40 hover:from-pink-600 hover:to-rose-600 transition-all duration-200 transform hover:scale-105"
             >
-              Create
+              <Plus className="w-5 h-5" />
+              Create Tour
             </Link>
-            <button
-              className="block text-left py-2 px-4 rounded bg-white text-gray-700 hover:bg-pink-50 transition"
-              disabled
-            >
-              Settings
-            </button>
-            <button
-              className="block text-left py-2 px-4 rounded bg-white text-gray-700 hover:bg-pink-50 transition"
-              disabled
-            >
-              Integrations
-            </button>
-          </nav>
-        </aside>
+          </div>
+        </div>
 
-        {/* Main Content */}
-        <main className="flex-1 flex flex-col items-center px-2 md:px-0 pt-10 pb-20">
-          <div className="w-full max-w-3xl">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mx-auto p-6 md:p-8 mt-2">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="font-bold text-xl">Tours</h2>
-                <Link
-                  to="/tours/create"
-                  className="px-4 py-2 rounded bg-gradient-to-r from-pink-400 to-pink-500 text-white font-semibold text-sm shadow hover:from-pink-500 hover:to-pink-600 transition"
-                >
-                  + Create Tour
-                </Link>
+        {/* Content Card */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="w-12 h-12 text-pink-500 animate-spin mb-4" />
+              <p className="text-gray-500 font-medium">Loading tours...</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="bg-red-50 text-red-600 px-6 py-4 rounded-lg border border-red-200">
+                <p className="font-medium">{error}</p>
               </div>
-              {loading ? (
-                <div className="text-center text-gray-400 py-12">Loading...</div>
-              ) : error ? (
-                <div className="text-red-600 py-6">{error}</div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="bg-gray-50">
-                        <th className="py-3 px-4 text-left font-semibold text-gray-700">Title</th>
-                        <th className="py-3 px-4 text-left font-semibold text-gray-700">Slug</th>
-                        <th className="py-3 px-4 text-left font-semibold text-gray-700">Line</th>
-                        <th className="py-3 px-4 text-left font-semibold text-gray-700">Duration</th>
-                        <th className="py-3 px-4 text-left font-semibold text-gray-700">Regular Price</th>
-                        <th className="py-3 px-4 text-left font-semibold text-gray-700">Promo Price</th>
-                        <th className="py-3 px-4 text-left font-semibold text-gray-700">Flipbook</th>
-                        <th className="py-3 px-4 text-left font-semibold text-gray-700">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(!tours || tours.length === 0) ? (
-                        <tr>
-                          <td className="text-center text-gray-400 py-6" colSpan={9}>
-                            No tours found.
-                          </td>
-                        </tr>
-                      ) : (
-                        tours.map((tour) => (
-                          <tr key={tour.id} className="border-t last:border-b hover:bg-gray-50">
-                            <td className="py-3 px-4">{tour.title}</td>
-                            <td className="py-3 px-4">{tour.slug}</td>
-                            <td className="py-3 px-4">{tour.line}</td>
-                            <td className="py-3 px-4">{tour.durationDays}</td>
-                            <td className="py-3 px-4">{tour.regularPricePerPerson ? `₱${tour.regularPricePerPerson.toLocaleString()}` : "--"}</td>
-                            <td className="py-3 px-4">{tour.promoPricePerPerson && tour.isSaleEnabled ? `₱${tour.promoPricePerPerson.toLocaleString()}` : "--"}</td>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+                    <th className="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Title</th>
+                    <th className="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Slug</th>
+                    <th className="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Line</th>
+                    <th className="py-4 px-6 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Duration</th>
+                    <th className="py-4 px-6 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Regular Price</th>
+                    <th className="py-4 px-6 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Promo Price</th>
+                    <th className="py-4 px-6 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {(!tours || tours.length === 0) ? (
+                    <tr>
+                      <td className="text-center py-16" colSpan={7}>
+                        <div className="flex flex-col items-center">
+                          <div className="bg-gray-100 rounded-full p-4 mb-4">
+                            <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                          </div>
+                          <p className="text-gray-500 font-medium mb-1">No tours found</p>
+                          <p className="text-gray-400 text-sm">Create your first tour to get started</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    tours.map((tour, index) => (
+                      <tr 
+                        key={tour.id} 
+                        className="hover:bg-gray-50 transition-colors duration-150"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        <td className="py-4 px-6">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-gray-900 mb-1">{tour.title}</span>
+                            {tour.summary && (
+                              <span className="text-xs text-gray-500 line-clamp-1">{tour.summary}</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-4 px-6">
+                          <code className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded font-mono">
+                            {tour.slug}
+                          </code>
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                            tour.line === 'ROUTE_A' ? 'bg-rose-100 text-rose-700' :
+                            tour.line === 'ROUTE_B' ? 'bg-blue-100 text-blue-700' :
+                            tour.line === 'RED' ? 'bg-red-100 text-red-700' :
+                            tour.line === 'YELLOW' ? 'bg-yellow-100 text-yellow-700' :
+                            tour.line === 'GREEN' ? 'bg-green-100 text-green-700' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>
+                            {tour.line}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6 text-center">
+                          <span className="inline-flex items-center gap-1 text-sm font-medium text-gray-700">
+                            <span className="text-lg font-bold text-gray-900">{tour.durationDays}</span>
+                            <span className="text-xs text-gray-500">days</span>
+                          </span>
+                        </td>
+                        <td className="py-4 px-6 text-right">
+                          <span className="font-semibold text-gray-900">
+                            {tour.regularPricePerPerson ? `₱${tour.regularPricePerPerson.toLocaleString()}` : "—"}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6 text-right">
+                          {tour.promoPricePerPerson && tour.isSaleEnabled ? (
+                            <div className="flex flex-col items-end">
+                              <span className="font-semibold text-pink-600">
+                                ₱{tour.promoPricePerPerson.toLocaleString()}
+                              </span>
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-700 mt-1">
+                                Sale Active
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">—</span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="flex items-center justify-center gap-2">
+                            {/* Flipbook Button */}
+                            {tour.bookingPdfUrl && (
+                              <a
+                                href={tour.bookingPdfUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-150 group"
+                                title="Open Flipbook"
+                              >
+                                <ExternalLink className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                              </a>
+                            )}
+                            
+                            {/* Edit Button */}
+                            <Link
+                              to={`/tours/${tour.id}/edit`}
+                              className="p-2 text-pink-600 hover:bg-pink-50 rounded-lg transition-colors duration-150 group"
+                              title="Edit Tour"
+                            >
+                              <Edit2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                            </Link>
 
-                            {/* Flipbook column */}
-                            <td className="py-3 px-4">
-                              {tour.bookingPdfUrl ? (
-                                <a
-                                  href={tour.bookingPdfUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="px-3 py-1 rounded text-xs font-medium bg-blue-50 text-blue-700 hover:bg-blue-100"
-                                  onClick={() => {
-                                    // allow click even when deleting is happening (but visual disabled state is handled on button)
-                                  }}
-                                >
-                                  Open Flipbook
-                                </a>
+                            {/* Delete Button */}
+                            <button
+                              onClick={() => handleDelete(tour.id)}
+                              disabled={deletingId === tour.id}
+                              className={`p-2 rounded-lg transition-colors duration-150 group ${
+                                deletingId === tour.id 
+                                  ? "text-red-400 cursor-not-allowed" 
+                                  : "text-red-600 hover:bg-red-50"
+                              }`}
+                              title="Delete Tour"
+                            >
+                              {deletingId === tour.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
                               ) : (
-                                <span className="text-xs text-gray-400">—</span>
+                                <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
                               )}
-                            </td>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
 
-                            <td className="py-3 px-4 flex gap-2">
-                              <Link
-                                to={`/tours/${tour.id}/edit`}
-                                className="px-4 py-1 bg-gradient-to-r from-pink-400 to-pink-500 text-white rounded font-medium text-xs shadow hover:from-pink-500 hover:to-pink-600 transition"
-                              >
-                                Edit
-                              </Link>
-
-                              <button
-                                onClick={() => handleDelete(tour.id)}
-                                disabled={deletingId === tour.id}
-                                className={`px-3 py-1 rounded text-xs font-medium ${deletingId === tour.id ? "bg-red-200 text-red-600" : "bg-red-500 text-white hover:bg-red-600"}`}
-                              >
-                                {deletingId === tour.id ? "Deleting…" : "Delete"}
-                              </button>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+        {/* Footer Stats */}
+        {tours && tours.length > 0 && (
+          <div className="mt-6 flex items-center justify-between px-6 py-4 bg-white rounded-xl shadow-sm border border-gray-200">
+            <div className="text-sm text-gray-600">
+              Showing <span className="font-semibold text-gray-900">{tours.length}</span> {tours.length === 1 ? 'tour' : 'tours'}
+            </div>
+            <div className="flex items-center gap-4 text-sm text-gray-500">
+              <span className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                Active Tours: <span className="font-semibold text-gray-700">{tours.length}</span>
+              </span>
             </div>
           </div>
-        </main>
-      </div>
+        )}
+      </main>
     </div>
   );
 }

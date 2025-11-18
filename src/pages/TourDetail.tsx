@@ -831,7 +831,7 @@ useEffect(() => {
 
         {/* Tour Video Section - Full Width */}
         {tour && (tour as unknown as { video_url?: string }).video_url && (
-          <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-gray-700/50">
+          <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-gray-900 to-gray-800">
             <div className="p-6 lg:p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-blue-600 p-3 rounded-xl">
@@ -845,14 +845,14 @@ useEffect(() => {
                 </div>
               </div>
               
-              <div className="relative rounded-xl overflow-hidden shadow-2xl bg-black min-h-[400px] lg:min-h-[500px]">
+              <div className="relative rounded-xl overflow-hidden shadow-2xl bg-black w-full" style={{ aspectRatio: '16/9' }}>
                 <video 
                   src={(tour as unknown as { video_url?: string }).video_url}
                   autoPlay
                   loop
                   muted
                   playsInline
-                  className="w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover"
                 >
                   Your browser does not support the video tag.
                 </video>

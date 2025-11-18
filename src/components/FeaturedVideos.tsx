@@ -1,18 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination, Navigation } from 'swiper/modules';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Import featured videos service
 import { fetchFeaturedVideos, type FeaturedVideo } from '../lib/featured-videos-service';
 
-import 'swiper/css';
-import 'swiper/css/pagination';
-import 'swiper/css/navigation';
-
 export default function FeaturedVideos() {
   const [videos, setVideos] = useState<FeaturedVideo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     loadVideos();
@@ -29,12 +25,28 @@ export default function FeaturedVideos() {
     }
   };
 
+  useEffect(() => {
+    if (videos.length === 0) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % videos.length);
+    }, 8000); // Change video every 8 seconds
+
+    return () => clearInterval(interval);
+  }, [videos.length]);
+
+  const goToPrevious = () => {
+    setCurrentIndex((prev) => (prev - 1 + videos.length) % videos.length);
+  };
+
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % videos.length);
+  };
+
   if (loading) {
     return (
-      <section className="py-16 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-        <div className="container mx-auto px-4">
-          <div className="h-96 bg-white/5 rounded-2xl animate-pulse" />
-        </div>
+      <section className="relative py-20 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-[600px] flex items-center justify-center">
+        <div className="h-96 bg-white/5 rounded-2xl animate-pulse max-w-4xl w-full mx-auto" />
       </section>
     );
   }
@@ -43,69 +55,60 @@ export default function FeaturedVideos() {
     return null;
   }
 
+  const currentVideo = videos[currentIndex];
+
   return (
-    <section className="relative py-16 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 overflow-hidden">
+    <section className="relative py-20 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-[600px] overflow-hidden">
+      {/* Video Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentVideo.id}
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 1.2 }}
+            className="absolute inset-0"
+          >
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-full h-full object-cover"
+              poster={currentVideo.thumbnail_url}
+              key={currentVideo.video_url}
+            >
+              <source src={currentVideo.video_url} type="video/mp4" />
+            </video>
+            
+            {/* Dark overlay for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 via-slate-900/50 to-slate-900/80" />
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Gradient Orbs */}
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute top-10 left-10 w-96 h-96 bg-blue-500/30 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1,
-          }}
-          className="absolute bottom-20 right-10 w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.15, 1],
-            opacity: [0.25, 0.45, 0.25],
-          }}
-          transition={{
-            duration: 9,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 2,
-          }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-500/20 rounded-full blur-3xl"
-        />
-        
         {/* Grid Pattern Overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px]" />
         
         {/* Floating Particles */}
-        {[...Array(20)].map((_, i) => (
+        {[...Array(15)].map((_, i) => (
           <motion.div
             key={i}
             animate={{
-              y: [0, -30, 0],
-              x: [0, Math.random() * 20 - 10, 0],
-              opacity: [0.2, 0.5, 0.2],
+              y: [0, -40, 0],
+              x: [0, Math.random() * 30 - 15, 0],
+              opacity: [0.1, 0.3, 0.1],
             }}
             transition={{
-              duration: 3 + Math.random() * 4,
+              duration: 4 + Math.random() * 4,
               repeat: Infinity,
               ease: "easeInOut",
-              delay: Math.random() * 2,
+              delay: Math.random() * 3,
             }}
-            className="absolute w-1 h-1 bg-white/40 rounded-full"
+            className="absolute w-1.5 h-1.5 bg-white/30 rounded-full"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -114,184 +117,87 @@ export default function FeaturedVideos() {
         ))}
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
+      {/* Content */}
+      <div className="container mx-auto px-4 relative z-10 flex flex-col items-center justify-center min-h-[500px]">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="text-center mb-8"
         >
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-2xl"
-          >
+          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-2xl">
             Experience Our Tours
-          </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-            viewport={{ once: true }}
-            className="text-xl text-blue-200 max-w-2xl mx-auto drop-shadow-lg"
-          >
+          </h2>
+          <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto drop-shadow-lg">
             Watch immersive videos from our most popular destinations
-          </motion.p>
+          </p>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          viewport={{ once: true }}
-          className="overflow-hidden"
-        >
-          <Swiper
-            modules={[Autoplay, Pagination, Navigation]}
-            spaceBetween={30}
-            slidesPerView={1}
-            navigation
-            pagination={{ clickable: true }}
-            autoplay={{
-              delay: 5000,
-              disableOnInteraction: false,
-              pauseOnMouseEnter: true,
-            }}
-            breakpoints={{
-              768: {
-                slidesPerView: 2,
-              },
-              1024: {
-                slidesPerView: 2,
-              },
-            }}
-            className="featured-videos-swiper"
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentVideo.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.6 }}
+            className="text-center max-w-4xl"
           >
-            {videos.map((video, index) => (
-              <SwiperSlide key={video.id}>
-                <div className="relative group rounded-2xl overflow-hidden shadow-2xl bg-slate-800 hover:shadow-blue-500/20 transition-shadow duration-300">
-                  <div className="relative aspect-video">
-                    <video
-                      id={`video-${video.id}`}
-                      className="w-full h-full object-cover"
-                      poster={video.thumbnail_url}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      onLoadedData={(e) => {
-                        // Ensure video plays when loaded
-                        const videoEl = e.currentTarget;
-                        videoEl.play().catch(() => {
-                          // Autoplay might be blocked, silently fail
-                        });
-                      }}
-                    >
-                      <source src={video.video_url} type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
+            <h3 className="text-3xl md:text-5xl font-bold text-white mb-4 drop-shadow-2xl">
+              {currentVideo.title}
+            </h3>
+            {currentVideo.description && (
+              <p className="text-lg md:text-xl text-gray-100 drop-shadow-xl leading-relaxed">
+                {currentVideo.description}
+              </p>
+            )}
+          </motion.div>
+        </AnimatePresence>
 
-                    {/* Subtle Overlay for Better Text Readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 pointer-events-none" />
+        {/* Navigation Controls */}
+        {videos.length > 1 && (
+          <>
+            <div className="flex items-center gap-4 mt-12">
+              <button
+                onClick={goToPrevious}
+                className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white p-3 rounded-full transition-all duration-300 border border-white/20 hover:scale-110"
+                aria-label="Previous video"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              
+              <div className="flex gap-2">
+                {videos.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentIndex(index)}
+                    className={`transition-all duration-300 rounded-full ${
+                      index === currentIndex
+                        ? 'w-12 h-3 bg-blue-500 shadow-lg shadow-blue-500/50'
+                        : 'w-3 h-3 bg-white/40 hover:bg-white/60'
+                    }`}
+                    aria-label={`Go to video ${index + 1}`}
+                  />
+                ))}
+              </div>
 
-                    {/* Content Overlay */}
-                    <div className="absolute inset-0 flex flex-col justify-end p-8">
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        viewport={{ once: true }}
-                      >
-                        <h3 className="text-3xl md:text-4xl font-bold text-white mb-3 drop-shadow-2xl">
-                          {video.title}
-                        </h3>
-                        {video.description && (
-                          <p className="text-base md:text-lg text-gray-100 line-clamp-2 drop-shadow-xl max-w-2xl">
-                            {video.description}
-                          </p>
-                        )}
-                      </motion.div>
-                    </div>
+              <button
+                onClick={goToNext}
+                className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white p-3 rounded-full transition-all duration-300 border border-white/20 hover:scale-110"
+                aria-label="Next video"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </div>
 
-                    {/* Muted indicator */}
-                    <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1.5 text-white text-xs flex items-center gap-1">
-                      <span>🔇</span>
-                      <span>Auto-playing</span>
-                    </div>
-                  </div>
-                </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </motion.div>
+            {/* Auto-playing indicator */}
+            <div className="mt-6 flex items-center gap-2 text-white/70 text-sm">
+              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+              <span>Auto-playing • {currentIndex + 1} of {videos.length}</span>
+            </div>
+          </>
+        )}
       </div>
-
-      <style>{`
-        .featured-videos-swiper {
-          overflow: visible;
-          padding-bottom: 50px;
-        }
-
-        .featured-videos-swiper .swiper-wrapper {
-          padding-bottom: 20px;
-        }
-
-        .featured-videos-swiper .swiper-slide {
-          height: auto;
-        }
-
-        .featured-videos-swiper .swiper-button-next,
-        .featured-videos-swiper .swiper-button-prev {
-          color: white;
-          background: rgba(59, 130, 246, 0.3);
-          backdrop-filter: blur(10px);
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          border: 2px solid rgba(255, 255, 255, 0.2);
-          transition: all 0.3s ease;
-        }
-
-        .featured-videos-swiper .swiper-button-next:hover,
-        .featured-videos-swiper .swiper-button-prev:hover {
-          background: rgba(59, 130, 246, 0.5);
-          border-color: rgba(255, 255, 255, 0.4);
-          transform: scale(1.1);
-        }
-
-        .featured-videos-swiper .swiper-button-next:after,
-        .featured-videos-swiper .swiper-button-prev:after {
-          font-size: 20px;
-        }
-
-        .featured-videos-swiper .swiper-pagination {
-          bottom: 0 !important;
-        }
-
-        .featured-videos-swiper .swiper-pagination-bullet {
-          background: white;
-          opacity: 0.4;
-          width: 12px;
-          height: 12px;
-          transition: all 0.3s ease;
-        }
-
-        .featured-videos-swiper .swiper-pagination-bullet:hover {
-          opacity: 0.7;
-          transform: scale(1.2);
-        }
-
-        .featured-videos-swiper .swiper-pagination-bullet-active {
-          opacity: 1;
-          background: #3b82f6;
-          width: 14px;
-          height: 14px;
-          box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
-        }
-      `}</style>
     </section>
   );
 }

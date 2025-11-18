@@ -45,7 +45,7 @@ export default function FeaturedVideos() {
 
   if (loading) {
     return (
-      <section className="relative py-20 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-[600px] flex items-center justify-center">
+      <section className="relative py-32 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-[800px] flex items-center justify-center">
         <div className="h-96 bg-white/5 rounded-2xl animate-pulse max-w-4xl w-full mx-auto" />
       </section>
     );
@@ -58,7 +58,7 @@ export default function FeaturedVideos() {
   const currentVideo = videos[currentIndex];
 
   return (
-    <section className="relative py-20 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-[600px] overflow-hidden">
+    <section className="relative py-32 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-[800px] overflow-hidden">
       {/* Video Background */}
       <div className="absolute inset-0 overflow-hidden">
         <AnimatePresence mode="wait">
@@ -118,13 +118,13 @@ export default function FeaturedVideos() {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 relative z-10 flex flex-col items-center justify-center min-h-[500px]">
+      <div className="container mx-auto px-4 relative z-10 flex flex-col items-center justify-center min-h-[700px]">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-8"
+          className="text-center mb-12"
         >
           <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-2xl">
             Experience Our Tours

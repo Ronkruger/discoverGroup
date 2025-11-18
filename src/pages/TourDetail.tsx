@@ -845,16 +845,20 @@ useEffect(() => {
                 </div>
               </div>
               
-              <div className="relative rounded-xl overflow-hidden shadow-2xl bg-black">
+              <div className="relative rounded-xl overflow-hidden shadow-2xl bg-black min-h-[400px] lg:min-h-[500px]">
                 <video 
-                  src={(tour as unknown as { video_url?: string }).video_url} 
-                  controls 
-                  className="w-full max-h-[500px] lg:max-h-[600px] object-contain"
-                  poster={tour.images?.[0]}
-                  preload="metadata"
+                  src={(tour as unknown as { video_url?: string }).video_url}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
                 >
                   Your browser does not support the video tag.
                 </video>
+                
+                {/* Content overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
               </div>
 
               <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">

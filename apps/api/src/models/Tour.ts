@@ -10,6 +10,7 @@ export interface ITour extends Document {
   images?: string[];
   guaranteedDeparture?: boolean;
   bookingPdfUrl?: string;
+  video_url?: string;
   departureDates?: string[];
   travelWindow?: {
     start: string;
@@ -53,6 +54,7 @@ const TourSchema = new Schema<ITour>({
   images: [{ type: String }],
   guaranteedDeparture: { type: Boolean, default: false },
   bookingPdfUrl: { type: String },
+  video_url: { type: String },
   departureDates: [{
     start: { type: String, required: true },
     end: { type: String, required: true }

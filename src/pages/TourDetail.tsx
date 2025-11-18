@@ -573,7 +573,7 @@ useEffect(() => {
   }
 
   return (
-  <div className="min-h-screen" style={themeStyle}>
+  <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800" style={themeStyle}>
       <style>{`
         .accent-yellow { color: var(--accent-yellow); }
         .bg-accent-yellow { background-color: var(--accent-yellow); }
@@ -581,7 +581,7 @@ useEffect(() => {
         .tab-underline { transition: transform .25s cubic-bezier(.2,.9,.2,1), opacity .25s; }
         .fade-enter { opacity: 0; transform: translateY(6px); }
         .fade-enter-active { opacity: 1; transform: translateY(0); transition: all .28s ease; }
-        .card-glass { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); backdrop-filter: blur(6px); }
+        .card-glass { background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)); backdrop-filter: blur(12px); }
         .modal-backdrop { background: rgba(2,6,23,0.6); }
         .itinerary-day { transition: all .18s ease; }
         .itinerary-day:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(2,6,23,0.45); }
@@ -728,14 +728,14 @@ useEffect(() => {
   <div className="mb-6 hidden lg:grid grid-cols-3 gap-6 items-start relative">
           {/* Hero image (left: spans 2 columns on lg) */}
           <div className="lg:col-span-2 relative">
-            <div className="rounded-lg overflow-hidden shadow-xl">
+            <div className="rounded-2xl overflow-hidden shadow-2xl ring-2 ring-white/10">
               {/* Carousel */}
-              <div className="relative w-full h-80 md:h-[380px] bg-slate-800 rounded">
+              <div className="relative w-full h-80 md:h-[450px] bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl">
                 {tour && tour.images && tour.images.length > 0 && isSafeImageUrl(tour.images![carouselIndex!]) ? (
                   <img
                     src={tour.images![carouselIndex!]}
                     alt={`${tour.title!} image ${carouselIndex! + 1}`}
-                    className="w-full h-full object-cover transition-transform duration-700 ease-out transform hover:scale-105"
+                    className="w-full h-full object-cover transition-all duration-700 ease-out transform hover:scale-105"
                     loading="lazy"
                     onClick={() => openGallery(carouselIndex)}
                     style={{ cursor: "zoom-in" }}
@@ -749,16 +749,20 @@ useEffect(() => {
                 <button
                   aria-label="Previous image"
                   onClick={prevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white rounded-full p-2"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white rounded-full p-3 transition-all duration-200 hover:scale-110 shadow-lg"
                 >
-                  ‹
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                  </svg>
                 </button>
                 <button
                   aria-label="Next image"
                   onClick={nextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white rounded-full p-2"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white rounded-full p-3 transition-all duration-200 hover:scale-110 shadow-lg"
                 >
-                  ›
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
 
                 {/* Desktop lower-left badges and gallery button */}
@@ -780,7 +784,11 @@ useEffect(() => {
                       key={idx}
                       onClick={() => setCarouselIndex(idx)}
                       aria-label={`Go to image ${idx + 1}`}
-                      className={`w-2 h-2 rounded-full ${idx === carouselIndex ? "bg-accent-yellow" : "bg-white/30"}`}
+                      className={`transition-all duration-300 rounded-full ${
+                        idx === carouselIndex 
+                          ? "w-8 h-2 bg-accent-yellow shadow-lg" 
+                          : "w-2 h-2 bg-white/40 hover:bg-white/60"
+                      }`}
                     />
                   ))}
                 </div>
@@ -821,14 +829,161 @@ useEffect(() => {
           </div>
         </div>
 
+        {/* Tour Video Section - Full Width */}
+        {tour && (tour as unknown as { video_url?: string }).video_url && (
+          <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-gray-700/50">
+            <div className="p-6 lg:p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="bg-blue-600 p-3 rounded-xl">
+                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-2xl lg:text-3xl font-bold text-white">Experience This Tour</h2>
+                  <p className="text-gray-300 text-sm lg:text-base">Watch our exclusive video preview</p>
+                </div>
+              </div>
+              
+              <div className="relative rounded-xl overflow-hidden shadow-2xl bg-black">
+                <video 
+                  src={(tour as unknown as { video_url?: string }).video_url} 
+                  controls 
+                  className="w-full max-h-[500px] lg:max-h-[600px] object-contain"
+                  poster={tour.images?.[0]}
+                  preload="metadata"
+                >
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-blue-500/20 p-2 rounded-lg">
+                      <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-400">Visual Preview</div>
+                      <div className="text-sm font-semibold text-white">See highlights</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-green-500/20 p-2 rounded-lg">
+                      <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-400">Real Experience</div>
+                      <div className="text-sm font-semibold text-white">Authentic footage</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-purple-500/20 p-2 rounded-lg">
+                      <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-400">Plan Ahead</div>
+                      <div className="text-sm font-semibold text-white">Know what to expect</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Tabs: full width under the hero/title */}
-        <div className="bg-white/6 card-glass rounded-t-lg border-b border-white/6 mb-6">
-          <div className="px-4">
-            <div className="flex gap-4 overflow-x-auto">
-              <button onClick={() => setActiveTab("itinerary")} className={`px-3 py-3 whitespace-nowrap -mb-px ${activeTab === "itinerary" ? "border-b-2 border-accent-yellow text-accent-yellow font-semibold" : "text-slate-200"}`}>Itinerary</button>
-              <button onClick={() => setActiveTab("availability")} className={`px-3 py-3 whitespace-nowrap -mb-px ${activeTab === "availability" ? "border-b-2 border-accent-yellow text-accent-yellow font-semibold" : "text-slate-200"}`}>Availability</button>
-              <button onClick={() => setActiveTab("extensions")} className={`px-3 py-3 whitespace-nowrap -mb-px ${activeTab === "extensions" ? "border-b-2 border-accent-yellow text-accent-yellow font-semibold" : "text-slate-200"}`}>Extensions</button>
-              <button onClick={() => setActiveTab("details")} className={`px-3 py-3 whitespace-nowrap -mb-px ${activeTab === "details" ? "border-b-2 border-accent-yellow text-accent-yellow font-semibold" : "text-slate-200"}`}>Details</button>
+        <div className="bg-white/10 card-glass rounded-xl border border-white/10 mb-8 shadow-xl">
+          <div className="px-6 py-2">
+            <div className="flex gap-6 overflow-x-auto">
+              <button 
+                onClick={() => setActiveTab("itinerary")} 
+                className={`px-4 py-4 whitespace-nowrap relative transition-all duration-200 ${
+                  activeTab === "itinerary" 
+                    ? "text-accent-yellow font-bold" 
+                    : "text-slate-300 hover:text-white"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  Itinerary
+                </span>
+                {activeTab === "itinerary" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-accent-yellow rounded-full" />
+                )}
+              </button>
+              
+              <button 
+                onClick={() => setActiveTab("availability")} 
+                className={`px-4 py-4 whitespace-nowrap relative transition-all duration-200 ${
+                  activeTab === "availability" 
+                    ? "text-accent-yellow font-bold" 
+                    : "text-slate-300 hover:text-white"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Availability
+                </span>
+                {activeTab === "availability" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-accent-yellow rounded-full" />
+                )}
+              </button>
+              
+              <button 
+                onClick={() => setActiveTab("extensions")} 
+                className={`px-4 py-4 whitespace-nowrap relative transition-all duration-200 ${
+                  activeTab === "extensions" 
+                    ? "text-accent-yellow font-bold" 
+                    : "text-slate-300 hover:text-white"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Extensions
+                </span>
+                {activeTab === "extensions" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-accent-yellow rounded-full" />
+                )}
+              </button>
+              
+              <button 
+                onClick={() => setActiveTab("details")} 
+                className={`px-4 py-4 whitespace-nowrap relative transition-all duration-200 ${
+                  activeTab === "details" 
+                    ? "text-accent-yellow font-bold" 
+                    : "text-slate-300 hover:text-white"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Details
+                </span>
+                {activeTab === "details" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-accent-yellow rounded-full" />
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -840,19 +995,37 @@ useEffect(() => {
             {/* Tab panels */}
             <div>
               {activeTab === "itinerary" && (
-                <div className="bg-white/6 card-glass rounded-lg p-4 lg:p-6 border border-white/6">
-                  <h3 className="text-lg lg:text-xl font-semibold mb-4 text-white">Day-by-day itinerary</h3>
+                <div className="bg-gradient-to-br from-white/10 to-white/5 card-glass rounded-2xl p-6 lg:p-8 border border-white/10 shadow-xl">
+                  <h3 className="text-2xl lg:text-3xl font-bold mb-6 text-white flex items-center gap-3">
+                    <div className="bg-blue-600 p-2 rounded-lg">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                    </div>
+                    Day-by-day itinerary
+                  </h3>
                   <div className="space-y-6">
                     {itinerary.map((day: ItineraryDay & { image?: string }) => (
-                      <div key={day.day} className="p-4 border rounded-lg bg-white/4">
+                      <div key={day.day} className="p-6 border-2 border-white/10 rounded-xl bg-gradient-to-br from-white/5 to-transparent hover:from-white/10 hover:border-white/20 transition-all duration-300 hover:shadow-lg itinerary-day">
                         <div className="flex items-start justify-between">
                           <div className="w-full">
-                            <div className="text-sm text-slate-300">Day {day.day}</div>
-                            <div className="text-lg font-semibold text-white">{day.title}</div>
-                            <p className="text-slate-300 mt-2">{day.description}</p>
+                            <div className="flex items-center gap-3 mb-3">
+                              <div className="bg-accent-yellow text-gray-900 w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
+                                {day.day}
+                              </div>
+                              <div>
+                                <div className="text-xs text-slate-400 uppercase tracking-wider">Day {day.day}</div>
+                                <div className="text-xl font-bold text-white">{day.title}</div>
+                              </div>
+                            </div>
+                            <p className="text-slate-300 leading-relaxed pl-13">{day.description}</p>
                             {day.image && (
-                              <div className="mt-3">
-                                <img src={day.image} alt={`Itinerary Day ${day.day}`} className="w-full max-w-md h-40 object-cover rounded border" />
+                              <div className="mt-4 pl-13">
+                                <img 
+                                  src={day.image} 
+                                  alt={`Itinerary Day ${day.day}`} 
+                                  className="w-full max-w-2xl h-48 object-cover rounded-lg border-2 border-white/10 shadow-lg hover:scale-105 transition-transform duration-300" 
+                                />
                               </div>
                             )}
                           </div>

@@ -117,6 +117,7 @@ interface TourFormData {
   durationDays: number;
   guaranteedDeparture: boolean;
   bookingPdfUrl: string;
+  video_url?: string; // Tour video URL
 
   // Pricing
   regularPricePerPerson: number | "";
@@ -142,6 +143,7 @@ interface TourFormData {
   mainImage: string;
   galleryImages: string[];
   relatedImages: string[];
+  videoFile?: File | null; // For video upload
 
   // Itinerary
   itinerary: { day: number; title: string; description: string; image?: string }[];
@@ -206,6 +208,8 @@ export default function TourForm(): JSX.Element {
     durationDays: 7,
     guaranteedDeparture: false,
     bookingPdfUrl: "",
+    video_url: "",
+    videoFile: null,
     regularPricePerPerson: "",
     promoPricePerPerson: "",
     basePricePerDay: "",
@@ -293,6 +297,8 @@ export default function TourForm(): JSX.Element {
           durationDays: tour.durationDays || 7,
           guaranteedDeparture: tour.guaranteedDeparture || false,
           bookingPdfUrl: tour.bookingPdfUrl || "",
+          video_url: (tour as unknown as { video_url?: string }).video_url || "",
+          videoFile: null,
 
           regularPricePerPerson: tour.regularPricePerPerson ?? "",
           promoPricePerPerson: tour.promoPricePerPerson ?? "",
@@ -407,6 +413,8 @@ export default function TourForm(): JSX.Element {
         isSaleEnabled: !!formData.isSaleEnabled,
         saleEndDate: formData.isSaleEnabled && formData.saleEndDate ? formData.saleEndDate : undefined,
         travelWindow: formData.travelWindow.start && formData.travelWindow.end ? formData.travelWindow : undefined,
+        // include video URL
+        video_url: formData.video_url || undefined,
         additionalInfo: {
           ...formData.additionalInfo,
           continent: formData.continent,
@@ -1216,6 +1224,68 @@ export default function TourForm(): JSX.Element {
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Tour Video Upload */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Tour Video
+                  <span className="text-xs text-gray-500 ml-2">(MP4, WebM, MOV - max 100MB)</span>
+                </label>
+                <div className="space-y-3">
+                  {formData.video_url ? (
+                    <div className="border-2 border-green-200 rounded-lg p-4 bg-green-50">
+                      <video 
+                        src={formData.video_url} 
+                        controls 
+                        className="w-full max-h-64 rounded-lg bg-black"
+                      />
+                      <div className="mt-3 flex items-center justify-between">
+                        <span className="text-sm text-green-700 font-medium">✓ Video uploaded</span>
+                        <button
+                          type="button"
+                          onClick={() => handleInputChange("video_url", "")}
+                          className="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-sm font-semibold hover:bg-red-200 transition-colors"
+                        >
+                          Remove Video
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed border-blue-300 rounded-lg p-6 bg-blue-50/30 hover:bg-blue-50 transition-colors">
+                      <input
+                        type="file"
+                        accept="video/mp4,video/webm,video/quicktime"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          
+                          // Validate file size (100MB limit)
+                          if (file.size > 100 * 1024 * 1024) {
+                            alert('Video file size must be less than 100MB');
+                            return;
+                          }
+
+                          // Upload to Supabase
+                          try {
+                            const url = await uploadImageToSupabase(file, 'homepage-media', id || formData.slug, 'tour-video');
+                            if (url) {
+                              handleInputChange("video_url", url);
+                              handleInputChange("videoFile", file);
+                            }
+                          } catch (error) {
+                            console.error('Video upload failed:', error);
+                            alert('Failed to upload video. Please try again.');
+                          }
+                        }}
+                        className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
+                      />
+                      <p className="mt-2 text-xs text-gray-500 text-center">
+                        This video will be displayed on the tour detail page
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Related Images Upload */}

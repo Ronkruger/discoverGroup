@@ -364,7 +364,7 @@ export default function DestinationCountry(): JSX.Element {
       <div className="container mx-auto px-6 py-12">
         {/* HERO + CAROUSEL + SUMMARY */}
         <header className="mb-16">
-          <div className="rounded-3xl overflow-hidden bg-white shadow-2xl border border-gray-100">
+          <div className="rounded-3xl overflow-hidden bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md shadow-2xl border border-white/10">
             <div className="md:flex">
             {/* Carousel (left) */}
             <div className="md:w-3/5 relative bg-gradient-to-br from-blue-900 to-slate-900">
@@ -408,7 +408,7 @@ export default function DestinationCountry(): JSX.Element {
               </div>
 
               {/* thumbnails */}
-              <div className="hidden md:flex gap-2 p-3 bg-white border-t">
+              <div className="hidden md:flex gap-2 p-3 bg-gray-800/50 backdrop-blur-md border-t border-white/10">
                 {carouselImages.map((src, i) => (
                   <button key={i} onClick={() => gotoImage(i)} className={`w-20 h-12 overflow-hidden rounded-sm border ${i === currentIndex ? "ring-2 ring-rose-500" : "border-slate-200"}`}>
                     <img src={src} alt={`thumb ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
@@ -462,7 +462,7 @@ export default function DestinationCountry(): JSX.Element {
                   </h3>
                   <div className="space-y-3">
                     {summary.testimonials.map((t, i) => (
-                      <blockquote key={i} className="text-sm text-gray-700 bg-white p-3 rounded-xl border border-gray-200 italic">
+                      <blockquote key={i} className="text-sm text-slate-300 bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/20 italic">
                         <svg className="w-4 h-4 text-blue-400 mb-1" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
                         "{t.quote}" <span className="not-italic text-xs text-gray-500 font-medium block mt-1">— {t.author}</span>
                       </blockquote>
@@ -489,7 +489,7 @@ export default function DestinationCountry(): JSX.Element {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
         {/* Map (col 1/2 on large screens) */}
         <div className="lg:col-span-2">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg mb-6">
+          <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-2xl mb-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
               <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
               Tour Destinations
@@ -530,7 +530,7 @@ export default function DestinationCountry(): JSX.Element {
                   const total = perPerson * Math.max(1, passengers);
 
                   return (
-                    <article key={t.slug} className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group">
+                    <article key={t.slug} className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:from-white/15 transition-all duration-300 group">
                       <div className="relative h-56 bg-gradient-to-br from-blue-500 to-indigo-600 overflow-hidden">
                         <img src={t.images?.[0] ?? "/assets/placeholder.jpg"} alt={t.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

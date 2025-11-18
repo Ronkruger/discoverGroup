@@ -280,7 +280,7 @@ export default function ViewBookings() {
   const pendingCount = filteredBookings.filter(b => b.status === "pending").length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -331,7 +331,7 @@ export default function ViewBookings() {
         )}
 
         {/* Filters and Search */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+        <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Search */}
             <div>
@@ -419,7 +419,7 @@ export default function ViewBookings() {
         </div>
 
         {/* Bookings Table */}
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+        <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
           {filteredBookings.length === 0 ? (
             <div className="p-8 text-center">
               <div className="text-gray-400 mb-4">
@@ -439,9 +439,9 @@ export default function ViewBookings() {
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-800/80">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking Details</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Booking ID</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tour</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Travel Date</th>
@@ -450,9 +450,9 @@ export default function ViewBookings() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredBookings.map(booking => (
-                    <tr key={booking.id} className="hover:bg-gray-50">
+                <tbody className="bg-gray-900/50 divide-y divide-white/10">
+                  {filteredBookings.map((booking) => (
+                    <tr key={booking.id} className="hover:bg-white/5 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="text-sm font-medium text-gray-900">{booking.bookingId}</div>

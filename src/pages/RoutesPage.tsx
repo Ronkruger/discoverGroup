@@ -24,49 +24,51 @@ export default function RoutesPage() {
     filter === "ALL" ? tours : tours.filter((t) => t.line === filter);
 
   return (
-    <main className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Our Routes</h1>
+    <main className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
+      <div className="container mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6 text-white">Our Routes</h1>
 
-      {/* Filter Controls */}
-      <div className="mb-6 flex flex-wrap gap-3">
-        {/* All Routes button */}
-        <button
-          onClick={() => setFilter("ALL")}
-          className={`px-4 py-2 rounded-lg border ${
-            filter === "ALL"
-              ? "bg-gray-800 text-white border-gray-800"
-              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-          }`}
-        >
-          All Routes
-        </button>
+        {/* Filter Controls */}
+        <div className="mb-8 flex flex-wrap gap-3">
+          {/* All Routes button */}
+          <button
+            onClick={() => setFilter("ALL")}
+            className={`px-6 py-3 rounded-xl border transition-all font-semibold ${
+              filter === "ALL"
+                ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-500 shadow-lg"
+                : "bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/30"
+            }`}
+          >
+            All Routes
+          </button>
 
-        {/* Line buttons */}
-        {Object.keys(lineColors).map((line) => {
-          const color = lineColors[line];
-          return (
-            <button
-              key={line}
-              onClick={() => setFilter(line)}
-              className={`px-4 py-2 rounded-lg border ${
-                filter === line
-                  ? `bg-${color} text-white border-${color}`
-                  : `bg-white text-gray-700 border-gray-300 hover:bg-${color}/20`
-              }`}
-            >
-              {line} Line
-            </button>
-          );
-        })}
-      </div>
+          {/* Line buttons */}
+          {Object.keys(lineColors).map((line) => {
+            const color = lineColors[line];
+            return (
+              <button
+                key={line}
+                onClick={() => setFilter(line)}
+                className={`px-6 py-3 rounded-xl border transition-all font-semibold ${
+                  filter === line
+                    ? `bg-${color} text-white border-${color} shadow-lg`
+                    : `bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/30`
+                }`}
+              >
+                {line} Line
+              </button>
+            );
+          })}
+        </div>
 
-      {/* Grid */}
-      <div className="grid md:grid-cols-3 gap-6">
-        {filteredTours.length > 0 ? (
-          filteredTours.map((tour) => <TourCard key={tour.id} tour={tour} />)
-        ) : (
-          <p className="col-span-full text-gray-500">No tours found.</p>
-        )}
+        {/* Grid */}
+        <div className="grid md:grid-cols-3 gap-6">
+          {filteredTours.length > 0 ? (
+            filteredTours.map((tour) => <TourCard key={tour.id} tour={tour} />)
+          ) : (
+            <p className="col-span-full text-slate-300 text-center py-12 text-lg">No tours found.</p>
+          )}
+        </div>
       </div>
     </main>
   );

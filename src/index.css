@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* Global Dark Theme */
+body {
+  background: linear-gradient(to bottom, #111827, #1f2937);
+  color: #fff;
+  min-height: 100vh;
+}
+
 /* Custom animations for header */
 @keyframes shimmer {
   0% {
@@ -12,4 +19,68 @@
 
 .animate-shimmer {
   animation: shimmer 3s infinite;
+}
+
+/* Glass morphism utilities */
+.glass-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.glass-card:hover {
+  background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05));
+  border-color: rgba(255,255,255,0.15);
+}
+
+/* Button styles */
+.btn-primary {
+  background: linear-gradient(to right, #3b82f6, #2563eb);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  transition: all 0.3s;
+  box-shadow: 0 10px 15px -3px rgba(59,130,246,0.1), 0 4px 6px -4px rgba(59,130,246,0.1);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(to right, #2563eb, #1d4ed8);
+  box-shadow: 0 20px 25px -5px rgba(37,99,235,0.15), 0 8px 10px -6px rgba(37,99,235,0.15);
+  transform: scale(1.05);
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255,255,255,0.20);
+  transition: all 0.3s;
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.20);
+  border-color: rgba(255,255,255,0.30);
+}
+
+/* Input styles */
+input, select, textarea {
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.20);
+  color: #fff;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s;
+  outline: none;
+}
+
+input::placeholder, select::placeholder, textarea::placeholder {
+  color: rgba(255,255,255,0.5);
+}
+
+input:focus, select:focus, textarea:focus {
+  box-shadow: 0 0 0 2px #3b82f6;
+  border-color: transparent;
 }

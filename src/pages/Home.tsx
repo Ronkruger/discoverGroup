@@ -336,7 +336,7 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="bg-white py-20">
+      <section className="bg-gradient-to-b from-gray-800 to-gray-900 py-20">
         <div className="container mx-auto px-6 grid md:grid-cols-3 gap-12 text-center">
           {[
             { label: "Happy Travelers", value: homepageSettings.statistics.travelers },
@@ -351,42 +351,42 @@ export default function Home() {
               viewport={{ once: true }}
               className="p-6"
             >
-              <h3 className="text-4xl font-bold text-blue-600">
+              <h3 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                 <CountUp end={stat.value} duration={3} separator="," />
                 {stat.label.includes("Years") ? "+" : ""}
               </h3>
-              <p className="text-gray-600 mt-2">{stat.label}</p>
+              <p className="text-slate-300 mt-2">{stat.label}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
       {/* Why Choose Us */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gray-900">
         <div className="container mx-auto px-6 text-center">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="text-3xl font-bold mb-12"
+            className="text-3xl font-bold mb-12 text-white"
           >
             Why Travel with Us?
           </motion.h2>
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                icon: <Map className="w-10 h-10 text-blue-600 mx-auto" />,
+                icon: <Map className="w-10 h-10 text-blue-400 mx-auto" />,
                 title: "Customizable Itineraries",
                 desc: "Tailor-made routes designed to match your travel style and preferences.",
               },
               {
-                icon: <Users className="w-10 h-10 text-blue-600 mx-auto" />,
+                icon: <Users className="w-10 h-10 text-purple-400 mx-auto" />,
                 title: "Professional Guides",
                 desc: "Passionate local experts bringing history and culture to life.",
               },
               {
-                icon: <CheckCircle className="w-10 h-10 text-blue-600 mx-auto" />,
+                icon: <CheckCircle className="w-10 h-10 text-green-400 mx-auto" />,
                 title: "Guaranteed Excellence",
                 desc: "25+ years delivering exceptional European travel experiences.",
               },
@@ -399,11 +399,11 @@ export default function Home() {
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.03, rotate: 1 }}
                 whileTap={{ scale: 0.98 }}
-                className="p-6 bg-white rounded-2xl shadow hover:shadow-lg transition"
+                className="p-6 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl hover:shadow-2xl hover:from-white/15 hover:to-white/8 transition-all"
               >
                 {f.icon}
-                <h3 className="font-semibold text-lg mt-4">{f.title}</h3>
-                <p className="text-gray-600 mt-2">{f.desc}</p>
+                <h3 className="font-semibold text-lg mt-4 text-white">{f.title}</h3>
+                <p className="text-slate-300 mt-2">{f.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -549,14 +549,14 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-gradient-to-b from-gray-900 to-gray-800">
         <div className="container mx-auto px-6 text-center">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="text-3xl font-bold mb-12"
+            className="text-3xl font-bold mb-12 text-white"
           >
             What Our Travelers Say
           </motion.h2>
@@ -585,10 +585,10 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: i * 0.2 }}
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.02 }}
-                className="p-6 bg-gray-50 rounded-2xl shadow hover:shadow-md transition"
+                className="p-6 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl hover:shadow-2xl hover:from-white/15 transition-all"
               >
-                <p className="italic text-gray-700 mb-4">“{t.quote}”</p>
-                <p className="font-semibold text-gray-900">{t.name}</p>
+                <p className="italic text-slate-300 mb-4">"{t.quote}"</p>
+                <p className="font-semibold text-white">{t.name}</p>
               </motion.div>
             ))}
           </div>
@@ -596,14 +596,14 @@ export default function Home() {
       </section>
 
       {/* Call to Action */}
-      <section className="bg-gradient-to-r from-gray-100 to-gray-200 py-20">
+      <section className="bg-gradient-to-br from-blue-900 to-purple-900 py-20">
         <div className="container mx-auto px-6 text-center">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="text-3xl font-bold mb-4 text-gray-900"
+            className="text-3xl font-bold mb-4 text-white"
           >
             Ready for Your European Adventure?
           </motion.h2>
@@ -612,7 +612,7 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
-            className="text-gray-600 mb-8 max-w-xl mx-auto"
+            className="text-blue-100 mb-8 max-w-xl mx-auto"
           >
             Start planning your dream European journey today. Expert guidance, 
             guaranteed departures, and unforgettable experiences await.

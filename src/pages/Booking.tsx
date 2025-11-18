@@ -461,8 +461,7 @@ export default function Booking(): JSX.Element {
   }
 
   const themeStyle: React.CSSProperties = {
-    background:
-      "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
+    background: "linear-gradient(to bottom, #111827, #1f2937)", // from-gray-900 to-gray-800
     ["--accent-yellow" as string]: "#FFD24D",
     ["--accent-yellow-600" as string]: "#FFC107",
     ["--muted-slate" as string]: "#94a3b8",
@@ -500,7 +499,7 @@ export default function Booking(): JSX.Element {
   }
 
   return (
-    <main style={themeStyle} className="min-h-screen py-12 relative overflow-hidden">
+    <main style={themeStyle} className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 py-12 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-white/5 rounded-full blur-3xl animate-pulse"></div>
@@ -534,16 +533,16 @@ export default function Booking(): JSX.Element {
         }
         
         .card-glass {
-          background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-          backdrop-filter: blur(20px) saturate(180%);
-          border: 1px solid rgba(255,255,255,0.18);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+          background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+          backdrop-filter: blur(16px) saturate(150%);
+          border: 1px solid rgba(255,255,255,0.1);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
           color: #ffffff;
           animation: fadeIn 0.6s ease-out;
         }
         .card-glass:hover {
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-          border-color: rgba(255,255,255,0.25);
+          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+          border-color: rgba(255,255,255,0.15);
           transform: translateY(-2px);
           transition: all 0.3s ease;
         }
@@ -571,10 +570,10 @@ export default function Booking(): JSX.Element {
           transform: scale(1.01);
         }
         .btn-primary {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
           color: white;
           border: none;
-          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+          box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
           font-weight: 600;
           transition: all 0.3s ease;
           position: relative;
@@ -595,7 +594,7 @@ export default function Booking(): JSX.Element {
         }
         .btn-primary:hover { 
           transform: translateY(-2px); 
-          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+          box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
         }
         .btn-primary:active {
           transform: translateY(0);

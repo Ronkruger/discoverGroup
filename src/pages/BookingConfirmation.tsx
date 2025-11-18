@@ -215,11 +215,11 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
 
   if (!bookingId) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center px-6">
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center px-6">
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-8 text-center max-w-lg"
+          className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/15 rounded-2xl p-8 text-center max-w-lg shadow-2xl"
         >
           <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 className="w-8 h-8 text-red-400" />
@@ -257,9 +257,9 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-green-600/20 to-emerald-600/20 backdrop-blur-sm border-b border-white/10">
+      <div className="bg-gradient-to-r from-gray-800/50 to-gray-900/50 backdrop-blur-sm border-b border-white/10">
         <div className="container mx-auto px-6 py-16 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -338,7 +338,7 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-8 mb-8"
+          className="bg-gradient-to-br from-white/8 to-white/3 backdrop-blur-md border border-white/10 rounded-2xl p-8 mb-8 shadow-2xl"
         >
           <div className="grid md:grid-cols-2 gap-8">
             <div>
@@ -491,7 +491,7 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
           transition={{ delay: 0.5 }}
           className="mb-8"
         >
-          <div className="flex flex-wrap gap-2 bg-white/5 backdrop-blur-sm rounded-lg p-2">
+          <div className="flex flex-wrap gap-2 bg-gradient-to-br from-white/8 to-white/3 backdrop-blur-md rounded-xl p-2 border border-white/10">
             {[
               { id: 'details', label: 'Next Steps', icon: CheckCircle2 },
               { id: 'itinerary', label: 'Itinerary', icon: Clock },
@@ -528,7 +528,7 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 + index * 0.1 }}
-                  className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 hover:bg-white/10 transition-colors group cursor-pointer"
+                  className="bg-gradient-to-br from-white/8 to-white/3 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:from-white/12 hover:to-white/5 transition-all group cursor-pointer shadow-lg"
                 >
                   <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <step.icon className="w-6 h-6 text-white" />
@@ -544,7 +544,7 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
           )}
 
           {activeTab === 'itinerary' && (
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-8">
+            <div className="bg-gradient-to-br from-white/8 to-white/3 backdrop-blur-md border border-white/10 rounded-2xl p-8 shadow-2xl">
               <h3 className="text-2xl font-bold text-white mb-6">Your Day Schedule</h3>
               <div className="space-y-6">
                 {sampleItinerary.map((item, index) => (
@@ -580,7 +580,7 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 + index * 0.1 }}
-                  className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6"
+                  className="bg-gradient-to-br from-white/8 to-white/3 backdrop-blur-md border border-white/10 rounded-xl p-6 shadow-lg"
                 >
                   <h3 className="text-white font-semibold mb-4">{rec.title}</h3>
                   <ul className="space-y-2">

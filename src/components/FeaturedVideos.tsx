@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
-import { Play, Pause } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 // Import featured videos service
@@ -14,7 +13,6 @@ import 'swiper/css/navigation';
 export default function FeaturedVideos() {
   const [videos, setVideos] = useState<FeaturedVideo[]>([]);
   const [loading, setLoading] = useState(true);
-  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
 
   useEffect(() => {
     loadVideos();
@@ -28,20 +26,6 @@ export default function FeaturedVideos() {
       console.error('Failed to load featured videos:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handlePlayPause = (videoId: string, videoElement: HTMLVideoElement) => {
-    if (playingVideo === videoId) {
-      videoElement.pause();
-      setPlayingVideo(null);
-    } else {
-      // Pause all other videos
-      document.querySelectorAll('video').forEach((v) => {
-        if (v !== videoElement) v.pause();
-      });
-      videoElement.play();
-      setPlayingVideo(videoId);
     }
   };
 
@@ -185,7 +169,7 @@ export default function FeaturedVideos() {
             }}
             className="featured-videos-swiper"
           >
-            {videos.map((video) => (
+            {videos.map((video, index) => (
               <SwiperSlide key={video.id}>
                 <div className="relative group rounded-2xl overflow-hidden shadow-2xl bg-slate-800 hover:shadow-blue-500/20 transition-shadow duration-300">
                   <div className="relative aspect-video">
@@ -193,46 +177,48 @@ export default function FeaturedVideos() {
                       id={`video-${video.id}`}
                       className="w-full h-full object-cover"
                       poster={video.thumbnail_url}
+                      autoPlay
+                      muted
                       loop
                       playsInline
-                      onClick={(e) => handlePlayPause(video.id, e.currentTarget)}
+                      onLoadedData={(e) => {
+                        // Ensure video plays when loaded
+                        const videoEl = e.currentTarget;
+                        videoEl.play().catch(() => {
+                          // Autoplay might be blocked, silently fail
+                        });
+                      }}
                     >
                       <source src={video.video_url} type="video/mp4" />
                       Your browser does not support the video tag.
                     </video>
 
-                    {/* Play/Pause Overlay */}
-                    <div
-                      className="absolute inset-0 flex items-center justify-center bg-black/30 transition-opacity cursor-pointer"
-                      style={{
-                        opacity: playingVideo === video.id ? 0 : 1,
-                      }}
-                      onClick={() => {
-                        const videoEl = document.getElementById(
-                          `video-${video.id}`
-                        ) as HTMLVideoElement;
-                        if (videoEl) handlePlayPause(video.id, videoEl);
-                      }}
-                    >
-                      <div className="bg-white/90 backdrop-blur-sm rounded-full p-6 group-hover:scale-110 transition-transform shadow-xl">
-                        {playingVideo === video.id ? (
-                          <Pause className="w-12 h-12 text-blue-600" />
-                        ) : (
-                          <Play className="w-12 h-12 text-blue-600 ml-1" />
+                    {/* Subtle Overlay for Better Text Readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 pointer-events-none" />
+
+                    {/* Content Overlay */}
+                    <div className="absolute inset-0 flex flex-col justify-end p-8">
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        viewport={{ once: true }}
+                      >
+                        <h3 className="text-3xl md:text-4xl font-bold text-white mb-3 drop-shadow-2xl">
+                          {video.title}
+                        </h3>
+                        {video.description && (
+                          <p className="text-base md:text-lg text-gray-100 line-clamp-2 drop-shadow-xl max-w-2xl">
+                            {video.description}
+                          </p>
                         )}
-                      </div>
+                      </motion.div>
                     </div>
 
-                    {/* Gradient Overlay for Text */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6">
-                      <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-lg">
-                        {video.title}
-                      </h3>
-                      {video.description && (
-                        <p className="text-sm text-gray-200 line-clamp-2 drop-shadow-md">
-                          {video.description}
-                        </p>
-                      )}
+                    {/* Muted indicator */}
+                    <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1.5 text-white text-xs flex items-center gap-1">
+                      <span>🔇</span>
+                      <span>Auto-playing</span>
                     </div>
                   </div>
                 </div>

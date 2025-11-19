@@ -2,8 +2,10 @@ import * as React from "react";
 import { fetchTours } from "../api/tours";
 import { toggleFavorite, getFavorites } from "../api/favorites";
 import { fetchRecentBookingNotification } from "../api/bookings";
+import { submitReview, fetchApprovedReviews } from "../api/reviews";
 import { useAuth } from "../context/useAuth";
 import type { Tour } from "../types";
+import type { Review } from "../api/reviews";
 import TourCard from "../components/TourCard";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -54,6 +56,15 @@ export default function Home() {
     tourSlug: string;
     timeAgo: string;
   } | null>(null);
+  const [reviews, setReviews] = React.useState<Review[]>([]);
+  const [showReviewForm, setShowReviewForm] = React.useState(false);
+  const [reviewForm, setReviewForm] = React.useState({
+    name: '',
+    rating: 5,
+    comment: '',
+  });
+  const [reviewSubmitting, setReviewSubmitting] = React.useState(false);
+  const [reviewSuccess, setReviewSuccess] = React.useState(false);
   const { user } = useAuth();
 
   // Load homepage settings and subscribe to changes
@@ -95,6 +106,19 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
+  // Load approved reviews
+  React.useEffect(() => {
+    const loadReviews = async () => {
+      try {
+        const reviewsData = await fetchApprovedReviews();
+        setReviews(reviewsData);
+      } catch (err) {
+        console.warn('Could not load reviews:', err);
+      }
+    };
+    loadReviews();
+  }, []);
+
   React.useEffect(() => {
     let cancelled = false;
     
@@ -128,6 +152,32 @@ export default function Home() {
     setTours([]);
     setError(null);
     fetchTours().then(setTours).catch(() => setError('Failed to load tours'));
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setReviewSubmitting(true);
+    setReviewSuccess(false);
+
+    try {
+      await submitReview({
+        name: reviewForm.name,
+        rating: reviewForm.rating,
+        comment: reviewForm.comment,
+      });
+      
+      setReviewSuccess(true);
+      setReviewForm({ name: '', rating: 5, comment: '' });
+      setShowReviewForm(false);
+      
+      // Show success message
+      setTimeout(() => setReviewSuccess(false), 5000);
+    } catch (err) {
+      console.error('Failed to submit review:', err);
+      alert('Failed to submit review. Please try again.');
+    } finally {
+      setReviewSubmitting(false);
+    }
   };
 
   return (
@@ -550,47 +600,178 @@ export default function Home() {
 
       {/* Testimonials */}
       <section className="py-20 bg-gradient-to-b from-gray-900 to-gray-800">
-        <div className="container mx-auto px-6 text-center">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-3xl font-bold mb-12 text-white"
-          >
-            What Our Travelers Say
-          </motion.h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                quote:
-                  "An absolutely incredible journey through Europe! Every detail was perfectly planned and executed.",
-                name: "Emma Thompson",
-              },
-              {
-                quote:
-                  "Our guide was phenomenal — truly passionate and knowledgeable. This trip exceeded all expectations!",
-                name: "Michael Chen",
-              },
-              {
-                quote:
-                  "The accommodations were stunning and the itinerary was perfectly paced. Already planning our next adventure!",
-                name: "Isabella Rodriguez",
-              },
-            ].map((t, i) => (
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="text-3xl font-bold mb-4 text-white"
+            >
+              What Our Travelers Say
+            </motion.h2>
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              onClick={() => setShowReviewForm(!showReviewForm)}
+              className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl"
+            >
+              {showReviewForm ? 'Cancel' : 'Write a Review'}
+            </motion.button>
+
+            {reviewSuccess && (
               <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: i * 0.2 }}
-                viewport={{ once: true }}
-                whileHover={{ scale: 1.02 }}
-                className="p-6 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl hover:shadow-2xl hover:from-white/15 transition-all"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4 p-4 bg-green-500/20 border border-green-500/50 rounded-xl text-green-200"
               >
-                <p className="italic text-slate-300 mb-4">"{t.quote}"</p>
-                <p className="font-semibold text-white">{t.name}</p>
+                Thank you! Your review has been submitted and will appear after approval.
               </motion.div>
-            ))}
+            )}
+          </div>
+
+          {/* Review Form */}
+          {showReviewForm && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="max-w-2xl mx-auto mb-12"
+            >
+              <form onSubmit={handleReviewSubmit} className="card-glass rounded-2xl p-8 shadow-2xl">
+                <div className="mb-6">
+                  <label className="block text-white font-semibold mb-2">Your Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={reviewForm.name}
+                    onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50"
+                    placeholder="Enter your name"
+                  />
+                </div>
+
+                <div className="mb-6">
+                  <label className="block text-white font-semibold mb-2">Rating</label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setReviewForm({ ...reviewForm, rating: star })}
+                        className="transition-transform hover:scale-110"
+                      >
+                        <Star
+                          className={`w-8 h-8 ${
+                            star <= reviewForm.rating
+                              ? 'fill-yellow-400 text-yellow-400'
+                              : 'text-slate-500'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <label className="block text-white font-semibold mb-2">Your Review</label>
+                  <textarea
+                    required
+                    value={reviewForm.comment}
+                    onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                    rows={4}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50"
+                    placeholder="Share your experience with us..."
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={reviewSubmitting}
+                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {reviewSubmitting ? 'Submitting...' : 'Submit Review'}
+                </button>
+              </form>
+            </motion.div>
+          )}
+
+          {/* Reviews Grid */}
+          <div className="grid md:grid-cols-3 gap-8">
+            {reviews.length > 0 ? (
+              reviews.slice(0, 6).map((review, i) => (
+                <motion.div
+                  key={review._id || i}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: i * 0.1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ scale: 1.02 }}
+                  className="p-6 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl hover:shadow-2xl hover:from-white/15 transition-all"
+                >
+                  <div className="flex gap-1 mb-3">
+                    {[...Array(5)].map((_, idx) => (
+                      <Star
+                        key={idx}
+                        className={`w-4 h-4 ${
+                          idx < review.rating
+                            ? 'fill-yellow-400 text-yellow-400'
+                            : 'text-slate-600'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <p className="italic text-slate-300 mb-4">"{review.comment}"</p>
+                  <p className="font-semibold text-white">{review.name}</p>
+                  {review.tourTitle && (
+                    <p className="text-xs text-slate-400 mt-1">{review.tourTitle}</p>
+                  )}
+                </motion.div>
+              ))
+            ) : (
+              // Fallback to static testimonials if no reviews yet
+              [
+                {
+                  quote: "An absolutely incredible journey through Europe! Every detail was perfectly planned and executed.",
+                  name: "Emma Thompson",
+                  rating: 5,
+                },
+                {
+                  quote: "Our guide was phenomenal — truly passionate and knowledgeable. This trip exceeded all expectations!",
+                  name: "Michael Chen",
+                  rating: 5,
+                },
+                {
+                  quote: "The accommodations were stunning and the itinerary was perfectly paced. Already planning our next adventure!",
+                  name: "Isabella Rodriguez",
+                  rating: 5,
+                },
+              ].map((t, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: i * 0.2 }}
+                  viewport={{ once: true }}
+                  whileHover={{ scale: 1.02 }}
+                  className="p-6 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl hover:shadow-2xl hover:from-white/15 transition-all"
+                >
+                  <div className="flex gap-1 mb-3">
+                    {[...Array(5)].map((_, idx) => (
+                      <Star
+                        key={idx}
+                        className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                      />
+                    ))}
+                  </div>
+                  <p className="italic text-slate-300 mb-4">"{t.quote}"</p>
+                  <p className="font-semibold text-white">{t.name}</p>
+                </motion.div>
+              ))
+            )}
           </div>
         </div>
       </section>

@@ -1733,7 +1733,6 @@ export default function Booking(): JSX.Element {
               <div className="card-glass rounded-2xl p-5 shadow-2xl">
                 <img src={tour.images?.[0] ?? "/assets/placeholder.jpg"} alt={tour.title} className="w-full h-40 object-cover rounded" />
                 <div className="mt-4">
-                  <div className="text-xs text-slate-300">Your booking</div>
                   <div className="text-lg font-semibold text-slate-100">{tour.title}</div>
                   <div className="text-sm text-slate-300 mt-1">
                     {tour.line ?? ""} • {(() => {

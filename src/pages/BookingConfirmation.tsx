@@ -168,7 +168,7 @@ export default function BookingConfirmation(): JSX.Element {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'My Tour Booking Confirmed!',
+          title: 'My Tour Booking Reservation Confirmed!',
           text: `I just booked ${state.tourTitle} in ${state.country}!`,
           url: window.location.href,
         });
@@ -275,7 +275,7 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
             transition={{ delay: 0.1 }}
             className="text-4xl md:text-5xl font-bold text-white mb-4"
           >
-            Booking Confirmed!
+            Booking Reservation Confirmed!
           </motion.h1>
           
           <motion.p 
@@ -342,7 +342,7 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
         >
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <h2 className="text-2xl font-bold text-white mb-6">Booking Details</h2>
+              <h2 className="text-2xl font-bold text-white mb-6">Reservation Details</h2>
               <div className="space-y-4">
                 <div>
                   <div className="text-slate-400 text-sm mb-1">Booking Reference</div>

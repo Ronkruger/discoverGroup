@@ -16,7 +16,7 @@ import { Autoplay, Pagination } from "swiper/modules";
 import { EnhancedSearch } from "../components/EnhancedSearch";
 import { SkeletonCard } from "../components/LoadingComponents";
 import { NetworkError } from "../components/ErrorComponents";
-import { getHomepageSettings, subscribeToSettingsChanges } from "../services/homepageSettings";
+import { getHomepageSettings, getHomepageSettingsSync } from "../services/homepageSettings";
 import BackToTop from "../components/BackToTop";
 import FeaturedVideos from "../components/FeaturedVideos";
 
@@ -50,7 +50,7 @@ export default function Home() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [favorites, setFavorites] = React.useState<string[]>([]);
-  const [homepageSettings, setHomepageSettings] = React.useState(getHomepageSettings());
+  const [homepageSettings, setHomepageSettings] = React.useState(getHomepageSettingsSync());
   const [recentBooking, setRecentBooking] = React.useState<{
     customerName: string;
     tourSlug: string;
@@ -67,15 +67,13 @@ export default function Home() {
   const [reviewSuccess, setReviewSuccess] = React.useState(false);
   const { user } = useAuth();
 
-  // Load homepage settings and subscribe to changes
+  // Load homepage settings from API
   React.useEffect(() => {
-    setHomepageSettings(getHomepageSettings());
-    
-    const unsubscribe = subscribeToSettingsChanges((newSettings) => {
-      setHomepageSettings(newSettings);
+    getHomepageSettings().then(settings => {
+      setHomepageSettings(settings);
+    }).catch(err => {
+      console.error('Failed to load homepage settings:', err);
     });
-    
-    return unsubscribe;
   }, []);
 
   // Load user's favorites when component mounts

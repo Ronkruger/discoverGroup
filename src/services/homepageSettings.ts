@@ -1,5 +1,7 @@
-// Service to fetch homepage settings from admin panel
-// Settings are stored in localStorage by the admin panel
+// Service to fetch homepage settings from API
+// Settings are managed by the admin panel and stored in the database
+
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 interface HomepageSettings {
   logo: {
@@ -110,67 +112,55 @@ const DEFAULT_SETTINGS: HomepageSettings = {
 };
 
 /**
- * Get homepage settings from localStorage (set by admin panel)
- * Falls back to default settings if not found
+ * Get homepage settings from API
+ * Uses sessionStorage for caching to reduce API calls
  */
-export function getHomepageSettings(): HomepageSettings {
+export async function getHomepageSettings(): Promise<HomepageSettings> {
   try {
-    const savedSettings = localStorage.getItem('discovergroup-homepage-settings');
+    // Try to get from cache first
+    const cached = sessionStorage.getItem('discovergroup-homepage-settings');
+    const cacheTime = sessionStorage.getItem('discovergroup-homepage-settings-time');
     
-    if (savedSettings) {
-      const parsed = JSON.parse(savedSettings);
-      // Merge with defaults to ensure all fields exist
-      return {
-        ...DEFAULT_SETTINGS,
-        ...parsed,
-        logo: { ...DEFAULT_SETTINGS.logo, ...(parsed.logo || {}) },
-        hero: { ...DEFAULT_SETTINGS.hero, ...(parsed.hero || {}) },
-        statistics: { ...DEFAULT_SETTINGS.statistics, ...(parsed.statistics || {}) },
-        features: parsed.features || DEFAULT_SETTINGS.features,
-        testimonials: parsed.testimonials || DEFAULT_SETTINGS.testimonials,
-      };
+    // Cache for 5 minutes
+    if (cached && cacheTime) {
+      const age = Date.now() - parseInt(cacheTime);
+      if (age < 5 * 60 * 1000) {
+        return JSON.parse(cached);
+      }
+    }
+    
+    // Fetch from API
+    const response = await fetch(`${API_URL}/api/homepage-settings`);
+    
+    if (response.ok) {
+      const settings = await response.json();
+      
+      // Cache the settings
+      sessionStorage.setItem('discovergroup-homepage-settings', JSON.stringify(settings));
+      sessionStorage.setItem('discovergroup-homepage-settings-time', Date.now().toString());
+      
+      return settings;
     }
   } catch (error) {
-    console.error('Error loading homepage settings:', error);
+    console.error('Error loading homepage settings from API:', error);
   }
   
+  // Fallback to default settings
   return DEFAULT_SETTINGS;
 }
 
 /**
- * Subscribe to homepage settings changes
- * Calls callback whenever settings are updated in localStorage
+ * Get homepage settings synchronously from cache or defaults
+ * Use this for initial render, then call getHomepageSettings() async
  */
-export function subscribeToSettingsChanges(callback: (settings: HomepageSettings) => void): () => void {
-  const handler = (e: StorageEvent) => {
-    if (e.key === 'discovergroup-homepage-settings') {
-      callback(getHomepageSettings());
+export function getHomepageSettingsSync(): HomepageSettings {
+  try {
+    const cached = sessionStorage.getItem('discovergroup-homepage-settings');
+    if (cached) {
+      return JSON.parse(cached);
     }
-  };
-  
-  // Listen for postMessage from admin panel (cross-domain sync)
-  const messageHandler = (event: MessageEvent) => {
-    // Only accept messages from admin domain
-    const adminOrigins = ['http://localhost:5174', 'https://lambent-dodol-2486cc.netlify.app'];
-    if (!adminOrigins.includes(event.origin)) return;
-    
-    if (event.data.type === 'SYNC_HOMEPAGE_SETTINGS' && event.data.settings) {
-      try {
-        localStorage.setItem('discovergroup-homepage-settings', JSON.stringify(event.data.settings));
-        callback(event.data.settings);
-        console.log('✅ Homepage settings synced from admin panel');
-      } catch (error) {
-        console.error('Error syncing settings:', error);
-      }
-    }
-  };
-  
-  window.addEventListener('storage', handler);
-  window.addEventListener('message', messageHandler);
-  
-  // Return unsubscribe function
-  return () => {
-    window.removeEventListener('storage', handler);
-    window.removeEventListener('message', messageHandler);
-  };
+  } catch (error) {
+    console.error('Error loading cached settings:', error);
+  }
+  return DEFAULT_SETTINGS;
 }

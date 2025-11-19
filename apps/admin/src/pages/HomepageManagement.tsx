@@ -171,19 +171,20 @@ const HomepageManagement: React.FC = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [savingVideo, setSavingVideo] = useState(false);
 
-  // Load settings from localStorage on component mount
+  // Load settings from API on component mount
   useEffect(() => {
-    const savedSettings = localStorage.getItem('discovergroup-homepage-settings');
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
     
-    if (savedSettings) {
-      try {
-        const parsedSettings = JSON.parse(savedSettings);
-        setSettings(parsedSettings);
+    // Load homepage settings from API
+    fetch(`${API_URL}/api/homepage-settings`)
+      .then(res => res.json())
+      .then(data => {
+        setSettings(data);
         setSaved(true);
-      } catch (error) {
-        console.error('Error loading saved homepage settings:', error);
-      }
-    }
+      })
+      .catch(error => {
+        console.error('Error loading homepage settings:', error);
+      });
     
     // Load featured videos from Supabase
     loadFeaturedVideos();
@@ -221,17 +222,26 @@ const HomepageManagement: React.FC = () => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      // Store settings in localStorage
-      localStorage.setItem('discovergroup-homepage-settings', JSON.stringify(settings));
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       
-      // Also try to sync to client domain if possible
-      syncToClientDomain();
+      // Save settings to API
+      const response = await fetch(`${API_URL}/api/homepage-settings`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(settings),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save settings');
+      }
       
       setSaved(true);
       
       // Reset success message after 3 seconds
       setTimeout(() => {
-        // Keep saved state but button is ready for new changes
+        setSaved(false);
       }, 3000);
       
     } catch (error) {
@@ -239,37 +249,6 @@ const HomepageManagement: React.FC = () => {
       alert('Failed to save settings. Please try again.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const syncToClientDomain = () => {
-    // Try to sync settings to client domain via postMessage if window is open
-    try {
-      const clientUrl = window.location.hostname === 'localhost' 
-        ? 'http://localhost:5173' 
-        : window.location.protocol + '//' + window.location.hostname.replace('admin.', '').replace('lambent-dodol-2486cc', 'discovergrp');
-      
-      // Open a hidden iframe to client domain to sync settings
-      const iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
-      iframe.src = clientUrl + '?sync-settings=true';
-      
-      iframe.onload = () => {
-        // Send settings to client page
-        iframe.contentWindow?.postMessage({
-          type: 'SYNC_HOMEPAGE_SETTINGS',
-          settings: settings,
-        }, clientUrl);
-        
-        // Remove iframe after sync
-        setTimeout(() => {
-          document.body.removeChild(iframe);
-        }, 1000);
-      };
-      
-      document.body.appendChild(iframe);
-    } catch (error) {
-      console.warn('Could not auto-sync to client domain:', error);
     }
   };
 

@@ -110,6 +110,7 @@ import adminDashboardRouter from "./routes/admin/dashboard";
 import apiBookingsRouter from "./routes/api/bookings";
 import favoritesRouter from "./routes/favorites";
 import reviewsRouter from "./routes/reviews";
+import homepageSettingsRouter from "./routes/homepage-settings";
 app.use("/admin/tours", adminToursRouter);
 app.use("/admin/users", adminUsersRouter);
 app.use("/admin/bookings", adminBookingsRouter);
@@ -121,6 +122,7 @@ app.use("/public/tours", publicToursRouter);
 app.use("/api/bookings", apiBookingsRouter);
 app.use("/api/favorites", favoritesRouter);
 app.use("/api/reviews", reviewsRouter);
+app.use("/api/homepage-settings", homepageSettingsRouter);
 app.use("/api", emailRouter);
 app.use("/auth", authRouter);
 

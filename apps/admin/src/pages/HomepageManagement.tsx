@@ -1085,7 +1085,7 @@ const HomepageManagement: React.FC = () => {
             onClick={() => {
               const clientUrl = window.location.hostname === 'localhost' 
                 ? 'http://localhost:5173' 
-                : window.location.protocol + '//' + window.location.hostname.replace('admin.', '').replace('lambent-dodol-2486cc', 'discovergrp');
+                : 'https://discoverg.netlify.app';
               window.open(clientUrl, '_blank');
             }}
             className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"

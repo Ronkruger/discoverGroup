@@ -389,9 +389,9 @@ export default function Home() {
       <section className="bg-gradient-to-b from-gray-800 to-gray-900 py-20">
         <div className="container mx-auto px-6 grid md:grid-cols-3 gap-12 text-center">
           {[
-            { label: "Happy Travelers", value: homepageSettings.statistics.travelers },
-            { label: "Tours Completed", value: homepageSettings.statistics.packages },
-            { label: "Years of Experience", value: homepageSettings.statistics.destinations },
+            { label: "Happy Travelers", value: homepageSettings.statistics.travelers, suffix: "+" },
+            { label: "Tour Packages", value: homepageSettings.statistics.packages, suffix: "+" },
+            { label: "Destinations", value: homepageSettings.statistics.destinations, suffix: "+" },
           ].map((stat, i) => (
             <motion.div
               key={i}
@@ -403,7 +403,7 @@ export default function Home() {
             >
               <h3 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                 <CountUp end={stat.value} duration={3} separator="," />
-                {stat.label.includes("Years") ? "+" : ""}
+                {stat.suffix}
               </h3>
               <p className="text-slate-300 mt-2">{stat.label}</p>
             </motion.div>

@@ -1,10 +1,14 @@
 @import "tailwindcss";
 
-/* Global Dark Theme */
+/* Global Dark Theme - Applied to main content areas, not navigation */
 body {
   background: linear-gradient(to bottom, #111827, #1f2937);
-  color: #fff;
   min-height: 100vh;
+}
+
+/* Default text color for dark backgrounds only */
+main {
+  color: #fff;
 }
 
 /* Custom animations for header */

@@ -387,10 +387,11 @@ export default function Home() {
 
       {/* Stats Section */}
       <section className="bg-gradient-to-b from-gray-800 to-gray-900 py-20">
-        <div className="container mx-auto px-6 grid md:grid-cols-3 gap-12 text-center">
+        <div className="container mx-auto px-6 grid md:grid-cols-4 gap-12 text-center">
           {[
             { label: "Happy Travelers", value: homepageSettings.statistics.travelers, suffix: "+" },
             { label: "Tour Packages", value: homepageSettings.statistics.packages, suffix: "+" },
+            { label: "Average Rating", value: homepageSettings.statistics.rating, suffix: "★" },
             { label: "Destinations", value: homepageSettings.statistics.destinations, suffix: "+" },
           ].map((stat, i) => (
             <motion.div
@@ -402,7 +403,7 @@ export default function Home() {
               className="p-6"
             >
               <h3 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                <CountUp end={stat.value} duration={3} separator="," />
+                <CountUp end={stat.value} duration={3} separator="," decimals={stat.label === "Average Rating" ? 1 : 0} />
                 {stat.suffix}
               </h3>
               <p className="text-slate-300 mt-2">{stat.label}</p>

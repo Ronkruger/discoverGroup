@@ -372,6 +372,15 @@ export default function Header(): React.ReactElement {
               </span>
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-blue-400 group-hover:w-full transition-all duration-300"></span>
             </Link>
+            <Link
+              to="/contact"
+              className="text-sm font-bold uppercase tracking-wider text-blue-900 hover:text-blue-600 transition-all duration-200 relative px-3 py-2 rounded-lg hover:bg-blue-50 group"
+            >
+              <span className="flex items-center gap-2">
+                📧 Contact
+              </span>
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-blue-400 group-hover:w-full transition-all duration-300"></span>
+            </Link>
           </nav>
 
           {/* Right side */}

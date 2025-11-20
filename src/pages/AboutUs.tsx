@@ -1,67 +1,378 @@
-import React from "react";
-import { Users, Globe, Clock, Award, Star, Phone } from "lucide-react";
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { Users, Globe, Award, Phone, MapPin, Calendar, Briefcase, Plane, Shield, FileText, Sparkles, ChevronRight, Target, Heart, TrendingUp } from "lucide-react";
 
-const features = [
-  {
-    icon: <Users className="w-10 h-10 text-blue-600 group-hover:scale-110 transition-transform" />, title: "Customer-centric approach", desc: "We design tailor-made itineraries that align with your preferences, interests, and budget, ensuring every journey is unique and personal."
-  },
-  {
-    icon: <Globe className="w-10 h-10 text-yellow-500 group-hover:scale-110 transition-transform" />, title: "Domestic & International Tours", desc: "From popular European routes to worldwide destinations, we organize both local and global adventures."
-  },
-  {
-    icon: <Clock className="w-10 h-10 text-blue-400 group-hover:scale-110 transition-transform" />, title: "Leisurely Tour Packages", desc: "Our packages are crafted for a more relaxed, unhurried pace—perfect for families, seniors, and travelers who want to savor every moment. Many packages include visa assistance, flexible flight options, and transferrable booking slots."
-  },
-  {
-    icon: <Award className="w-10 h-10 text-green-600 group-hover:scale-110 transition-transform" />, title: "Accreditations", desc: "As of 2022, Discover Group is accredited by the Department of Tourism (DOT) Philippines and other major tourism associations."
-  },
-  {
-    icon: <Star className="w-10 h-10 text-yellow-400 group-hover:scale-110 transition-transform" />, title: "Company Size", desc: "With a dedicated team of 11–50 employees, we combine personalized service with professional expertise."
-  },
-  {
-    icon: <Star className="w-10 h-10 text-blue-500 group-hover:scale-110 transition-transform" />, title: "Emphasis on Experience", desc: "We believe in creating stories, not just trips—helping you build memories that last a lifetime."
-  },
-];
+type TabType = 'story' | 'services' | 'values';
 
 export default function AboutUs() {
+  const [activeTab, setActiveTab] = useState<TabType>('story');
+
+  const services = [
+    { icon: Plane, title: "International & Local Tours", desc: "From European adventures to Philippine wonders" },
+    { icon: FileText, title: "Visa Assistance", desc: "Specializing in Japan visa processing" },
+    { icon: Globe, title: "Airline Ticketing", desc: "Best rates and flexible booking options" },
+    { icon: Briefcase, title: "Corporate Travel", desc: "Meetings, events, and team building" },
+    { icon: Shield, title: "Airport Assistance", desc: "Seamless arrival and departure support" },
+    { icon: Users, title: "Group Packages", desc: "Customized itineraries for any group size" },
+  ];
+
+  const stats = [
+    { number: "2008", label: "Established", icon: Calendar },
+    { number: "15+", label: "Years Experience", icon: Award },
+    { number: "32K+", label: "Happy Travelers", icon: Users },
+    { number: "100%", label: "Personalized", icon: Heart },
+  ];
+
+  const values = [
+    { 
+      icon: Target, 
+      title: "Customer-Centric", 
+      desc: "Every itinerary is tailored to your preferences, interests, and budget. Your dream journey is our priority.",
+      color: "from-blue-500 to-blue-600"
+    },
+    { 
+      icon: Heart, 
+      title: "Collaborative Approach", 
+      desc: "We work closely with you to understand your vision and craft experiences that exceed expectations.",
+      color: "from-pink-500 to-pink-600"
+    },
+    { 
+      icon: TrendingUp, 
+      title: "Quality & Excellence", 
+      desc: "DOT-accredited since 2022, we maintain the highest standards in travel services and customer care.",
+      color: "from-green-500 to-green-600"
+    },
+  ];
+
   return (
-    <main className="min-h-[80vh] bg-gradient-to-br from-blue-100 via-white to-yellow-50/60 pb-16">
-      {/* Hero Section */}
-      <section className="relative flex flex-col items-center justify-center py-16 mb-8 w-full">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-700/80 to-blue-400/60 opacity-80 animate-gradient-x" />
-        <div className="relative z-10 flex flex-col items-center">
-          <img src="/logo.jpg" alt="Discover Group Logo" className="h-24 w-24 rounded-2xl shadow-lg mb-4 border-4 border-white bg-white/80 animate-fade-in" />
-          <h1 className="text-5xl md:text-6xl font-extrabold text-white drop-shadow-lg mb-2 text-center animate-fade-in">About Discover Group</h1>
-          <p className="text-xl text-blue-100 max-w-3xl text-center drop-shadow mb-2 animate-fade-in delay-100">Discover Group of Travel Services Inc. is a premier travel agency based in Quezon City, Philippines, specializing in customized and group tour packages since 2008.</p>
-        </div>
-      </section>
+    <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+      {/* Hero Section with Parallax Effect */}
+      <section className="relative h-[70vh] flex items-center justify-center overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ 
+            backgroundImage: 'url("/assets/paris.jpg")',
+            transform: 'scale(1.1)',
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-900/80 via-blue-800/70 to-gray-900/90" />
+        
+        {/* Animated background elements */}
+        <motion.div
+          className="absolute top-20 left-10 w-32 h-32 bg-yellow-400/20 rounded-full blur-3xl"
+          animate={{ 
+            y: [0, 50, 0],
+            scale: [1, 1.2, 1]
+          }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-20 right-20 w-40 h-40 bg-blue-400/20 rounded-full blur-3xl"
+          animate={{ 
+            y: [0, -40, 0],
+            scale: [1, 1.3, 1]
+          }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        />
 
-      {/* Features Grid */}
-      <section className="w-full flex justify-center">
-        <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-6">
-          {features.map(f => (
-            <div
-              key={f.title}
-              className="group bg-white/90 rounded-3xl shadow-xl p-8 flex flex-col items-center text-center hover:shadow-2xl hover:-translate-y-1 transition-all duration-200 cursor-pointer border border-slate-100"
-            >
-              <div className="mb-3">{f.icon}</div>
-              <h3 className="text-xl font-bold text-blue-900 mb-2 group-hover:text-yellow-500 transition-colors">{f.title}</h3>
-              <p className="text-slate-700 text-base leading-relaxed">{f.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Mission & CTA */}
-      <section className="w-full flex flex-col items-center mt-16">
-        <div className="bg-white/80 rounded-2xl shadow-lg px-8 py-8 max-w-2xl text-center animate-fade-in">
-          <p className="text-blue-900 text-2xl font-semibold mb-4">Our mission is to make travel accessible, enjoyable, and truly unforgettable.</p>
-          <p className="text-slate-700 mb-6 text-lg">Whether you’re planning a family holiday, a group adventure, or a once-in-a-lifetime journey, Discover Group is your trusted partner in travel.</p>
-          <a
-            href="mailto:info@discovergroup.com.ph"
-            className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-400 text-white font-bold rounded-full shadow-lg hover:from-yellow-400 hover:to-yellow-300 hover:text-blue-900 hover:scale-105 transition-all duration-200 text-lg"
+        <div className="relative z-10 container mx-auto px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
+            className="mb-6"
           >
-            <Phone className="w-6 h-6" /> Contact us today
-          </a>
+            <img 
+              src="/logo.jpg" 
+              alt="Discover Group Logo" 
+              className="h-32 w-32 mx-auto rounded-3xl shadow-2xl border-4 border-white/50 backdrop-blur-sm"
+            />
+          </motion.div>
+          
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-6xl md:text-7xl font-bold text-white mb-6"
+          >
+            Discover Group
+          </motion.h1>
+          
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-2xl text-blue-100 max-w-3xl mx-auto mb-4"
+          >
+            Creating Unforgettable Travel Experiences Since 2008
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="flex items-center justify-center gap-2 text-yellow-300"
+          >
+            <MapPin className="w-5 h-5" />
+            <span className="text-lg">Quezon City, Philippines</span>
+          </motion.div>
+        </div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <ChevronRight className="w-8 h-8 text-white rotate-90" />
+        </motion.div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-16 -mt-20 relative z-20">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="card-glass rounded-2xl p-6 text-center hover:shadow-2xl transition-all group"
+              >
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <stat.icon className="w-8 h-8 text-white" />
+                </div>
+                <div className="text-4xl font-bold text-white mb-2">{stat.number}</div>
+                <div className="text-slate-300">{stat.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Interactive Tabs Section */}
+      <section className="py-20">
+        <div className="container mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Our Story</h2>
+            <p className="text-xl text-slate-300 max-w-3xl mx-auto">
+              Discover what makes us the trusted travel partner for thousands of adventurers
+            </p>
+          </motion.div>
+
+          {/* Tab Navigation */}
+          <div className="flex flex-wrap justify-center gap-4 mb-12">
+            {[
+              { key: 'story', label: 'Our Journey', icon: Sparkles },
+              { key: 'services', label: 'What We Offer', icon: Briefcase },
+              { key: 'values', label: 'Our Values', icon: Heart },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as TabType)}
+                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-semibold transition-all ${
+                  activeTab === tab.key
+                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg scale-105'
+                    : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                }`}
+              >
+                <tab.icon className="w-5 h-5" />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab Content */}
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+            className="max-w-6xl mx-auto"
+          >
+            {activeTab === 'story' && (
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="card-glass rounded-2xl p-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                      <Calendar className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white">Founded in May 2008</h3>
+                  </div>
+                  <p className="text-slate-300 leading-relaxed mb-4">
+                    Discover Group of Travel Services Inc. began with a simple vision: to make travel accessible, 
+                    enjoyable, and truly unforgettable for every Filipino traveler.
+                  </p>
+                  <p className="text-slate-300 leading-relaxed">
+                    What started as a small travel agency in Quezon City has grown into a trusted name in the 
+                    Philippine travel industry, serving thousands of satisfied customers across 15+ years.
+                  </p>
+                </div>
+
+                <div className="card-glass rounded-2xl p-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                      <MapPin className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white">Our Headquarters</h3>
+                  </div>
+                  <p className="text-slate-300 leading-relaxed mb-4">
+                    Located at the 22nd floor of The Upper Class Tower on Quezon Avenue, Diliman, 
+                    our modern office serves as the hub for all our travel operations.
+                  </p>
+                  <p className="text-slate-300 leading-relaxed">
+                    Our strategic location in Metro Manila allows us to serve clients nationwide while 
+                    maintaining close partnerships with international travel networks.
+                  </p>
+                </div>
+
+                <div className="card-glass rounded-2xl p-8 md:col-span-2">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center">
+                      <Award className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white">Accredited & Trusted</h3>
+                  </div>
+                  <p className="text-slate-300 leading-relaxed">
+                    As a DOT-accredited travel agency since 2022, we uphold the highest standards of service quality 
+                    and professionalism. Our dedicated team of 11-50 travel experts combines personalized attention 
+                    with industry expertise to ensure every journey exceeds expectations.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'services' && (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {services.map((service, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    className="card-glass rounded-2xl p-6 hover:shadow-2xl transition-all group cursor-pointer"
+                  >
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <service.icon className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-3 group-hover:text-yellow-400 transition-colors">
+                      {service.title}
+                    </h3>
+                    <p className="text-slate-300 leading-relaxed">{service.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'values' && (
+              <div className="space-y-6">
+                {values.map((value, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    className="card-glass rounded-2xl p-8 hover:shadow-2xl transition-all"
+                  >
+                    <div className="flex items-start gap-6">
+                      <div className={`w-20 h-20 bg-gradient-to-br ${value.color} rounded-2xl flex items-center justify-center flex-shrink-0`}>
+                        <value.icon className="w-10 h-10 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-white mb-3">{value.title}</h3>
+                        <p className="text-slate-300 text-lg leading-relaxed">{value.desc}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Mission Statement */}
+      <section className="py-20 bg-gradient-to-r from-blue-900/50 to-purple-900/50">
+        <div className="container mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="max-w-4xl mx-auto text-center"
+          >
+            <Sparkles className="w-16 h-16 text-yellow-400 mx-auto mb-6" />
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              Our Mission
+            </h2>
+            <p className="text-2xl text-blue-100 leading-relaxed mb-8">
+              To make travel accessible, enjoyable, and truly unforgettable by crafting personalized 
+              journeys that create lasting memories and meaningful connections.
+            </p>
+            <p className="text-xl text-slate-300 mb-12">
+              Whether you're planning a family holiday, a group adventure, or a once-in-a-lifetime journey, 
+              Discover Group is your trusted partner in turning travel dreams into reality.
+            </p>
+            <a
+              href="/contact"
+              className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-blue-900 font-bold text-lg rounded-full shadow-2xl hover:from-yellow-300 hover:to-yellow-400 hover:scale-105 transition-all"
+            >
+              <Phone className="w-6 h-6" />
+              Start Your Journey Today
+            </a>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Team Size & Approach */}
+      <section className="py-20">
+        <div className="container mx-auto px-6">
+          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="card-glass rounded-2xl p-8"
+            >
+              <Users className="w-16 h-16 text-blue-400 mb-6" />
+              <h3 className="text-3xl font-bold text-white mb-4">Dedicated Team</h3>
+              <p className="text-slate-300 text-lg leading-relaxed mb-4">
+                Our team of 11-50 travel professionals brings together years of experience, 
+                local knowledge, and a passion for creating extraordinary travel experiences.
+              </p>
+              <p className="text-slate-300 leading-relaxed">
+                Each member is committed to providing personalized service while maintaining 
+                the professional expertise you deserve.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="card-glass rounded-2xl p-8"
+            >
+              <Heart className="w-16 h-16 text-pink-400 mb-6" />
+              <h3 className="text-3xl font-bold text-white mb-4">Creating Stories</h3>
+              <p className="text-slate-300 text-lg leading-relaxed mb-4">
+                We don't just book trips—we create stories and build memories that last a lifetime.
+              </p>
+              <p className="text-slate-300 leading-relaxed">
+                Every itinerary is thoughtfully designed to reflect your unique preferences, ensuring 
+                your journey is as individual as you are.
+              </p>
+            </motion.div>
+          </div>
         </div>
       </section>
     </main>

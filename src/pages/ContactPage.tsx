@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Send, Clock, MessageCircle } from "lucide-react";
+import { Mail, Phone, MapPin, Send, Clock, MessageCircle, Facebook, Instagram, Users, FileText, Headphones } from "lucide-react";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -36,19 +36,19 @@ export default function ContactPage() {
     {
       icon: Phone,
       title: "Phone",
-      details: ["+63 2 8525 8404", "+63 8121 8065"],
-      action: "tel:+6328525804",
+      details: ["02 8554 6954"],
+      action: "tel:0285546954",
     },
     {
       icon: Mail,
       title: "Email",
-      details: ["romanolantano.discovergrp@gmail.com"],
-      action: "mailto:romanolantano.discovergrp@gmail.com",
+      details: ["inquiry@discovergrp.com"],
+      action: "mailto:inquiry@discovergrp.com",
     },
     {
       icon: MapPin,
       title: "Office",
-      details: ["Quezon City", "Philippines"],
+      details: ["22nd Floor, The Upper Class Tower", "Quezon Ave cor. Sct. Reyes St", "Diliman, Quezon City, 1103"],
       action: null,
     },
     {
@@ -130,6 +130,159 @@ export default function ContactPage() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Department Contact Details */}
+      <section className="py-12 bg-gradient-to-b from-gray-800 to-gray-900">
+        <div className="container mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-10"
+          >
+            <h2 className="text-3xl font-bold text-white mb-3">Contact by Department</h2>
+            <p className="text-slate-300">Reach out to the right team for your needs</p>
+          </motion.div>
+
+          <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-6">
+            {/* Sales */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="card-glass rounded-2xl p-6 hover:shadow-2xl transition-all"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-white">Sales</h3>
+              </div>
+              <div className="space-y-2 text-sm text-slate-300">
+                <a href="tel:09956743860" className="block hover:text-blue-400 transition-colors">
+                  📞 0995-674-3860
+                </a>
+                <a href="tel:09193946919" className="block hover:text-blue-400 transition-colors">
+                  📞 0919-394-6919
+                </a>
+                <a href="tel:09624402835" className="block hover:text-blue-400 transition-colors">
+                  📞 0962-440-2835
+                </a>
+              </div>
+            </motion.div>
+
+            {/* Visa */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="card-glass rounded-2xl p-6 hover:shadow-2xl transition-all"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-white">Visa</h3>
+              </div>
+              <div className="space-y-2 text-sm text-slate-300">
+                <a href="tel:09603123656" className="block hover:text-blue-400 transition-colors">
+                  📞 0960-312-3656
+                </a>
+                <a href="tel:09623736463" className="block hover:text-blue-400 transition-colors">
+                  📞 0962-373-6463
+                </a>
+                <a href="tel:09623736465" className="block hover:text-blue-400 transition-colors">
+                  📞 0962-373-6465
+                </a>
+              </div>
+            </motion.div>
+
+            {/* Customer Relations */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              viewport={{ once: true }}
+              className="card-glass rounded-2xl p-6 hover:shadow-2xl transition-all"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
+                  <Headphones className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-white">Customer Relations</h3>
+              </div>
+              <div className="space-y-2 text-sm text-slate-300">
+                <a href="tel:09616052958" className="block hover:text-blue-400 transition-colors">
+                  📞 0961-605-2958
+                </a>
+                <a href="tel:09687374685" className="block hover:text-blue-400 transition-colors">
+                  📞 0968-737-4685
+                </a>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Email Addresses */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
+            className="max-w-3xl mx-auto mt-8"
+          >
+            <div className="card-glass rounded-2xl p-6 text-center">
+              <h3 className="text-lg font-semibold text-white mb-4">Email Addresses</h3>
+              <div className="flex flex-wrap justify-center gap-4 text-sm">
+                <a href="mailto:inquiry@discovergrp.com" className="text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  inquiry@discovergrp.com
+                </a>
+                <span className="text-slate-500">|</span>
+                <a href="mailto:traveldesk@discovergrp.com" className="text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  traveldesk@discovergrp.com
+                </a>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Social Media */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            viewport={{ once: true }}
+            className="max-w-3xl mx-auto mt-6"
+          >
+            <div className="card-glass rounded-2xl p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 text-center">Follow Us</h3>
+              <div className="flex justify-center gap-6">
+                <a 
+                  href="https://www.facebook.com/discovergrp" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl transition-all hover:scale-105 text-white font-medium"
+                >
+                  <Facebook className="w-5 h-5" />
+                  Facebook
+                </a>
+                <a 
+                  href="https://www.instagram.com/discover_grp/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:from-purple-700 hover:via-pink-700 hover:to-orange-600 rounded-xl transition-all hover:scale-105 text-white font-medium"
+                >
+                  <Instagram className="w-5 h-5" />
+                  Instagram
+                </a>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 

@@ -93,6 +93,12 @@ const navigationItems: NavItem[] = [
     permission: "canAccessSettings",
   },
   {
+    to: "/countries",
+    label: "Countries",
+    icon: MapPin,
+    permission: "canAccessSettings",
+  },
+  {
     to: "/settings",
     label: "Settings",
     icon: Settings,

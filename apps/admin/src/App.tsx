@@ -18,6 +18,7 @@ import Settings from './pages/Settings';
 import SalesDepartment from './pages/SalesDepartment';
 import MapMarkersManagement from './pages/MapMarkersManagement';
 import HomepageManagement from './pages/HomepageManagement';
+import CountryManagement from './pages/CountryManagement';
 import { UserRole } from "./types/auth";
 
 // Loading component
@@ -227,6 +228,19 @@ const AppRouter: React.FC = () => {
                   allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.WEB_DEVELOPER]}
                 >
                   <HomepageManagement />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Country Management - Administrator & Web Developer */}
+            <Route
+              path="/countries"
+              element={
+                <ProtectedRoute 
+                  requiredPermission="canAccessSettings"
+                  allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.WEB_DEVELOPER]}
+                >
+                  <CountryManagement />
                 </ProtectedRoute>
               }
             />

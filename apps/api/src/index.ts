@@ -111,6 +111,7 @@ import apiBookingsRouter from "./routes/api/bookings";
 import favoritesRouter from "./routes/favorites";
 import reviewsRouter from "./routes/reviews";
 import homepageSettingsRouter from "./routes/homepage-settings";
+import countriesRouter from "./routes/countries";
 app.use("/admin/tours", adminToursRouter);
 app.use("/admin/users", adminUsersRouter);
 app.use("/admin/bookings", adminBookingsRouter);
@@ -123,6 +124,7 @@ app.use("/api/bookings", apiBookingsRouter);
 app.use("/api/favorites", favoritesRouter);
 app.use("/api/reviews", reviewsRouter);
 app.use("/api/homepage-settings", homepageSettingsRouter);
+app.use("/api/countries", countriesRouter);
 app.use("/api", emailRouter);
 app.use("/auth", authRouter);
 

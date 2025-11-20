@@ -175,49 +175,6 @@ export default function Header(): React.ReactElement {
         </div>
       )}
 
-      {/* Utility bar - Enhanced */}
-      <div className="bg-gradient-to-r from-gray-50 to-blue-50/30 border-b border-gray-200/50">
-        <div className="container mx-auto px-4 py-2.5 flex items-center justify-between text-xs text-gray-700">
-          <div className="flex items-center gap-2 cursor-pointer hover:text-blue-600 font-medium transition-all group">
-            <span className="inline-flex items-center gap-1">
-              🌍 TTC Portfolio of Brands 
-              <svg className="w-3 h-3 group-hover:rotate-180 transition-transform" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </span>
-          </div>
-          <div className="hidden md:flex items-center gap-6">
-            <a href="/faqs" className="hover:text-blue-600 transition-colors font-medium">❓ FAQs</a>
-            <a href="/get-a-quote" className="hover:text-blue-600 transition-colors font-medium">💼 Get a Quote</a>
-            <a href="/agents" className="hover:text-blue-600 transition-colors font-medium">🔐 Agents Login</a>
-
-            <div className="relative group">
-              <button className="flex items-center gap-1 hover:text-blue-600 font-medium transition-colors">
-                👤 My Account 
-                <svg className="w-3 h-3 group-hover:rotate-180 transition-transform" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ease-in-out transform group-hover:translate-y-0 translate-y-2">
-                <div className="absolute -top-2 right-0 w-full h-2 bg-transparent"></div>
-                <ul className="py-2 text-sm">
-                  <li className="px-4 py-2.5 hover:bg-blue-50 transition-colors">
-                    <a href="/profile" className="flex items-center gap-2 w-full h-full">
-                      <span>👤</span> Profile
-                    </a>
-                  </li>
-                  <li className="px-4 py-2.5 hover:bg-blue-50 transition-colors">
-                    <a href="/bookings" className="flex items-center gap-2 w-full h-full">
-                      <span>📋</span> My Bookings
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main header - Enhanced */}
       <div className="bg-gradient-to-b from-white to-gray-50/50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between gap-8">

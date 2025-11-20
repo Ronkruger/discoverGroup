@@ -35,7 +35,7 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <Link to="/about" className="hover:text-yellow-300 transition">
+              <Link to="/about-us" className="hover:text-yellow-300 transition">
                 About Us
               </Link>
             </li>
@@ -51,10 +51,10 @@ export default function Footer() {
         <div>
           <h4 className="font-semibold text-yellow-400 mb-4">Contact Us</h4>
           <ul className="space-y-2 text-sm text-blue-100">
-            <li>📍 123 Travel Road, Manila, PH</li>
-            <li>📞 +63 02 8526 8404</li>
-            <li>💬 +65 8121 6065</li>
-            <li>✉️ info@discovergroup.com</li>
+            <li>📍 22nd Floor, The Upper Class Tower</li>
+            <li className="pl-4">Quezon Ave, Diliman, QC 1103</li>
+            <li>📞 02 8554 6954</li>
+            <li>✉️ inquiry@discovergrp.com</li>
           </ul>
         </div>
 
@@ -62,10 +62,8 @@ export default function Footer() {
         <div>
           <h4 className="font-semibold text-yellow-400 mb-4">Follow Us</h4>
           <div className="flex gap-4">
-            <a href="#" className="hover:text-yellow-300 transition">🌐</a>
-            <a href="#" className="hover:text-yellow-300 transition">👍</a>
-            <a href="#" className="hover:text-yellow-300 transition">🐦</a>
-            <a href="#" className="hover:text-yellow-300 transition">📸</a>
+            <a href="https://www.facebook.com/discovergrp" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-300 transition text-2xl" title="Facebook">📘</a>
+            <a href="https://www.instagram.com/discover_grp/" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-300 transition text-2xl" title="Instagram">📸</a>
           </div>
         </div>
       </div>

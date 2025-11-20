@@ -14,6 +14,7 @@ export default function CountryManagement() {
     description: '',
     heroQuery: '',
     heroImageUrl: '',
+    heroImages: [],
     bestTime: '',
     currency: '',
     language: '',
@@ -49,6 +50,7 @@ export default function CountryManagement() {
       description: country.description,
       heroQuery: country.heroQuery || '',
       heroImageUrl: country.heroImageUrl || '',
+      heroImages: country.heroImages || [],
       bestTime: country.bestTime,
       currency: country.currency,
       language: country.language,
@@ -67,6 +69,7 @@ export default function CountryManagement() {
       description: '',
       heroQuery: '',
       heroImageUrl: '',
+      heroImages: [],
       bestTime: '',
       currency: '',
       language: '',
@@ -86,6 +89,7 @@ export default function CountryManagement() {
       description: '',
       heroQuery: '',
       heroImageUrl: '',
+      heroImages: [],
       bestTime: '',
       currency: '',
       language: '',
@@ -104,7 +108,13 @@ export default function CountryManagement() {
       setUploadingHero(true);
       const result = await uploadFile(file, 'country-images', { folder: 'hero-images' });
       if (result.success && result.url) {
-        setFormData({ ...formData, heroImageUrl: result.url });
+        const currentImages = formData.heroImages || [];
+        const updatedImages = [...currentImages, result.url];
+        setFormData({ 
+          ...formData, 
+          heroImages: updatedImages,
+          heroImageUrl: updatedImages[0] // Set first image as primary
+        });
         alert('Hero image uploaded successfully!');
       } else {
         throw new Error(result.error || 'Upload failed');
@@ -114,6 +124,26 @@ export default function CountryManagement() {
       alert('Failed to upload image');
     } finally {
       setUploadingHero(false);
+    }
+  };
+
+  const removeHeroImage = (index: number) => {
+    const currentImages = formData.heroImages || [];
+    const updatedImages = currentImages.filter((_, i) => i !== index);
+    setFormData({
+      ...formData,
+      heroImages: updatedImages,
+      heroImageUrl: updatedImages[0] || '' // Update primary to first remaining image
+    });
+  };
+
+  const setPrimaryHeroImage = (index: number) => {
+    const currentImages = formData.heroImages || [];
+    if (currentImages[index]) {
+      setFormData({
+        ...formData,
+        heroImageUrl: currentImages[index]
+      });
     }
   };
 
@@ -304,30 +334,60 @@ export default function CountryManagement() {
                 <p className="text-xs text-gray-500 mt-1">Used for Unsplash fallback if no hero image</p>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">Hero Image</label>
-                <div className="flex gap-2">
+              <div className="col-span-2">
+                <label className="block text-sm font-medium mb-2">Hero Images</label>
+                <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                  <Upload size={16} />
+                  {uploadingHero ? 'Uploading...' : 'Add Hero Image'}
                   <input
-                    type="text"
-                    value={formData.heroImageUrl}
-                    onChange={(e) => setFormData({ ...formData, heroImageUrl: e.target.value })}
-                    className="flex-1 px-3 py-2 border rounded-lg"
-                    placeholder="Image URL or upload..."
+                    type="file"
+                    accept="image/*"
+                    onChange={handleHeroImageUpload}
+                    className="hidden"
+                    disabled={uploadingHero}
                   />
-                  <label className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200">
-                    <Upload size={16} />
-                    {uploadingHero ? 'Uploading...' : 'Upload'}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleHeroImageUpload}
-                      className="hidden"
-                      disabled={uploadingHero}
-                    />
-                  </label>
-                </div>
-                {formData.heroImageUrl && (
-                  <img src={formData.heroImageUrl} alt="Hero preview" className="mt-2 h-24 w-auto rounded" />
+                </label>
+                
+                {formData.heroImages && formData.heroImages.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <p className="text-sm text-gray-600">{formData.heroImages.length} image(s) uploaded</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {formData.heroImages.map((imageUrl, index) => (
+                        <div key={index} className="relative group border rounded-lg overflow-hidden">
+                          <img 
+                            src={imageUrl} 
+                            alt={`Hero ${index + 1}`} 
+                            className="w-full h-32 object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => setPrimaryHeroImage(index)}
+                              className={`px-2 py-1 text-xs rounded ${
+                                formData.heroImageUrl === imageUrl 
+                                  ? 'bg-green-600 text-white' 
+                                  : 'bg-white text-gray-800 hover:bg-gray-100'
+                              }`}
+                              title="Set as primary"
+                            >
+                              {formData.heroImageUrl === imageUrl ? 'Primary' : 'Set Primary'}
+                            </button>
+                            <button
+                              onClick={() => removeHeroImage(index)}
+                              className="p-1 bg-red-600 text-white rounded hover:bg-red-700"
+                              title="Remove image"
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+                          {formData.heroImageUrl === imageUrl && (
+                            <div className="absolute top-1 left-1 bg-green-600 text-white text-xs px-2 py-0.5 rounded">
+                              Primary
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             </div>

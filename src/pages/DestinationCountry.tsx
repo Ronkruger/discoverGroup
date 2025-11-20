@@ -3,6 +3,7 @@ import { useLocation, useParams, Link } from "react-router-dom";
 import type { Tour } from "../types";
 import { fetchToursByCountry } from "../api/tours";
 import { fetchCountryBySlug, type Country } from "../api/countries";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import React from "react";
 
 type LeafletMap = {
@@ -32,6 +33,7 @@ export default function DestinationCountry() {
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   const mapRef = useRef<LeafletMap | null>(null);
   const markersLayerRef = useRef<unknown | null>(null);
@@ -148,16 +150,72 @@ export default function DestinationCountry() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
-      {/* Hero Section */}
+      {/* Hero Section with Image Carousel */}
       <section className="relative h-[60vh] overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: country.heroImageUrl 
-              ? `url(${country.heroImageUrl})`
-              : `url(https://source.unsplash.com/1600x900/?${country.heroQuery || country.slug})`,
-          }}
-        />
+        {/* Hero Images */}
+        {country.heroImages && country.heroImages.length > 0 ? (
+          <>
+            {country.heroImages.map((imageUrl, index) => (
+              <div
+                key={index}
+                className={`absolute inset-0 bg-cover bg-center transition-opacity duration-700 ${
+                  index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                }`}
+                style={{ backgroundImage: `url(${imageUrl})` }}
+              />
+            ))}
+            
+            {/* Carousel Navigation */}
+            {country.heroImages.length > 1 && (
+              <>
+                <button
+                  onClick={() => setCurrentImageIndex((prev) => 
+                    prev === 0 ? country.heroImages!.length - 1 : prev - 1
+                  )}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft size={32} />
+                </button>
+                <button
+                  onClick={() => setCurrentImageIndex((prev) => 
+                    prev === country.heroImages!.length - 1 ? 0 : prev + 1
+                  )}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors"
+                  aria-label="Next image"
+                >
+                  <ChevronRight size={32} />
+                </button>
+                
+                {/* Dots Indicator */}
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+                  {country.heroImages.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        index === currentImageIndex 
+                          ? 'bg-white w-8' 
+                          : 'bg-white/50 hover:bg-white/75'
+                      }`}
+                      aria-label={`Go to image ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </>
+        ) : (
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: country.heroImageUrl 
+                ? `url(${country.heroImageUrl})`
+                : `url(https://source.unsplash.com/1600x900/?${country.heroQuery || country.slug})`,
+            }}
+          />
+        )}
+        
         <div className="absolute inset-0 bg-gradient-to-b from-gray-900/60 via-gray-900/40 to-gray-900" />
         <div className="relative z-10 container mx-auto px-6 h-full flex flex-col justify-center">
           <h1 className="text-6xl font-bold text-white mb-4">{country.name}</h1>

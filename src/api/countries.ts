@@ -5,7 +5,8 @@ export interface Country {
   name: string;
   slug: string;
   description: string;
-  heroImageUrl?: string;
+  heroImageUrl?: string; // Primary hero image URL (backward compatibility)
+  heroImages?: string[]; // Array of hero image URLs
   heroQuery?: string;
   bestTime: string;
   currency: string;

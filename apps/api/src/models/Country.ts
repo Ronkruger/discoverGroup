@@ -17,7 +17,8 @@ const countrySchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true, index: true },
   slug: { type: String, required: true, unique: true, index: true },
   description: { type: String, required: true },
-  heroImageUrl: { type: String },
+  heroImageUrl: { type: String }, // Primary hero image (backward compatibility)
+  heroImages: [{ type: String }], // Array of hero image URLs
   heroQuery: { type: String },
   bestTime: { type: String, required: true },
   currency: { type: String, required: true },

@@ -100,11 +100,11 @@ export default function DestinationCountry() {
       
       const bounds: [number, number][] = [];
       tours.forEach(tour => {
-        if (tour.mapMarkers) {
-          tour.mapMarkers.forEach(marker => {
+        if (tour.mapMarkers && Array.isArray(tour.mapMarkers)) {
+          tour.mapMarkers.forEach((marker: { lat?: number; lng?: number; label?: string }) => {
             if (marker.lat && marker.lng) {
               L.marker([marker.lat, marker.lng])
-                .bindPopup(`<b>${marker.label}</b>`)
+                .bindPopup(`<b>${marker.label || 'Location'}</b>`)
                 .addTo(markersLayer);
               bounds.push([marker.lat, marker.lng]);
             }
@@ -234,12 +234,16 @@ export default function DestinationCountry() {
                   />
                   <div className="p-6">
                     <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-yellow-400 transition-colors">
-                      {tour.name}
+                      {tour.title}
                     </h3>
-                    <p className="text-slate-300 text-sm mb-4">{tour.duration} • {tour.destinations?.join(', ')}</p>
+                    <p className="text-slate-300 text-sm mb-4">
+                      {tour.durationDays ? `${tour.durationDays} days` : 'Duration TBA'}
+                      {' • '}
+                      {tour.additionalInfo?.countriesVisited?.join(', ') || 'Multiple destinations'}
+                    </p>
                     <div className="flex items-center justify-between">
                       <span className="text-yellow-400 font-bold text-xl">
-                        ${tour.pricingInfo?.basePrice?.toLocaleString() || 'TBA'}
+                        ${tour.regularPricePerPerson?.toLocaleString() || 'TBA'}
                       </span>
                       <span className="text-blue-400">View Details →</span>
                     </div>

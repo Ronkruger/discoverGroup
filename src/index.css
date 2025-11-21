@@ -1,5 +1,40 @@
 @import "tailwindcss";
 
+/* Modern Font System - Optimized for readability */
+:root {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Improved line height for better readability */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  line-height: 1.6;
+  letter-spacing: -0.011em;
+}
+
+/* Serif font for headings and elegant text */
+.font-serif, h1.font-serif, h2.font-serif, h3.font-serif {
+  font-family: 'Newsreader', 'Georgia', 'Times New Roman', serif;
+  font-feature-settings: 'liga', 'dlig';
+  letter-spacing: -0.02em;
+}
+
+/* Optimal font sizes for readability */
+body {
+  font-size: 16px;
+}
+
+@media (max-width: 640px) {
+  body {
+    font-size: 15px;
+  }
+}
+
 /* Global Dark Theme - Applied to main content areas, not navigation */
 body {
   background: linear-gradient(to bottom, #111827, #1f2937);

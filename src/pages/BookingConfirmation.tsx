@@ -143,17 +143,6 @@ export default function BookingConfirmation(): JSX.Element {
   // Get booking ID from URL parameter or location state
   const bookingId = urlBookingId || state.bookingId;
 
-  // Debug logging
-  console.log('🔍 BookingConfirmation Debug Info:', {
-    urlBookingId,
-    stateBookingId: state.bookingId,
-    finalBookingId: bookingId,
-    hasLocationState: !!location.state,
-    locationState: location.state,
-    tourTitle: state.tourTitle,
-    allStateKeys: Object.keys(state)
-  });
-
   // Confetti burst on mount!
   useEffect(() => {
     confetti({
@@ -172,13 +161,13 @@ export default function BookingConfirmation(): JSX.Element {
           text: `I just booked ${state.tourTitle} in ${state.country}!`,
           url: window.location.href,
         });
-      } catch (err) {
-        console.log('Error sharing:', err);
+      } catch {
+        // Silently fail - sharing is optional
       }
     } else {
       // Fallback for browsers that don't support Web Share API
       navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
+      // Note: In production, use a toast notification instead of alert
     }
   };
 
@@ -225,25 +214,9 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
             <CheckCircle2 className="w-8 h-8 text-red-400" />
           </div>
           <h2 className="text-xl font-bold text-white mb-2">No Booking Found</h2>
-          <p className="text-slate-300 mb-4">
+          <p className="text-slate-300 mb-6">
             No booking data available. If you just completed a booking please check your email.
           </p>
-          
-          {/* Debug Information */}
-          <div className="text-left bg-slate-800/50 p-4 rounded-lg mb-4 text-sm">
-            <div className="text-yellow-400 mb-2">Debug Info:</div>
-            <div className="text-slate-300">
-              <div>Has Location State: {location.state ? '✅ Yes' : '❌ No'}</div>
-              <div>URL Booking ID: {urlBookingId || '❌ Missing'}</div>
-              <div>State Booking ID: {state.bookingId || '❌ Missing'}</div>
-              <div>Final Booking ID: {bookingId || '❌ Missing'}</div>
-              <div>Tour Title: {state.tourTitle || '❌ Missing'}</div>
-              <div>Available Keys: {Object.keys(state).length > 0 ? Object.keys(state).join(', ') : 'None'}</div>
-              <div className="mt-2 text-xs text-slate-400">
-                Raw State: {JSON.stringify(location.state, null, 2)}
-              </div>
-            </div>
-          </div>
           
           <Link 
             to="/" 

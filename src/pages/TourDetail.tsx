@@ -33,42 +33,31 @@ import { fetchTourBySlug } from "../api/tours";
 import type { Tour, ItineraryDay, Stop, DepartureDate } from "../types";
 import { DepartureDateCalendar } from "../components/DepartureDateCalendar";
 import BackToTop from "../components/BackToTop";
-// Gallery image with fallback and debug info
+// Gallery image with fallback
 function GalleryImageWithFallback({ src }: { src: string }) {
   const [error, setError] = useState(false);
+  
   return (
-    <div style={{position:'relative'}}>
+    <div className="relative">
       {!error ? (
         <img
           src={src}
           alt="Gallery"
-          className="w-full h-[70vh] object-contain border-2 border-yellow-400 bg-white"
-          onLoad={e => {
-            const img = e.currentTarget;
-            console.log('Gallery image loaded:', img.src, 'naturalWidth:', img.naturalWidth, 'naturalHeight:', img.naturalHeight);
-          }}
-          onError={() => {
-            setError(true);
-            console.error('Gallery image failed to load:', src);
-          }}
+          className="w-full h-[70vh] object-contain bg-white rounded-lg"
+          onError={() => setError(true)}
         />
       ) : (
-        <div style={{width:'100%',height:'70vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#fff',border:'2px solid #FFD24D'}}>
-          <img src="/assets/placeholder.jpg" alt="placeholder" style={{maxHeight:'60vh',maxWidth:'80vw'}} />
-          <div style={{position:'absolute',top:10,left:10,zIndex:1000,color:'yellow',background:'rgba(0,0,0,0.7)',padding:'6px',fontSize:'12px',maxWidth:'80vw',wordBreak:'break-all'}}>
-            <b>DEBUG src:</b> {src}<br />
-            <span style={{color:'red'}}>Image failed to load. Check Supabase permissions or URL.</span>
-          </div>
-        </div>
-      )}
-      {!error && (
-        <div style={{position:'absolute',top:10,left:10,zIndex:1000,color:'yellow',background:'rgba(0,0,0,0.7)',padding:'6px',fontSize:'12px',maxWidth:'80vw',wordBreak:'break-all'}}>
-          <b>DEBUG src:</b> {src}
+        <div className="w-full h-[70vh] flex items-center justify-center bg-gray-100 rounded-lg">
+          <img 
+            src="/assets/placeholder.jpg" 
+            alt="placeholder" 
+            className="max-h-[60vh] max-w-[80vw] object-contain"
+          />
         </div>
       )}
     </div>
   );
-  }
+}
 
 export default TourDetail;
 export { GalleryImageWithFallback };
@@ -114,8 +103,6 @@ function TourDetail() {
     }
     return [];
   }, [tour?.galleryImages, tour?.images]);
-    // Debug: log images array used for gallery
-    console.log("images for gallery", images);
 
   const carouselTimerRef = useRef<number | null>(null);
   // datesRef is the container for the date buttons (grid / vertical)
@@ -129,11 +116,6 @@ function TourDetail() {
         const t = await fetchTourBySlug(slug);
         if (cancelled) return;
         setTour(t);
-          // Debug: log galleryImages and full tour object
-          if (t) {
-            console.log("tour.galleryImages", t.galleryImages);
-            console.log("tour", t);
-          }
         if (t) {
           const defaultDate =
             t.travelWindow?.start ??
@@ -144,8 +126,7 @@ function TourDetail() {
               : null);
           setSelectedDate(defaultDate);
         }
-      } catch (err) {
-        console.error("fetchTourBySlug error", err);
+      } catch {
         if (!cancelled) setTour(null);
       }
     })();

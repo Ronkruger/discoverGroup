@@ -435,7 +435,7 @@ useEffect(() => {
     const compactWrapper = compact ? "p-3" : "p-4";
     const compactButtons = compact ? "text-sm px-2 py-1" : "px-3 py-2";
     return (
-      <div className={`${compact ? "w-full" : "w-full"} ${compactWrapper} bg-white card-glass border border-white/8 rounded-lg shadow-lg`}>
+      <div className={`${compact ? "w-full" : "w-full"} ${compactWrapper} bg-white card-glass border border-white/8 rounded-lg shadow-lg gradient-border modern-card`}>
         <div className="text-xs text-slate-500">Launch Offer</div>
 
         <div className="mt-2 flex items-baseline gap-3">
@@ -455,7 +455,7 @@ useEffect(() => {
         {/* If a flipbook is provided, show quick access */}
         {tour && tour.bookingPdfUrl && (
           <div className="mt-3">
-            <a href={tour.bookingPdfUrl} target="_blank" rel="noopener noreferrer" className="inline-block text-sm px-3 py-1 bg-white/90 rounded font-semibold">
+            <a href={tour.bookingPdfUrl} target="_blank" rel="noopener noreferrer" className="inline-block text-sm px-3 py-1 bg-white/90 rounded font-semibold smooth-transition hover:bg-white hover:shadow-lg hover:scale-105">
               Open Flipbook
             </a>
           </div>
@@ -464,13 +464,13 @@ useEffect(() => {
         {compact ? (
           <div className="mt-3 space-y-2">
             <div className="flex gap-2">
-              <button onClick={showAvailableDates} className={`${compactButtons} bg-rose-600 text-white rounded`}>Available Dates</button>
-              <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className={`${compactButtons} border rounded bg-white hover:bg-slate-50`}>Customize</Link>
+              <button onClick={showAvailableDates} className={`${compactButtons} bg-rose-600 text-white rounded smooth-transition hover:bg-rose-700 hover:shadow-lg hover:scale-105`}>Available Dates</button>
+              <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className={`${compactButtons} border rounded bg-white hover:bg-slate-50 smooth-transition hover:shadow-lg hover:scale-105`}>Customize</Link>
             </div>
             <Link
               to={`/booking/${encodeURIComponent(builderSlug)}`}
               state={{ tour, selectedDate, passengers, perPerson: perPersonForTotals }}
-              className="w-full text-center px-3 py-2 bg-accent-yellow text-slate-900 rounded font-semibold block"
+              className="w-full text-center px-3 py-2 bg-accent-yellow text-slate-900 rounded font-semibold block smooth-transition hover:shadow-lg hover:scale-105"
             >
               BOOK NOW
             </Link>
@@ -478,7 +478,7 @@ useEffect(() => {
         ) : (
           <>
             <div className="mt-3 flex gap-2">
-              <button onClick={showAvailableDates} className={`${compactButtons} bg-rose-600 text-white rounded`}>Available Dates</button>
+              <button onClick={showAvailableDates} className={`${compactButtons} bg-rose-600 text-white rounded smooth-transition hover:bg-rose-700 hover:shadow-lg hover:scale-105`}>Available Dates</button>
             </div>
           </>
         )}
@@ -533,11 +533,11 @@ useEffect(() => {
             </div>
 
             <div className="flex gap-2 mt-4">
-              <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className="flex-1 text-center px-3 py-2 bg-accent-yellow text-slate-900 rounded font-semibold">CUSTOMIZE</Link>
+              <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className="flex-1 text-center px-3 py-2 bg-accent-yellow text-slate-900 rounded font-semibold smooth-transition hover:shadow-lg hover:scale-105">CUSTOMIZE</Link>
               <Link
                 to={`/booking/${encodeURIComponent(builderSlug)}`}
                 state={{ tour, selectedDate, passengers, perPerson: perPersonForTotals }}
-                className="px-3 py-2 border rounded text-sm inline-flex items-center gap-2 bg-white text-slate-900 font-semibold shadow hover:shadow-md"
+                className="px-3 py-2 border rounded text-sm inline-flex items-center gap-2 bg-white text-slate-900 font-semibold shadow hover:shadow-md smooth-transition hover:scale-105"
               >
                 BOOK NOW
               </Link>
@@ -608,21 +608,21 @@ useEffect(() => {
       `}</style>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav className="text-sm text-slate-200/80 mb-4 flex items-center gap-2">
-          <Link to="/" className="hover:underline">Home</Link>
+        {/* Breadcrumb with animation */}
+        <nav className="text-sm text-slate-200/80 mb-6 flex items-center gap-2 animate-fade-in">
+          <Link to="/" className="hover:text-accent-yellow smooth-transition hover:underline">Home</Link>
           <span className="text-slate-400">/</span>
-          <Link to="/tours" className="hover:underline">Tours</Link>
+          <Link to="/tours" className="hover:text-accent-yellow smooth-transition hover:underline">Tours</Link>
           <span className="text-slate-400">/</span>
           <span className="text-white font-medium">{tour ? tour.title! : ""}</span>
         </nav>
 
         {/* Mobile-optimized layout: Hero -> Title -> Booking -> Content */}
         <div className="lg:hidden">
-          {/* Mobile Hero - Reduced height */}
-          <div className="relative mb-4">
-            <div className="rounded-lg overflow-hidden shadow-xl">
-              <div className="relative w-full h-48 bg-slate-800 rounded">
+          {/* Mobile Hero - Reduced height with animation */}
+          <div className="relative mb-4 animate-scale-in stagger-1">
+            <div className="rounded-2xl overflow-hidden shadow-2xl gradient-border image-overlay">
+              <div className="relative w-full h-48 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl">
                 {tour && tour.images && tour.images.length > 0 && isSafeImageUrl(tour.images[carouselIndex!]) ? (
                   <img
                     src={tour.images![carouselIndex!]}
@@ -681,16 +681,16 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Mobile Title Section */}
-          <div className="mb-4">
-            <div className="text-xs uppercase tracking-wider text-slate-200/80">{tour?.line ?? "Line"}</div>
-            <h1 className="font-serif font-extrabold text-2xl text-white mt-1 leading-tight">
+          {/* Mobile Title Section with animations */}
+          <div className="mb-4 animate-fade-in-up stagger-2">
+            <div className="text-xs uppercase tracking-widest text-slate-200/80 animate-fade-in stagger-3">{tour?.line ?? "Line"}</div>
+            <h1 className="font-serif font-extrabold text-2xl text-white mt-1 leading-tight animate-slide-in-left stagger-3">
               {tour?.title}
             </h1>
-            <p className="text-slate-300 mt-2 text-sm">{tour?.summary}</p>
+            <p className="text-slate-300 mt-2 text-sm animate-fade-in stagger-4">{tour?.summary}</p>
 
-            <div className="mt-3 flex items-center gap-2">
-              <button onClick={() => openGallery(0)} className="px-3 py-1.5 bg-accent-yellow text-slate-900 rounded font-semibold text-sm">
+            <div className="mt-3 flex items-center gap-2 animate-fade-in stagger-5">
+              <button onClick={() => openGallery(0)} className="px-3 py-1.5 bg-accent-yellow text-slate-900 rounded-lg font-semibold text-sm smooth-transition hover:shadow-lg hover:scale-105">
                 View gallery
               </button>
               {highlights.length > 0 && (
@@ -699,17 +699,17 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Mobile Booking Card */}
-          <div className="mb-6">
+          {/* Mobile Booking Card with animation */}
+          <div className="mb-6 animate-scale-in stagger-4">
             <BookingCard compact />
           </div>
         </div>
 
   {/* Desktop layout: Hero + CTA column to the right on large screens */}
   <div className="mb-6 hidden lg:grid grid-cols-3 gap-6 items-start relative">
-          {/* Hero image (left: spans 2 columns on lg) */}
-          <div className="lg:col-span-2 relative">
-            <div className="rounded-2xl overflow-hidden shadow-2xl ring-2 ring-white/10">
+          {/* Hero image (left: spans 2 columns on lg) with animation */}
+          <div className="lg:col-span-2 relative animate-scale-in stagger-1">
+            <div className="rounded-2xl overflow-hidden shadow-2xl ring-2 ring-white/10 gradient-border image-overlay modern-card">
               {/* Carousel */}
               <div className="relative w-full h-80 md:h-[450px] bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl">
                 {tour && tour.images && tour.images.length > 0 && isSafeImageUrl(tour.images![carouselIndex!]) ? (
@@ -777,16 +777,16 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Desktop CTA column (right side of image on lg) */}
-          <div className="lg:col-span-1 items-start flex">
+          {/* Desktop CTA column (right side of image on lg) with animation */}
+          <div className="lg:col-span-1 items-start flex animate-slide-in-right-custom stagger-2">
             <div className="w-full">
               <BookingCard />
             </div>
           </div>
         </div>
 
-        {/* Desktop Title block (below hero image) */}
-        <div className="mb-6 hidden lg:block">
+        {/* Desktop Title block (below hero image) with animation */}
+        <div className="mb-6 hidden lg:block animate-fade-in-up stagger-3">
           <div className="bg-transparent rounded-md">
             <div className="lg:flex lg:items-center lg:justify-between">
               <div className="lg:w-2/3">
@@ -810,9 +810,9 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* Tour Video Section - Full Width */}
+        {/* Tour Video Section - Full Width with animation */}
         {tour && (tour as unknown as { video_url?: string }).video_url && (
-          <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-gray-900 to-gray-800">
+          <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-gray-900 to-gray-800 animate-scale-in stagger-4 gradient-border">
             <div className="p-6 lg:p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-blue-600 p-3 rounded-xl">
@@ -890,16 +890,16 @@ useEffect(() => {
           </div>
         )}
 
-        {/* Tabs: full width under the hero/title */}
-        <div className="bg-white/10 card-glass rounded-xl border border-white/10 mb-8 shadow-xl">
+        {/* Tabs: full width under the hero/title with animation */}
+        <div className="bg-white/10 card-glass rounded-xl border border-white/10 mb-8 shadow-xl animate-fade-in stagger-5 gradient-border smooth-transition">
           <div className="px-6 py-2">
             <div className="flex gap-6 overflow-x-auto">
               <button 
                 onClick={() => setActiveTab("itinerary")} 
-                className={`px-4 py-4 whitespace-nowrap relative transition-all duration-200 ${
+                className={`px-4 py-4 whitespace-nowrap relative smooth-transition ${
                   activeTab === "itinerary" 
-                    ? "text-accent-yellow font-bold" 
-                    : "text-slate-300 hover:text-white"
+                    ? "text-accent-yellow font-bold scale-105" 
+                    : "text-slate-300 hover:text-white hover:scale-105"
                 }`}
               >
                 <span className="flex items-center gap-2">
@@ -909,16 +909,16 @@ useEffect(() => {
                   Itinerary
                 </span>
                 {activeTab === "itinerary" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-accent-yellow rounded-full" />
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-accent-yellow rounded-full animate-scale-in" />
                 )}
               </button>
               
               <button 
                 onClick={() => setActiveTab("availability")} 
-                className={`px-4 py-4 whitespace-nowrap relative transition-all duration-200 ${
+                className={`px-4 py-4 whitespace-nowrap relative smooth-transition ${
                   activeTab === "availability" 
-                    ? "text-accent-yellow font-bold" 
-                    : "text-slate-300 hover:text-white"
+                    ? "text-accent-yellow font-bold scale-105" 
+                    : "text-slate-300 hover:text-white hover:scale-105"
                 }`}
               >
                 <span className="flex items-center gap-2">
@@ -928,16 +928,16 @@ useEffect(() => {
                   Availability
                 </span>
                 {activeTab === "availability" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-accent-yellow rounded-full" />
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-accent-yellow rounded-full animate-scale-in" />
                 )}
               </button>
               
               <button 
                 onClick={() => setActiveTab("extensions")} 
-                className={`px-4 py-4 whitespace-nowrap relative transition-all duration-200 ${
+                className={`px-4 py-4 whitespace-nowrap relative smooth-transition ${
                   activeTab === "extensions" 
-                    ? "text-accent-yellow font-bold" 
-                    : "text-slate-300 hover:text-white"
+                    ? "text-accent-yellow font-bold scale-105" 
+                    : "text-slate-300 hover:text-white hover:scale-105"
                 }`}
               >
                 <span className="flex items-center gap-2">
@@ -947,16 +947,16 @@ useEffect(() => {
                   Extensions
                 </span>
                 {activeTab === "extensions" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-accent-yellow rounded-full" />
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-accent-yellow rounded-full animate-scale-in" />
                 )}
               </button>
               
               <button 
                 onClick={() => setActiveTab("details")} 
-                className={`px-4 py-4 whitespace-nowrap relative transition-all duration-200 ${
+                className={`px-4 py-4 whitespace-nowrap relative smooth-transition ${
                   activeTab === "details" 
-                    ? "text-accent-yellow font-bold" 
-                    : "text-slate-300 hover:text-white"
+                    ? "text-accent-yellow font-bold scale-105" 
+                    : "text-slate-300 hover:text-white hover:scale-105"
                 }`}
               >
                 <span className="flex items-center gap-2">
@@ -966,7 +966,7 @@ useEffect(() => {
                   Details
                 </span>
                 {activeTab === "details" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-accent-yellow rounded-full" />
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-accent-yellow rounded-full animate-scale-in" />
                 )}
               </button>
             </div>
@@ -980,8 +980,8 @@ useEffect(() => {
             {/* Tab panels */}
             <div>
               {activeTab === "itinerary" && (
-                <div className="bg-gradient-to-br from-white/10 to-white/5 card-glass rounded-2xl p-6 lg:p-8 border border-white/10 shadow-xl">
-                  <h3 className="text-2xl lg:text-3xl font-bold mb-6 text-white flex items-center gap-3">
+                <div className="bg-gradient-to-br from-white/10 to-white/5 card-glass rounded-2xl p-6 lg:p-8 border border-white/10 shadow-xl animate-fade-in-up gradient-border">
+                  <h3 className="text-2xl lg:text-3xl font-bold mb-6 text-white flex items-center gap-3 animate-slide-in-left">
                     <div className="bg-blue-600 p-2 rounded-lg">
                       <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -990,8 +990,8 @@ useEffect(() => {
                     Day-by-day itinerary
                   </h3>
                   <div className="space-y-6">
-                    {itinerary.map((day: ItineraryDay & { image?: string }) => (
-                      <div key={day.day} className="p-6 border-2 border-white/10 rounded-xl bg-gradient-to-br from-white/5 to-transparent hover:from-white/10 hover:border-white/20 transition-all duration-300 hover:shadow-lg itinerary-day">
+                    {itinerary.map((day: ItineraryDay & { image?: string }, index: number) => (
+                      <div key={day.day} className={`p-6 border-2 border-white/10 rounded-xl bg-gradient-to-br from-white/5 to-transparent hover:from-white/10 hover:border-white/20 smooth-transition hover:shadow-lg itinerary-day modern-card animate-fade-in-up gradient-border stagger-${Math.min(index + 1, 5)}`}>
                         <div className="flex items-start justify-between">
                           <div className="w-full">
                             <div className="flex items-center gap-3 mb-3">
@@ -1022,8 +1022,8 @@ useEffect(() => {
                 </div>
               )}
               {activeTab === "availability" && (
-                <div className="bg-white/6 card-glass rounded-lg p-6 border border-white/6">
-                  <h3 className="text-xl font-semibold mb-4 text-white">Availability</h3>
+                <div className="bg-white/6 card-glass rounded-lg p-6 border border-white/6 animate-fade-in-up gradient-border">
+                  <h3 className="text-xl font-semibold mb-4 text-white animate-slide-in-left">Availability</h3>
                   <p className="text-slate-300">
                     {hasTravelWindow ? (
                       <>This tour runs from <strong className="text-white">{formatDate(tour!.travelWindow!.start)}</strong> to <strong className="text-white">{formatDate(tour!.travelWindow!.end)}</strong>.</>
@@ -1036,14 +1036,14 @@ useEffect(() => {
                 </div>
               )}
               {activeTab === "extensions" && (
-                <div className="bg-white/6 card-glass rounded-lg p-6 border border-white/6">
-                  <h3 className="text-xl font-semibold mb-4 text-white">Extensions</h3>
+                <div className="bg-white/6 card-glass rounded-lg p-6 border border-white/6 animate-fade-in-up gradient-border">
+                  <h3 className="text-xl font-semibold mb-4 text-white animate-slide-in-left">Extensions</h3>
                   <p className="text-slate-300">Optional extensions (e.g., pre/post stays) are available on some departures.</p>
                 </div>
               )}
               {activeTab === "details" && (
-                <div className="bg-white/6 card-glass rounded-lg p-6 border border-white/6">
-                  <h3 className="text-xl font-semibold mb-4 text-white">Tour details</h3>
+                <div className="bg-white/6 card-glass rounded-lg p-6 border border-white/6 animate-fade-in-up gradient-border">
+                  <h3 className="text-xl font-semibold mb-4 text-white animate-slide-in-left">Tour details</h3>
                   <p className="text-slate-300">Practical information, inclusion/exclusion, activity level and more.</p>
 
                   {/* If flipbook is available show it here too */}
@@ -1060,9 +1060,9 @@ useEffect(() => {
 
           {/* Right: booking summary + stops (BookingCard removed from aside to avoid duplication) */}
           <aside className="space-y-6">
-            {/* Departure Dates Calendar */}
+            {/* Departure Dates Calendar with animation */}
             {hasDepartureDates && (
-              <section ref={datesRef}>
+              <section ref={datesRef} className="animate-scale-in stagger-2">
                 <DepartureDateCalendar
                   departureDates={(tour!.departureDates! as DepartureDate[]).map(dateObj => {
                     // Handle both legacy string and new object format
@@ -1077,9 +1077,9 @@ useEffect(() => {
               </section>
             )}
             
-            {/* Legacy Travel Window (if no departure dates) */}
+            {/* Legacy Travel Window (if no departure dates) with animation */}
             {!hasDepartureDates && hasTravelWindow && (
-              <section className="bg-white/6 card-glass rounded-lg p-5 border border-white/6 shadow-sm">
+              <section className="bg-white/6 card-glass rounded-lg p-5 border border-white/6 shadow-sm animate-scale-in stagger-2 gradient-border">
                 <h4 className="text-sm text-slate-200 mb-3">Travel Window</h4>
                 <div className="text-sm text-slate-200">
                   <div className="font-semibold text-white">{formatDate(tour!.travelWindow!.start)} – {formatDate(tour!.travelWindow!.end)}</div>
@@ -1089,14 +1089,14 @@ useEffect(() => {
             )}
             
             {!hasDepartureDates && !hasTravelWindow && (
-              <section className="bg-white/6 card-glass rounded-lg p-5 border border-white/6 shadow-sm">
+              <section className="bg-white/6 card-glass rounded-lg p-5 border border-white/6 shadow-sm animate-scale-in stagger-2 gradient-border">
                 <h4 className="text-sm text-slate-200 mb-3">Departure</h4>
                 <div className="text-sm text-slate-400">No departure information available</div>
               </section>
             )}
 
-            {/* Tour summary card */}
-            <section className="bg-white/6 card-glass rounded-lg p-5 border border-white/6 shadow-sm">
+            {/* Tour summary card with animation */}
+            <section className="bg-white/6 card-glass rounded-lg p-5 border border-white/6 shadow-sm animate-scale-in stagger-3 gradient-border modern-card">
               <h4 className="text-sm text-slate-200 mb-2">Tour overview</h4>
               <div className="text-sm text-slate-200">
                 <p className="mb-2">{tour?.summary}</p>
@@ -1125,8 +1125,8 @@ useEffect(() => {
               </div> {/* Close .text-sm .text-slate-200 */}
             </section> {/* Close Tour overview section */}
 
-            {/* Chat with Agent Card */}
-            <section className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 card-glass rounded-lg p-5 border-2 border-blue-400/30 shadow-lg">
+            {/* Chat with Agent Card with animation and glow */}
+            <section className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 card-glass rounded-lg p-5 border-2 border-blue-400/30 shadow-lg animate-scale-in stagger-4 modern-card animate-pulse-glow">
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">

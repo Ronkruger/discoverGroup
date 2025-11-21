@@ -47,7 +47,7 @@ function Write-ColorOutput {
 
 # Check if we're in a git repository
 function Test-GitRepository {
-    $gitDir = git rev-parse --git-dir 2>$null
+    git rev-parse --git-dir 2>$null | Out-Null
     return $?
 }
 

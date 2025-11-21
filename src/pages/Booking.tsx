@@ -499,12 +499,7 @@ export default function Booking(): JSX.Element {
   }
 
   return (
-    <main style={themeStyle} className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 py-12 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-white/5 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      </div>
+    <main style={themeStyle} className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 py-12 relative">
       
       <style>{`
         @keyframes fadeIn {
@@ -723,26 +718,26 @@ export default function Booking(): JSX.Element {
               {/* Step 3: Payment Method Selection */}
               {step === 3 && paymentType !== "cash-appointment" && (
                 <section aria-labelledby="payment-heading">
-                  <div className="flex items-center gap-3 mb-6 section-header">
-                    <div className="p-3 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-3 bg-blue-600 rounded-xl">
                       <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                       </svg>
                     </div>
                     <div>
                       <h2 id="payment-heading" className="text-2xl font-bold text-white">Select Payment Method</h2>
-                      <p className="text-white/80 text-sm">Choose how you'd like to complete your booking</p>
+                      <p className="text-gray-200 text-sm">Choose how you'd like to complete your booking</p>
                     </div>
                   </div>
 
                   {/* Demo Mode Notice */}
-                  <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl flex items-start gap-3">
+                  <div className="mb-6 p-4 bg-yellow-900/30 border-2 border-yellow-600 rounded-xl flex items-start gap-3">
                     <svg className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <div className="text-sm">
-                      <div className="font-semibold text-yellow-300 mb-1">Demo Mode Active</div>
-                      <p className="text-yellow-200/80">This is a demonstration booking flow. No actual payment will be processed. Select any method to see how the payment experience works!</p>
+                      <div className="font-semibold text-yellow-200 mb-1">Demo Mode Active</div>
+                      <p className="text-gray-200">This is a demonstration booking flow. No actual payment will be processed. Select any method to see how the payment experience works!</p>
                     </div>
                   </div>
                   
@@ -794,35 +789,35 @@ export default function Booking(): JSX.Element {
               {/* Step 4: Review Booking */}
               {step === 4 && (
                 <section aria-labelledby="review-confirm-heading">
-                  <div className="flex items-center gap-3 mb-6 section-header">
-                    <div className="p-3 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-3 bg-green-600 rounded-xl">
                       <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div>
                       <h2 id="review-confirm-heading" className="text-2xl font-bold text-white">Review Your Booking</h2>
-                      <p className="text-white/80 text-sm">Double-check everything before proceeding</p>
+                      <p className="text-gray-200 text-sm">Double-check everything before proceeding</p>
                     </div>
                   </div>
                   
                   <div className="info-card border-2 border-white/20">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <div className="text-xs text-white/60 uppercase tracking-wider mb-1">Tour Package</div>
+                        <div className="text-xs text-gray-200 uppercase tracking-wider mb-1">Tour Package</div>
                         <div className="font-bold text-white text-lg">{tour.title}</div>
-                        <div className="text-sm text-white/80 mt-2">{tour.summary}</div>
+                        <div className="text-sm text-gray-200 mt-2">{tour.summary}</div>
                       </div>
                       <div>
-                        <div className="text-xs text-white/60 uppercase tracking-wider mb-1">Departure Date</div>
+                        <div className="text-xs text-gray-200 uppercase tracking-wider mb-1">Departure Date</div>
                         <div className="font-semibold text-white">{selectedDate || "—"}</div>
-                        <div className="text-xs text-white/60 uppercase tracking-wider mt-3 mb-1">Passengers</div>
+                        <div className="text-xs text-gray-200 uppercase tracking-wider mt-3 mb-1">Passengers</div>
                         <div className="font-semibold text-white">{passengers} {passengers === 1 ? 'person' : 'people'}</div>
                       </div>
                     </div>
                     {wantsAppointment && (
                       <div className="mt-6 pt-6 border-t border-white/20">
-                        <div className="text-xs text-white/60 uppercase tracking-wider mb-2">Office Appointment</div>
+                        <div className="text-xs text-gray-200 uppercase tracking-wider mb-2">Office Appointment</div>
                         <div className="flex items-center gap-2 text-sm text-white">
                           <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -1144,22 +1139,22 @@ export default function Booking(): JSX.Element {
                                     </div>
                                     <div className="flex justify-between text-sm">
                                       <span className="text-slate-300">Downpayment ({downpaymentPercentage}%):</span>
-                                      <span className="text-blue-400 font-semibold">{formatCurrencyPHP(downpaymentAmount)}</span>
+                                      <span className="text-white font-semibold">{formatCurrencyPHP(downpaymentAmount)}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                       <span className="text-slate-300">Remaining Balance:</span>
-                                      <span className="text-yellow-400 font-semibold">{formatCurrencyPHP(remainingBalance)}</span>
+                                      <span className="text-white font-semibold">{formatCurrencyPHP(remainingBalance)}</span>
                                     </div>
                                     
                                     {/* Payment Terms Information */}
-                                    <div className="mt-4 p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+                                    <div className="mt-4 p-3 bg-orange-900/30 border-2 border-orange-600 rounded-lg">
                                       <div className="flex items-start gap-2 mb-2">
-                                        <svg className="w-4 h-4 text-orange-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-4 h-4 text-orange-300 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         <div className="flex-1">
-                                          <div className="text-sm font-semibold text-orange-300 mb-1">Payment Terms</div>
-                                          <ul className="text-xs text-orange-200/90 space-y-1 list-disc list-inside">
+                                          <div className="text-sm font-semibold text-orange-200 mb-1">Payment Terms</div>
+                                          <ul className="text-xs text-gray-200 space-y-1 list-disc list-inside">
                                             <li>Pay downpayment now to secure your booking</li>
                                             <li>Remaining balance due <strong>30 days before departure</strong></li>
                                             <li>Payment reminders will be sent via email & SMS</li>
@@ -1192,13 +1187,13 @@ export default function Booking(): JSX.Element {
                             />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <svg className="w-5 h-5 text-yellow-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
                                 <div className="text-white font-bold text-lg">Cash on Hand (Office Visit)</div>
                               </div>
                               <div className="text-sm text-white/80 break-words">
-                                Pay in person at our office: <span className="font-bold text-yellow-300">{formatCurrencyPHP(total)}</span>
+                                Pay in person at our office: <span className="font-bold text-white">{formatCurrencyPHP(total)}</span>
                               </div>
                               <div className="mt-2 text-xs text-white/60 flex items-center gap-1">
                                 <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1215,12 +1210,12 @@ export default function Booking(): JSX.Element {
                             <div className="text-sm font-medium text-slate-300">
                               {paymentType === "cash-appointment" ? "To Pay at Office" : paymentType === "full" ? "Total Amount" : "Amount to Pay Now"}
                             </div>
-                            <div className="text-lg font-bold text-blue-400">
+                            <div className="text-lg font-bold text-white">
                               {formatCurrencyPHP(paymentType === "cash-appointment" ? total : paymentAmount)}
                             </div>
                           </div>
                           {paymentType === "cash-appointment" && (
-                            <div className="mt-2 text-xs text-yellow-400 flex items-center gap-1">
+                            <div className="mt-2 text-xs text-gray-300 flex items-center gap-1">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>

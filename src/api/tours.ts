@@ -39,16 +39,55 @@ export async function fetchTourBySlug(slug: string): Promise<Tour | null> {
 }
 
 export async function fetchContinents(): Promise<string[]> {
-  return ["Europe", "Asia", "North America"];
+  try {
+    const tours = await fetchTours();
+    const continents = new Set<string>();
+    
+    tours.forEach(tour => {
+      if (tour.continent) {
+        continents.add(tour.continent);
+      }
+    });
+    
+    // Return sorted continents, with Europe first if it exists
+    const continentList = Array.from(continents).sort();
+    const europeIndex = continentList.indexOf('Europe');
+    if (europeIndex > 0) {
+      continentList.splice(europeIndex, 1);
+      continentList.unshift('Europe');
+    }
+    
+    return continentList;
+  } catch {
+    // Fallback to hardcoded list
+    return ["Europe", "Asia", "North America"];
+  }
 }
 
 export async function fetchCountriesByContinent(continent: string): Promise<string[]> {
-  const countries: Record<string, string[]> = {
-    "Europe": ["France", "Switzerland", "Italy"],
-    "Asia": ["Thailand", "Vietnam", "Philippines"],
-    "North America": ["USA", "Canada"]
-  };
-  return countries[continent] || [];
+  try {
+    const response = await fetch(`${API_BASE}/public/tours/by-continent/${encodeURIComponent(continent)}/countries`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch countries');
+    }
+    const data = await response.json();
+    return Array.isArray(data) ? data : [];
+  } catch {
+    // Fallback to getting countries from tours
+    const tours = await fetchTours();
+    const countries = new Set<string>();
+    
+    tours.forEach(tour => {
+      if (tour.continent === continent) {
+        const tourCountries = tour.additionalInfo?.countriesVisited || 
+                            tour.additionalInfo?.countries || 
+                            [];
+        tourCountries.forEach((country: string) => countries.add(country));
+      }
+    });
+    
+    return Array.from(countries).sort();
+  }
 }
 
 export async function fetchDestinationsByContinent(continent: string): Promise<string[]> {

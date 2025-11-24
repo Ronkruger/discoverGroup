@@ -113,7 +113,30 @@ export default function TourBuilder(): JSX.Element {
     fetchTourBySlug(slug)
       .then((t) => {
         setTour(t);
-        setSelectedDate(t?.travelWindow?.start ?? null);
+        // Try to set selectedDate from travelWindow.start, or fall back to first departure date
+        let initialDate: string | null = t?.travelWindow?.start ?? null;
+        
+        // Fallback: if no travelWindow, try to extract from departureDates
+        if (!initialDate && t?.departureDates && t.departureDates.length > 0) {
+          const firstDep = t.departureDates[0];
+          if (typeof firstDep === 'string') {
+            // Parse string like "Feb 4-18, 2026" to get start date
+            const match = firstDep.match(/([A-Za-z]+)\s+(\d+).*?(\d{4})/);
+            if (match) {
+              const [, month, day, year] = match;
+              const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+              const monthIndex = monthNames.findIndex(m => month.toLowerCase().startsWith(m));
+              if (monthIndex !== -1) {
+                initialDate = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+              }
+            }
+          } else {
+            // Structured DepartureDate object
+            initialDate = firstDep.start;
+          }
+        }
+        
+        setSelectedDate(initialDate);
         setJoinIndex(null);
         setLeaveIndex(null);
         setExpandedChangeAt(null);

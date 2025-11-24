@@ -357,13 +357,13 @@ export default function ViewBookings() {
                 id="status-filter"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as BookingStatus | "all")}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
               >
-                <option value="all">All Statuses</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="pending">Pending</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="all" className="text-gray-900">All Statuses</option>
+                <option value="confirmed" className="text-gray-900">Confirmed</option>
+                <option value="pending" className="text-gray-900">Pending</option>
+                <option value="completed" className="text-gray-900">Completed</option>
+                <option value="cancelled" className="text-gray-900">Cancelled</option>
               </select>
             </div>
 
@@ -376,11 +376,11 @@ export default function ViewBookings() {
                 id="sort-by"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as "date" | "amount" | "status")}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
               >
-                <option value="date">Booking Date</option>
-                <option value="amount">Total Amount</option>
-                <option value="status">Status</option>
+                <option value="date" className="text-gray-900">Booking Date</option>
+                <option value="amount" className="text-gray-900">Total Amount</option>
+                <option value="status" className="text-gray-900">Status</option>
               </select>
             </div>
 
@@ -393,10 +393,10 @@ export default function ViewBookings() {
                 id="sort-order"
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
               >
-                <option value="desc">Newest First</option>
-                <option value="asc">Oldest First</option>
+                <option value="desc" className="text-gray-900">Newest First</option>
+                <option value="asc" className="text-gray-900">Oldest First</option>
               </select>
             </div>
           </div>
@@ -491,12 +491,12 @@ export default function ViewBookings() {
                         <select
                           value={booking.status}
                           onChange={(e) => handleStatusChange(booking.bookingId, e.target.value as BookingStatus)}
-                          className="ml-2 text-xs px-2 py-1 rounded border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="ml-2 text-xs px-2 py-1 rounded border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                          <option value="confirmed">Confirmed</option>
-                          <option value="pending">Pending</option>
-                          <option value="completed">Completed</option>
-                          <option value="cancelled">Cancelled</option>
+                          <option value="confirmed" className="text-gray-900">Confirmed</option>
+                          <option value="pending" className="text-gray-900">Pending</option>
+                          <option value="completed" className="text-gray-900">Completed</option>
+                          <option value="cancelled" className="text-gray-900">Cancelled</option>
                         </select>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

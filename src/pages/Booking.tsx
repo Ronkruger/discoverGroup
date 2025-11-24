@@ -1483,14 +1483,14 @@ export default function Booking(): JSX.Element {
                                 className="w-full rounded px-3 py-2 bg-white/10 border border-white/20 text-white"
                                 required
                               >
-                                <option value="">Select a time</option>
+                                <option value="" className="bg-gray-800 text-white">Select a time</option>
                 
-                                <option value="10:00">10:00 AM</option>
-                                <option value="11:00">11:00 AM</option>
-                                <option value="13:00">1:00 PM</option>
-                                <option value="14:00">2:00 PM</option>
-                                <option value="15:00">3:00 PM</option>
-                                <option value="16:00">4:00 PM</option>
+                                <option value="10:00" className="bg-gray-800 text-white">10:00 AM</option>
+                                <option value="11:00" className="bg-gray-800 text-white">11:00 AM</option>
+                                <option value="13:00" className="bg-gray-800 text-white">1:00 PM</option>
+                                <option value="14:00" className="bg-gray-800 text-white">2:00 PM</option>
+                                <option value="15:00" className="bg-gray-800 text-white">3:00 PM</option>
+                                <option value="16:00" className="bg-gray-800 text-white">4:00 PM</option>
                               </select>
                             </div>
                           </div>
@@ -1502,11 +1502,11 @@ export default function Booking(): JSX.Element {
                               onChange={(e) => setAppointmentPurpose(e.target.value)}
                               className="w-full rounded px-3 py-2 bg-white/10 border border-white/20 text-white"
                             >
-                              <option value="consultation">General Consultation</option>
-                              <option value="tour-details">Discuss Tour Details</option>
-                              <option value="payment">Payment & Documentation</option>
-                              <option value="customization">Customize Itinerary</option>
-                              <option value="group-booking">Group Booking</option>
+                              <option value="consultation" className="bg-gray-800 text-white">General Consultation</option>
+                              <option value="tour-details" className="bg-gray-800 text-white">Discuss Tour Details</option>
+                              <option value="payment" className="bg-gray-800 text-white">Payment & Documentation</option>
+                              <option value="customization" className="bg-gray-800 text-white">Customize Itinerary</option>
+                              <option value="group-booking" className="bg-gray-800 text-white">Group Booking</option>
                             </select>
                           </div>
 

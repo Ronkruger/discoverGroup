@@ -99,8 +99,8 @@ export const PayMongoMockup: React.FC<PaymentMockupProps> = ({
         {(paymentMethod.type === 'gcash' || paymentMethod.type === 'grab_pay' || paymentMethod.type === 'paymaya') && (
           <div className="text-center py-8">
             <div className="text-6xl mb-4">{paymentMethod.icon}</div>
-            <p className="text-gray-600 mb-4">You will be redirected to {paymentMethod.name} to complete your payment</p>
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-600">
+            <p className="text-gray-900 font-medium mb-4">You will be redirected to {paymentMethod.name} to complete your payment</p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 rounded-full text-sm text-green-800 font-medium">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
               Ready to proceed
             </div>
@@ -108,12 +108,12 @@ export const PayMongoMockup: React.FC<PaymentMockupProps> = ({
         )}
 
         {/* Mockup Notice */}
-        <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <div className="mt-6 p-4 bg-yellow-50 border-2 border-yellow-300 rounded-lg">
           <div className="flex gap-3">
             <span className="text-yellow-600 text-xl">⚠️</span>
             <div className="flex-1">
               <h5 className="font-semibold text-yellow-900 mb-1">Mockup Mode</h5>
-              <p className="text-sm text-yellow-800">
+              <p className="text-sm text-yellow-900 font-medium">
                 This is a visual mockup of PayMongo integration. 
                 The actual payment gateway will be integrated later.
                 Clicking "Complete Payment" will simulate a successful transaction.
@@ -149,7 +149,7 @@ export const PayMongoMockup: React.FC<PaymentMockupProps> = ({
       </div>
 
       {/* Security Badges */}
-      <div className="mt-6 flex justify-center items-center gap-4 text-xs text-gray-500">
+      <div className="mt-6 flex justify-center items-center gap-4 text-xs text-gray-700 font-medium">
         <span className="flex items-center gap-1">
           <span>🔒</span> Secure Payment
         </span>
@@ -266,14 +266,14 @@ export const DragonpayMockup: React.FC<PaymentMockupProps> = ({
               className={`p-4 border-2 rounded-lg text-left transition-all ${
                 selectedProcessor === processor.code
                   ? 'border-orange-500 bg-orange-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                  : 'border-gray-200 hover:border-gray-300 bg-white'
               }`}
             >
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{processor.icon}</span>
-                <span className="font-medium text-gray-900">{processor.name}</span>
+                <span className="font-semibold text-gray-900">{processor.name}</span>
                 {selectedProcessor === processor.code && (
-                  <span className="ml-auto text-orange-500">✓</span>
+                  <span className="ml-auto text-orange-500 font-bold text-lg">✓</span>
                 )}
               </div>
             </button>
@@ -283,9 +283,9 @@ export const DragonpayMockup: React.FC<PaymentMockupProps> = ({
 
       {/* Processing Info for OTC */}
       {paymentMethod.type === 'otc' && selectedProcessor && (
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="mb-6 p-4 bg-blue-50 border-2 border-blue-300 rounded-lg">
           <h5 className="font-semibold text-blue-900 mb-2">Payment Instructions:</h5>
-          <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+          <ol className="text-sm text-blue-900 font-medium space-y-1 list-decimal list-inside">
             <li>Click "Generate Payment Code" below</li>
             <li>Save or print your payment reference number</li>
             <li>Visit any {processors.find(p => p.code === selectedProcessor)?.name} branch</li>
@@ -296,12 +296,12 @@ export const DragonpayMockup: React.FC<PaymentMockupProps> = ({
       )}
 
       {/* Mockup Notice */}
-      <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+      <div className="mb-6 p-4 bg-yellow-50 border-2 border-yellow-300 rounded-lg">
         <div className="flex gap-3">
           <span className="text-yellow-600 text-xl">⚠️</span>
           <div className="flex-1">
             <h5 className="font-semibold text-yellow-900 mb-1">Mockup Mode</h5>
-            <p className="text-sm text-yellow-800">
+            <p className="text-sm text-yellow-900 font-medium">
               This is a visual mockup of Dragonpay integration. 
               The actual payment gateway will be integrated later.
               Clicking the button will simulate the payment flow.
@@ -336,7 +336,7 @@ export const DragonpayMockup: React.FC<PaymentMockupProps> = ({
       </div>
 
       {/* Security Badges */}
-      <div className="mt-6 flex justify-center items-center gap-4 text-xs text-gray-500">
+      <div className="mt-6 flex justify-center items-center gap-4 text-xs text-gray-700 font-medium">
         <span className="flex items-center gap-1">
           <span>🔒</span> Secure
         </span>

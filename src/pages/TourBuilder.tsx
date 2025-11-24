@@ -42,10 +42,12 @@ import type { Tour, Stop, ItineraryDay } from "../types";
 import { fetchTourBySlug, fetchTours } from "../api/tours";
 import React from "react";
 import BackToTop from "../components/BackToTop";
+import { useToast } from "../hooks/useToast";
 
 export default function TourBuilder(): JSX.Element {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { showWarning } = useToast();
 
   const [tour, setTour] = useState<Tour | null | undefined>(undefined);
   const [allTours, setAllTours] = useState<Tour[]>([]);
@@ -600,6 +602,28 @@ export default function TourBuilder(): JSX.Element {
   function insertRouteInline(selectedSlug: string) {
     const selected = allTours.find((t) => t.slug === selectedSlug);
     if (!selected || expandedChangeAt === null || !tour) return;
+    
+    // Validate: Check if the selected tour has the same start date as the current tour
+    const currentStartDate = selectedDate || tour.travelWindow?.start;
+    const selectedStartDate = selected.travelWindow?.start || 
+      (selected.departureDates && selected.departureDates.length > 0 
+        ? (typeof selected.departureDates[0] === 'string' 
+            ? selected.departureDates[0].split('-')[0].trim() 
+            : selected.departureDates[0].start)
+        : null);
+    
+    if (currentStartDate && selectedStartDate) {
+      // Normalize dates for comparison
+      const currentDate = new Date(currentStartDate).toDateString();
+      const selectedDate = new Date(selectedStartDate).toDateString();
+      
+      if (currentDate === selectedDate) {
+        showWarning('Cannot combine tours with the same start date. Please select a tour with a different departure date.');
+        setExpandedChangeAt(null);
+        return;
+      }
+    }
+    
     setInlineInsert({ tour: selected, insertAfterIndex: expandedChangeAt });
     setExpandedChangeAt(null);
   }
@@ -630,9 +654,9 @@ export default function TourBuilder(): JSX.Element {
         <h2 className="text-2xl font-semibold text-slate-900 mb-3">Route not found</h2>
         <p className="text-slate-600 mb-6">Please choose another route to customize.</p>
         <div className="max-w-md">
-          <select aria-label="Choose a route" className="w-full border rounded-xl px-4 py-3 bg-white shadow-sm" onChange={(e) => navigate(`/tour/builder/${e.target.value}`)} defaultValue="">
-            <option value="" disabled>Choose a route...</option>
-            {allTours.map((t) => <option key={t.slug} value={t.slug}>{t.title}</option>)}
+          <select aria-label="Choose a route" className="w-full border rounded-xl px-4 py-3 bg-white shadow-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" onChange={(e) => navigate(`/tour/builder/${e.target.value}`)} defaultValue="">
+            <option value="" disabled className="text-gray-500">Choose a route...</option>
+            {allTours.map((t) => <option key={t.slug} value={t.slug} className="text-gray-900">{t.title}</option>)}
           </select>
         </div>
       </div>
@@ -845,7 +869,7 @@ export default function TourBuilder(): JSX.Element {
                             <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-accent-yellow/30">
                               <h4 className="text-sm font-semibold text-white mb-3">Insert Alternative Route After Day {idx + 1}</h4>
                               <select
-                                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white text-sm"
+                                className="w-full px-3 py-2 bg-white border border-gray-300 rounded text-gray-900 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 onChange={(e) => {
                                   if (e.target.value) {
                                     insertRouteInline(e.target.value);
@@ -853,9 +877,9 @@ export default function TourBuilder(): JSX.Element {
                                 }}
                                 defaultValue=""
                               >
-                                <option value="">Select a route...</option>
+                                <option value="" className="text-gray-900">Select a route...</option>
                                 {allTours.filter(t => t.slug !== tour?.slug).map(t => (
-                                  <option key={t.slug} value={t.slug}>{t.title}</option>
+                                  <option key={t.slug} value={t.slug} className="text-gray-900">{t.title}</option>
                                 ))}
                               </select>
                               <button

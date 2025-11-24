@@ -980,13 +980,13 @@ export default function Booking(): JSX.Element {
                                     ? dateRange
                                     : `${new Date(dateRange.start).toLocaleDateString()} - ${new Date(dateRange.end).toLocaleDateString()}`;
                                 return (
-                                  <option key={index} value={value} className="bg-slate-800 text-white">
+                                  <option key={index} value={value} className="bg-slate-800 text-white font-medium">
                                     {label}
                                   </option>
                                 );
                               })
                             ) : tour.travelWindow ? (
-                              <option value={`${tour.travelWindow.start} - ${tour.travelWindow.end}`} className="bg-slate-800 text-white">
+                              <option value={`${tour.travelWindow.start} - ${tour.travelWindow.end}`} className="bg-slate-800 text-white font-medium">
                                 {`${new Date(tour.travelWindow.start).toLocaleDateString()} - ${new Date(tour.travelWindow.end).toLocaleDateString()}`}
                               </option>
                             ) : (

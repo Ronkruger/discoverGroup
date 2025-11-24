@@ -381,12 +381,12 @@ export default function ContactPage() {
                       required
                       className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 transition-all"
                     >
-                      <option value="" className="bg-gray-800">Select a subject</option>
-                      <option value="booking" className="bg-gray-800">Tour Booking Inquiry</option>
-                      <option value="custom" className="bg-gray-800">Custom Tour Request</option>
-                      <option value="general" className="bg-gray-800">General Question</option>
-                      <option value="support" className="bg-gray-800">Customer Support</option>
-                      <option value="feedback" className="bg-gray-800">Feedback</option>
+                      <option value="" className="bg-gray-800 text-gray-300">Select a subject</option>
+                      <option value="booking" className="bg-gray-800 text-white">Tour Booking Inquiry</option>
+                      <option value="custom" className="bg-gray-800 text-white">Custom Tour Request</option>
+                      <option value="general" className="bg-gray-800 text-white">General Question</option>
+                      <option value="support" className="bg-gray-800 text-white">Customer Support</option>
+                      <option value="feedback" className="bg-gray-800 text-white">Feedback</option>
                     </select>
                   </div>
                 </div>

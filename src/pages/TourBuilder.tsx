@@ -96,7 +96,17 @@ export default function TourBuilder(): JSX.Element {
 
   useEffect(() => {
     if (!slug) {
+      // No slug = empty builder (no default tour)
       setTour(null);
+      setSelectedDate(null);
+      setJoinIndex(null);
+      setLeaveIndex(null);
+      setExpandedChangeAt(null);
+      setInlineInsert(null);
+      setPassengers(1);
+      setIncludeInfant(false);
+      setInfantCount(1);
+      setCountryFilter(null);
       return;
     }
     setTour(undefined);

@@ -48,6 +48,7 @@ export default function AppRouter() {
           {/* Canonical singular routes */}
           <Route path="/tour/:slug" element={<TourDetail />} />
           <Route path="/tour/builder/:slug" element={<TourBuilder />} />
+          <Route path="/tour/builder" element={<TourBuilder />} />
 
 
           {/* Booking route */}

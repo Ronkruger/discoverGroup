@@ -155,7 +155,7 @@ export default function WaysToGo() {
                 Browse All Tours
               </Link>
               <Link 
-                to="/tour/builder/route-a-preferred" 
+                to="/tour/builder" 
                 className="px-8 py-4 bg-blue-500 text-white rounded-xl font-bold hover:bg-blue-400 transition-all shadow-lg hover:shadow-xl border-2 border-white"
               >
                 Build Custom Tour

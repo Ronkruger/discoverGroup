@@ -1346,14 +1346,6 @@ export default function Booking(): JSX.Element {
                               <span>{passportError}</span>
                             </div>
                           )}
-                          <div className="mt-2 text-slate-400 text-xs">
-                            <strong>Valid formats:</strong>
-                            <ul className="mt-1 ml-4 list-disc space-y-0.5">
-                              <li>After 2016: 1 letter + 7 digits + 1 letter (e.g., P1234567A)</li>
-                              <li>2005-2016: 2 letters + 7 digits (e.g., AB1234567)</li>
-                              <li>Before 2005: 2 letters + 6 digits (e.g., AB123456)</li>
-                            </ul>
-                          </div>
                         </div>
                       </div>
                       <div className="mt-6 flex justify-between">

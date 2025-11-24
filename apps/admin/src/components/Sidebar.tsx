@@ -12,7 +12,8 @@ import {
   BarChart3,
   MessageSquare,
   Map,
-  Globe
+  Globe,
+  Tag
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { authService } from "../services/authService";
@@ -96,6 +97,12 @@ const navigationItems: NavItem[] = [
     to: "/countries",
     label: "Countries",
     icon: MapPin,
+    permission: "canAccessSettings",
+  },
+  {
+    to: "/promo-banners",
+    label: "Promo Banners",
+    icon: Tag,
     permission: "canAccessSettings",
   },
   {

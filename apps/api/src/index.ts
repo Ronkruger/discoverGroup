@@ -114,6 +114,7 @@ import favoritesRouter from "./routes/favorites";
 import reviewsRouter from "./routes/reviews";
 import homepageSettingsRouter from "./routes/homepage-settings";
 import countriesRouter from "./routes/countries";
+import promoBannerRouter from "./routes/promoBanner";
 app.use("/admin/tours", adminToursRouter);
 app.use("/admin/users", adminUsersRouter);
 app.use("/admin/bookings", adminBookingsRouter);
@@ -127,6 +128,7 @@ app.use("/api/favorites", favoritesRouter);
 app.use("/api/reviews", reviewsRouter);
 app.use("/api/homepage-settings", homepageSettingsRouter);
 app.use("/api/countries", countriesRouter);
+app.use("/api/promo-banners", promoBannerRouter);
 app.use("/api", emailRouter);
 app.use("/auth", authRouter);
 

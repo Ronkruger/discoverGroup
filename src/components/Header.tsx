@@ -43,11 +43,25 @@ const getAdminUrl = () => {
 
 const ADMIN_URL = getAdminUrl();
 
+interface PromoBanner {
+  _id: string;
+  isEnabled: boolean;
+  title: string;
+  message: string;
+  ctaText: string;
+  ctaLink: string;
+  backgroundColor: string;
+  textColor: string;
+}
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'https://discovergroup.onrender.com';
+
 export default function Header(): React.ReactElement {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [promoBanner, setPromoBanner] = React.useState<PromoBanner | null>(null);
 
   const [megaOpen, setMegaOpen] = React.useState(false);
   const [continents, setContinents] = React.useState<string[]>([]);
@@ -59,6 +73,25 @@ export default function Header(): React.ReactElement {
 
   const [countryToursMap, setCountryToursMap] = React.useState<Record<string, Tour[] | null>>({});
   const containerRef = React.useRef<HTMLDivElement | null>(null);
+
+  // Fetch active promo banner
+  React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/promo-banners/active`);
+        const data = await response.json();
+        if (!cancelled && data.banner) {
+          setPromoBanner(data.banner);
+        }
+      } catch (err) {
+        console.error("Error fetching promo banner:", err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -146,6 +179,34 @@ export default function Header(): React.ReactElement {
 
   return (
   <header className="w-full backdrop-blur-xl bg-white/95 shadow-xl sticky top-0 border-b border-slate-200/50 z-[100] relative">
+      {/* Promo Banner */}
+      {promoBanner && (
+        <div 
+          className="w-full relative overflow-hidden"
+          style={{ 
+            backgroundColor: promoBanner.backgroundColor,
+            color: promoBanner.textColor
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+          <div className="container mx-auto px-6 py-3 flex items-center justify-between relative z-10">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl animate-bounce">✈️</span>
+              <div>
+                <span className="font-bold">{promoBanner.title}:</span>{" "}
+                <span className="opacity-90">{promoBanner.message}</span>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate(promoBanner.ctaLink)}
+              className="px-5 py-2 bg-yellow-400 text-gray-900 rounded-full font-bold hover:bg-yellow-300 transition-all transform hover:scale-105 shadow-lg"
+            >
+              {promoBanner.ctaText} →
+            </button>
+          </div>
+        </div>
+      )}
+      
       {/* Main header - Enhanced */}
       <div className="bg-gradient-to-b from-white to-gray-50/50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between gap-8">

@@ -96,6 +96,43 @@ export default function Booking(): JSX.Element {
   const [customerEmail, setCustomerEmail] = useState<string>("");
   const [customerPhone, setCustomerPhone] = useState<string>("");
   const [customerPassport, setCustomerPassport] = useState<string>("");
+  const [passportError, setPassportError] = useState<string>("");
+
+  // Philippine passport validation
+  const validatePassport = (value: string): boolean => {
+    if (!value.trim()) {
+      setPassportError("");
+      return true; // Optional field
+    }
+
+    const cleaned = value.trim().toUpperCase();
+    
+    // Most recent format (after Aug 15, 2016): 1 letter + 7 digits + 1 letter (e.g., P1234567A)
+    const recentFormat = /^[A-Z]\d{7}[A-Z]$/;
+    
+    // 2005-2016 format: 2 letters + 7 digits (e.g., AB1234567)
+    const oldFormat = /^[A-Z]{2}\d{7}$/;
+    
+    // Pre-2005 format: 2 letters + 6 digits (e.g., AB123456)
+    const oldestFormat = /^[A-Z]{2}\d{6}$/;
+    
+    if (recentFormat.test(cleaned) || oldFormat.test(cleaned) || oldestFormat.test(cleaned)) {
+      setPassportError("");
+      return true;
+    }
+    
+    setPassportError("Invalid Philippine passport format. Expected: 1 letter + 7 digits + 1 letter (e.g., P1234567A) or 2 letters + 7 digits (e.g., AB1234567)");
+    return false;
+  };
+
+  const handlePassportChange = (value: string) => {
+    setCustomerPassport(value);
+    if (value.trim()) {
+      validatePassport(value);
+    } else {
+      setPassportError("");
+    }
+  };
 
   // Office appointment state
   const [wantsAppointment, setWantsAppointment] = useState<boolean>(false);
@@ -1294,11 +1331,29 @@ export default function Booking(): JSX.Element {
                         </div>
                         <div className="form-field">
                           <input 
-                            placeholder="Passport or ID" 
+                            placeholder="Philippine Passport (e.g., P1234567A)" 
                             value={customerPassport}
-                            onChange={(e) => setCustomerPassport(e.target.value)}
-                            className="w-full rounded-xl px-4 py-3" 
+                            onChange={(e) => handlePassportChange(e.target.value)}
+                            onBlur={(e) => validatePassport(e.target.value)}
+                            className={`w-full rounded-xl px-4 py-3 ${passportError ? 'border-2 border-red-500 focus:border-red-500' : ''}`}
+                            maxLength={9}
                           />
+                          {passportError && (
+                            <div className="mt-2 text-red-400 text-sm flex items-start gap-2">
+                              <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span>{passportError}</span>
+                            </div>
+                          )}
+                          <div className="mt-2 text-slate-400 text-xs">
+                            <strong>Valid formats:</strong>
+                            <ul className="mt-1 ml-4 list-disc space-y-0.5">
+                              <li>After 2016: 1 letter + 7 digits + 1 letter (e.g., P1234567A)</li>
+                              <li>2005-2016: 2 letters + 7 digits (e.g., AB1234567)</li>
+                              <li>Before 2005: 2 letters + 6 digits (e.g., AB123456)</li>
+                            </ul>
+                          </div>
                         </div>
                       </div>
                       <div className="mt-6 flex justify-between">
@@ -1309,10 +1364,11 @@ export default function Booking(): JSX.Element {
                             setCustomerEmail("");
                             setCustomerPhone("");
                             setCustomerPassport("");
+                            setPassportError("");
                           }} className="px-4 py-2 btn-secondary rounded">Reset</button>
                           <button 
                             onClick={handleNext} 
-                            disabled={!customerName.trim() || !customerEmail.trim()}
+                            disabled={!customerName.trim() || !customerEmail.trim() || !!passportError}
                             className="px-4 py-2 btn-primary rounded disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Continue

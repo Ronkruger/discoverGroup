@@ -26,6 +26,8 @@ const Profile = lazy(() => import("./pages/Profile"));
 const UserSettings = lazy(() => import("./pages/UserSettings"));
 const AboutUs = lazy(() => import("./pages/AboutUs"));
 const Favorites = lazy(() => import("./pages/Favorites"));
+const WaysToGo = lazy(() => import("./pages/WaysToGo"));
+const Deals = lazy(() => import("./pages/Deals"));
 
 export default function AppRouter() {
   return (
@@ -72,6 +74,8 @@ export default function AppRouter() {
 
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/ways-to-go" element={<WaysToGo />} />
+          <Route path="/deals" element={<Deals />} />
 
           {/* Helpful fallback route to display when no route matches (avoids silent console-only warnings) */}
           <Route

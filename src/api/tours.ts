@@ -44,7 +44,7 @@ export async function fetchContinents(): Promise<string[]> {
     const continents = new Set<string>();
     
     tours.forEach(tour => {
-      if (tour.continent) {
+      if (typeof tour.continent === "string" && tour.continent.length > 0) {
         continents.add(tour.continent);
       }
     });
@@ -79,9 +79,11 @@ export async function fetchCountriesByContinent(continent: string): Promise<stri
     
     tours.forEach(tour => {
       if (tour.continent === continent) {
-        const tourCountries = tour.additionalInfo?.countriesVisited || 
-                            tour.additionalInfo?.countries || 
-                            [];
+        const tourCountries = Array.isArray(tour.additionalInfo?.countriesVisited)
+          ? tour.additionalInfo?.countriesVisited
+          : Array.isArray(tour.additionalInfo?.countries)
+            ? tour.additionalInfo?.countries
+            : [];
         tourCountries.forEach((country: string) => countries.add(country));
       }
     });

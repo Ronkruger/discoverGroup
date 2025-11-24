@@ -72,9 +72,9 @@ export default function Profile() {
               {/* User Avatar & Info */}
               <div className="text-center mb-6">
                 <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold mb-4 shadow-lg">
-                  {user.name?.charAt(0).toUpperCase() || "U"}
+                  {user.fullName?.charAt(0).toUpperCase() || "U"}
                 </div>
-                <h2 className="text-xl font-bold text-white mb-1">{user.name || "User"}</h2>
+                <h2 className="text-xl font-bold text-white mb-1">{user.fullName || "User"}</h2>
                 <p className="text-sm text-gray-300">{user.email}</p>
               </div>
 
@@ -155,7 +155,7 @@ export default function Profile() {
               <div className="space-y-6 animate-fade-in">
                 {/* Welcome Card */}
                 <div className="bg-gradient-to-br from-blue-600 to-purple-700 rounded-2xl shadow-2xl p-8 text-white">
-                  <h2 className="text-2xl font-bold mb-2">Welcome back, {user.name?.split(" ")[0] || "Traveler"}! ✈️</h2>
+                  <h2 className="text-2xl font-bold mb-2">Welcome back, {user.fullName?.split(" ")[0] || "Traveler"}! ✈️</h2>
                   <p className="text-blue-100 mb-6">Ready to explore new destinations? Check out our latest tour packages.</p>
                   <Link
                     to="/routes"
@@ -216,7 +216,7 @@ export default function Profile() {
                     <div className="flex items-start justify-between p-4 bg-white/5 rounded-lg">
                       <div>
                         <p className="text-sm text-gray-400">Full Name</p>
-                        <p className="text-white font-medium">{user.name || "Not provided"}</p>
+                        <p className="text-white font-medium">{user.fullName || "Not provided"}</p>
                       </div>
                       <button className="text-blue-400 hover:text-blue-300 text-sm">Edit</button>
                     </div>

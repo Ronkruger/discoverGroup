@@ -369,13 +369,13 @@ export default function Home() {
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 1 }}
-              className="mt-6 bg-white border border-green-200 rounded-lg p-4 shadow-sm max-w-md mx-auto"
+              className="mt-6 bg-white border-2 border-green-300 rounded-lg p-4 shadow-sm max-w-md mx-auto"
             >
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <div className="text-sm">
-                  <span className="font-medium">{hashName(recentBooking.customerName)}</span> just booked 
-                  <span className="font-medium"> {getTourTitle(recentBooking.tourSlug)}</span> • {recentBooking.timeAgo}
+                <div className="text-sm text-gray-900 font-medium">
+                  <span className="font-semibold text-gray-900">{hashName(recentBooking.customerName)}</span> just booked 
+                  <span className="font-semibold text-blue-600"> {getTourTitle(recentBooking.tourSlug)}</span> • <span className="text-gray-600">{recentBooking.timeAgo}</span>
                 </div>
               </div>
             </motion.div>

@@ -47,7 +47,6 @@ export default function Header(): React.ReactElement {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
-  const [promoVisible, setPromoVisible] = React.useState(true);
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const [megaOpen, setMegaOpen] = React.useState(false);
@@ -147,34 +146,6 @@ export default function Header(): React.ReactElement {
 
   return (
   <header className="w-full backdrop-blur-xl bg-white/95 shadow-xl sticky top-0 border-b border-slate-200/50 z-[100] relative">
-      {/* Promo bar - Enhanced */}
-      {promoVisible && (
-        <div className="w-full bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700 text-white relative overflow-hidden">
-          {/* Animated background effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
-          <div className="container mx-auto px-4 py-3 text-sm font-semibold flex justify-center items-center relative z-10">
-            <span className="flex items-center gap-2">
-              <span className="text-xl animate-bounce">✈️</span>
-              <span className="hidden sm:inline">Limited Time Offer:</span>
-              <span>Up to 30% off on European Tours!</span>
-              <a
-                href="/deals"
-                className="ml-2 px-4 py-1 bg-yellow-400 text-blue-900 rounded-full font-bold hover:bg-yellow-300 transition-all hover:scale-105 shadow-lg"
-              >
-                Book Now →
-              </a>
-            </span>
-            <button
-              aria-label="Dismiss promo"
-              onClick={() => setPromoVisible(false)}
-              className="absolute right-4 text-white/70 hover:text-white hover:bg-white/10 rounded-full p-1 transition-all"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Main header - Enhanced */}
       <div className="bg-gradient-to-b from-white to-gray-50/50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between gap-8">

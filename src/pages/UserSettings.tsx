@@ -2,11 +2,11 @@ import React from "react";
 
 export default function UserSettings() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 py-12">
+    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
       <div className="max-w-lg mx-auto px-6">
-        <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl p-6">
-          <h1 className="text-2xl font-bold mb-4 text-white">User Settings</h1>
-          <p className="text-slate-300">This is a placeholder for the user settings page (change client info).</p>
+        <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-lg p-6">
+          <h1 className="text-2xl font-bold mb-4 text-gray-900">User Settings</h1>
+          <p className="text-gray-700">This is a placeholder for the user settings page (change client info).</p>
         </div>
       </div>
     </main>

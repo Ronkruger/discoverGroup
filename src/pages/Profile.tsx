@@ -57,25 +57,25 @@ export default function Profile() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 py-12">
+    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
       <div className="container mx-auto px-5">
         {/* Page Header */}
         <div className="mb-8 animate-fade-in-up">
-          <h1 className="text-4xl font-bold text-white mb-2">My Profile</h1>
-          <p className="text-gray-300">Manage your account and view your bookings</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">My Profile</h1>
+          <p className="text-gray-700">Manage your account and view your bookings</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar */}
           <aside className="lg:col-span-1">
-            <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl p-6 sticky top-24">
+            <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-lg p-6 sticky top-24">
               {/* User Avatar & Info */}
               <div className="text-center mb-6">
                 <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold mb-4 shadow-lg">
                   {user.fullName?.charAt(0).toUpperCase() || "U"}
                 </div>
-                <h2 className="text-xl font-bold text-white mb-1">{user.fullName || "User"}</h2>
-                <p className="text-sm text-gray-300">{user.email}</p>
+                <h2 className="text-xl font-bold text-gray-900 mb-1">{user.fullName || "User"}</h2>
+                <p className="text-sm text-gray-700">{user.email}</p>
               </div>
 
               {/* Navigation Tabs */}
@@ -85,7 +85,7 @@ export default function Profile() {
                   className={`w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 ${
                     activeTab === "overview"
                       ? "bg-blue-600 text-white shadow-lg"
-                      : "text-gray-300 hover:bg-white/5"
+                      : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,7 +99,7 @@ export default function Profile() {
                   className={`w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 ${
                     activeTab === "bookings"
                       ? "bg-blue-600 text-white shadow-lg"
-                      : "text-gray-300 hover:bg-white/5"
+                      : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,7 +113,7 @@ export default function Profile() {
                   className={`w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 ${
                     activeTab === "settings"
                       ? "bg-blue-600 text-white shadow-lg"
-                      : "text-gray-300 hover:bg-white/5"
+                      : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,11 +123,11 @@ export default function Profile() {
                   Settings
                 </button>
 
-                <hr className="border-white/10 my-4" />
+                <hr className="border-gray-200 my-4" />
 
                 <Link
                   to="/favorites"
-                  className="w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 text-gray-300 hover:bg-white/5"
+                  className="w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 text-gray-700 hover:bg-gray-100"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -170,69 +170,69 @@ export default function Profile() {
 
                 {/* Quick Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-6">
+                  <div className="bg-white border-2 border-gray-200 rounded-xl p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-sm text-gray-300">Total Bookings</h3>
+                      <h3 className="text-sm text-gray-600">Total Bookings</h3>
                       <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                       </svg>
                     </div>
-                    <p className="text-3xl font-bold text-white">{loading ? '...' : bookings.length}</p>
-                    <p className="text-xs text-gray-400 mt-1">All time</p>
+                    <p className="text-3xl font-bold text-gray-900">{loading ? '...' : bookings.length}</p>
+                    <p className="text-xs text-gray-600 mt-1">All time</p>
                   </div>
 
-                  <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-6">
+                  <div className="bg-white border-2 border-gray-200 rounded-xl p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-sm text-gray-300">Confirmed Trips</h3>
+                      <h3 className="text-sm text-gray-600">Confirmed Trips</h3>
                       <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                       </svg>
                     </div>
-                    <p className="text-3xl font-bold text-white">{loading ? '...' : bookings.filter(b => b.status === 'confirmed').length}</p>
-                    <p className="text-xs text-gray-400 mt-1">Scheduled</p>
+                    <p className="text-3xl font-bold text-gray-900">{loading ? '...' : bookings.filter(b => b.status === 'confirmed').length}</p>
+                    <p className="text-xs text-gray-600 mt-1">Scheduled</p>
                   </div>
 
-                  <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-6">
+                  <div className="bg-white border-2 border-gray-200 rounded-xl p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-sm text-gray-300">Favorites</h3>
+                      <h3 className="text-sm text-gray-600">Favorites</h3>
                       <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                       </svg>
                     </div>
-                    <p className="text-3xl font-bold text-white">{loading ? '...' : favoritesCount}</p>
-                    <p className="text-xs text-gray-400 mt-1">Saved tours</p>
+                    <p className="text-3xl font-bold text-gray-900">{loading ? '...' : favoritesCount}</p>
+                    <p className="text-xs text-gray-600 mt-1">Saved tours</p>
                   </div>
                 </div>
 
                 {/* Account Info */}
-                <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl p-6">
-                  <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                    <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-lg p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                     Account Information
                   </h3>
                   <div className="space-y-4">
-                    <div className="flex items-start justify-between p-4 bg-white/5 rounded-lg">
+                    <div className="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
                       <div>
-                        <p className="text-sm text-gray-400">Full Name</p>
-                        <p className="text-white font-medium">{user.fullName || "Not provided"}</p>
+                        <p className="text-sm text-gray-600">Full Name</p>
+                        <p className="text-gray-900 font-medium">{user.fullName || "Not provided"}</p>
                       </div>
-                      <button className="text-blue-400 hover:text-blue-300 text-sm">Edit</button>
+                      <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">Edit</button>
                     </div>
-                    <div className="flex items-start justify-between p-4 bg-white/5 rounded-lg">
+                    <div className="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
                       <div>
-                        <p className="text-sm text-gray-400">Email Address</p>
-                        <p className="text-white font-medium">{user.email}</p>
+                        <p className="text-sm text-gray-600">Email Address</p>
+                        <p className="text-gray-900 font-medium">{user.email}</p>
                       </div>
-                      <button className="text-blue-400 hover:text-blue-300 text-sm">Edit</button>
+                      <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">Edit</button>
                     </div>
-                    <div className="flex items-start justify-between p-4 bg-white/5 rounded-lg">
+                    <div className="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
                       <div>
-                        <p className="text-sm text-gray-400">Phone Number</p>
-                        <p className="text-white font-medium">Not provided</p>
+                        <p className="text-sm text-gray-600">Phone Number</p>
+                        <p className="text-gray-900 font-medium">Not provided</p>
                       </div>
-                      <button className="text-blue-400 hover:text-blue-300 text-sm">Add</button>
+                      <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">Add</button>
                     </div>
                   </div>
                 </div>
@@ -242,9 +242,9 @@ export default function Profile() {
             {/* Bookings Tab */}
             {activeTab === "bookings" && (
               <div className="animate-fade-in">
-                <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl p-8">
+                <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-lg p-8">
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-white">My Bookings</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">My Bookings</h2>
                     <Link
                       to="/routes"
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
@@ -255,8 +255,8 @@ export default function Profile() {
 
                   {loading ? (
                     <div className="text-center py-12">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-                      <p className="text-gray-300">Loading your bookings...</p>
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                      <p className="text-gray-700">Loading your bookings...</p>
                     </div>
                   ) : bookings.length === 0 ? (
                     <div className="text-center py-12">

@@ -641,9 +641,9 @@ export default function TourBuilder(): JSX.Element {
     return (
       <div className="p-8">
         <div className="animate-pulse space-y-4 max-w-4xl">
-          <div className="h-56 rounded-2xl bg-slate-200" />
-          <div className="h-6 w-3/4 rounded bg-slate-200" />
-          <div className="h-40 rounded-2xl bg-slate-100" />
+          <div className="h-56 rounded-2xl bg-gray-200" />
+          <div className="h-6 w-3/4 rounded bg-gray-200" />
+          <div className="h-40 rounded-2xl bg-gray-100" />
         </div>
       </div>
     );
@@ -651,8 +651,8 @@ export default function TourBuilder(): JSX.Element {
   if (tour === null) {
     return (
       <div className="p-8">
-        <h2 className="text-2xl font-semibold text-slate-900 mb-3">Route not found</h2>
-        <p className="text-slate-600 mb-6">Please choose another route to customize.</p>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-3">Route not found</h2>
+        <p className="text-gray-600 mb-6">Please choose another route to customize.</p>
         <div className="max-w-md">
           <select aria-label="Choose a route" className="w-full border rounded-xl px-4 py-3 bg-white shadow-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" onChange={(e) => navigate(`/tour/builder/${e.target.value}`)} defaultValue="">
             <option value="" disabled className="text-gray-500">Choose a route...</option>
@@ -668,10 +668,10 @@ export default function TourBuilder(): JSX.Element {
   // canProceed required by CTA block (visible/disabled state)
   const canProceed = Boolean(tour && selectedDate);
 
-  // Theme style from TourDetail: deep-blue gradient with yellow accent
+  // Theme style: light gradient with yellow accent
   const themeStyle: React.CSSProperties = {
     background:
-      "linear-gradient(180deg, rgba(2,18,51,1) 0%, rgba(8,42,102,1) 35%, rgba(4,18,55,1) 100%)",
+      "linear-gradient(180deg, rgba(249,250,251,1) 0%, rgba(243,244,246,1) 35%, rgba(255,255,255,1) 100%)",
     ["--accent-yellow" as string]: "#FFD24D",
     ["--accent-yellow-600" as string]: "#FFC107",
     ["--muted-slate" as string]: "#94a3b8",
@@ -688,40 +688,40 @@ export default function TourBuilder(): JSX.Element {
         .tab-underline { transition: transform .25s cubic-bezier(.2,.9,.2,1), opacity .25s; }
         .fade-enter { opacity: 0; transform: translateY(6px); }
         .fade-enter-active { opacity: 1; transform: translateY(0); transition: all .28s ease; }
-        .card-glass { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.06); }
-        .modal-backdrop { background: rgba(2,6,23,0.6); }
+        .card-glass { background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9)); backdrop-filter: blur(6px); border: 1px solid rgba(0,0,0,0.06); }
+        .modal-backdrop { background: rgba(0,0,0,0.5); }
 
         /* Timeline highlight adjustments */
         .timeline-section { 
           padding: 32px; 
           border-radius: 24px; 
-          background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); 
+          background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9)); 
           backdrop-filter: blur(8px);
         }
-        .timeline-rail { background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); width: 2px; }
+        .timeline-rail { background: linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.04)); width: 2px; }
         .timeline-row { 
           transition: all .25s ease; 
           padding: 20px;
           margin-bottom: 24px;
           border-radius: 16px;
-          background: rgba(255,255,255,0.01);
-          border: 1px solid rgba(255,255,255,0.05);
+          background: rgba(255,255,255,0.8);
+          border: 1px solid rgba(0,0,0,0.08);
         }
         .timeline-row:hover { 
-          background: rgba(255,255,255,0.03); 
+          background: rgba(255,255,255,0.95); 
           transform: translateY(-4px); 
-          box-shadow: 0 12px 40px rgba(0,0,0,0.3);
-          border-color: rgba(255,210,77,0.3);
+          box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+          border-color: rgba(255,210,77,0.4);
         }
-        .timeline-card { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.04); }
+        .timeline-card { background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9)); border: 1px solid rgba(0,0,0,0.06); }
         .timeline-marker { width: 44px; height: 44px; border-radius: 9999px; display: grid; place-items: center; }
-        .timeline-marker.included { background: linear-gradient(180deg,#2563eb,#1e40af); box-shadow: 0 6px 20px rgba(2,6,23,0.5); color: white; border: 2px solid rgba(255,255,255,0.06); }
-        .timeline-marker.default { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.04); }
-        .timeline-bar { box-shadow: 0 8px 30px rgba(2,6,23,0.45); border-radius: 8px; opacity: 0.98; }
-        .timeline-connector { opacity: 0.95; box-shadow: 0 6px 20px rgba(2,6,23,0.35); border-radius: 8px; }
-        .timeline-heading { color: #e6eefc; font-weight: 700; }
-        .timeline-sub { color: rgba(230,238,252,0.75); }
-        .timeline-small { color: rgba(230,238,252,0.6); }
+        .timeline-marker.included { background: linear-gradient(180deg,#2563eb,#1e40af); box-shadow: 0 6px 20px rgba(0,0,0,0.15); color: white; border: 2px solid rgba(0,0,0,0.1); }
+        .timeline-marker.default { background: rgba(0,0,0,0.08); color: rgba(0,0,0,0.7); border: 1px solid rgba(0,0,0,0.1); }
+        .timeline-bar { box-shadow: 0 8px 30px rgba(0,0,0,0.15); border-radius: 8px; opacity: 0.98; }
+        .timeline-connector { opacity: 0.95; box-shadow: 0 6px 20px rgba(0,0,0,0.1); border-radius: 8px; }
+        .timeline-heading { color: #1f2937; font-weight: 700; }
+        .timeline-sub { color: rgba(31,41,55,0.75); }
+        .timeline-small { color: rgba(31,41,55,0.6); }
 
         /* Increase small font sizes by 5% inside timeline and card areas to improve readability */
         .timeline-section .text-xs,
@@ -735,11 +735,11 @@ export default function TourBuilder(): JSX.Element {
         /* Badge interaction */
         .badge-filter { cursor: pointer; transition: transform .12s; }
         .badge-filter:hover { transform: translateY(-2px); }
-        .badge-active { box-shadow: 0 6px 18px rgba(2,6,23,0.5); transform: scale(1.02); }
+        .badge-active { box-shadow: 0 6px 18px rgba(0,0,0,0.15); transform: scale(1.02); }
       `}</style>
 
       <div ref={pageTopRef} />
-      <div className="container mx-auto px-6 lg:px-12 text-slate-200">
+      <div className="container mx-auto px-6 lg:px-12 text-gray-900">
         <div className="grid lg:grid-cols-[minmax(0,1fr)_380px] gap-12">
           <div className="space-y-8">
             <section className="relative rounded-3xl card-glass shadow-sm overflow-visible p-6 timeline-section" aria-label="Timeline">
@@ -747,8 +747,8 @@ export default function TourBuilder(): JSX.Element {
               {/* Fallback message if no stops or itinerary are present */}
               {(finalLength === 0 || finalDayStops.length === 0) ? (
                 <div className="flex flex-col items-center justify-center py-16">
-                  <div className="text-lg font-semibold text-slate-300 mb-2">No stops or itinerary found for this tour.</div>
-                  <div className="text-sm text-slate-400 mb-4">Please check the tour data or select a different route.</div>
+                  <div className="text-lg font-semibold text-gray-700 mb-2">No stops or itinerary found for this tour.</div>
+                  <div className="text-sm text-gray-600 mb-4">Please check the tour data or select a different route.</div>
                 </div>
               ) : (
                 <>
@@ -810,13 +810,13 @@ export default function TourBuilder(): JSX.Element {
                                 {idx + 1}
                               </div>
                               <div>
-                                <div className="text-lg font-bold text-white">
+                                <div className="text-lg font-bold text-gray-900">
                                   {itineraryDay?.title || `Day ${idx + 1}`}
                                 </div>
-                                <div className="text-sm text-slate-400">{weekday}, {monthDay}</div>
+                                <div className="text-sm text-gray-600">{weekday}, {monthDay}</div>
                               </div>
                             </div>
-                            <div className="text-sm text-slate-300 bg-white/5 px-3 py-1 rounded-full">
+                            <div className="text-sm text-gray-700 bg-gray-100 px-3 py-1 rounded-full">
                               {places || 'Location'}
                             </div>
                           </div>
@@ -838,7 +838,7 @@ export default function TourBuilder(): JSX.Element {
                             {/* Description Section */}
                             <div className="p-4">
                               {itineraryDay?.description && (
-                                <p className="text-slate-200 text-sm leading-relaxed">
+                                <p className="text-gray-700 text-sm leading-relaxed">
                                   {itineraryDay.description}
                                 </p>
                               )}
@@ -851,12 +851,12 @@ export default function TourBuilder(): JSX.Element {
                                     e.stopPropagation();
                                     openInlineChangeAt(idx);
                                   }}
-                                  className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded text-xs font-medium transition-colors"
+                                  className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded text-xs font-medium transition-colors"
                                 >
                                   Customize Day
                                 </button>
                                 {places && (
-                                  <div className="text-xs text-slate-400">
+                                  <div className="text-xs text-gray-600">
                                     📍 {places}
                                   </div>
                                 )}
@@ -866,8 +866,8 @@ export default function TourBuilder(): JSX.Element {
 
                           {/* Inline Route Selector (if expanded) */}
                           {expandedChangeAt === idx && (
-                            <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-accent-yellow/30">
-                              <h4 className="text-sm font-semibold text-white mb-3">Insert Alternative Route After Day {idx + 1}</h4>
+                            <div className="mt-4 p-4 bg-gray-100 rounded-lg border-2 border-yellow-400">
+                              <h4 className="text-sm font-semibold text-gray-900 mb-3">Insert Alternative Route After Day {idx + 1}</h4>
                               <select
                                 className="w-full px-3 py-2 bg-white border border-gray-300 rounded text-gray-900 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 onChange={(e) => {
@@ -885,7 +885,7 @@ export default function TourBuilder(): JSX.Element {
                               <button
                                 type="button"
                                 onClick={() => setExpandedChangeAt(null)}
-                                className="mt-2 text-xs text-slate-400 hover:text-white"
+                                className="mt-2 text-xs text-gray-700 hover:text-gray-900"
                               >
                                 Cancel
                               </button>
@@ -898,11 +898,11 @@ export default function TourBuilder(): JSX.Element {
 
                   {/* Inserted Route Indicator */}
                   {inlineInsert && (
-                    <div className="mt-6 p-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl border border-purple-400/30">
+                    <div className="mt-6 p-4 bg-purple-100 rounded-xl border-2 border-purple-400">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-sm font-semibold text-white">Additional Route Inserted</div>
-                          <div className="text-xs text-slate-300 mt-1">{inlineInsert.tour.title}</div>
+                          <div className="text-sm font-semibold text-gray-900">Additional Route Inserted</div>
+                          <div className="text-xs text-gray-700 mt-1">{inlineInsert.tour.title}</div>
                         </div>
                         <button
                           type="button"
@@ -933,19 +933,19 @@ export default function TourBuilder(): JSX.Element {
                 alt={tour.title}
                 className="w-full h-36 object-cover"
               />
-              <div className="p-6 space-y-5 text-slate-200">
+              <div className="p-6 space-y-5 text-gray-900">
                 <div>
-                  <div className="text-xs text-slate-400">Tour Details</div>
+                  <div className="text-xs text-gray-600">Tour Details</div>
                   <div className="mt-3 text-sm">
-                    <div className="flex items-center justify-between"><span className="text-xs text-slate-400">Start</span><span className="font-medium">{formatDateISO(selectedDate)}</span></div>
-                    <div className="flex items-center justify-between mt-2"><span className="text-xs text-slate-400">End</span><span className="font-medium">{formatDateISO(endDateIso() ?? undefined)}</span></div>
+                    <div className="flex items-center justify-between"><span className="text-xs text-gray-600">Start</span><span className="font-medium">{formatDateISO(selectedDate)}</span></div>
+                    <div className="flex items-center justify-between mt-2"><span className="text-xs text-gray-600">End</span><span className="font-medium">{formatDateISO(endDateIso() ?? undefined)}</span></div>
 
-                    <div className="flex items-center justify-between mt-3"><span className="text-xs text-slate-400">From</span><span className="font-medium">{sidebarFrom}</span></div>
-                    <div className="flex items-center justify-between mt-2"><span className="text-xs text-slate-400">To</span><span className="font-medium">{sidebarTo}</span></div>
+                    <div className="flex items-center justify-between mt-3"><span className="text-xs text-gray-600">From</span><span className="font-medium">{sidebarFrom}</span></div>
+                    <div className="flex items-center justify-between mt-2"><span className="text-xs text-gray-600">To</span><span className="font-medium">{sidebarTo}</span></div>
 
                     {/* Aside badges: duration, guaranteed, countries */}
                     <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-2 bg-white/6 text-slate-200 px-3 py-1 rounded-full text-sm">• {tour?.durationDays ?? itinerary.length} days</span>
+                      <span className="inline-flex items-center gap-2 bg-gray-100 text-gray-900 px-3 py-1 rounded-full text-sm">• {tour?.durationDays ?? itinerary.length} days</span>
                       {tour?.guaranteedDeparture && (
                         <span className="inline-flex items-center gap-2 bg-emerald-600/20 text-emerald-200 px-3 py-1 rounded-full text-sm">Guaranteed departure</span>
                       )}
@@ -956,7 +956,7 @@ export default function TourBuilder(): JSX.Element {
                           key={c}
                           title={`Filter timeline by ${c}`}
                           onClick={() => setCountryFilter((prev) => prev === c ? null : c)}
-                          className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm badge-filter ${countryFilter === c ? "badge-active bg-accent-yellow text-slate-900" : "bg-white/6 text-slate-200"}`}
+                          className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm badge-filter ${countryFilter === c ? "badge-active bg-accent-yellow text-slate-900" : "bg-gray-100 text-gray-900"}`}
                         >
                           {c}
                         </button>
@@ -964,22 +964,22 @@ export default function TourBuilder(): JSX.Element {
 
                       {/* Clear filter control */}
                       {countryFilter && (
-                        <button onClick={() => setCountryFilter(null)} className="text-xs underline text-slate-300 ml-2">Clear filter</button>
+                        <button onClick={() => setCountryFilter(null)} className="text-xs underline text-gray-700 ml-2">Clear filter</button>
                       )}
                     </div>
                   </div>
                 </div>
 
-                <div className="border-t pt-3 text-xs text-slate-400">
+                <div className="border-t pt-3 text-xs text-gray-600">
                   <div>Duration</div>
-                  <div className="text-base font-semibold text-slate-200">{computeDays()} Days</div>
+                  <div className="text-base font-semibold text-gray-900">{computeDays()} Days</div>
                 </div>
 
-                <div className="border-t pt-3 text-xs text-slate-400">
+                <div className="border-t pt-3 text-xs text-gray-600">
                   <div className="flex items-center justify-between">
                     <div>
                       <div>Passengers</div>
-                      <div className="text-base font-semibold text-slate-200">{passengers} Pax{includeInfant && infantCount > 0 ? ` + ${infantCount} Infant(s)` : ""}</div>
+                      <div className="text-base font-semibold text-gray-900">{passengers} Pax{includeInfant && infantCount > 0 ? ` + ${infantCount} Infant(s)` : ""}</div>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -987,13 +987,13 @@ export default function TourBuilder(): JSX.Element {
                         type="button"
                         aria-label="Decrease passengers"
                         onClick={() => changePassengers(-1)}
-                        className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-white/6 text-slate-200"
+                        className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100 text-gray-900"
                       >
                         −
                       </button>
                       <input
                         aria-label="Passengers"
-                        className="w-14 text-center rounded-md border px-2 py-1 text-sm bg-transparent text-slate-200"
+                        className="w-14 text-center rounded-md border px-2 py-1 text-sm bg-white text-gray-900"
                         value={passengers}
                         onChange={onPassengersInput}
                         inputMode="numeric"
@@ -1003,7 +1003,7 @@ export default function TourBuilder(): JSX.Element {
                         type="button"
                         aria-label="Increase passengers"
                         onClick={() => changePassengers(1)}
-                        className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-white/6 text-slate-200"
+                        className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100 text-gray-900"
                       >
                         +
                       </button>
@@ -1026,7 +1026,7 @@ export default function TourBuilder(): JSX.Element {
                         }}
                         className="w-4 h-4"
                       />
-                      <label htmlFor="infant-checkbox" className="text-sm text-slate-300">Include infant (price TBD)</label>
+                      <label htmlFor="infant-checkbox" className="text-sm text-gray-700">Include infant (price TBD)</label>
                     </div>
 
                     {includeInfant && (
@@ -1065,21 +1065,21 @@ export default function TourBuilder(): JSX.Element {
                   <div className="flex flex-col gap-2">
                     {perPersonBreakdown.lines.map((ln, i) => (
                       <div key={i} className="flex items-center justify-between">
-                        <div className="text-xs text-slate-400">{ln.label}</div>
-                        <div className="text-sm font-semibold text-slate-200">{ln.value}</div>
+                        <div className="text-xs text-gray-600">{ln.label}</div>
+                        <div className="text-sm font-semibold text-gray-900">{ln.value}</div>
                       </div>
                     ))}
 
                     {perPersonBreakdown.totalValue ? (
                       <div className="flex items-center justify-between pt-2 border-t">
-                        <div className="text-xs text-slate-400">{perPersonBreakdown.totalLabel}</div>
-                        <div className="text-base font-semibold text-slate-200">{perPersonBreakdown.totalValue}</div>
+                        <div className="text-xs text-gray-600">{perPersonBreakdown.totalLabel}</div>
+                        <div className="text-base font-semibold text-gray-900">{perPersonBreakdown.totalValue}</div>
                       </div>
                     ) : null}
 
                     <div className="flex items-center justify-between pt-3">
-                      <div className="text-xs text-slate-400">Total</div>
-                      <div className="text-2xl font-extrabold text-slate-200">{formattedPrice()}</div>
+                      <div className="text-xs text-gray-600">Total</div>
+                      <div className="text-2xl font-extrabold text-gray-900">{formattedPrice()}</div>
                     </div>
                   </div>
                 </div>
@@ -1089,7 +1089,7 @@ export default function TourBuilder(): JSX.Element {
                   <div className="flex gap-3">
                     <Link
                       to={`/tour/${encodeURIComponent(tour?.slug ?? slug ?? "")}`}
-                      className="flex-1 px-3 py-2 border rounded text-center text-sm hover:bg-white/6 text-slate-200"
+                      className="flex-1 px-3 py-2 border rounded text-center text-sm hover:bg-gray-100 text-gray-900"
                     >
                       Back to tour
                     </Link>
@@ -1111,7 +1111,7 @@ export default function TourBuilder(): JSX.Element {
               </div>
             </div>
 
-            <div className="rounded-2xl card-glass p-5 text-sm text-slate-300 shadow-sm">Tip: Select a date to auto-select the full segment. Use the colored markers to fine-tune your join/leave days.</div>
+            <div className="rounded-2xl card-glass p-5 text-sm text-gray-700 shadow-sm">Tip: Select a date to auto-select the full segment. Use the colored markers to fine-tune your join/leave days.</div>
           </aside>
         </div>
       </div>

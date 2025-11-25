@@ -734,24 +734,24 @@ export default function Booking(): JSX.Element {
       <div className="container mx-auto px-5 relative z-10">
         {/* Page Header */}
         <div className="text-center mb-10">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 drop-shadow-lg">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
             Complete Your Booking
           </h1>
-          <p className="text-lg text-white/90 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-700 max-w-2xl mx-auto">
             You're just a few steps away from your dream European adventure!
           </p>
         </div>
         
         <div className="max-w-4xl mx-auto">
           <div className="space-y-6">
-            <div className="card-glass rounded-2xl p-5 shadow-2xl overflow-x-auto">
+            <div className="bg-white border-2 border-gray-200 rounded-2xl p-5 shadow-lg overflow-x-auto">
               <ProgressIndicator 
                 steps={bookingSteps}
                 currentStep={step + 1}
                 className="mb-0 min-w-max"
               />
             </div>
-            <div className="card-glass rounded-2xl p-6 md:p-8 shadow-2xl">{/* Step 3: Payment Method Selection */}
+            <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 md:p-8 shadow-lg">{/* Step 3: Payment Method Selection */}
               {/* Step 3: Payment Method Selection */}
               {step === 3 && paymentType !== "cash-appointment" && (
                 <section aria-labelledby="payment-heading">
@@ -762,19 +762,19 @@ export default function Booking(): JSX.Element {
                       </svg>
                     </div>
                     <div>
-                      <h2 id="payment-heading" className="text-2xl font-bold text-white">Select Payment Method</h2>
-                      <p className="text-gray-200 text-sm">Choose how you'd like to complete your booking</p>
+                      <h2 id="payment-heading" className="text-2xl font-bold text-gray-900">Select Payment Method</h2>
+                      <p className="text-gray-700 text-sm">Choose how you'd like to complete your booking</p>
                     </div>
                   </div>
 
                   {/* Demo Mode Notice */}
-                  <div className="mb-6 p-4 bg-yellow-900/30 border-2 border-yellow-600 rounded-xl flex items-start gap-3">
-                    <svg className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="mb-6 p-4 bg-yellow-50 border-2 border-yellow-400 rounded-xl flex items-start gap-3">
+                    <svg className="w-5 h-5 text-yellow-700 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <div className="text-sm">
-                      <div className="font-semibold text-yellow-200 mb-1">Demo Mode Active</div>
-                      <p className="text-gray-200">This is a demonstration booking flow. No actual payment will be processed. Select any method to see how the payment experience works!</p>
+                      <div className="font-semibold text-yellow-900 mb-1">Demo Mode Active</div>
+                      <p className="text-gray-900">This is a demonstration booking flow. No actual payment will be processed. Select any method to see how the payment experience works!</p>
                     </div>
                   </div>
                   
@@ -798,7 +798,7 @@ export default function Booking(): JSX.Element {
                       <svg className="w-5 h-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <div className="text-sm text-red-200">{error}</div>
+                      <div className="text-sm text-red-700">{error}</div>
                     </div>
                   )}
                   
@@ -833,46 +833,46 @@ export default function Booking(): JSX.Element {
                       </svg>
                     </div>
                     <div>
-                      <h2 id="review-confirm-heading" className="text-2xl font-bold text-white">Review Your Booking</h2>
-                      <p className="text-gray-200 text-sm">Double-check everything before proceeding</p>
+                      <h2 id="review-confirm-heading" className="text-2xl font-bold text-gray-900">Review Your Booking</h2>
+                      <p className="text-gray-700 text-sm">Double-check everything before proceeding</p>
                     </div>
                   </div>
                   
-                  <div className="info-card border-2 border-white/20">
+                  <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <div className="text-xs text-gray-200 uppercase tracking-wider mb-1">Tour Package</div>
-                        <div className="font-bold text-white text-lg">{tour.title}</div>
-                        <div className="text-sm text-gray-200 mt-2">{tour.summary}</div>
+                        <div className="text-xs text-gray-600 uppercase tracking-wider mb-1">Tour Package</div>
+                        <div className="font-bold text-gray-900 text-lg">{tour.title}</div>
+                        <div className="text-sm text-gray-700 mt-2">{tour.summary}</div>
                       </div>
                       <div>
-                        <div className="text-xs text-gray-200 uppercase tracking-wider mb-1">Departure Date</div>
-                        <div className="font-semibold text-white">{selectedDate || "—"}</div>
-                        <div className="text-xs text-gray-200 uppercase tracking-wider mt-3 mb-1">Passengers</div>
-                        <div className="font-semibold text-white">{passengers} {passengers === 1 ? 'person' : 'people'}</div>
+                        <div className="text-xs text-gray-600 uppercase tracking-wider mb-1">Departure Date</div>
+                        <div className="font-semibold text-gray-900">{selectedDate || "—"}</div>
+                        <div className="text-xs text-gray-600 uppercase tracking-wider mt-3 mb-1">Passengers</div>
+                        <div className="font-semibold text-gray-900">{passengers} {passengers === 1 ? 'person' : 'people'}</div>
                       </div>
                     </div>
                     {wantsAppointment && (
-                      <div className="mt-6 pt-6 border-t border-white/20">
-                        <div className="text-xs text-gray-200 uppercase tracking-wider mb-2">Office Appointment</div>
-                        <div className="flex items-center gap-2 text-sm text-white">
+                      <div className="mt-6 pt-6 border-t border-gray-300">
+                        <div className="text-xs text-gray-600 uppercase tracking-wider mb-2">Office Appointment</div>
+                        <div className="flex items-center gap-2 text-sm text-gray-900 font-medium">
                           <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                           <span>{new Date(appointmentDate).toLocaleDateString()} at {appointmentTime}</span>
                         </div>
-                        <div className="text-xs text-white/60 mt-1">Purpose: {appointmentPurpose.replace('-', ' ')}</div>
+                        <div className="text-xs text-gray-600 mt-1">Purpose: {appointmentPurpose.replace('-', ' ')}</div>
                       </div>
                     )}
                     {selectedPaymentMethod && (
-                      <div className="mt-6 pt-6 border-t border-white/20">
-                        <div className="text-xs text-white/60 uppercase tracking-wider mb-3">Selected Payment Method</div>
-                        <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-400/30">
+                      <div className="mt-6 pt-6 border-t border-gray-300">
+                        <div className="text-xs text-gray-600 uppercase tracking-wider mb-3">Selected Payment Method</div>
+                        <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl border-2 border-blue-200">
                           <span className="text-3xl">{selectedPaymentMethod.icon}</span>
                           <div className="flex-1">
-                            <div className="font-bold text-white text-lg">{selectedPaymentMethod.name}</div>
-                            <div className="text-sm text-white/70">{selectedPaymentMethod.description}</div>
-                            <div className="mt-2 flex items-center gap-2 text-xs text-white/60">
+                            <div className="font-bold text-gray-900 text-lg">{selectedPaymentMethod.name}</div>
+                            <div className="text-sm text-gray-700">{selectedPaymentMethod.description}</div>
+                            <div className="mt-2 flex items-center gap-2 text-xs text-gray-600 font-medium">
                               <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
@@ -882,13 +882,13 @@ export default function Booking(): JSX.Element {
                         </div>
                       </div>
                     )}
-                    <div className="mt-6 pt-6 border-t border-white/20">
+                    <div className="mt-6 pt-6 border-t border-gray-300">
                       <div className="flex justify-between items-center mb-3">
-                        <div className="text-sm text-white/70">Per person</div>
-                        <div className="font-semibold text-white text-lg">{formatCurrencyPHP(perPerson)}</div>
+                        <div className="text-sm text-gray-700 font-medium">Per person</div>
+                        <div className="font-semibold text-gray-900 text-lg">{formatCurrencyPHP(perPerson)}</div>
                       </div>
                       <div className="flex justify-between items-center">
-                        <div className="text-base text-white font-semibold">Total Amount</div>
+                        <div className="text-base text-gray-900 font-semibold">Total Amount</div>
                         <div className="text-3xl font-bold price-highlight">{formatCurrencyPHP(total)}</div>
                       </div>
                     </div>
@@ -923,8 +923,8 @@ export default function Booking(): JSX.Element {
                       </svg>
                     </div>
                     <div>
-                      <h2 id="confirm-heading" className="text-2xl font-bold text-white">Complete Your Payment</h2>
-                      <p className="text-white/80 text-sm">Secure demo payment - No actual charges will be made</p>
+                      <h2 id="confirm-heading" className="text-2xl font-bold text-gray-900">Complete Your Payment</h2>
+                      <p className="text-gray-700 text-sm">Secure demo payment - No actual charges will be made</p>
                     </div>
                   </div>
 
@@ -973,39 +973,39 @@ export default function Booking(): JSX.Element {
                   {step === 0 && (
                     <section aria-labelledby="review-heading">
                       <div className="flex items-center gap-3 mb-6 section-header">
-                        <div className="p-3 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-xl">
-                          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="p-3 bg-green-100 rounded-xl">
+                          <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                           </svg>
                         </div>
                         <div>
-                          <h2 id="review-heading" className="text-2xl font-bold text-white">Review Your Selection</h2>
-                          <p className="text-white/80 text-sm">Confirm your tour details and travel date</p>
+                          <h2 id="review-heading" className="text-2xl font-bold text-gray-900">Review Your Selection</h2>
+                          <p className="text-gray-700 text-sm">Confirm your tour details and travel date</p>
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div className="info-card form-field">
                           <div className="flex items-start gap-3">
-                            <div className="p-2 bg-blue-500/20 rounded-lg flex-shrink-0">
-                              <svg className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+                              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="text-xs text-white/60 uppercase tracking-wider mb-1">Tour Package</div>
-                              <div className="font-bold text-white text-lg break-words">{tour.title}</div>
-                              <div className="text-sm text-white/80 mt-2">{tour.summary}</div>
+                              <div className="text-xs text-gray-600 uppercase tracking-wider mb-1">Tour Package</div>
+                              <div className="font-bold text-gray-900 text-lg break-words">{tour.title}</div>
+                              <div className="text-sm text-gray-700 mt-2">{tour.summary}</div>
                             </div>
                           </div>
                         </div>
-                        <div className="info-card form-field">
-                          <div className="text-xs text-white/60 uppercase tracking-wider mb-2">Travel Date</div>
+                        <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-5 form-field">
+                          <div className="text-xs text-gray-600 uppercase tracking-wider mb-2">Travel Date</div>
                           <select 
                             value={selectedDate ?? ""} 
                             onChange={(e) => setSelectedDate(e.target.value)} 
-                            className="mt-1 w-full rounded-xl px-4 py-3 bg-white/10 border-2 border-white/20 text-white focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 font-medium"
+                            className="mt-1 w-full rounded-xl px-4 py-3 bg-white border-2 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-medium"
                           >
-                            <option value="" className="bg-slate-800 text-slate-300">Select departure date</option>
+                            <option value="" className="bg-white text-gray-500">Select departure date</option>
                             {tour.departureDates && tour.departureDates.length > 0 ? (
                               tour.departureDates.map((dateRange, index) => {
                                 const value =
@@ -1017,13 +1017,13 @@ export default function Booking(): JSX.Element {
                                     ? dateRange
                                     : `${new Date(dateRange.start).toLocaleDateString()} - ${new Date(dateRange.end).toLocaleDateString()}`;
                                 return (
-                                  <option key={index} value={value} className="bg-slate-800 text-white font-medium">
+                                  <option key={index} value={value} className="bg-white text-gray-900 font-medium">
                                     {label}
                                   </option>
                                 );
                               })
                             ) : tour.travelWindow ? (
-                              <option value={`${tour.travelWindow.start} - ${tour.travelWindow.end}`} className="bg-slate-800 text-white font-medium">
+                              <option value={`${tour.travelWindow.start} - ${tour.travelWindow.end}`} className="bg-white text-gray-900 font-medium">
                                 {`${new Date(tour.travelWindow.start).toLocaleDateString()} - ${new Date(tour.travelWindow.end).toLocaleDateString()}`}
                               </option>
                             ) : (
@@ -1038,23 +1038,23 @@ export default function Booking(): JSX.Element {
                               Please select a departure date to continue
                             </div>
                           )}
-                          <div className="text-xs text-white/60 uppercase tracking-wider mt-4 mb-2">Number of Passengers</div>
+                          <div className="text-xs text-gray-600 uppercase tracking-wider mt-4 mb-2">Number of Passengers</div>
                           <input 
                             type="number" 
                             min={1} 
                             value={passengers} 
                             onChange={(e) => setPassengers(Math.max(1, Number(e.target.value)))} 
-                            className="mt-1 w-full md:w-40 rounded-xl px-4 py-3 bg-white/10 border-2 border-white/20 text-white font-bold text-lg text-center focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20" 
+                            className="mt-1 w-full md:w-40 rounded-xl px-4 py-3 bg-white border-2 border-gray-300 text-gray-900 font-bold text-lg text-center focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" 
                           />
                         </div>
                       </div>
-                      <div className="mt-6 p-5 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl border border-white/20">
+                      <div className="mt-6 p-5 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border-2 border-purple-200">
                         <div className="flex items-center justify-between mb-2">
-                          <div className="text-sm text-white/70">Price per person</div>
-                          <div className="text-xl font-bold text-white">{formatCurrencyPHP(perPerson)}</div>
+                          <div className="text-sm text-gray-700">Price per person</div>
+                          <div className="text-xl font-bold text-gray-900">{formatCurrencyPHP(perPerson)}</div>
                         </div>
-                        <div className="flex items-center justify-between pt-3 border-t border-white/20">
-                          <div className="text-base font-semibold text-white">Total Amount</div>
+                        <div className="flex items-center justify-between pt-3 border-t-2 border-purple-200">
+                          <div className="text-base font-semibold text-gray-900">Total Amount</div>
                           <div className="text-2xl font-bold price-highlight">{formatCurrencyPHP(total)}</div>
                         </div>
                       </div>
@@ -1062,12 +1062,12 @@ export default function Booking(): JSX.Element {
                       {/* Payment Options */}
                       <div className="mt-8 p-6 info-card">
                         <div className="flex items-center gap-3 mb-5">
-                          <div className="p-2 bg-yellow-500/20 rounded-lg">
-                            <svg className="w-6 h-6 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <div className="p-2 bg-yellow-100 rounded-lg">
+                            <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                           </div>
-                          <h3 className="text-xl font-bold text-white">Choose Payment Method</h3>
+                          <h3 className="text-xl font-bold text-gray-900">Choose Payment Method</h3>
                         </div>
                         <div className="space-y-4">
                           <label className="payment-option flex items-start gap-4 cursor-pointer p-4 rounded-xl border-2 border-white/20 hover:border-white/40 transition-all bg-white/5 hover:bg-white/10 group">
@@ -1081,15 +1081,15 @@ export default function Booking(): JSX.Element {
                             />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <svg className="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <div className="text-white font-bold text-lg">Full Payment (Online)</div>
+                                <div className="text-gray-900 font-bold text-lg">Full Payment (Online)</div>
                               </div>
-                              <div className="text-sm text-white/80 break-words">
-                                Pay the complete amount now: <span className="font-bold text-green-300">{formatCurrencyPHP(total)}</span>
+                              <div className="text-sm text-gray-700 break-words">
+                                Pay the complete amount now: <span className="font-bold text-green-600">{formatCurrencyPHP(total)}</span>
                               </div>
-                              <div className="mt-2 text-xs text-white/60">✓ Instant confirmation</div>
+                              <div className="mt-2 text-xs text-gray-600">✓ Instant confirmation</div>
                             </div>
                           </label>
 
@@ -1108,20 +1108,20 @@ export default function Booking(): JSX.Element {
                                 />
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                    <svg className="w-5 h-5 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    <div className="text-white font-bold text-lg">Downpayment (Online Payment)</div>
+                                    <div className="text-gray-900 font-bold text-lg">Downpayment (Online Payment)</div>
                                   </div>
-                                  <div className="text-sm text-white/80">
+                                  <div className="text-sm text-gray-700">
                                     Pay partial amount now, remaining before departure
                                   </div>
-                                  <div className="mt-2 text-xs text-white/60">✓ Flexible payment terms</div>
+                                  <div className="mt-2 text-xs text-gray-600">✓ Flexible payment terms</div>
                                 </div>
                               </label>                              {paymentType === "downpayment" && (
-                                <div className="ml-8 p-4 bg-slate-900/50 rounded-lg space-y-4">
+                                <div className="ml-8 p-4 bg-gray-50 border-2 border-gray-200 rounded-lg space-y-4">
                                   <div>
-                                    <label className="block text-slate-300 text-sm mb-2">Select Payment Terms</label>
+                                    <label className="block text-gray-700 text-sm font-medium mb-2">Select Payment Terms</label>
                                     <div className="grid grid-cols-3 gap-2 mb-3">
                                       {[
                                         { value: "30", label: "30%" },

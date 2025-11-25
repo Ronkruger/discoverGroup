@@ -263,8 +263,8 @@ export default function Profile() {
                       <svg className="w-24 h-24 mx-auto text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                       </svg>
-                      <h3 className="text-xl font-semibold text-white mb-2">No bookings yet</h3>
-                      <p className="text-gray-400 mb-6">Start planning your next adventure by browsing our tour packages</p>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">No bookings yet</h3>
+                      <p className="text-gray-700 mb-6">Start planning your next adventure by browsing our tour packages</p>
                       <Link
                         to="/routes"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
@@ -280,12 +280,12 @@ export default function Profile() {
                       {bookings.map((booking) => (
                         <div 
                           key={booking.id} 
-                          className="bg-white/5 rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-all"
+                          className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:shadow-md transition-all"
                         >
                           <div className="flex justify-between items-start mb-4">
                             <div>
-                              <h3 className="text-xl font-semibold text-white mb-1">{booking.tour.title}</h3>
-                              <p className="text-gray-400 text-sm">Booking ID: {booking.bookingId}</p>
+                              <h3 className="text-xl font-semibold text-gray-900 mb-1">{booking.tour.title}</h3>
+                              <p className="text-gray-600 text-sm">Booking ID: {booking.bookingId}</p>
                             </div>
                             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                               booking.status === 'confirmed' ? 'bg-green-500/20 text-green-300 border border-green-500/30' :
@@ -300,23 +300,23 @@ export default function Profile() {
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
                             <div>
                               <p className="text-gray-400">Travel Date</p>
-                              <p className="text-white font-medium">{new Date(booking.selectedDate).toLocaleDateString()}</p>
+                              <p className="text-gray-900 font-medium">{new Date(booking.selectedDate).toLocaleDateString()}</p>
                             </div>
                             <div>
-                              <p className="text-gray-400">Passengers</p>
-                              <p className="text-white font-medium">{booking.passengers}</p>
+                              <p className="text-gray-600">Passengers</p>
+                              <p className="text-gray-900 font-medium">{booking.passengers}</p>
                             </div>
                             <div>
-                              <p className="text-gray-400">Total Amount</p>
-                              <p className="text-white font-medium">PHP {booking.totalAmount.toLocaleString()}</p>
+                              <p className="text-gray-600">Total Amount</p>
+                              <p className="text-gray-900 font-medium">PHP {booking.totalAmount.toLocaleString()}</p>
                             </div>
                             <div>
-                              <p className="text-gray-400">Payment</p>
-                              <p className="text-white font-medium">{booking.paymentType === 'full' ? 'Full' : 'Downpayment'}</p>
+                              <p className="text-gray-600">Payment</p>
+                              <p className="text-gray-900 font-medium">{booking.paymentType === 'full' ? 'Full' : 'Downpayment'}</p>
                             </div>
                           </div>
 
-                          <div className="pt-4 border-t border-white/10">
+                          <div className="pt-4 border-t border-gray-200">
                             <Link 
                               to={`/tour/${booking.tour.slug}`}
                               className="text-blue-400 hover:text-blue-300 text-sm font-medium inline-flex items-center gap-1"
@@ -338,23 +338,23 @@ export default function Profile() {
             {/* Settings Tab */}
             {activeTab === "settings" && (
               <div className="animate-fade-in">
-                <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl p-8">
-                  <h2 className="text-2xl font-bold text-white mb-6">Account Settings</h2>
+                <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-lg p-8">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Account Settings</h2>
 
                   {/* Email Notifications */}
                   <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">Email Notifications</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Email Notifications</h3>
                     <div className="space-y-3">
-                      <label className="flex items-center justify-between p-4 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10 transition-all">
-                        <span className="text-gray-300">Booking confirmations</span>
+                      <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-all">
+                        <span className="text-gray-700">Booking confirmations</span>
                         <input type="checkbox" defaultChecked className="w-5 h-5 text-blue-600 rounded" />
                       </label>
-                      <label className="flex items-center justify-between p-4 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10 transition-all">
-                        <span className="text-gray-300">Special offers and promotions</span>
+                      <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-all">
+                        <span className="text-gray-700">Special offers and promotions</span>
                         <input type="checkbox" defaultChecked className="w-5 h-5 text-blue-600 rounded" />
                       </label>
-                      <label className="flex items-center justify-between p-4 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10 transition-all">
-                        <span className="text-gray-300">Travel tips and updates</span>
+                      <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-all">
+                        <span className="text-gray-700">Travel tips and updates</span>
                         <input type="checkbox" className="w-5 h-5 text-blue-600 rounded" />
                       </label>
                     </div>
@@ -362,16 +362,16 @@ export default function Profile() {
 
                   {/* Password */}
                   <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">Password</h3>
-                    <button className="px-6 py-3 bg-white/5 text-white rounded-lg hover:bg-white/10 transition-all border border-white/10">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Password</h3>
+                    <button className="px-6 py-3 bg-gray-100 text-gray-900 rounded-lg hover:bg-gray-200 transition-all border-2 border-gray-300 font-medium">
                       Change Password
                     </button>
                   </div>
 
                   {/* Danger Zone */}
-                  <div className="pt-6 border-t border-white/10">
-                    <h3 className="text-lg font-semibold text-red-400 mb-4">Danger Zone</h3>
-                    <button className="px-6 py-3 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-all border border-red-500/30">
+                  <div className="pt-6 border-t border-gray-200">
+                    <h3 className="text-lg font-semibold text-red-600 mb-4">Danger Zone</h3>
+                    <button className="px-6 py-3 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-all border-2 border-red-300 font-medium">
                       Delete Account
                     </button>
                   </div>

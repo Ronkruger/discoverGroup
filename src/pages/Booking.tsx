@@ -536,7 +536,7 @@ export default function Booking(): JSX.Element {
   }
 
   return (
-    <main style={themeStyle} className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 py-12 relative">
+    <main style={themeStyle} className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 relative">
       
       <style>{`
         @keyframes fadeIn {

@@ -379,6 +379,18 @@ export default function TourDetailNew() {
                 Reserve
               </Link>
 
+              {/* Flipbook Link */}
+              {tour.bookingPdfUrl && (
+                <a
+                  href={tour.bookingPdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full border-2 border-gray-900 text-gray-900 font-semibold py-3 rounded-lg transition-all block text-center mb-4 hover:bg-gray-50"
+                >
+                  Open Flipbook
+                </a>
+              )}
+
               <p className="text-center text-sm text-gray-600 mb-4">
                 You won't be charged yet
               </p>

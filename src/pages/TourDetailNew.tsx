@@ -4,7 +4,7 @@ import { fetchTourBySlug } from "../api/tours";
 import type { Tour } from "../types";
 import { 
   MapPin, Users, Clock, Heart, Share2, 
-  Star, ChevronRight, Check
+  Star, ChevronRight, Check, Calendar
 } from "lucide-react";
 import BackToTop from "../components/BackToTop";
 
@@ -13,6 +13,7 @@ export default function TourDetailNew() {
   const [tour, setTour] = useState<Tour | null>(null);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [passengers, setPassengers] = useState(1);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -41,6 +42,28 @@ export default function TourDetailNew() {
   const regularPrice = tour.regularPricePerPerson || 0;
   const promoPrice = tour.promoPricePerPerson;
   const displayPrice = promoPrice && promoPrice < regularPrice ? promoPrice : regularPrice;
+
+  // Format departure dates
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return "";
+    // If looks like a range, return as-is
+    if (/[-–—]/.test(dateStr) && dateStr.split(/[-–—]/).length >= 2) {
+      return dateStr;
+    }
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) {
+      return dateStr;
+    }
+    return d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  // Get departure dates
+  const departureDates = tour.departureDates || [];
+  const hasDepartureDates = departureDates.length > 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -280,26 +303,44 @@ export default function TourDetailNew() {
 
               {/* Dates Selection */}
               <div className="mb-4">
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="border border-gray-300 rounded-lg p-3">
-                    <label className="text-xs font-semibold text-gray-900 block mb-1">
-                      Check-In
+                {hasDepartureDates ? (
+                  <div className="border border-gray-300 rounded-lg p-4">
+                    <label className="text-xs font-semibold text-gray-900 block mb-3 flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      Available Dates
                     </label>
-                    <input
-                      type="date"
-                      className="w-full text-sm text-gray-700 focus:outline-none"
-                    />
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {departureDates.map((date, idx) => {
+                        const dateValue = typeof date === 'string' ? date : JSON.stringify(date);
+                        const displayDateStr = typeof date === 'string' 
+                          ? formatDate(date)
+                          : `${formatDate((date as { start: string; end: string }).start)} - ${formatDate((date as { start: string; end: string }).end)}`;
+                        
+                        return (
+                          <button
+                            key={idx}
+                            onClick={() => setSelectedDate(dateValue)}
+                            className={`w-full text-left px-3 py-2 rounded-lg border transition-all ${
+                              selectedDate === dateValue
+                                ? 'border-gray-900 bg-gray-50 font-semibold'
+                                : 'border-gray-200 hover:border-gray-400 hover:bg-gray-50'
+                            }`}
+                          >
+                            <div className="text-sm text-gray-900">{displayDateStr}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="border border-gray-300 rounded-lg p-3">
-                    <label className="text-xs font-semibold text-gray-900 block mb-1">
-                      Check-Out
+                ) : (
+                  <div className="border border-gray-300 rounded-lg p-4">
+                    <label className="text-xs font-semibold text-gray-900 block mb-2">
+                      <Calendar className="w-4 h-4 inline mr-2" />
+                      Departure Date
                     </label>
-                    <input
-                      type="date"
-                      className="w-full text-sm text-gray-700 focus:outline-none"
-                    />
+                    <p className="text-sm text-gray-600">Contact us for available dates</p>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Guests */}
@@ -329,7 +370,7 @@ export default function TourDetailNew() {
               {/* Reserve Button */}
               <Link
                 to={`/booking/${slug}`}
-                state={{ tour, passengers, perPerson: displayPrice }}
+                state={{ tour, passengers, perPerson: displayPrice, selectedDate }}
                 className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-3 rounded-lg transition-all block text-center mb-4"
               >
                 Reserve

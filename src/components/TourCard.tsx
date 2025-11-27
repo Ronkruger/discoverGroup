@@ -73,7 +73,7 @@ export default function TourCard({
   return (
     <Link 
       to={`/tour/${tour.slug}`}
-      className="group block bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+      className="group block bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 w-full h-[520px] flex flex-col"
       role="article"
       aria-labelledby={`tour-title-${tour.slug}`}
     >
@@ -142,7 +142,7 @@ export default function TourCard({
       </div>
 
       {/* Content Section */}
-      <div className="p-5">
+      <div className="p-5 flex-1 flex flex-col">
         {/* Logo/Brand (if applicable) */}
         {tour.images && tour.images.length > 0 && (
           <div className="flex items-center gap-2 mb-3">
@@ -200,17 +200,17 @@ export default function TourCard({
         </div>
 
         {/* Price Section */}
-        <div>
+        <div className="mt-auto">
           <div className="text-xs text-gray-500 mb-1">From</div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold text-gray-900">
-              ฿{displayPrice?.toLocaleString() || 'N/A'}
+              ₱{displayPrice?.toLocaleString() || 'N/A'}
             </span>
             <span className="text-sm text-gray-500">/night</span>
           </div>
           {originalPrice && (
             <div className="text-xs text-gray-400 line-through mt-1">
-              ฿{originalPrice.toLocaleString()} for 3 nights
+              ₱{originalPrice.toLocaleString()} for 3 nights
             </div>
           )}
         </div>

@@ -21,6 +21,7 @@ import {
   ExternalLink,
   Plus
 } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 
 // Import CustomRoute type
 import type { CustomRoute } from "../types";
@@ -124,6 +125,7 @@ export default function BookingConfirmation(): JSX.Element {
   const location = useLocation();
   const { bookingId: urlBookingId } = useParams<{ bookingId?: string }>();
   const [activeTab, setActiveTab] = useState("details");
+  const { darkMode } = useTheme();
   
   const state = (location.state ?? {}) as {
     bookingId?: string;
@@ -204,23 +206,35 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
 
   if (!bookingId) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center px-6">
+      <div className={`min-h-screen flex items-center justify-center px-6 ${
+        darkMode 
+          ? 'bg-gradient-to-b from-gray-900 to-gray-800' 
+          : 'bg-gradient-to-b from-gray-50 via-gray-100 to-white'
+      }`}>
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/15 rounded-2xl p-8 text-center max-w-lg shadow-2xl"
+          className={`backdrop-blur-md rounded-2xl p-8 text-center max-w-lg shadow-2xl ${
+            darkMode
+              ? 'bg-gradient-to-br from-white/10 to-white/5 border border-white/15'
+              : 'bg-white/80 border border-gray-200'
+          }`}
         >
-          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle2 className="w-8 h-8 text-red-400" />
+          <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
+            darkMode ? 'bg-red-500/20' : 'bg-red-100'
+          }`}>
+            <CheckCircle2 className={`w-8 h-8 ${darkMode ? 'text-red-400' : 'text-red-600'}`} />
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">No Booking Found</h2>
-          <p className="text-slate-300 mb-6">
+          <h2 className={`text-xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+            No Booking Found
+          </h2>
+          <p className={`mb-6 ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
             No booking data available. If you just completed a booking please check your email.
           </p>
           
           <Link 
             to="/" 
-            className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-6 py-3 rounded-lg font-medium transition-all shadow-lg shadow-yellow-500/30"
           >
             Return Home
           </Link>
@@ -230,23 +244,33 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
+    <div className={`min-h-screen ${
+      darkMode 
+        ? 'bg-gradient-to-b from-gray-900 to-gray-800' 
+        : 'bg-gradient-to-b from-gray-50 via-gray-100 to-white'
+    }`}>
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-gray-800/50 to-gray-900/50 backdrop-blur-sm border-b border-white/10">
+      <div className={`backdrop-blur-sm border-b ${
+        darkMode
+          ? 'bg-gradient-to-r from-gray-800/50 to-gray-900/50 border-white/10'
+          : 'bg-white/80 border-gray-200'
+      }`}>
         <div className="container mx-auto px-6 py-16 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center justify-center w-20 h-20 bg-green-500/20 rounded-full mb-6"
+            className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-6 ${
+              darkMode ? 'bg-green-500/20' : 'bg-green-100'
+            }`}
           >
-            <CheckCircle2 className="w-10 h-10 text-green-400" />
+            <CheckCircle2 className={`w-10 h-10 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
           </motion.div>
           
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-4xl md:text-5xl font-bold text-white mb-4"
+            className={`text-4xl md:text-5xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}
           >
             Booking Reservation Confirmed!
           </motion.h1>
@@ -255,7 +279,7 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-xl text-slate-300 max-w-2xl mx-auto mb-4"
+            className={`text-xl max-w-2xl mx-auto mb-4 ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}
           >
             Get ready for an amazing adventure! Your booking is confirmed and we're excited to host you.
           </motion.p>
@@ -266,7 +290,9 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
-              className="flex items-center justify-center gap-2 text-green-400 mb-6"
+              className={`flex items-center justify-center gap-2 mb-6 ${
+                darkMode ? 'text-green-400' : 'text-green-600'
+              }`}
             >
               <Mail size={20} />
               <span>Confirmation email sent to {state.customerEmail}</span>
@@ -282,21 +308,29 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
           >
             <button
               onClick={handleDownloadTicket}
-              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                darkMode
+                  ? 'bg-white/10 hover:bg-white/20 text-white'
+                  : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
+              }`}
             >
               <Download className="w-5 h-5" />
               Download Ticket
             </button>
             <button
               onClick={handleShare}
-              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                darkMode
+                  ? 'bg-white/10 hover:bg-white/20 text-white'
+                  : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
+              }`}
             >
               <Share2 className="w-5 h-5" />
               Share
             </button>
             <button
               onClick={handleAddToCalendar}
-              className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-6 py-3 rounded-lg font-medium transition-all shadow-lg shadow-yellow-500/30"
             >
               <Calendar className="w-5 h-5" />
               Add to Calendar
@@ -311,43 +345,77 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-gradient-to-br from-white/8 to-white/3 backdrop-blur-md border border-white/10 rounded-2xl p-8 mb-8 shadow-2xl"
+          className={`backdrop-blur-md rounded-2xl p-8 mb-8 shadow-2xl ${
+            darkMode
+              ? 'bg-gradient-to-br from-white/8 to-white/3 border border-white/10'
+              : 'bg-white/80 border border-gray-200'
+          }`}
         >
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <h2 className="text-2xl font-bold text-white mb-6">Reservation Details</h2>
+              <h2 className={`text-2xl font-bold mb-6 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                Reservation Details
+              </h2>
               <div className="space-y-4">
                 <div>
-                  <div className="text-slate-400 text-sm mb-1">Booking Reference</div>
-                  <div className="text-white text-xl font-mono bg-white/5 px-3 py-2 rounded">{bookingId}</div>
+                  <div className={`text-sm mb-1 ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>
+                    Booking Reference
+                  </div>
+                  <div className={`text-xl font-mono px-3 py-2 rounded ${
+                    darkMode
+                      ? 'text-white bg-white/5'
+                      : 'text-gray-900 bg-gray-100'
+                  }`}>
+                    {bookingId}
+                  </div>
                 </div>
                 <div>
-                  <div className="text-slate-400 text-sm mb-1">Tour</div>
-                  <div className="text-white text-lg font-semibold">{state.tourTitle}</div>
+                  <div className={`text-sm mb-1 ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>
+                    Tour
+                  </div>
+                  <div className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                    {state.tourTitle}
+                  </div>
                 </div>
                 
                 {/* Custom Routes Display */}
                 {state.customRoutes && state.customRoutes.length > 0 && (
                   <div>
-                    <div className="text-slate-400 text-sm mb-2">Combined Tour Package</div>
+                    <div className={`text-sm mb-2 ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>
+                      Combined Tour Package
+                    </div>
                     <div className="space-y-2">
                       {state.customRoutes.map((route, index) => (
                         <div 
                           key={index}
-                          className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 rounded-lg p-3"
+                          className={`rounded-lg p-3 ${
+                            darkMode
+                              ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30'
+                              : 'bg-gradient-to-r from-purple-100 to-pink-100 border border-purple-300'
+                          }`}
                         >
                           <div className="flex items-start gap-2">
-                            <Plus className="w-4 h-4 text-purple-300 mt-0.5 flex-shrink-0" />
+                            <Plus className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
+                              darkMode ? 'text-purple-300' : 'text-purple-600'
+                            }`} />
                             <div className="flex-1">
-                              <div className="text-purple-100 font-semibold text-sm">{route.tourTitle}</div>
-                              <div className="text-purple-200/80 text-xs mt-1">
+                              <div className={`font-semibold text-sm ${
+                                darkMode ? 'text-purple-100' : 'text-purple-900'
+                              }`}>
+                                {route.tourTitle}
+                              </div>
+                              <div className={`text-xs mt-1 ${
+                                darkMode ? 'text-purple-200/80' : 'text-purple-700'
+                              }`}>
                                 {route.durationDays} days • {route.tourLine} • PHP {route.pricePerPerson.toLocaleString()}/person
                               </div>
                             </div>
                           </div>
                         </div>
                       ))}
-                      <div className="text-slate-300 text-xs mt-2 flex items-center gap-1">
+                      <div className={`text-xs mt-2 flex items-center gap-1 ${
+                        darkMode ? 'text-slate-300' : 'text-gray-600'
+                      }`}>
                         <Star className="w-3 h-3 text-yellow-400" />
                         <span>Combined package includes all routes above</span>
                       </div>
@@ -356,9 +424,11 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
                 )}
                 
                 <div>
-                  <div className="text-slate-400 text-sm mb-1">Destination</div>
-                  <div className="text-white font-medium flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-blue-400" />
+                  <div className={`text-sm mb-1 ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>
+                    Destination
+                  </div>
+                  <div className={`font-medium flex items-center gap-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                    <MapPin className={`w-4 h-4 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                     {state.country}
                   </div>
                 </div>
@@ -366,12 +436,16 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
             </div>
             
             <div>
-              <h2 className="text-2xl font-bold text-white mb-6">Trip Information</h2>
+              <h2 className={`text-2xl font-bold mb-6 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                Trip Information
+              </h2>
               <div className="space-y-4">
                 <div>
-                  <div className="text-slate-400 text-sm mb-1">Travel Date</div>
-                  <div className="text-white font-medium flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-green-400" />
+                  <div className={`text-sm mb-1 ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>
+                    Travel Date
+                  </div>
+                  <div className={`font-medium flex items-center gap-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                    <Calendar className={`w-4 h-4 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
                     {(() => {
                       if (!state.date) return "Date not specified";
                       
@@ -410,23 +484,29 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
                   </div>
                 </div>
                 <div>
-                  <div className="text-slate-400 text-sm mb-1">Passengers</div>
-                  <div className="text-white font-medium flex items-center gap-2">
-                    <Users className="w-4 h-4 text-purple-400" />
+                  <div className={`text-sm mb-1 ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>
+                    Passengers
+                  </div>
+                  <div className={`font-medium flex items-center gap-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                    <Users className={`w-4 h-4 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`} />
                     {state.passengers} {state.passengers === 1 ? 'person' : 'people'}
                   </div>
                 </div>
                 <div>
-                  <div className="text-slate-400 text-sm mb-1">Total Paid</div>
-                  <div className="text-white text-2xl font-bold">
+                  <div className={`text-sm mb-1 ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>
+                    Total Paid
+                  </div>
+                  <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                     PHP {(state.total ?? 0).toLocaleString("en-PH", { minimumFractionDigits: 2 })}
                   </div>
                 </div>
                 {state.appointmentDate && state.appointmentTime && !isNaN(new Date(state.appointmentDate).getTime()) && (
-                  <div className="mt-4 pt-4 border-t border-white/20">
-                    <div className="text-slate-400 text-sm mb-1">Office Appointment Scheduled</div>
-                    <div className="text-white font-medium flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-blue-400" />
+                  <div className={`mt-4 pt-4 border-t ${darkMode ? 'border-white/20' : 'border-gray-300'}`}>
+                    <div className={`text-sm mb-1 ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>
+                      Office Appointment Scheduled
+                    </div>
+                    <div className={`font-medium flex items-center gap-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                      <Calendar className={`w-4 h-4 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                       {new Date(state.appointmentDate).toLocaleDateString('en-US', { 
                         weekday: 'long', 
                         year: 'numeric', 
@@ -435,18 +515,22 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
                       })} at {state.appointmentTime}
                     </div>
                     {state.appointmentPurpose && (
-                      <div className="text-slate-300 text-sm mt-2">
+                      <div className={`text-sm mt-2 ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
                         Purpose: {state.appointmentPurpose.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                       </div>
                     )}
-                    <div className="mt-3 p-3 bg-blue-900/30 border border-blue-700/50 rounded-lg">
-                      <div className="text-blue-200 text-sm">
+                    <div className={`mt-3 p-3 rounded-lg ${
+                      darkMode
+                        ? 'bg-blue-900/30 border border-blue-700/50'
+                        : 'bg-blue-50 border border-blue-200'
+                    }`}>
+                      <div className={`text-sm ${darkMode ? 'text-blue-200' : 'text-blue-800'}`}>
                         <strong>📍 Location:</strong> 123 Travel Avenue, Makati City, Metro Manila
                       </div>
-                      <div className="text-blue-200 text-sm mt-1">
+                      <div className={`text-sm mt-1 ${darkMode ? 'text-blue-200' : 'text-blue-800'}`}>
                         <strong>📞 Contact:</strong> +63 02 8526 8404
                       </div>
-                      <div className="text-blue-300 text-xs mt-2">
+                      <div className={`text-xs mt-2 ${darkMode ? 'text-blue-300' : 'text-blue-700'}`}>
                         Please arrive 10 minutes early. A confirmation email has been sent with directions.
                       </div>
                     </div>
@@ -464,7 +548,11 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
           transition={{ delay: 0.5 }}
           className="mb-8"
         >
-          <div className="flex flex-wrap gap-2 bg-gradient-to-br from-white/8 to-white/3 backdrop-blur-md rounded-xl p-2 border border-white/10">
+          <div className={`flex flex-wrap gap-2 backdrop-blur-md rounded-xl p-2 ${
+            darkMode
+              ? 'bg-gradient-to-br from-white/8 to-white/3 border border-white/10'
+              : 'bg-white/80 border border-gray-200'
+          }`}>
             {[
               { id: 'details', label: 'Next Steps', icon: CheckCircle2 },
               { id: 'itinerary', label: 'Itinerary', icon: Clock },
@@ -475,8 +563,10 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                   activeTab === tab.id
-                    ? 'bg-blue-500 text-white'
-                    : 'text-slate-300 hover:text-white hover:bg-white/10'
+                    ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 shadow-lg shadow-yellow-500/30'
+                    : darkMode
+                      ? 'text-slate-300 hover:text-white hover:bg-white/10'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
                 }`}
               >
                 <tab.icon className="w-4 h-4" />
@@ -501,14 +591,26 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 + index * 0.1 }}
-                  className="bg-gradient-to-br from-white/8 to-white/3 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:from-white/12 hover:to-white/5 transition-all group cursor-pointer shadow-lg"
+                  className={`backdrop-blur-md rounded-xl p-6 transition-all group cursor-pointer shadow-lg ${
+                    darkMode
+                      ? 'bg-gradient-to-br from-white/8 to-white/3 border border-white/10 hover:from-white/12 hover:to-white/5'
+                      : 'bg-white/80 border border-gray-200 hover:bg-white hover:shadow-xl'
+                  }`}
                 >
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <step.icon className="w-6 h-6 text-white" />
+                  <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-yellow-500/30">
+                    <step.icon className="w-6 h-6 text-gray-900" />
                   </div>
-                  <h3 className="text-white font-semibold mb-2">{step.title}</h3>
-                  <p className="text-slate-300 text-sm mb-4">{step.description}</p>
-                  <button className="text-blue-400 text-sm font-medium hover:text-blue-300 transition-colors">
+                  <h3 className={`font-semibold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                    {step.title}
+                  </h3>
+                  <p className={`text-sm mb-4 ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
+                    {step.description}
+                  </p>
+                  <button className={`text-sm font-medium transition-colors ${
+                    darkMode
+                      ? 'text-blue-400 hover:text-blue-300'
+                      : 'text-blue-600 hover:text-blue-700'
+                  }`}>
                     {step.action} →
                   </button>
                 </motion.div>
@@ -517,8 +619,14 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
           )}
 
           {activeTab === 'itinerary' && (
-            <div className="bg-gradient-to-br from-white/8 to-white/3 backdrop-blur-md border border-white/10 rounded-2xl p-8 shadow-2xl">
-              <h3 className="text-2xl font-bold text-white mb-6">Your Day Schedule</h3>
+            <div className={`backdrop-blur-md rounded-2xl p-8 shadow-2xl ${
+              darkMode
+                ? 'bg-gradient-to-br from-white/8 to-white/3 border border-white/10'
+                : 'bg-white/80 border border-gray-200'
+            }`}>
+              <h3 className={`text-2xl font-bold mb-6 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                Your Day Schedule
+              </h3>
               <div className="space-y-6">
                 {sampleItinerary.map((item, index) => (
                   <motion.div
@@ -528,16 +636,30 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
                     transition={{ delay: 0.6 + index * 0.1 }}
                     className="flex gap-4 items-start"
                   >
-                    <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                      <item.icon className="w-6 h-6 text-white" />
+                    <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg flex items-center justify-center shadow-lg shadow-yellow-500/30">
+                      <item.icon className="w-6 h-6 text-gray-900" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <span className="text-blue-400 font-mono font-semibold">{item.time}</span>
-                        <span className="bg-white/10 text-slate-300 text-xs px-2 py-1 rounded">{item.duration}</span>
+                        <span className={`font-mono font-semibold ${
+                          darkMode ? 'text-blue-400' : 'text-blue-600'
+                        }`}>
+                          {item.time}
+                        </span>
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          darkMode
+                            ? 'bg-white/10 text-slate-300'
+                            : 'bg-gray-200 text-gray-700'
+                        }`}>
+                          {item.duration}
+                        </span>
                       </div>
-                      <h4 className="text-white font-semibold mb-1">{item.title}</h4>
-                      <p className="text-slate-300 text-sm">{item.description}</p>
+                      <h4 className={`font-semibold mb-1 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                        {item.title}
+                      </h4>
+                      <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
+                        {item.description}
+                      </p>
                     </div>
                   </motion.div>
                 ))}
@@ -553,13 +675,23 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 + index * 0.1 }}
-                  className="bg-gradient-to-br from-white/8 to-white/3 backdrop-blur-md border border-white/10 rounded-xl p-6 shadow-lg"
+                  className={`backdrop-blur-md rounded-xl p-6 shadow-lg ${
+                    darkMode
+                      ? 'bg-gradient-to-br from-white/8 to-white/3 border border-white/10'
+                      : 'bg-white/80 border border-gray-200'
+                  }`}
                 >
-                  <h3 className="text-white font-semibold mb-4">{rec.title}</h3>
+                  <h3 className={`font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                    {rec.title}
+                  </h3>
                   <ul className="space-y-2">
                     {rec.items.map((item, itemIndex) => (
-                      <li key={itemIndex} className="text-slate-300 text-sm flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                      <li key={itemIndex} className={`text-sm flex items-center gap-2 ${
+                        darkMode ? 'text-slate-300' : 'text-gray-600'
+                      }`}>
+                        <div className={`w-1.5 h-1.5 rounded-full ${
+                          darkMode ? 'bg-blue-400' : 'bg-blue-600'
+                        }`}></div>
                         {item}
                       </li>
                     ))}
@@ -577,19 +709,27 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
           transition={{ delay: 0.8 }}
           className="mt-16 text-center"
         >
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-8">
-            <MessageCircle className="w-12 h-12 text-blue-400 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-white mb-4">Need Help or Have Questions?</h3>
-            <p className="text-slate-300 mb-6 max-w-2xl mx-auto">
+          <div className={`backdrop-blur-sm rounded-lg p-8 ${
+            darkMode
+              ? 'bg-white/5 border border-white/10'
+              : 'bg-white/80 border border-gray-200'
+          }`}>
+            <MessageCircle className={`w-12 h-12 mx-auto mb-4 ${
+              darkMode ? 'text-blue-400' : 'text-blue-600'
+            }`} />
+            <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+              Need Help or Have Questions?
+            </h3>
+            <p className={`mb-6 max-w-2xl mx-auto ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
               Our support team is available 24/7 to assist you. Contact us anytime for help with your booking or travel questions.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <div className="flex items-center gap-2 text-white">
-                <Phone className="w-5 h-5 text-green-400" />
+              <div className={`flex items-center gap-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                <Phone className={`w-5 h-5 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
                 <span className="font-medium">+1 (555) 123-4567</span>
               </div>
-              <div className="flex items-center gap-2 text-white">
-                <Mail className="w-5 h-5 text-blue-400" />
+              <div className={`flex items-center gap-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                <Mail className={`w-5 h-5 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                 <span className="font-medium">support@discovertours.com</span>
               </div>
             </div>
@@ -597,20 +737,28 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <Link 
                 to="/" 
-                className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-6 py-3 rounded-lg font-medium transition-all shadow-lg shadow-yellow-500/30"
               >
                 Return Home
               </Link>
               <Link 
                 to="/routes" 
-                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                  darkMode
+                    ? 'bg-white/10 hover:bg-white/20 text-white'
+                    : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
+                }`}
               >
                 <Plus className="w-5 h-5" />
                 Book Another Tour
               </Link>
               <Link 
                 to="/contact" 
-                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                  darkMode
+                    ? 'bg-white/10 hover:bg-white/20 text-white'
+                    : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
+                }`}
               >
                 <ExternalLink className="w-5 h-5" />
                 Get Support

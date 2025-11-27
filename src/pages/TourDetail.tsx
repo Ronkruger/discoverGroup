@@ -423,8 +423,7 @@ useEffect(() => {
 
   // Inline styles + small CSS for theme variables and transitions
   const themeStyle: React.CSSProperties = {
-    background:
-      "linear-gradient(180deg, rgba(2,18,51,1) 0%, rgba(8,42,102,1) 35%, rgba(4,18,55,1) 100%)",
+    background: "linear-gradient(180deg, rgba(249,250,251,1) 0%, rgba(243,244,246,1) 35%, rgba(255,255,255,1) 100%)",
     ["--accent-yellow" as string]: "#FFD24D",
     ["--accent-yellow-600" as string]: "#FFC107",
     ["--muted-slate" as string]: "#94a3b8",
@@ -435,27 +434,27 @@ useEffect(() => {
     const compactWrapper = compact ? "p-3" : "p-4";
     const compactButtons = compact ? "text-sm px-2 py-1" : "px-3 py-2";
     return (
-      <div className={`${compact ? "w-full" : "w-full"} ${compactWrapper} bg-white card-glass border border-white/8 rounded-lg shadow-lg gradient-border modern-card`}>
-        <div className="text-xs text-slate-500">Launch Offer</div>
+      <div className={`${compact ? "w-full" : "w-full"} ${compactWrapper} bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-lg border border-gray-200 rounded-2xl shadow-xl hover:shadow-2xl transition-all`}>
+        <div className="text-xs text-gray-600 uppercase tracking-wider">Launch Offer</div>
 
         <div className="mt-2 flex items-baseline gap-3">
-          <div className="text-2xl font-bold" style={{ color: "var(--accent-yellow)" }}>
+          <div className="text-3xl font-bold text-gray-900">
             {formatCurrencyPHP(perPersonPrimary ?? 0)}
           </div>
-          <div className="text-xs text-slate-500">per person</div>
+          <div className="text-xs text-gray-600">per person</div>
         </div>
 
         <div className="mt-2 flex items-center gap-2">
           {typeof priceInfo.promo === "number" && (
-            <div className="text-xs text-slate-900 bg-accent-yellow px-2 py-1 rounded">Promo available</div>
+            <div className="text-xs text-gray-900 bg-gradient-to-r from-yellow-400 to-yellow-500 px-3 py-1 rounded-full font-semibold shadow-md">Promo available</div>
           )}
-          <div className="text-xs text-slate-400">· Flexible payment</div>
+          <div className="text-xs text-gray-600">· Flexible payment</div>
         </div>
 
         {/* If a flipbook is provided, show quick access */}
         {tour && tour.bookingPdfUrl && (
           <div className="mt-3">
-            <a href={tour.bookingPdfUrl} target="_blank" rel="noopener noreferrer" className="inline-block text-sm px-3 py-1 bg-white/90 rounded font-semibold smooth-transition hover:bg-white hover:shadow-lg hover:scale-105">
+            <a href={tour.bookingPdfUrl} target="_blank" rel="noopener noreferrer" className="inline-block text-sm px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 border border-gray-300 rounded-xl font-semibold smooth-transition hover:shadow-md">
               Open Flipbook
             </a>
           </div>
@@ -464,13 +463,13 @@ useEffect(() => {
         {compact ? (
           <div className="mt-3 space-y-2">
             <div className="flex gap-2">
-              <button onClick={showAvailableDates} className={`${compactButtons} bg-rose-600 text-white rounded smooth-transition hover:bg-rose-700 hover:shadow-lg hover:scale-105`}>Available Dates</button>
-              <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className={`${compactButtons} border rounded bg-white hover:bg-slate-50 smooth-transition hover:shadow-lg hover:scale-105`}>Customize</Link>
+              <button onClick={showAvailableDates} className={`${compactButtons} bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 rounded-xl font-bold smooth-transition hover:shadow-lg hover:-translate-y-0.5`}>Available Dates</button>
+              <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className={`${compactButtons} border border-gray-300 rounded-xl bg-white text-gray-900 hover:bg-gray-50 smooth-transition hover:shadow-md font-semibold`}>Customize</Link>
             </div>
             <Link
               to={`/booking/${encodeURIComponent(builderSlug)}`}
               state={{ tour, selectedDate, passengers, perPerson: perPersonForTotals }}
-              className="w-full text-center px-3 py-2 bg-accent-yellow text-slate-900 rounded font-semibold block smooth-transition hover:shadow-lg hover:scale-105"
+              className="w-full text-center px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-bold block smooth-transition hover:shadow-lg hover:-translate-y-0.5"
             >
               BOOK NOW
             </Link>
@@ -478,7 +477,7 @@ useEffect(() => {
         ) : (
           <>
             <div className="mt-3 flex gap-2">
-              <button onClick={showAvailableDates} className={`${compactButtons} bg-rose-600 text-white rounded smooth-transition hover:bg-rose-700 hover:shadow-lg hover:scale-105`}>Available Dates</button>
+              <button onClick={showAvailableDates} className={`${compactButtons} bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 rounded-xl font-bold smooth-transition hover:shadow-lg hover:-translate-y-0.5`}>Available Dates</button>
             </div>
           </>
         )}
@@ -486,58 +485,58 @@ useEffect(() => {
         {!compact && (
           <>
             <div className="mt-4">
-              <div className="text-xs text-slate-400">PASSENGERS</div>
+              <div className="text-xs text-gray-600 uppercase tracking-wider">PASSENGERS</div>
               <div className="mt-2 flex items-center gap-2">
-                <button onClick={() => togglePassenger(-1)} className="px-2 py-1 bg-white/6 rounded">−</button>
+                <button onClick={() => togglePassenger(-1)} className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 border border-gray-300 rounded-lg font-semibold transition-all">−</button>
                 <input
                   type="number"
                   min={1}
                   max={10}
                   value={passengers}
                   onChange={(e) => setPassengers(Math.max(1, Math.min(10, Number(e.target.value) || 1)))}
-                  className="w-16 text-black px-2 py-1 rounded border"
+                  className="w-16 text-gray-900 px-2 py-2 rounded-lg border border-gray-300 text-center font-semibold focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
                   aria-label="Number of passengers"
                 />
-                <button onClick={() => togglePassenger(1)} className="px-2 py-1 bg-white/6 rounded">+</button>
-                <div className="ml-auto text-xs text-slate-400">Max 10</div>
+                <button onClick={() => togglePassenger(1)} className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 border border-gray-300 rounded-lg font-semibold transition-all">+</button>
+                <div className="ml-auto text-xs text-gray-600">Max 10</div>
               </div>
             </div>
 
             <div className="mt-4">
               <div className="flex items-center justify-between">
-                <div className="text-xs text-slate-300">PRICE</div>
-                <div className="text-xs text-slate-400">Preview options</div>
+                <div className="text-xs text-gray-600 uppercase tracking-wider">PRICE</div>
+                <div className="text-xs text-gray-600">Preview options</div>
               </div>
 
               <div className="mt-2">
-                <div className="text-lg font-semibold" style={{ color: "var(--accent-yellow)" }}>
-                  {formatCurrencyPHP(perPersonPrimary ?? 0)} <span className="text-xs text-slate-300">per person</span>
+                <div className="text-lg font-bold text-gray-900">
+                  {formatCurrencyPHP(perPersonPrimary ?? 0)} <span className="text-xs text-gray-600">per person</span>
                 </div>
 
                 <div className="mt-2 flex items-center gap-2">
                   {typeof priceInfo.promo === "number" && (
                     <>
-                      <label className="inline-flex items-center gap-2 text-sm text-slate-200">
-                        <input type="checkbox" checked={usePromoForTotals} onChange={(e) => setUsePromoForTotals(e.target.checked)} />
+                      <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                        <input type="checkbox" checked={usePromoForTotals} onChange={(e) => setUsePromoForTotals(e.target.checked)} className="rounded border-gray-300" />
                         Use promo for totals
                       </label>
-                      <div className="text-xs text-slate-300">Promo: <span className="font-semibold">{formatCurrencyPHP(typeof priceInfo.promo === "number" ? priceInfo.promo : 0)}</span></div>
+                      <div className="text-xs text-gray-700">Promo: <span className="font-semibold">{formatCurrencyPHP(typeof priceInfo.promo === "number" ? priceInfo.promo : 0)}</span></div>
                     </>
                   )}
                 </div>
 
                 {passengers > 1 && (
-                  <div className="text-sm font-bold mt-3 text-white">Total: {formatCurrencyPHP(totalForPassengers)}</div>
+                  <div className="text-sm font-bold mt-3 text-gray-900">Total: {formatCurrencyPHP(totalForPassengers)}</div>
                 )}
               </div>
             </div>
 
             <div className="flex gap-2 mt-4">
-              <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className="flex-1 text-center px-3 py-2 bg-accent-yellow text-slate-900 rounded font-semibold smooth-transition hover:shadow-lg hover:scale-105">CUSTOMIZE</Link>
+              <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className="flex-1 text-center px-3 py-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 rounded-xl font-bold smooth-transition hover:shadow-lg hover:-translate-y-0.5">CUSTOMIZE</Link>
               <Link
                 to={`/booking/${encodeURIComponent(builderSlug)}`}
                 state={{ tour, selectedDate, passengers, perPerson: perPersonForTotals }}
-                className="px-3 py-2 border rounded text-sm inline-flex items-center gap-2 bg-white text-slate-900 font-semibold shadow hover:shadow-md smooth-transition hover:scale-105"
+                className="px-3 py-2 border border-gray-300 rounded-xl text-sm inline-flex items-center gap-2 bg-white text-gray-900 font-bold shadow hover:shadow-md smooth-transition hover:-translate-y-0.5"
               >
                 BOOK NOW
               </Link>
@@ -554,7 +553,7 @@ useEffect(() => {
   }
 
   return (
-  <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white" style={themeStyle}>
+  <div className="min-h-screen" style={themeStyle}>
       <style>{`
         .accent-yellow { color: var(--accent-yellow); }
         .bg-accent-yellow { background-color: var(--accent-yellow); }

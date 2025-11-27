@@ -498,7 +498,7 @@ export default function Booking(): JSX.Element {
   }
 
   const themeStyle: React.CSSProperties = {
-    background: "linear-gradient(to bottom, #111827, #1f2937)", // from-gray-900 to-gray-800
+    background: "linear-gradient(180deg, rgba(249,250,251,1) 0%, rgba(243,244,246,1) 35%, rgba(255,255,255,1) 100%)",
     ["--accent-yellow" as string]: "#FFD24D",
     ["--accent-yellow-600" as string]: "#FFC107",
     ["--muted-slate" as string]: "#94a3b8",
@@ -536,7 +536,7 @@ export default function Booking(): JSX.Element {
   }
 
   return (
-    <main style={themeStyle} className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 relative">
+    <main style={themeStyle} className="min-h-screen py-12 relative">
       
       <style>{`
         @keyframes fadeIn {
@@ -565,51 +565,52 @@ export default function Booking(): JSX.Element {
         }
         
         .card-glass {
-          background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
-          backdrop-filter: blur(16px) saturate(150%);
-          border: 1px solid rgba(255,255,255,0.1);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-          color: #ffffff;
+          background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(0,0,0,0.06);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+          color: #1f2937;
           animation: fadeIn 0.6s ease-out;
+          border-radius: 24px;
         }
         .card-glass:hover {
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-          border-color: rgba(255,255,255,0.15);
-          transform: translateY(-2px);
+          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+          border-color: rgba(0,0,0,0.08);
           transition: all 0.3s ease;
+          transform: translateY(-2px);
         }
         .card-glass .text-xs,
         .card-glass .text-sm {
           font-size: 105% !important;
           line-height: 1.5;
-          color: rgba(255,255,255,0.95);
+          color: #4b5563;
         }
         input, select, textarea {
-          background: rgba(255,255,255,0.08);
-          border: 1.5px solid rgba(255,255,255,0.2);
-          color: #ffffff;
-          backdrop-filter: blur(10px);
-          transition: all 0.3s ease;
+          background: rgba(255,255,255,1);
+          border: 1px solid rgba(0,0,0,0.1);
+          color: #1f2937;
+          transition: all 0.25s ease;
+          border-radius: 12px;
         }
         input::placeholder, select::placeholder, textarea::placeholder {
-          color: rgba(255,255,255,0.5);
+          color: rgba(0,0,0,0.4);
         }
         input:focus, select:focus, textarea:focus {
           outline: none;
-          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
-          border-color: rgba(255,255,255,0.4);
-          background: rgba(255,255,255,0.12);
-          transform: scale(1.01);
+          box-shadow: 0 0 0 3px rgba(255, 210, 77, 0.12);
+          border-color: #FFD24D;
+          background: rgba(255,255,255,1);
         }
         .btn-primary {
-          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-          color: white;
+          background: linear-gradient(135deg, #FFD24D 0%, #FFC107 100%);
+          color: #1a202c;
           border: none;
-          box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-          font-weight: 600;
-          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(255, 210, 77, 0.3);
+          font-weight: 700;
+          transition: all 0.25s ease;
           position: relative;
           overflow: hidden;
+          border-radius: 12px;
         }
         .btn-primary::before {
           content: '';
@@ -626,7 +627,7 @@ export default function Booking(): JSX.Element {
         }
         .btn-primary:hover { 
           transform: translateY(-2px); 
-          box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+          box-shadow: 0 6px 20px rgba(255, 210, 77, 0.5);
         }
         .btn-primary:active {
           transform: translateY(0);
@@ -637,26 +638,27 @@ export default function Booking(): JSX.Element {
           transform: none;
         }
         .btn-secondary {
-          background: rgba(255,255,255,0.1);
-          color: #ffffff;
-          border: 1.5px solid rgba(255,255,255,0.3);
-          backdrop-filter: blur(10px);
+          background: rgba(255,255,255,1);
+          color: #1f2937;
+          border: 1px solid rgba(0,0,0,0.1);
           font-weight: 500;
-          transition: all 0.3s ease;
+          transition: all 0.25s ease;
+          border-radius: 12px;
         }
         .btn-secondary:hover {
-          background: rgba(255,255,255,0.15);
-          border-color: rgba(255,255,255,0.4);
-          transform: translateX(-2px);
+          background: rgba(243,244,246,1);
+          border-color: rgba(0,0,0,0.15);
+          transform: translateY(-1px);
         }
         .btn-accent { 
           background: linear-gradient(135deg, #FFD24D, #FFC107); 
           color: #1a202c; 
           font-weight: 700;
-          box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+          box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+          border-radius: 12px;
         }
         .btn-accent:hover {
-          box-shadow: 0 6px 20px rgba(255, 193, 7, 0.6);
+          box-shadow: 0 6px 20px rgba(255, 193, 7, 0.5);
           transform: translateY(-2px);
         }
         .price-highlight { 
@@ -669,16 +671,16 @@ export default function Booking(): JSX.Element {
           background-size: 1000px 100%;
         }
         .step-dot { 
-          background: rgba(255,255,255,0.1); 
-          color: rgba(255,255,255,0.7);
-          border: 2px solid rgba(255,255,255,0.2);
+          background: rgba(0,0,0,0.05); 
+          color: rgba(0,0,0,0.5);
+          border: 2px solid rgba(0,0,0,0.1);
           transition: all 0.3s ease;
         }
         .step-dot.active {
-          background: linear-gradient(135deg, #667eea, #764ba2);
+          background: linear-gradient(135deg, #3b82f6, #2563eb);
           color: white;
-          border-color: #667eea;
-          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
+          border-color: #3b82f6;
+          box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
           transform: scale(1.1);
           animation: scaleIn 0.5s ease-out;
         }
@@ -695,12 +697,18 @@ export default function Booking(): JSX.Element {
           color: #FFC107;
         }
         .info-card {
-          background: rgba(255,255,255,0.08);
-          border: 1px solid rgba(255,255,255,0.15);
-          backdrop-filter: blur(10px);
-          border-radius: 12px;
+          background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));
+          border: 1px solid rgba(0,0,0,0.06);
+          backdrop-filter: blur(8px);
+          border-radius: 16px;
           padding: 1.5rem;
           animation: slideInLeft 0.5s ease-out;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+        .info-card:hover {
+          box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+          transform: translateY(-2px);
+          transition: all 0.25s ease;
         }
         .success-badge {
           background: linear-gradient(135deg, #10b981, #059669);
@@ -713,12 +721,20 @@ export default function Booking(): JSX.Element {
         .payment-option {
           animation: fadeIn 0.4s ease-out;
           animation-fill-mode: both;
+          background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));
+          border: 2px solid rgba(0,0,0,0.08);
+          border-radius: 16px;
+          padding: 1.25rem;
+          cursor: pointer;
+          transition: all 0.25s ease;
         }
         .payment-option:nth-child(1) { animation-delay: 0.1s; }
         .payment-option:nth-child(2) { animation-delay: 0.2s; }
         .payment-option:nth-child(3) { animation-delay: 0.3s; }
         .payment-option:hover {
-          transform: translateX(4px);
+          transform: translateY(-2px);
+          border-color: #FFD24D;
+          box-shadow: 0 6px 20px rgba(255, 210, 77, 0.2);
         }
         .section-header {
           animation: slideInLeft 0.5s ease-out;
@@ -744,14 +760,14 @@ export default function Booking(): JSX.Element {
         
         <div className="max-w-4xl mx-auto">
           <div className="space-y-6">
-            <div className="bg-white border-2 border-gray-200 rounded-2xl p-5 shadow-lg overflow-x-auto">
+            <div className="rounded-3xl card-glass p-5 shadow-sm overflow-x-auto">
               <ProgressIndicator 
                 steps={bookingSteps}
                 currentStep={step + 1}
                 className="mb-0 min-w-max"
               />
             </div>
-            <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 md:p-8 shadow-lg">{/* Step 3: Payment Method Selection */}
+            <div className="rounded-3xl card-glass p-6 md:p-8 shadow-sm">{/* Step 3: Payment Method Selection */}
               {/* Step 3: Payment Method Selection */}
               {step === 3 && paymentType !== "cash-appointment" && (
                 <section aria-labelledby="payment-heading">

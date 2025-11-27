@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Loading from "./components/Loading";
 import React from "react";
+import { useTheme } from "./context/ThemeContext";
 
 
 import Booking from "./pages/Booking";
@@ -29,9 +30,11 @@ const Favorites = lazy(() => import("./pages/Favorites"));
 const WaysToGo = lazy(() => import("./pages/WaysToGo"));
 const Deals = lazy(() => import("./pages/Deals"));
 
-export default function AppRouter() {
+function AppContent() {
+  const { darkMode } = useTheme();
+
   return (
-    <Router>
+    <div className={`${darkMode ? 'dark bg-gray-900 text-white' : 'bg-white text-gray-900'} min-h-screen transition-colors duration-300`}>
       <Header />
       <Suspense fallback={<Loading />}>
         <Routes>
@@ -94,6 +97,14 @@ export default function AppRouter() {
         </Routes>
       </Suspense>
       <Footer />
+    </div>
+  );
+}
+
+export default function AppRouter() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }

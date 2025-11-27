@@ -83,10 +83,10 @@ export default function TourDetailNew() {
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{tour.title}</h1>
-              <div className="flex items-center gap-4 text-sm text-gray-600">
+          <div className="flex flex-col lg:flex-row items-start lg:justify-between gap-4 mb-4">
+            <div className="flex-1 w-full">
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">{tour.title}</h1>
+              <div className="flex flex-wrap items-center gap-2 lg:gap-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
                   <MapPin className="w-4 h-4" />
                   <span>{tour.line || "Multiple Destinations"}</span>
@@ -98,15 +98,15 @@ export default function TourDetailNew() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 lg:gap-3 w-full lg:w-auto">
               <button 
                 onClick={() => setIsWishlisted(!isWishlisted)}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-3 lg:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-red-500 text-red-500' : ''}`} />
                 <span className="text-sm font-medium">Save</span>
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <button className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-3 lg:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                 <Share2 className="w-5 h-5" />
                 <span className="text-sm font-medium">Share</span>
               </button>
@@ -115,9 +115,9 @@ export default function TourDetailNew() {
         </div>
 
         {/* Image Gallery Grid */}
-        <div className="grid grid-cols-4 gap-2 h-[500px] mb-8 rounded-xl overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 h-[300px] lg:h-[500px] mb-8 rounded-xl overflow-hidden">
           {/* Main large image */}
-          <div className="col-span-2 row-span-2 relative group cursor-pointer">
+          <div className="col-span-1 lg:col-span-2 lg:row-span-2 relative group cursor-pointer">
             <img
               src={images[0] || "/image.png"}
               alt={tour.title}
@@ -128,7 +128,7 @@ export default function TourDetailNew() {
           
           {/* Smaller images */}
           {images.slice(1, 5).map((img, idx) => (
-            <div key={idx} className="relative group cursor-pointer">
+            <div key={idx} className="hidden lg:block relative group cursor-pointer">
               <img
                 src={img}
                 alt={`${tour.title} ${idx + 2}`}
@@ -147,17 +147,17 @@ export default function TourDetailNew() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Content - 2 columns */}
-          <div className="col-span-2 space-y-8">
+          <div className="col-span-1 lg:col-span-2 space-y-6 lg:space-y-8">
             {/* Host Info */}
             <div className="border-b pb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-xl lg:text-2xl font-bold text-gray-900">
                     Tour hosted by Discover Group
                   </h2>
-                  <div className="flex items-center gap-4 mt-2 text-gray-600">
+                  <div className="flex flex-wrap items-center gap-2 lg:gap-4 mt-2 text-sm lg:text-base text-gray-600">
                     <div className="flex items-center gap-1">
                       <Users className="w-4 h-4" />
                       <span>2-15 guests</span>
@@ -185,8 +185,8 @@ export default function TourDetailNew() {
 
             {/* What this place offers */}
             <div className="border-b pb-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">What this tour offers</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <h3 className="text-lg lg:text-xl font-bold text-gray-900 mb-4">What this tour offers</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4">
                 {tour.highlights?.slice(0, 6).map((highlight, idx) => (
                   <div key={idx} className="flex items-center gap-3">
                     <Check className="w-5 h-5 text-green-600" />
@@ -218,8 +218,8 @@ export default function TourDetailNew() {
 
             {/* House Rules / Tour Policies */}
             <div className="border-b pb-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Things to know</h3>
-              <div className="grid grid-cols-2 gap-6">
+              <h3 className="text-lg lg:text-xl font-bold text-gray-900 mb-4">Things to know</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-3">Check-in / Departure</h4>
                   <div className="space-y-2 text-sm text-gray-700">
@@ -255,7 +255,7 @@ export default function TourDetailNew() {
                 <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
                 <h3 className="text-xl font-bold text-gray-900">4.8 · 120 reviews</h3>
               </div>
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4 mb-6">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-700">Cleanliness</span>
                   <div className="flex items-center gap-2">
@@ -279,8 +279,8 @@ export default function TourDetailNew() {
           </div>
 
           {/* Right Sidebar - Booking Card */}
-          <div className="col-span-1">
-            <div className="sticky top-24 border border-gray-300 rounded-xl p-6 shadow-xl bg-white">
+          <div className="col-span-1 lg:order-last order-first">
+            <div className="lg:sticky lg:top-24 border border-gray-300 rounded-xl p-4 lg:p-6 shadow-xl bg-white">
               {/* Price */}
               <div className="mb-6">
                 <div className="flex items-baseline gap-2">

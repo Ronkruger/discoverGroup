@@ -9,6 +9,7 @@
     "highlights": ["Paris", "Zurich", "Milan", "Florence", "Rome"],
     "images": ["../image.png"],
     "guaranteedDeparture": true,
+    "bookingPdfUrl": "https://online.fliphtml5.com/example",
     "regularPricePerPerson": 250000,
     "promoPricePerPerson": 160000,
     "allowsDownpayment": true,

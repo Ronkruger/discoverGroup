@@ -289,6 +289,9 @@ export default function TourDetailNew() {
                   </span>
                   <span className="text-gray-600">/ person</span>
                 </div>
+                <p className="text-xs text-gray-600 mt-1">
+                  Total price for {tour.durationDays} day tour
+                </p>
                 {promoPrice && promoPrice < regularPrice && (
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-sm text-gray-500 line-through">
@@ -383,7 +386,7 @@ export default function TourDetailNew() {
               {/* Price Breakdown */}
               <div className="space-y-3 pt-4 border-t">
                 <div className="flex justify-between text-gray-700">
-                  <span className="underline">₱{displayPrice.toLocaleString()} x {passengers} guest{passengers > 1 ? 's' : ''}</span>
+                  <span>₱{displayPrice.toLocaleString()} x {passengers} guest{passengers > 1 ? 's' : ''}</span>
                   <span>₱{(displayPrice * passengers).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-gray-700">

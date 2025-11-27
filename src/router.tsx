@@ -15,7 +15,7 @@ import BookingConfirmation from "./pages/BookingConfirmation";
 // Lazy load pages
 const Home = lazy(() => import("./pages/Home"));
 const RoutesPage = lazy(() => import("./pages/RoutesPage"));
-const TourDetail = lazy(() => import("./pages/TourDetail"));
+const TourDetail = lazy(() => import("./pages/TourDetailNew"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
 const TourBuilder = lazy(() => import("./pages/TourBuilder"));
 const DestinationCountry = lazy(() => import("./pages/DestinationCountry"));

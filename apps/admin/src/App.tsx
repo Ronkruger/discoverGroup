@@ -21,6 +21,7 @@ import HomepageManagement from './pages/HomepageManagement';
 import CountryManagement from './pages/CountryManagement';
 import PromoBannerManagement from './pages/PromoBannerManagement';
 import VisaAssistanceManagement from './pages/VisaAssistanceManagement';
+import ReviewManagement from './pages/ReviewManagement';
 import { UserRole } from "./types/auth";
 
 // Loading component
@@ -137,6 +138,19 @@ const AppRouter: React.FC = () => {
                   allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.VISA_DEPARTMENT]}
                 >
                   <VisaAssistanceManagement />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Reviews Management - Customer Service & Administrator */}
+            <Route
+              path="/reviews"
+              element={
+                <ProtectedRoute 
+                  requiredPermission="canAccessCustomerService"
+                  allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.CSR_DEPARTMENT]}
+                >
+                  <ReviewManagement />
                 </ProtectedRoute>
               }
             />

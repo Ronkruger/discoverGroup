@@ -207,7 +207,36 @@ export async function fetchBookingsByStatus(status: BookingStatus): Promise<Book
   return bookings.filter(booking => booking.status === status);
 }
 
-// Get recent booking for notification
+// Review system integration
+export async function canUserReviewTour(tourSlug: string): Promise<{
+  canReview: boolean;
+  isVerified: boolean;
+  bookingId?: string;
+  reason?: string;
+}> {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return { canReview: false, isVerified: false, reason: 'not_logged_in' };
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/reviews/user/eligibility/${tourSlug}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (response.ok) {
+      return await response.json();
+    }
+    return { canReview: false, isVerified: false, reason: 'api_error' };
+  } catch (error) {
+    console.error('Error checking review eligibility:', error);
+    return { canReview: false, isVerified: false, reason: 'network_error' };
+  }
+}
+
+// Get recent booking notification
 export async function fetchRecentBookingNotification(): Promise<{
   customerName: string;
   tourSlug: string;

@@ -142,3 +142,25 @@ export async function deleteTour(id: string | number): Promise<void> {
     throw new Error(`Failed to delete tour ${id}: ${res.status} ${text}`);
   }
 }
+
+// Fetch available continents
+export async function fetchContinents(): Promise<string[]> {
+  // For now, return hardcoded continents. In the future, this could be an API call.
+  console.log("📍 fetchContinents called");
+  const continents = ["Europe", "Asia", "North America", "South America", "Africa", "Oceania"];
+  console.log("📍 fetchContinents returning:", continents);
+  return continents;
+}
+
+// Fetch countries by continent
+export async function fetchCountriesByContinent(continent: string): Promise<string[]> {
+  const countries: Record<string, string[]> = {
+    "Europe": ["France", "Switzerland", "Italy", "Germany", "Spain", "United Kingdom", "Netherlands", "Austria", "Belgium", "Portugal"],
+    "Asia": ["Thailand", "Vietnam", "Philippines", "Japan", "China", "India", "Indonesia", "Malaysia", "Singapore", "South Korea"],
+    "North America": ["USA", "Canada", "Mexico"],
+    "South America": ["Brazil", "Argentina", "Chile", "Peru", "Colombia", "Ecuador"],
+    "Africa": ["South Africa", "Egypt", "Morocco", "Kenya", "Tanzania"],
+    "Oceania": ["Australia", "New Zealand", "Fiji"]
+  };
+  return countries[continent] || [];
+}

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Continent Loading Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+        .success {
+            color: #008000;
+            font-weight: bold;
+        }
+        .error {
+            color: #cc0000;
+            font-weight: bold;
+        }
+        pre {
+            background: #eee;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Continent Loading Test</h1>
+    <p>This page tests the continent loading functionality independently of the admin interface.</p>
+    
+    <div class="container">
+        <h2>Status</h2>
+        <div id="status" class="loading">Loading...</div>
+    </div>
+    
+    <div class="container">
+        <h2>Continent Data</h2>
+        <pre id="data">Loading...</pre>
+    </div>
+    
+    <div class="container">
+        <h2>Dropdown Test</h2>
+        <select id="continentSelect" disabled>
+            <option value="">Loading continents...</option>
+        </select>
+    </div>
+    
+    <div class="container">
+        <h2>Console Logs</h2>
+        <div id="logs" style="font-family: monospace; font-size: 12px;"></div>
+    </div>
+
+    <script type="module">
+        // Simulate the fetchContinents function
+        async function fetchContinents() {
+            console.log("📍 fetchContinents called");
+            const continents = ["Europe", "Asia", "North America", "South America", "Africa", "Oceania"];
+            console.log("📍 fetchContinents returning:", continents);
+            return continents;
+        }
+
+        // Log interceptor to show logs on page
+        const originalLog = console.log;
+        const originalError = console.error;
+        const logContainer = document.getElementById('logs');
+        
+        function addLogToPage(type, ...args) {
+            const logDiv = document.createElement('div');
+            logDiv.style.color = type === 'error' ? '#cc0000' : '#333';
+            logDiv.textContent = `[${type.toUpperCase()}] ${args.join(' ')}`;
+            logContainer.appendChild(logDiv);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        console.log = (...args) => {
+            originalLog(...args);
+            addLogToPage('log', ...args);
+        };
+        
+        console.error = (...args) => {
+            originalError(...args);
+            addLogToPage('error', ...args);
+        };
+
+        // Test the continent loading
+        async function testContinentLoading() {
+            const statusEl = document.getElementById('status');
+            const dataEl = document.getElementById('data');
+            const selectEl = document.getElementById('continentSelect');
+            
+            try {
+                console.log("🌍 Starting continent loading test...");
+                statusEl.textContent = "Loading continents...";
+                statusEl.className = "loading";
+                
+                const continents = await fetchContinents();
+                
+                console.log("✅ Continents loaded successfully:", continents);
+                statusEl.textContent = `✅ Success! Loaded ${continents.length} continents`;
+                statusEl.className = "success";
+                
+                dataEl.textContent = JSON.stringify(continents, null, 2);
+                
+                // Update select
+                selectEl.innerHTML = '<option value="">🌍 Select Continent</option>';
+                continents.forEach(continent => {
+                    const option = document.createElement('option');
+                    option.value = continent;
+                    option.textContent = continent;
+                    selectEl.appendChild(option);
+                });
+                selectEl.disabled = false;
+                
+            } catch (error) {
+                console.error("❌ Failed to load continents:", error);
+                statusEl.textContent = `❌ Error: ${error.message}`;
+                statusEl.className = "error";
+                dataEl.textContent = error.toString();
+            }
+        }
+
+        // Run the test
+        testContinentLoading();
+    </script>
+</body>
+</html>

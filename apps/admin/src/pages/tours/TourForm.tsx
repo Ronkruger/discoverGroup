@@ -1,7 +1,6 @@
 
 import React, { JSX, useState, useEffect } from "react";
-import { createTour, updateTour, fetchTourById, type Tour } from "../../services/apiClient";
-import { fetchContinents } from "../../../../../src/api/tours";
+import { createTour, updateTour, fetchTourById, fetchContinents, type Tour } from "../../services/apiClient";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Save,
@@ -246,6 +245,12 @@ export default function TourForm(): JSX.Element {
 
   // Continents for dropdown
   const [continents, setContinents] = useState<string[]>([]);
+  
+  // Debug logging for continents state
+  useEffect(() => {
+    console.log("🔍 Continents state updated:", continents);
+  }, [continents]);
+  
   // Sync galleryFields with formData.galleryImages
   useEffect(() => {
     setGalleryFields(formData.galleryImages.length ? formData.galleryImages : [""]);
@@ -264,13 +269,19 @@ export default function TourForm(): JSX.Element {
   useEffect(() => {
     const loadContinents = async () => {
       try {
+        console.log("🌍 Loading continents...");
         const continentsList = await fetchContinents();
+        console.log("✅ Continents loaded:", continentsList);
         setContinents(continentsList);
       } catch (error) {
-        console.error("Failed to fetch continents:", error);
+        console.error("❌ Failed to fetch continents:", error);
+        // Set a fallback list if there's an error
+        setContinents(["Europe", "Asia", "North America"]);
       }
     };
-    loadContinents();
+    
+    // Add a small delay to make the loading state visible during development
+    setTimeout(loadContinents, 100);
   }, []);
 
   // Load existing tour for editing
@@ -567,11 +578,19 @@ export default function TourForm(): JSX.Element {
                   disabled={continents.length === 0}
                 >
                   <option value="">
-                    {continents.length === 0 ? "🔄 Loading continents..." : "🌍 Select Continent"}
+                    {continents.length === 0 
+                      ? "🔄 Loading continents..." 
+                      : `🌍 Select Continent (${continents.length} available)`
+                    }
                   </option>
                   {continents.map((continent: string) => (
                     <option key={continent} value={continent}>
-                      {continent === "Europe" ? "🇪🇺" : continent === "Asia" ? "🌏" : "🌎"} {continent}
+                      {continent === "Europe" ? "🇪🇺" : 
+                       continent === "Asia" ? "🌏" : 
+                       continent === "North America" ? "🌎" :
+                       continent === "South America" ? "🌎" :
+                       continent === "Africa" ? "🌍" :
+                       continent === "Oceania" ? "🌏" : "🌎"} {continent}
                     </option>
                   ))}
                 </select>

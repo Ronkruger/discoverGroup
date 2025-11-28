@@ -11,6 +11,7 @@ import Booking from "./pages/Booking";
 import ViewBookings from "./pages/ViewBookings";
 
 import BookingConfirmation from "./pages/BookingConfirmation";
+import VisaAssistance from "./pages/VisaAssistance";
 
 // Lazy load pages
 const Home = lazy(() => import("./pages/Home"));
@@ -80,6 +81,7 @@ function AppContent() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/ways-to-go" element={<WaysToGo />} />
           <Route path="/deals" element={<Deals />} />
+          <Route path="/visa-assistance" element={<VisaAssistance />} />
 
           {/* Helpful fallback route to display when no route matches (avoids silent console-only warnings) */}
           <Route

@@ -60,9 +60,9 @@ export default function ContactPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-white">
+    <main className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-50 via-purple-50 to-white py-20">
+      <section className="relative bg-gradient-to-br from-yellow-50 via-blue-50 to-white py-16 lg:py-20">
         <div className="absolute inset-0 overflow-hidden">
           <motion.div
             className="absolute top-20 left-10 w-32 h-32 bg-white/5 rounded-full blur-3xl"
@@ -90,8 +90,8 @@ export default function ContactPage() {
             transition={{ duration: 0.6 }}
             className="max-w-3xl mx-auto text-center"
           >
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gray-900">Get in Touch</h1>
-            <p className="text-xl text-gray-700">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-gray-900">Get in Touch</h1>
+            <p className="text-lg lg:text-xl text-gray-700">
               Have questions about our tours? We're here to help you plan your perfect European adventure.
             </p>
           </motion.div>
@@ -108,11 +108,11 @@ export default function ContactPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="card-glass rounded-2xl p-6 hover:shadow-2xl transition-all group"
+                className="bg-white border-2 border-gray-200 rounded-xl p-6 shadow-md hover:shadow-xl transition-all group"
               >
                 <div className="flex flex-col items-center text-center">
                   <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg">
-                    <item.icon className="w-8 h-8 text-white" />
+                    <item.icon className="w-8 h-8 text-gray-900" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
                   {item.details.map((detail, idx) => (

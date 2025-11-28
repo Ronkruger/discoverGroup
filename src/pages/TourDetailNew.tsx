@@ -38,7 +38,7 @@ export default function TourDetailNew() {
     );
   }
 
-  const images = tour.galleryImages || tour.images || [];
+  const images: string[] = (tour.galleryImages || tour.images || []) as string[];
   const regularPrice = tour.regularPricePerPerson || 0;
   const promoPrice = tour.promoPricePerPerson;
   const displayPrice = promoPrice && promoPrice < regularPrice ? promoPrice : regularPrice;

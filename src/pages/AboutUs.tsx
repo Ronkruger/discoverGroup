@@ -178,14 +178,15 @@ export default function AboutUs() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as TabType)}
-                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-semibold transition-all ${
+                className={`flex items-center gap-2 px-4 py-3 md:px-8 md:py-4 rounded-xl font-semibold transition-all text-sm md:text-base ${
                   activeTab === tab.key
                     ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white shadow-lg scale-105'
                     : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-yellow-300 hover:bg-yellow-50'
                 }`}
               >
-                <tab.icon className="w-5 h-5" />
-                {tab.label}
+                <tab.icon className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
               </button>
             ))}
           </div>

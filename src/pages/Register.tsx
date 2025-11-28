@@ -399,7 +399,7 @@ export default function Register() {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="grid md:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                     {/* Full Name */}
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -624,7 +624,7 @@ export default function Register() {
                     )}
                   </motion.div>
 
-                  <div className="grid md:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                     {/* Password */}
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}

@@ -237,15 +237,15 @@ export default function ContactPage() {
           >
             <div className="card-glass rounded-2xl p-6 text-center">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Email Addresses</h3>
-              <div className="flex flex-wrap justify-center gap-4 text-sm">
-                <a href="mailto:inquiry@discovergrp.com" className="text-yellow-600 hover:text-yellow-700 transition-colors flex items-center gap-2 font-medium">
-                  <Mail className="w-4 h-4" />
-                  inquiry@discovergrp.com
+              <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 text-sm">
+                <a href="mailto:inquiry@discovergrp.com" className="text-yellow-600 hover:text-yellow-700 transition-colors flex items-center justify-center gap-2 font-medium break-all">
+                  <Mail className="w-4 h-4 flex-shrink-0" />
+                  <span className="break-all">inquiry@discovergrp.com</span>
                 </a>
-                <span className="text-gray-400">|</span>
-                <a href="mailto:traveldesk@discovergrp.com" className="text-yellow-600 hover:text-yellow-700 transition-colors flex items-center gap-2 font-medium">
-                  <Mail className="w-4 h-4" />
-                  traveldesk@discovergrp.com
+                <span className="text-gray-400 hidden sm:inline">|</span>
+                <a href="mailto:traveldesk@discovergrp.com" className="text-yellow-600 hover:text-yellow-700 transition-colors flex items-center justify-center gap-2 font-medium break-all">
+                  <Mail className="w-4 h-4 flex-shrink-0" />
+                  <span className="break-all">traveldesk@discovergrp.com</span>
                 </a>
               </div>
             </div>

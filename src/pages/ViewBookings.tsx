@@ -437,7 +437,72 @@ export default function ViewBookings() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+              {/* Mobile Card View - Hidden on desktop */}
+              <div className="md:hidden divide-y divide-gray-200">
+                {filteredBookings.map((booking) => (
+                  <div key={booking.id} className="p-4 hover:bg-gray-50 transition-all">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <div className="text-sm font-semibold text-gray-900">{booking.bookingId}</div>
+                        <div className="text-xs text-gray-500">{formatDate(booking.bookingDate)}</div>
+                      </div>
+                      <StatusBadge status={booking.status} />
+                    </div>
+                    
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <span className="font-medium text-gray-700">Customer:</span>
+                        <div className="text-gray-900">{booking.customerName}</div>
+                        <div className="text-gray-500 text-xs">{booking.customerEmail}</div>
+                      </div>
+                      
+                      <div>
+                        <span className="font-medium text-gray-700">Tour:</span>
+                        <div className="text-gray-900">{booking.tour.title}</div>
+                        <div className="text-gray-500 text-xs">{booking.tour.durationDays} days</div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <span className="font-medium text-gray-700 text-xs">Travel Date:</span>
+                          <div className="text-gray-900 text-xs">
+                            {new Date(booking.selectedDate).toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" })}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-700 text-xs">Payment:</span>
+                          <div className="text-gray-900 text-xs">{formatCurrencyPHP(booking.totalAmount)}</div>
+                          <div className="text-gray-500 text-xs">Paid: {formatCurrencyPHP(booking.paidAmount)}</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-3 pt-3 border-t border-gray-200 flex gap-2">
+                      <Link
+                        to={`/booking/confirmation/${booking.id}`}
+                        state={{ booking }}
+                        className="flex-1 text-center text-xs px-3 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-lg font-medium transition-all"
+                      >
+                        View Details
+                      </Link>
+                      <select
+                        value={booking.status}
+                        onChange={(e) => handleStatusChange(booking.bookingId, e.target.value as BookingStatus)}
+                        className="flex-1 text-xs px-2 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                      >
+                        <option value="confirmed">Confirmed</option>
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table View - Hidden on mobile */}
+              <div className="hidden md:block overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gradient-to-r from-gray-100 to-gray-50">
                   <tr>
@@ -528,6 +593,7 @@ export default function ViewBookings() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </div>
 

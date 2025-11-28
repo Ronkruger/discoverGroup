@@ -760,7 +760,7 @@ export default function Booking(): JSX.Element {
         
         <div className="max-w-4xl mx-auto">
           <div className="space-y-6">
-            <div className="rounded-3xl card-glass p-5 shadow-sm overflow-x-auto">
+            <div className="rounded-3xl card-glass p-3 md:p-5 shadow-sm overflow-x-auto">
               <ProgressIndicator 
                 steps={bookingSteps}
                 currentStep={step + 1}
@@ -1138,7 +1138,7 @@ export default function Booking(): JSX.Element {
                                 <div className="ml-8 p-4 bg-gray-50 border-2 border-gray-200 rounded-lg space-y-4">
                                   <div>
                                     <label className="block text-gray-700 text-sm font-medium mb-2">Select Payment Terms</label>
-                                    <div className="grid grid-cols-3 gap-2 mb-3">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
                                       {[
                                         { value: "30", label: "30%" },
                                         { value: "50", label: "50%" },

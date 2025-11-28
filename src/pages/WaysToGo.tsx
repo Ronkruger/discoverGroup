@@ -201,8 +201,8 @@ export default function WaysToGo() {
                   {option.icon}
                 </div>
                 <div className="relative z-10">
-                  <div className="mb-4">{React.cloneElement(option.icon, { className: 'w-16 h-16' })}</div>
-                  <h3 className="text-2xl font-bold mb-2">{option.title}</h3>
+                  <div className="mb-4">{React.cloneElement(option.icon, { className: 'w-12 h-12 sm:w-16 sm:h-16' })}</div>
+                  <h3 className="text-xl sm:text-2xl font-bold mb-2">{option.title}</h3>
                 </div>
               </div>
 

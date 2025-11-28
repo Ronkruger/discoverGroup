@@ -144,19 +144,20 @@ export default function Deals() {
       {/* Deal Type Filter */}
       <section className="bg-white border-b border-gray-200 sticky top-20 z-40 shadow-sm">
         <div className="container mx-auto px-5 py-4">
-          <div className="flex flex-wrap gap-3 justify-center">
+          <div className="flex flex-wrap gap-2 sm:gap-3 justify-center">
             {dealTypes.map((type) => (
               <button
                 key={type.id}
                 onClick={() => setSelectedDealType(type.id)}
-                className={`px-6 py-2 rounded-full font-semibold transition-all flex items-center gap-2 ${
+                className={`px-4 py-2.5 sm:px-6 sm:py-3 rounded-full font-semibold transition-all flex items-center gap-2 text-sm sm:text-base min-h-[44px] ${
                   selectedDealType === type.id
                     ? 'bg-red-600 text-white shadow-lg scale-105'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 {type.icon}
-                {type.label}
+                <span className="hidden sm:inline">{type.label}</span>
+                <span className="sm:hidden">{type.label.split(' ')[0]}</span>
               </button>
             ))}
           </div>

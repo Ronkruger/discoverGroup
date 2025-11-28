@@ -19,7 +19,11 @@ import {
   Star,
   MessageCircle,
   ExternalLink,
-  Plus
+  Plus,
+  Shield,
+  FileCheck,
+  AlertCircle,
+  CheckSquare
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
@@ -140,6 +144,11 @@ export default function BookingConfirmation(): JSX.Element {
     appointmentTime?: string;
     appointmentPurpose?: string;
     customRoutes?: CustomRoute[];
+    visaAssistanceRequested?: boolean;
+    visaDocumentsProvided?: boolean;
+    visaDestinationCountries?: string;
+    visaAssistanceStatus?: string;
+    visaAssistanceNotes?: string;
   };
 
   // Get booking ID from URL parameter or location state
@@ -556,7 +565,8 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
             {[
               { id: 'details', label: 'Next Steps', icon: CheckCircle2 },
               { id: 'itinerary', label: 'Itinerary', icon: Clock },
-              { id: 'recommendations', label: 'Recommendations', icon: Star }
+              { id: 'recommendations', label: 'Recommendations', icon: Star },
+              ...(state.visaAssistanceRequested ? [{ id: 'visa', label: 'Visa Assistance', icon: Shield }] : [])
             ].map(tab => (
               <button
                 key={tab.id}
@@ -698,6 +708,192 @@ Total: PHP ${(state.total ?? 0).toLocaleString()}
                   </ul>
                 </motion.div>
               ))}
+            </div>
+          )}
+
+          {activeTab === 'visa' && state.visaAssistanceRequested && (
+            <div className={`backdrop-blur-md rounded-2xl p-8 shadow-2xl ${
+              darkMode
+                ? 'bg-gradient-to-br from-white/8 to-white/3 border border-white/10'
+                : 'bg-white/80 border border-gray-200'
+            }`}>
+              <div className="flex items-center gap-3 mb-6">
+                <div className={`p-3 rounded-lg ${
+                  darkMode ? 'bg-green-500/20' : 'bg-green-100'
+                }`}>
+                  <Shield className={`w-6 h-6 ${
+                    darkMode ? 'text-green-400' : 'text-green-600'
+                  }`} />
+                </div>
+                <div>
+                  <h3 className={`text-2xl font-bold ${
+                    darkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Visa Assistance Service
+                  </h3>
+                  <p className={`${
+                    darkMode ? 'text-slate-300' : 'text-gray-600'
+                  }`}>
+                    Professional visa support included with your booking
+                  </p>
+                </div>
+              </div>
+
+              {/* Visa Status Card */}
+              <div className={`p-6 rounded-xl mb-6 ${
+                state.visaDocumentsProvided
+                  ? darkMode
+                    ? 'bg-gradient-to-r from-green-900/30 to-emerald-900/30 border border-green-700/50'
+                    : 'bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200'
+                  : darkMode
+                    ? 'bg-gradient-to-r from-yellow-900/30 to-orange-900/30 border border-yellow-700/50'
+                    : 'bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200'
+              }`}>
+                <div className="flex items-start gap-4">
+                  <div className={`p-2 rounded-lg ${
+                    state.visaDocumentsProvided
+                      ? 'bg-green-500/20 text-green-400'
+                      : 'bg-yellow-500/20 text-yellow-500'
+                  }`}>
+                    {state.visaDocumentsProvided ? <CheckSquare className="w-6 h-6" /> : <AlertCircle className="w-6 h-6" />}
+                  </div>
+                  <div className="flex-1">
+                    <div className={`font-semibold mb-2 ${
+                      state.visaDocumentsProvided
+                        ? darkMode ? 'text-green-300' : 'text-green-800'
+                        : darkMode ? 'text-yellow-300' : 'text-yellow-800'
+                    }`}>
+                      {state.visaDocumentsProvided
+                        ? '✅ Visa Documentation Provided'
+                        : '📋 Visa Assistance Processing Required'
+                      }
+                    </div>
+                    <p className={`text-sm ${
+                      state.visaDocumentsProvided
+                        ? darkMode ? 'text-green-200' : 'text-green-700'
+                        : darkMode ? 'text-yellow-200' : 'text-yellow-700'
+                    }`}>
+                      {state.visaDocumentsProvided
+                        ? 'Great! You\'ve provided your visa documentation. Our team will verify everything is in order for your trip.'
+                        : 'Our visa specialist will contact you within 24 hours to guide you through the visa application process.'
+                      }
+                    </p>
+                    {state.visaDestinationCountries && (
+                      <div className={`mt-3 text-sm ${
+                        darkMode ? 'text-slate-300' : 'text-gray-600'
+                      }`}>
+                        <strong>Destination Countries:</strong> {state.visaDestinationCountries}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Service Features */}
+              <div className="grid md:grid-cols-2 gap-6 mb-6">
+                <div className={`p-4 rounded-lg ${
+                  darkMode
+                    ? 'bg-white/5 border border-white/10'
+                    : 'bg-gray-50 border border-gray-200'
+                }`}>
+                  <div className={`flex items-center gap-2 mb-3 ${
+                    darkMode ? 'text-blue-400' : 'text-blue-600'
+                  }`}>
+                    <FileCheck className="w-5 h-5" />
+                    <span className="font-semibold">Documentation Support</span>
+                  </div>
+                  <ul className={`space-y-2 text-sm ${
+                    darkMode ? 'text-slate-300' : 'text-gray-600'
+                  }`}>
+                    <li>• Document requirements checklist</li>
+                    <li>• Visa form completion assistance</li>
+                    <li>• Photo specification guidance</li>
+                    <li>• Supporting documents review</li>
+                  </ul>
+                </div>
+
+                <div className={`p-4 rounded-lg ${
+                  darkMode
+                    ? 'bg-white/5 border border-white/10'
+                    : 'bg-gray-50 border border-gray-200'
+                }`}>
+                  <div className={`flex items-center gap-2 mb-3 ${
+                    darkMode ? 'text-purple-400' : 'text-purple-600'
+                  }`}>
+                    <Calendar className="w-5 h-5" />
+                    <span className="font-semibold">Application Support</span>
+                  </div>
+                  <ul className={`space-y-2 text-sm ${
+                    darkMode ? 'text-slate-300' : 'text-gray-600'
+                  }`}>
+                    <li>• Embassy appointment booking</li>
+                    <li>• Interview preparation guidance</li>
+                    <li>• Application status tracking</li>
+                    <li>• Expedited processing options</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Contact Information */}
+              <div className={`p-6 rounded-xl border-2 border-dashed ${
+                darkMode
+                  ? 'border-blue-500/30 bg-blue-900/10'
+                  : 'border-blue-300 bg-blue-50'
+              }`}>
+                <div className="flex items-center gap-2 mb-4">
+                  <Phone className={`w-5 h-5 ${
+                    darkMode ? 'text-blue-400' : 'text-blue-600'
+                  }`} />
+                  <span className={`font-semibold ${
+                    darkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Visa Assistance Contact
+                  </span>
+                </div>
+                <div className={`space-y-2 text-sm ${
+                  darkMode ? 'text-slate-300' : 'text-gray-600'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    <span>visa@discovergrp.com</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4" />
+                    <span>+63 02 8555 1234 (Visa Hotline)</span>
+                  </div>
+                  <div className={`mt-3 p-3 rounded-lg ${
+                    darkMode ? 'bg-white/5' : 'bg-white'
+                  }`}>
+                    <strong className={darkMode ? 'text-blue-300' : 'text-blue-800'}>
+                      💡 Pro Tip:
+                    </strong>
+                    <span className={`ml-2 ${
+                      darkMode ? 'text-slate-300' : 'text-gray-700'
+                    }`}>
+                      The visa process typically takes 10-15 business days. Start early for peace of mind!
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {state.visaAssistanceNotes && (
+                <div className={`mt-6 p-4 rounded-lg ${
+                  darkMode
+                    ? 'bg-white/5 border border-white/10'
+                    : 'bg-gray-50 border border-gray-200'
+                }`}>
+                  <div className={`text-sm font-semibold mb-2 ${
+                    darkMode ? 'text-slate-200' : 'text-gray-800'
+                  }`}>
+                    Special Instructions:
+                  </div>
+                  <p className={`text-sm ${
+                    darkMode ? 'text-slate-300' : 'text-gray-600'
+                  }`}>
+                    {state.visaAssistanceNotes}
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </motion.div>

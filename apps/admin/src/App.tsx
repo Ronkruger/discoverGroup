@@ -20,6 +20,7 @@ import MapMarkersManagement from './pages/MapMarkersManagement';
 import HomepageManagement from './pages/HomepageManagement';
 import CountryManagement from './pages/CountryManagement';
 import PromoBannerManagement from './pages/PromoBannerManagement';
+import VisaAssistanceManagement from './pages/VisaAssistanceManagement';
 import { UserRole } from "./types/auth";
 
 // Loading component
@@ -135,12 +136,7 @@ const AppRouter: React.FC = () => {
                   requiredPermission="canAccessVisaAssistance"
                   allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.VISA_DEPARTMENT]}
                 >
-                  <div className="p-6">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-4">Visa Assistance</h1>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <p className="text-blue-800">Visa assistance management will be implemented here.</p>
-                    </div>
-                  </div>
+                  <VisaAssistanceManagement />
                 </ProtectedRoute>
               }
             />

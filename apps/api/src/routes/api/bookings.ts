@@ -41,7 +41,12 @@ router.post("/", async (req, res) => {
       appointmentDate,
       appointmentTime,
       appointmentPurpose,
-      customRoutes
+      customRoutes,
+      visaAssistanceRequested,
+      visaDocumentsProvided,
+      visaDestinationCountries,
+      visaAssistanceStatus,
+      visaAssistanceNotes
     } = req.body;
 
     // Note: Tours are served from JSON files, not MongoDB
@@ -72,7 +77,12 @@ router.post("/", async (req, res) => {
       appointmentDate,
       appointmentTime,
       appointmentPurpose,
-      customRoutes: customRoutes || []
+      customRoutes: customRoutes || [],
+      visaAssistanceRequested: visaAssistanceRequested || false,
+      visaDocumentsProvided: visaDocumentsProvided || false,
+      visaDestinationCountries,
+      visaAssistanceStatus: visaAssistanceRequested ? (visaAssistanceStatus || 'pending') : 'not-needed',
+      visaAssistanceNotes
     });
 
     console.log('✅ Booking created successfully:', bookingId);
@@ -95,7 +105,12 @@ router.post("/", async (req, res) => {
         appointmentDate,
         appointmentTime,
         appointmentPurpose,
-        customRoutes: customRoutes || []
+        customRoutes: customRoutes || [],
+        visaAssistanceRequested: visaAssistanceRequested || false,
+        visaDocumentsProvided: visaDocumentsProvided || false,
+        visaDestinationCountries,
+        visaAssistanceStatus: visaAssistanceRequested ? (visaAssistanceStatus || 'pending') : 'not-needed',
+        visaAssistanceNotes
       });
 
       if (emailResult.success) {

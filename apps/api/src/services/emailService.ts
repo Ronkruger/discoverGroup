@@ -44,6 +44,12 @@ interface BookingDetails {
   paymentMethodIcon?: string;
   paymentGateway?: string;
   customRoutes?: CustomRoute[];
+  // Visa assistance fields
+  visaAssistanceRequested?: boolean;
+  visaDocumentsProvided?: boolean;
+  visaDestinationCountries?: string;
+  visaAssistanceStatus?: string;
+  visaAssistanceNotes?: string;
 }
 
 // Create transporter - using Gmail for real email sending
@@ -357,6 +363,12 @@ export const sendBookingConfirmationEmail = async (booking: BookingDetails): Pro
           appointmentTime: booking.appointmentTime,
           appointmentPurpose: formatAppointmentPurpose(booking.appointmentPurpose),
         }),
+        // Visa assistance data
+        visaAssistanceRequested: booking.visaAssistanceRequested || false,
+        visaDocumentsProvided: booking.visaDocumentsProvided || false,
+        visaDestinationCountries: booking.visaDestinationCountries || '',
+        visaAssistanceStatus: booking.visaAssistanceStatus || 'not-needed',
+        tourDestinationCountries: booking.country || booking.tourTitle || 'your destination',
       };
 
       // Get current settings

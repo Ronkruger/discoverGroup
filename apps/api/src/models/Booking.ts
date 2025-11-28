@@ -33,6 +33,12 @@ export interface IBooking extends Document {
   appointmentTime?: string;
   appointmentPurpose?: string;
   customRoutes?: ICustomRoute[]; // Custom routes added to base tour
+  // Visa assistance fields
+  visaAssistanceRequested?: boolean;
+  visaDocumentsProvided?: boolean;
+  visaDestinationCountries?: string;
+  visaAssistanceStatus?: 'pending' | 'in-progress' | 'completed' | 'not-needed';
+  visaAssistanceNotes?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -68,6 +74,16 @@ const BookingSchema = new Schema<IBooking>({
     pricePerPerson: { type: Number, required: true },
     insertAfterDay: { type: Number, required: true }
   }],
+  // Visa assistance fields
+  visaAssistanceRequested: { type: Boolean, default: false },
+  visaDocumentsProvided: { type: Boolean, default: false },
+  visaDestinationCountries: { type: String },
+  visaAssistanceStatus: { 
+    type: String, 
+    enum: ['pending', 'in-progress', 'completed', 'not-needed'],
+    default: 'not-needed'
+  },
+  visaAssistanceNotes: { type: String },
 }, { timestamps: true });
 
 export default mongoose.model<IBooking>('Booking', BookingSchema);

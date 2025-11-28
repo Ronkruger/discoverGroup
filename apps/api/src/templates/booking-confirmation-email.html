@@ -335,6 +335,40 @@
             color: #1e40af;
         }
         
+        .visa-assistance-card {
+            background: linear-gradient(135deg, #ecfccb 0%, #d9f99d 100%);
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 5px solid #65a30d;
+            margin: 25px 0;
+        }
+        
+        .visa-assistance-card h4 {
+            color: #365314;
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .visa-status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .visa-status-needed {
+            background: #fecaca;
+            color: #991b1b;
+        }
+        
+        .visa-status-provided {
+            background: #bbf7d0;
+            color: #166534;
+        }
+        
         @media only screen and (max-width: 600px) {
             .email-container {
                 border-radius: 0;
@@ -492,6 +526,63 @@
                 <p style="margin-top: 15px; color: #92400e; font-size: 14px;">
                     📍 <strong>Office Address:</strong> Quezon Avenue cor. Sct. Reyes St, Diliman, Quezon City, 1103 Metro Manila<br>
                     💰 Please bring <strong>{{totalAmount}}</strong> in cash. Credit/debit cards also accepted at our office.
+                </p>
+            </div>
+            {{/if}}
+            
+            <!-- Visa Assistance Section -->
+            {{#if visaAssistanceRequested}}
+            <div class="visa-assistance-card">
+                <h4>🛂 Visa Assistance Service</h4>
+                <div class="detail-row">
+                    <span class="detail-label">Service Status:</span>
+                    <span class="detail-value">
+                        <strong>Included in your booking</strong>
+                        <span class="visa-status {{#if visaDocumentsProvided}}visa-status-provided{{else}}visa-status-needed{{/if}}">
+                            {{#if visaDocumentsProvided}}✅ Visa Provided{{else}}📋 Assistance Needed{{/if}}
+                        </span>
+                    </span>
+                </div>
+                {{#if visaDestinationCountries}}
+                <div class="detail-row">
+                    <span class="detail-label">Destination Countries:</span>
+                    <span class="detail-value">{{visaDestinationCountries}}</span>
+                </div>
+                {{/if}}
+                {{#unless visaDocumentsProvided}}
+                <div class="detail-row">
+                    <span class="detail-label">Next Steps:</span>
+                    <span class="detail-value">Our visa specialist will contact you within 24 hours</span>
+                </div>
+                <ul style="margin-top: 15px; color: #365314;">
+                    <li>📋 Document requirements checklist will be provided</li>
+                    <li>🏛️ Embassy appointment booking assistance available</li>
+                    <li>📝 Visa form completion help included</li>
+                    <li>💼 Interview preparation guidance offered</li>
+                    <li>⚡ Expedited processing options available</li>
+                </ul>
+                <p style="margin-top: 15px; padding: 12px; background: rgba(34, 197, 94, 0.1); border-radius: 6px; color: #166534; font-size: 14px;">
+                    <strong>💡 Pro Tip:</strong> Start gathering your documents early! The visa process typically takes 10-15 business days, but we're here to make it as smooth as possible.
+                </p>
+                {{else}}
+                <p style="margin-top: 15px; color: #166534; font-size: 14px;">
+                    ✅ <strong>Great news!</strong> You've already provided your visa documentation. Our team will verify everything is in order for your trip.
+                </p>
+                {{/unless}}
+            </div>
+            {{else}}
+            <!-- No Visa Assistance Section -->
+            <div class="visa-assistance-card" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); border-left-color: #6b7280;">
+                <h4 style="color: #374151;">🛂 Visa Information</h4>
+                <div class="detail-row">
+                    <span class="detail-label">Visa Assistance:</span>
+                    <span class="detail-value">Not requested with this booking</span>
+                </div>
+                <p style="margin-top: 15px; color: #4b5563; font-size: 14px;">
+                    <strong>Need visa help?</strong> Our visa specialists are available to assist you even after booking. Contact us at <a href="mailto:visa@discovergrp.com" style="color: #2563eb;">visa@discovergrp.com</a> or call <a href="tel:+6328555123" style="color: #2563eb;">+63 02 8555 1234</a>.
+                </p>
+                <p style="margin-top: 10px; color: #6b7280; font-size: 13px;">
+                    Remember: Ensure your passport is valid for at least 6 months from your travel date, and check if you need a visa for {{tourDestinationCountries}}.
                 </p>
             </div>
             {{/if}}

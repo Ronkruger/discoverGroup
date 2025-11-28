@@ -18,11 +18,25 @@ if ([string]::IsNullOrWhiteSpace($status)) {
 git add -A
 git commit -m $message
 $branch = git branch --show-current
+
+# Push to personal repo
+Write-Host "🚀 Pushing to personal repo..." -ForegroundColor Cyan
 git push origin $branch
 
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "✅ Saved and pushed to $branch" -ForegroundColor Green
-} else {
-    Write-Host "❌ Push failed" -ForegroundColor Red
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ Push to personal repo failed" -ForegroundColor Red
     exit 1
 }
+
+# Push to company repo
+Write-Host "🚀 Pushing to company repo..." -ForegroundColor Cyan
+git push company $branch
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ Push to company repo failed" -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "✅ Saved and pushed to both repos!" -ForegroundColor Green
+Write-Host "   ✅ Personal: Ronkruger/discoverGroup" -ForegroundColor Green
+Write-Host "   ✅ Company: DiscoverGroup/discoverGrp" -ForegroundColor Green

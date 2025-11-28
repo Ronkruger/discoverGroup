@@ -42,21 +42,35 @@ $branch = git branch --show-current
 Write-Host "✅ Committed to $branch" -ForegroundColor Green
 
 # Confirm push
-Write-Host "`n🚀 Push to origin/$branch?" -ForegroundColor Yellow
+Write-Host "`n🚀 Push to both repositories?" -ForegroundColor Yellow
 $confirm = Read-Host "Press Enter to push, or 'n' to skip"
 
 if ($confirm -ne 'n') {
-    Write-Host "Pushing..." -ForegroundColor Cyan
+    # Push to personal repo
+    Write-Host "`nPushing to personal repo (origin/$branch)..." -ForegroundColor Cyan
     git push origin $branch
     
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "`n✅ Successfully pushed to origin/$branch" -ForegroundColor Green
-    } else {
-        Write-Host "`n❌ Push failed" -ForegroundColor Red
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "`n❌ Failed to push to personal repo" -ForegroundColor Red
         exit 1
     }
+    Write-Host "✅ Pushed to personal repo" -ForegroundColor Green
+    
+    # Push to company repo
+    Write-Host "`nPushing to company repo (company/$branch)..." -ForegroundColor Cyan
+    git push company $branch
+    
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "`n❌ Failed to push to company repo" -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "✅ Pushed to company repo" -ForegroundColor Green
+    
+    Write-Host "`n✅ Successfully pushed to both repositories!" -ForegroundColor Green
+    Write-Host "   ✅ Personal: Ronkruger/discoverGroup" -ForegroundColor Green
+    Write-Host "   ✅ Company: DiscoverGroup/discoverGrp" -ForegroundColor Green
 } else {
-    Write-Host "`n⏭️  Skipped push. Run 'git push' manually when ready." -ForegroundColor Yellow
+    Write-Host "`n⏭️  Skipped push. Run 'git push origin main && git push company main' manually when ready." -ForegroundColor Yellow
 }
 
 Write-Host "`n🎉 Done!" -ForegroundColor Green

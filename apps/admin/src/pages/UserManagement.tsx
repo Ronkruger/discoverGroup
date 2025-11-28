@@ -87,19 +87,34 @@ const UserManagement: React.FC = () => {
   );
 
   const calculateAge = (birthDate: string): number => {
+    if (!birthDate) return 0;
+    
     const today = new Date();
     const birth = new Date(birthDate);
+    
+    // Check if birth date is valid
+    if (isNaN(birth.getTime())) return 0;
+    
     let age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
+    
+    // Subtract 1 if birthday hasn't occurred this year yet
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
       age--;
     }
-    return age;
+    
+    // Ensure age is a whole number and non-negative
+    return Math.max(0, Math.floor(age));
   };
 
   const handleBirthDateChange = (birthDate: string) => {
     const age = calculateAge(birthDate);
     setCreateForm(prev => ({ ...prev, birthDate, age }));
+    
+    // Clear any previous error related to age when birth date is updated
+    if (error && error.includes('age')) {
+      setError(null);
+    }
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,6 +129,20 @@ const UserManagement: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    
+    // Validate age before submission
+    if (createForm.age < 18) {
+      setError('User must be at least 18 years old');
+      setIsLoading(false);
+      return;
+    }
+    
+    if (createForm.age > 100) {
+      setError('Invalid birth date - age appears to be over 100 years');
+      setIsLoading(false);
+      return;
+    }
+    
     try {
       await authService.register(createForm);
       setUsers(await authService.getAllUsers(showArchived));
@@ -540,9 +569,9 @@ const UserManagement: React.FC = () => {
                       max="100"
                       required
                       value={createForm.age}
-                      onChange={(e) => setCreateForm(prev => ({ ...prev, age: parseInt(e.target.value) }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Age"
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Auto-calculated from birth date"
                     />
                   </div>
                 </div>
@@ -561,6 +590,9 @@ const UserManagement: React.FC = () => {
                       className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Age will be automatically calculated ({createForm.age} years old)
+                  </p>
                 </div>
 
                 <div>

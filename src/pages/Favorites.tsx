@@ -75,7 +75,7 @@ export default function Favorites() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Loader className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <Loader className="w-12 h-12 animate-spin text-yellow-500 mx-auto mb-4" />
           <p className="text-gray-600">Loading your favorites...</p>
         </div>
       </div>
@@ -89,7 +89,7 @@ export default function Favorites() {
           <p className="text-red-600 mb-4">{error}</p>
           <button 
             onClick={() => window.location.reload()} 
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white rounded-xl hover:from-yellow-500 hover:to-yellow-600 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 font-semibold"
           >
             Try Again
           </button>
@@ -127,7 +127,7 @@ export default function Favorites() {
             </p>
             <Link 
               to="/routes" 
-              className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white rounded-xl hover:from-yellow-500 hover:to-yellow-600 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 font-semibold"
             >
               Explore Tours
             </Link>

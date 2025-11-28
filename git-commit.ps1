@@ -67,17 +67,31 @@ Write-Success "✅ Changes committed."
 $branch = git branch --show-current
 Write-Info "`n🌿 Current branch: $branch"
 
-# Push to remote
-Write-Info "`n🚀 Pushing to origin/$branch..."
+# Push to personal repo (origin)
+Write-Info "`n🚀 Pushing to personal repo (origin/$branch)..."
 git push origin $branch
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Error "❌ Failed to push to remote."
+    Write-Error "❌ Failed to push to personal repo."
     Write-Warning "⚠️  Changes are committed locally but not pushed."
     Write-Info "💡 You can manually push later with: git push origin $branch"
     exit 1
 }
+Write-Success "✅ Pushed to personal repo (Ronkruger/discoverGroup)"
 
-Write-Success "`n✅ Successfully pushed to origin/$branch"
-Write-Info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-Write-Success "🎉 All done!"
+# Push to company repo
+Write-Info "`n🚀 Pushing to company repo (company/$branch)..."
+git push company $branch
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "❌ Failed to push to company repo."
+    Write-Warning "⚠️  Changes pushed to personal repo but not company repo."
+    Write-Info "💡 You can manually push later with: git push company $branch"
+    exit 1
+}
+Write-Success "✅ Pushed to company repo (DiscoverGroup/discoverGrp)"
+
+Write-Info "`n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+Write-Success "🎉 All done! Pushed to both repositories:"
+Write-Success "   ✅ Personal: Ronkruger/discoverGroup"
+Write-Success "   ✅ Company: DiscoverGroup/discoverGrp"

@@ -60,9 +60,9 @@ export default function ContactPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
+    <main className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-900 via-blue-700 to-blue-500 text-white py-20">
+      <section className="relative bg-gradient-to-br from-yellow-50 via-blue-50 to-white py-16 lg:py-20">
         <div className="absolute inset-0 overflow-hidden">
           <motion.div
             className="absolute top-20 left-10 w-32 h-32 bg-white/5 rounded-full blur-3xl"
@@ -90,8 +90,8 @@ export default function ContactPage() {
             transition={{ duration: 0.6 }}
             className="max-w-3xl mx-auto text-center"
           >
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">Get in Touch</h1>
-            <p className="text-xl text-blue-100">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-gray-900">Get in Touch</h1>
+            <p className="text-lg lg:text-xl text-gray-700">
               Have questions about our tours? We're here to help you plan your perfect European adventure.
             </p>
           </motion.div>
@@ -108,17 +108,17 @@ export default function ContactPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="card-glass rounded-2xl p-6 hover:shadow-2xl transition-all group"
+                className="bg-white border-2 border-gray-200 rounded-xl p-6 shadow-md hover:shadow-xl transition-all group"
               >
                 <div className="flex flex-col items-center text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <item.icon className="w-8 h-8 text-white" />
+                  <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg">
+                    <item.icon className="w-8 h-8 text-gray-900" />
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
                   {item.details.map((detail, idx) => (
-                    <p key={idx} className="text-slate-300 text-sm">
+                    <p key={idx} className="text-gray-600 text-sm">
                       {item.action && idx === 0 ? (
-                        <a href={item.action} className="hover:text-blue-400 transition-colors">
+                        <a href={item.action} className="hover:text-yellow-600 transition-colors font-medium">
                           {detail}
                         </a>
                       ) : (
@@ -134,7 +134,7 @@ export default function ContactPage() {
       </section>
 
       {/* Department Contact Details */}
-      <section className="py-12 bg-gradient-to-b from-gray-800 to-gray-900">
+      <section className="py-12 bg-white">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -143,8 +143,8 @@ export default function ContactPage() {
             viewport={{ once: true }}
             className="text-center mb-10"
           >
-            <h2 className="text-3xl font-bold text-white mb-3">Contact by Department</h2>
-            <p className="text-slate-300">Reach out to the right team for your needs</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">Contact by Department</h2>
+            <p className="text-gray-600">Reach out to the right team for your needs</p>
           </motion.div>
 
           <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-6">
@@ -157,19 +157,19 @@ export default function ContactPage() {
               className="card-glass rounded-2xl p-6 hover:shadow-2xl transition-all"
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center shadow-lg">
                   <Users className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-white">Sales</h3>
+                <h3 className="text-xl font-semibold text-gray-900">Sales</h3>
               </div>
-              <div className="space-y-2 text-sm text-slate-300">
-                <a href="tel:09956743860" className="block hover:text-blue-400 transition-colors">
+              <div className="space-y-2 text-sm text-gray-700">
+                <a href="tel:09956743860" className="block hover:text-yellow-600 transition-colors font-medium">
                   📞 0995-674-3860
                 </a>
-                <a href="tel:09193946919" className="block hover:text-blue-400 transition-colors">
+                <a href="tel:09193946919" className="block hover:text-yellow-600 transition-colors font-medium">
                   📞 0919-394-6919
                 </a>
-                <a href="tel:09624402835" className="block hover:text-blue-400 transition-colors">
+                <a href="tel:09624402835" className="block hover:text-yellow-600 transition-colors font-medium">
                   📞 0962-440-2835
                 </a>
               </div>
@@ -184,19 +184,19 @@ export default function ContactPage() {
               className="card-glass rounded-2xl p-6 hover:shadow-2xl transition-all"
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center shadow-lg">
                   <FileText className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-white">Visa</h3>
+                <h3 className="text-xl font-semibold text-gray-900">Visa</h3>
               </div>
-              <div className="space-y-2 text-sm text-slate-300">
-                <a href="tel:09603123656" className="block hover:text-blue-400 transition-colors">
+              <div className="space-y-2 text-sm text-gray-700">
+                <a href="tel:09603123656" className="block hover:text-yellow-600 transition-colors font-medium">
                   📞 0960-312-3656
                 </a>
-                <a href="tel:09623736463" className="block hover:text-blue-400 transition-colors">
+                <a href="tel:09623736463" className="block hover:text-yellow-600 transition-colors font-medium">
                   📞 0962-373-6463
                 </a>
-                <a href="tel:09623736465" className="block hover:text-blue-400 transition-colors">
+                <a href="tel:09623736465" className="block hover:text-yellow-600 transition-colors font-medium">
                   📞 0962-373-6465
                 </a>
               </div>
@@ -211,16 +211,16 @@ export default function ContactPage() {
               className="card-glass rounded-2xl p-6 hover:shadow-2xl transition-all"
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center shadow-lg">
                   <Headphones className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-white">Customer Relations</h3>
+                <h3 className="text-xl font-semibold text-gray-900">Customer Relations</h3>
               </div>
-              <div className="space-y-2 text-sm text-slate-300">
-                <a href="tel:09616052958" className="block hover:text-blue-400 transition-colors">
+              <div className="space-y-2 text-sm text-gray-700">
+                <a href="tel:09616052958" className="block hover:text-yellow-600 transition-colors font-medium">
                   📞 0961-605-2958
                 </a>
-                <a href="tel:09687374685" className="block hover:text-blue-400 transition-colors">
+                <a href="tel:09687374685" className="block hover:text-yellow-600 transition-colors font-medium">
                   📞 0968-737-4685
                 </a>
               </div>
@@ -236,16 +236,16 @@ export default function ContactPage() {
             className="max-w-3xl mx-auto mt-8"
           >
             <div className="card-glass rounded-2xl p-6 text-center">
-              <h3 className="text-lg font-semibold text-white mb-4">Email Addresses</h3>
-              <div className="flex flex-wrap justify-center gap-4 text-sm">
-                <a href="mailto:inquiry@discovergrp.com" className="text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  inquiry@discovergrp.com
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Email Addresses</h3>
+              <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 text-sm">
+                <a href="mailto:inquiry@discovergrp.com" className="text-yellow-600 hover:text-yellow-700 transition-colors flex items-center justify-center gap-2 font-medium break-all">
+                  <Mail className="w-4 h-4 flex-shrink-0" />
+                  <span className="break-all">inquiry@discovergrp.com</span>
                 </a>
-                <span className="text-slate-500">|</span>
-                <a href="mailto:traveldesk@discovergrp.com" className="text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  traveldesk@discovergrp.com
+                <span className="text-gray-400 hidden sm:inline">|</span>
+                <a href="mailto:traveldesk@discovergrp.com" className="text-yellow-600 hover:text-yellow-700 transition-colors flex items-center justify-center gap-2 font-medium break-all">
+                  <Mail className="w-4 h-4 flex-shrink-0" />
+                  <span className="break-all">traveldesk@discovergrp.com</span>
                 </a>
               </div>
             </div>
@@ -260,7 +260,7 @@ export default function ContactPage() {
             className="max-w-3xl mx-auto mt-6"
           >
             <div className="card-glass rounded-2xl p-6">
-              <h3 className="text-lg font-semibold text-white mb-4 text-center">Follow Us</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Follow Us</h3>
               <div className="flex justify-center gap-6">
                 <a 
                   href="https://www.facebook.com/discovergrp" 
@@ -296,8 +296,8 @@ export default function ContactPage() {
               transition={{ duration: 0.6 }}
               className="text-center mb-12"
             >
-              <h2 className="text-4xl font-bold text-white mb-4">Send Us a Message</h2>
-              <p className="text-slate-300">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">Send Us a Message</h2>
+              <p className="text-gray-600">
                 Fill out the form below and our team will get back to you within 24 hours.
               </p>
             </motion.div>
@@ -322,7 +322,7 @@ export default function ContactPage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="name" className="block text-white font-semibold mb-2">
+                    <label htmlFor="name" className="block text-gray-700 font-semibold mb-2">
                       Full Name *
                     </label>
                     <input
@@ -332,12 +332,12 @@ export default function ContactPage() {
                       onChange={handleChange}
                       required
                       placeholder="John Doe"
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 transition-all"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-400/50 transition-all"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="block text-white font-semibold mb-2">
+                    <label htmlFor="email" className="block text-gray-700 font-semibold mb-2">
                       Email Address *
                     </label>
                     <input
@@ -348,14 +348,14 @@ export default function ContactPage() {
                       onChange={handleChange}
                       required
                       placeholder="john@example.com"
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 transition-all"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-400/50 transition-all"
                     />
                   </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="phone" className="block text-white font-semibold mb-2">
+                    <label htmlFor="phone" className="block text-gray-700 font-semibold mb-2">
                       Phone Number
                     </label>
                     <input
@@ -365,12 +365,12 @@ export default function ContactPage() {
                       value={formData.phone}
                       onChange={handleChange}
                       placeholder="+1 (555) 000-0000"
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 transition-all"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-400/50 transition-all"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="subject" className="block text-white font-semibold mb-2">
+                    <label htmlFor="subject" className="block text-gray-700 font-semibold mb-2">
                       Subject *
                     </label>
                     <select
@@ -379,20 +379,20 @@ export default function ContactPage() {
                       value={formData.subject}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 transition-all"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-400/50 transition-all"
                     >
-                      <option value="" className="bg-gray-800">Select a subject</option>
-                      <option value="booking" className="bg-gray-800">Tour Booking Inquiry</option>
-                      <option value="custom" className="bg-gray-800">Custom Tour Request</option>
-                      <option value="general" className="bg-gray-800">General Question</option>
-                      <option value="support" className="bg-gray-800">Customer Support</option>
-                      <option value="feedback" className="bg-gray-800">Feedback</option>
+                      <option value="" className="bg-white text-gray-500">Select a subject</option>
+                      <option value="booking" className="bg-white text-gray-900">Tour Booking Inquiry</option>
+                      <option value="custom" className="bg-white text-gray-900">Custom Tour Request</option>
+                      <option value="general" className="bg-white text-gray-900">General Question</option>
+                      <option value="support" className="bg-white text-gray-900">Customer Support</option>
+                      <option value="feedback" className="bg-white text-gray-900">Feedback</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="message" className="block text-white font-semibold mb-2">
+                  <label htmlFor="message" className="block text-gray-700 font-semibold mb-2">
                     Your Message *
                   </label>
                   <textarea
@@ -403,14 +403,14 @@ export default function ContactPage() {
                     onChange={handleChange}
                     required
                     placeholder="Tell us about your travel plans or questions..."
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 transition-all resize-none"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-400/50 transition-all resize-none"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-semibold rounded-xl hover:from-yellow-500 hover:to-yellow-600 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <>
@@ -431,7 +431,7 @@ export default function ContactPage() {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="py-20 bg-gradient-to-b from-gray-800 to-gray-900">
+      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -440,7 +440,7 @@ export default function ContactPage() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto text-center"
           >
-            <h2 className="text-3xl font-bold text-white mb-6">Why Choose Discover Group?</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Why Choose Discover Group?</h2>
             <div className="grid md:grid-cols-3 gap-8 mt-12">
               {[
                 {
@@ -464,8 +464,8 @@ export default function ContactPage() {
                   viewport={{ once: true }}
                   className="card-glass rounded-xl p-6"
                 >
-                  <h3 className="text-xl font-semibold text-white mb-3">{item.title}</h3>
-                  <p className="text-slate-300">{item.description}</p>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">{item.title}</h3>
+                  <p className="text-gray-600">{item.description}</p>
                 </motion.div>
               ))}
             </div>

@@ -280,21 +280,21 @@ export default function ViewBookings() {
   const pendingCount = filteredBookings.filter(b => b.status === "pending").length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
+    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, rgba(249,250,251,1) 0%, rgba(243,244,246,1) 35%, rgba(255,255,255,1) 100%)" }}>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">View Bookings</h1>
-              <p className="text-gray-600">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">My Bookings</h1>
+              <p className="text-gray-700">
                 {currentUserEmail ? `Showing bookings for ${currentUserEmail}` : "Manage and track all tour bookings"}
               </p>
             </div>
             <div className="flex gap-3">
               <Link
                 to="/routes"
-                className="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium"
+                className="inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-gray-900 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all font-medium shadow-sm hover:shadow-md"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -303,7 +303,7 @@ export default function ViewBookings() {
               </Link>
               <button
                 onClick={loadBookings}
-                className="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+                className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all font-medium shadow-sm hover:shadow-md"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -312,7 +312,7 @@ export default function ViewBookings() {
               </button>
               <button
                 onClick={exportToCSV}
-                className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 rounded-xl hover:from-yellow-500 hover:to-yellow-600 transition-all font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -331,7 +331,7 @@ export default function ViewBookings() {
         )}
 
         {/* Filters and Search */}
-        <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl p-6 mb-6">
+        <div className="bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-lg border border-gray-200 rounded-3xl shadow-lg p-6 mb-6 hover:shadow-xl transition-shadow">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Search */}
             <div>
@@ -344,7 +344,7 @@ export default function ViewBookings() {
                 placeholder="Email, name, or booking ID..."
                 value={searchEmail}
                 onChange={(e) => setSearchEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition-all shadow-sm"
               />
             </div>
 
@@ -357,13 +357,13 @@ export default function ViewBookings() {
                 id="status-filter"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as BookingStatus | "all")}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition-all shadow-sm"
               >
-                <option value="all">All Statuses</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="pending">Pending</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="all" className="text-gray-900">All Statuses</option>
+                <option value="confirmed" className="text-gray-900">Confirmed</option>
+                <option value="pending" className="text-gray-900">Pending</option>
+                <option value="completed" className="text-gray-900">Completed</option>
+                <option value="cancelled" className="text-gray-900">Cancelled</option>
               </select>
             </div>
 
@@ -376,11 +376,11 @@ export default function ViewBookings() {
                 id="sort-by"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as "date" | "amount" | "status")}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition-all shadow-sm"
               >
-                <option value="date">Booking Date</option>
-                <option value="amount">Total Amount</option>
-                <option value="status">Status</option>
+                <option value="date" className="text-gray-900">Booking Date</option>
+                <option value="amount" className="text-gray-900">Total Amount</option>
+                <option value="status" className="text-gray-900">Status</option>
               </select>
             </div>
 
@@ -393,10 +393,10 @@ export default function ViewBookings() {
                 id="sort-order"
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition-all shadow-sm"
               >
-                <option value="desc">Newest First</option>
-                <option value="asc">Oldest First</option>
+                <option value="desc" className="text-gray-900">Newest First</option>
+                <option value="asc" className="text-gray-900">Oldest First</option>
               </select>
             </div>
           </div>
@@ -404,22 +404,22 @@ export default function ViewBookings() {
 
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-lg border p-4">
-            <div className="text-2xl font-bold text-blue-600">{totalCount}</div>
-            <div className="text-sm text-gray-600">Total Bookings</div>
+          <div className="bg-gradient-to-br from-white/95 to-white/90 rounded-2xl border border-gray-200 p-6 shadow-md hover:shadow-xl transition-all hover:-translate-y-1">
+            <div className="text-3xl font-bold text-gray-900">{totalCount}</div>
+            <div className="text-sm text-gray-600 font-medium mt-1">Total Bookings</div>
           </div>
-          <div className="bg-white rounded-lg border p-4">
-            <div className="text-2xl font-bold text-green-600">{confirmedCount}</div>
-            <div className="text-sm text-gray-600">Confirmed</div>
+          <div className="bg-gradient-to-br from-white/95 to-white/90 rounded-2xl border border-gray-200 p-6 shadow-md hover:shadow-xl transition-all hover:-translate-y-1">
+            <div className="text-3xl font-bold text-green-600">{confirmedCount}</div>
+            <div className="text-sm text-gray-600 font-medium mt-1">Confirmed</div>
           </div>
-          <div className="bg-white rounded-lg border p-4">
-            <div className="text-2xl font-bold text-yellow-600">{pendingCount}</div>
-            <div className="text-sm text-gray-600">Pending</div>
+          <div className="bg-gradient-to-br from-white/95 to-white/90 rounded-2xl border border-gray-200 p-6 shadow-md hover:shadow-xl transition-all hover:-translate-y-1">
+            <div className="text-3xl font-bold text-orange-600">{pendingCount}</div>
+            <div className="text-sm text-gray-600 font-medium mt-1">Pending</div>
           </div>
         </div>
 
         {/* Bookings Table */}
-        <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+        <div className="bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-lg border border-gray-200 rounded-3xl shadow-xl overflow-hidden">
           {filteredBookings.length === 0 ? (
             <div className="p-8 text-center">
               <div className="text-gray-400 mb-4">
@@ -437,22 +437,87 @@ export default function ViewBookings() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+              {/* Mobile Card View - Hidden on desktop */}
+              <div className="md:hidden divide-y divide-gray-200">
+                {filteredBookings.map((booking) => (
+                  <div key={booking.id} className="p-4 hover:bg-gray-50 transition-all">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <div className="text-sm font-semibold text-gray-900">{booking.bookingId}</div>
+                        <div className="text-xs text-gray-500">{formatDate(booking.bookingDate)}</div>
+                      </div>
+                      <StatusBadge status={booking.status} />
+                    </div>
+                    
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <span className="font-medium text-gray-700">Customer:</span>
+                        <div className="text-gray-900">{booking.customerName}</div>
+                        <div className="text-gray-500 text-xs">{booking.customerEmail}</div>
+                      </div>
+                      
+                      <div>
+                        <span className="font-medium text-gray-700">Tour:</span>
+                        <div className="text-gray-900">{booking.tour.title}</div>
+                        <div className="text-gray-500 text-xs">{booking.tour.durationDays} days</div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <span className="font-medium text-gray-700 text-xs">Travel Date:</span>
+                          <div className="text-gray-900 text-xs">
+                            {new Date(booking.selectedDate).toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" })}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-700 text-xs">Payment:</span>
+                          <div className="text-gray-900 text-xs">{formatCurrencyPHP(booking.totalAmount)}</div>
+                          <div className="text-gray-500 text-xs">Paid: {formatCurrencyPHP(booking.paidAmount)}</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-3 pt-3 border-t border-gray-200 flex gap-2">
+                      <Link
+                        to={`/booking/confirmation/${booking.id}`}
+                        state={{ booking }}
+                        className="flex-1 text-center text-xs px-3 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-lg font-medium transition-all"
+                      >
+                        View Details
+                      </Link>
+                      <select
+                        value={booking.status}
+                        onChange={(e) => handleStatusChange(booking.bookingId, e.target.value as BookingStatus)}
+                        className="flex-1 text-xs px-2 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                      >
+                        <option value="confirmed">Confirmed</option>
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table View - Hidden on mobile */}
+              <div className="hidden md:block overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-800/80">
+                <thead className="bg-gradient-to-r from-gray-100 to-gray-50">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Booking ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tour</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Travel Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Booking ID</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Customer</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Tour</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Travel Date</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Payment</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-gray-900/50 divide-y divide-white/10">
+                <tbody className="bg-white divide-y divide-gray-200">
                   {filteredBookings.map((booking) => (
-                    <tr key={booking.id} className="hover:bg-white/5 transition-colors">
+                    <tr key={booking.id} className="hover:bg-gray-50 transition-all hover:shadow-md">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="text-sm font-medium text-gray-900">{booking.bookingId}</div>
@@ -491,12 +556,12 @@ export default function ViewBookings() {
                         <select
                           value={booking.status}
                           onChange={(e) => handleStatusChange(booking.bookingId, e.target.value as BookingStatus)}
-                          className="ml-2 text-xs px-2 py-1 rounded border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="ml-2 text-xs px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition-all shadow-sm hover:shadow-md"
                         >
-                          <option value="confirmed">Confirmed</option>
-                          <option value="pending">Pending</option>
-                          <option value="completed">Completed</option>
-                          <option value="cancelled">Cancelled</option>
+                          <option value="confirmed" className="text-gray-900">Confirmed</option>
+                          <option value="pending" className="text-gray-900">Pending</option>
+                          <option value="completed" className="text-gray-900">Completed</option>
+                          <option value="cancelled" className="text-gray-900">Cancelled</option>
                         </select>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -507,7 +572,7 @@ export default function ViewBookings() {
                           <Link
                             to={`/booking/confirmation/${booking.id}`}
                             state={{ booking }}
-                            className="text-blue-600 hover:text-blue-800"
+                            className="text-gray-600 hover:text-yellow-600 transition-colors"
                             title="View Details"
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -528,6 +593,7 @@ export default function ViewBookings() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </div>
 
@@ -544,7 +610,7 @@ export default function ViewBookings() {
                     setSearchEmail("");
                     setStatusFilter("all");
                   }}
-                  className="text-blue-600 hover:text-blue-800 underline"
+                  className="text-gray-700 hover:text-yellow-600 underline font-medium transition-colors"
                 >
                   Clear filters
                 </button>

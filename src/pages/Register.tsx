@@ -399,7 +399,7 @@ export default function Register() {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="grid md:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                     {/* Full Name */}
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -595,7 +595,7 @@ export default function Register() {
                         <motion.select
                           whileFocus={{ scale: 1.01 }}
                           name="gender"
-                          className={`w-full pl-12 pr-4 py-3 bg-white border-2 ${
+                          className={`w-full pl-12 pr-4 py-3 bg-white text-gray-900 border-2 ${
                             fieldErrors.gender ? 'border-red-500' : 'border-gray-200'
                           } rounded-xl focus:border-pink-500 focus:ring-4 focus:ring-pink-100 outline-none transition-all duration-300 appearance-none cursor-pointer`}
                           value={form.gender}
@@ -604,11 +604,11 @@ export default function Register() {
                           onBlur={() => setFocusedField(null)}
                           required
                         >
-                          <option value="">Select gender</option>
-                          <option value="male">Male</option>
-                          <option value="female">Female</option>
-                          <option value="other">Other</option>
-                          <option value="prefer_not_to_say">Prefer not to say</option>
+                          <option value="" className="text-gray-900">Select gender</option>
+                          <option value="male" className="text-gray-900">Male</option>
+                          <option value="female" className="text-gray-900">Female</option>
+                          <option value="other" className="text-gray-900">Other</option>
+                          <option value="prefer_not_to_say" className="text-gray-900">Prefer not to say</option>
                         </motion.select>
                       </div>
                     </div>
@@ -624,7 +624,7 @@ export default function Register() {
                     )}
                   </motion.div>
 
-                  <div className="grid md:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                     {/* Password */}
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}

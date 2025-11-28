@@ -43,12 +43,25 @@ const getAdminUrl = () => {
 
 const ADMIN_URL = getAdminUrl();
 
+interface PromoBanner {
+  _id: string;
+  isEnabled: boolean;
+  title: string;
+  message: string;
+  ctaText: string;
+  ctaLink: string;
+  backgroundColor: string;
+  textColor: string;
+}
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'https://discovergroup.onrender.com';
+
 export default function Header(): React.ReactElement {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
-  const [promoVisible, setPromoVisible] = React.useState(true);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [promoBanner, setPromoBanner] = React.useState<PromoBanner | null>(null);
 
   const [megaOpen, setMegaOpen] = React.useState(false);
   const [continents, setContinents] = React.useState<string[]>([]);
@@ -60,6 +73,25 @@ export default function Header(): React.ReactElement {
 
   const [countryToursMap, setCountryToursMap] = React.useState<Record<string, Tour[] | null>>({});
   const containerRef = React.useRef<HTMLDivElement | null>(null);
+
+  // Fetch active promo banner
+  React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/promo-banners/active`);
+        const data = await response.json();
+        if (!cancelled && data.banner) {
+          setPromoBanner(data.banner);
+        }
+      } catch (err) {
+        console.error("Error fetching promo banner:", err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -147,34 +179,34 @@ export default function Header(): React.ReactElement {
 
   return (
   <header className="w-full backdrop-blur-xl bg-white/95 shadow-xl sticky top-0 border-b border-slate-200/50 z-[100] relative">
-      {/* Promo bar - Enhanced */}
-      {promoVisible && (
-        <div className="w-full bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700 text-white relative overflow-hidden">
-          {/* Animated background effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
-          <div className="container mx-auto px-4 py-3 text-sm font-semibold flex justify-center items-center relative z-10">
-            <span className="flex items-center gap-2">
-              <span className="text-xl animate-bounce">✈️</span>
-              <span className="hidden sm:inline">Limited Time Offer:</span>
-              <span>Up to 30% off on European Tours!</span>
-              <a
-                href="/deals"
-                className="ml-2 px-4 py-1 bg-yellow-400 text-blue-900 rounded-full font-bold hover:bg-yellow-300 transition-all hover:scale-105 shadow-lg"
-              >
-                Book Now →
-              </a>
-            </span>
+      {/* Promo Banner */}
+      {promoBanner && (
+        <div 
+          className="w-full relative overflow-hidden"
+          style={{ 
+            backgroundColor: promoBanner.backgroundColor,
+            color: promoBanner.textColor
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+          <div className="container mx-auto px-6 py-3 flex items-center justify-between relative z-10">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl animate-bounce">✈️</span>
+              <div>
+                <span className="font-bold">{promoBanner.title}:</span>{" "}
+                <span className="opacity-90">{promoBanner.message}</span>
+              </div>
+            </div>
             <button
-              aria-label="Dismiss promo"
-              onClick={() => setPromoVisible(false)}
-              className="absolute right-4 text-white/70 hover:text-white hover:bg-white/10 rounded-full p-1 transition-all"
+              onClick={() => navigate(promoBanner.ctaLink)}
+              className="px-5 py-2 bg-yellow-400 text-gray-900 rounded-full font-bold hover:bg-yellow-300 transition-all transform hover:scale-105 shadow-lg"
             >
-              ✕
+              {promoBanner.ctaText} →
             </button>
           </div>
         </div>
       )}
-
+      
       {/* Main header - Enhanced */}
       <div className="bg-gradient-to-b from-white to-gray-50/50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between gap-8">
@@ -301,17 +333,17 @@ export default function Header(): React.ReactElement {
 
             {/* Other nav links - Enhanced */}
 
-            <a
-              href="#"
+            <Link
+              to="/ways-to-go"
               className="text-sm font-bold uppercase tracking-wider text-blue-900 hover:text-blue-600 transition-all duration-200 relative px-3 py-2 rounded-lg hover:bg-blue-50 group"
             >
               <span className="flex items-center gap-2">
                 🚶 Ways To Go
               </span>
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-blue-400 group-hover:w-full transition-all duration-300"></span>
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/deals"
               className="text-sm font-bold uppercase tracking-wider text-blue-900 hover:text-blue-600 transition-all duration-200 relative px-3 py-2 rounded-lg hover:bg-blue-50 group"
             >
               <span className="flex items-center gap-2">
@@ -319,7 +351,7 @@ export default function Header(): React.ReactElement {
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-pulse">HOT</span>
               </span>
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-blue-400 group-hover:w-full transition-all duration-300"></span>
-            </a>
+            </Link>
             <Link
               to="/about-us"
               className="text-sm font-bold uppercase tracking-wider text-blue-900 hover:text-blue-600 transition-all duration-200 relative px-3 py-2 rounded-lg hover:bg-blue-50 group"

@@ -96,6 +96,43 @@ export default function Booking(): JSX.Element {
   const [customerEmail, setCustomerEmail] = useState<string>("");
   const [customerPhone, setCustomerPhone] = useState<string>("");
   const [customerPassport, setCustomerPassport] = useState<string>("");
+  const [passportError, setPassportError] = useState<string>("");
+
+  // Philippine passport validation
+  const validatePassport = (value: string): boolean => {
+    if (!value.trim()) {
+      setPassportError("");
+      return true; // Optional field
+    }
+
+    const cleaned = value.trim().toUpperCase();
+    
+    // Most recent format (after Aug 15, 2016): 1 letter + 7 digits + 1 letter (e.g., P1234567A)
+    const recentFormat = /^[A-Z]\d{7}[A-Z]$/;
+    
+    // 2005-2016 format: 2 letters + 7 digits (e.g., AB1234567)
+    const oldFormat = /^[A-Z]{2}\d{7}$/;
+    
+    // Pre-2005 format: 2 letters + 6 digits (e.g., AB123456)
+    const oldestFormat = /^[A-Z]{2}\d{6}$/;
+    
+    if (recentFormat.test(cleaned) || oldFormat.test(cleaned) || oldestFormat.test(cleaned)) {
+      setPassportError("");
+      return true;
+    }
+    
+    setPassportError("Invalid Philippine passport format. Expected: 1 letter + 7 digits + 1 letter (e.g., P1234567A) or 2 letters + 7 digits (e.g., AB1234567)");
+    return false;
+  };
+
+  const handlePassportChange = (value: string) => {
+    setCustomerPassport(value);
+    if (value.trim()) {
+      validatePassport(value);
+    } else {
+      setPassportError("");
+    }
+  };
 
   // Office appointment state
   const [wantsAppointment, setWantsAppointment] = useState<boolean>(false);
@@ -461,7 +498,7 @@ export default function Booking(): JSX.Element {
   }
 
   const themeStyle: React.CSSProperties = {
-    background: "linear-gradient(to bottom, #111827, #1f2937)", // from-gray-900 to-gray-800
+    background: "linear-gradient(180deg, rgba(249,250,251,1) 0%, rgba(243,244,246,1) 35%, rgba(255,255,255,1) 100%)",
     ["--accent-yellow" as string]: "#FFD24D",
     ["--accent-yellow-600" as string]: "#FFC107",
     ["--muted-slate" as string]: "#94a3b8",
@@ -479,7 +516,7 @@ export default function Booking(): JSX.Element {
 
   // (stepLabels removed — it was unused)
 
-  if (loading) return <div className="container mx-auto px-5 py-12 text-center text-slate-200">Loading booking details…</div>;
+  if (loading) return <div className="container mx-auto px-5 py-12 text-center text-gray-900">Loading booking details…</div>;
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
@@ -489,8 +526,8 @@ export default function Booking(): JSX.Element {
     return (
       <main style={themeStyle} className="min-h-screen">
         <div className="container mx-auto px-5 py-12">
-          <div className="text-center text-slate-200">
-            <p className="text-slate-300 mb-4">We couldn't find that tour. Go back to browse other routes.</p>
+          <div className="text-center text-gray-900">
+            <p className="text-gray-700 mb-4">We couldn't find that tour. Go back to browse other routes.</p>
             <Link to="/routes" className="inline-block px-4 py-2 bg-rose-600 text-white rounded">Browse routes</Link>
           </div>
         </div>
@@ -499,12 +536,7 @@ export default function Booking(): JSX.Element {
   }
 
   return (
-    <main style={themeStyle} className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 py-12 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-white/5 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      </div>
+    <main style={themeStyle} className="min-h-screen py-12 relative">
       
       <style>{`
         @keyframes fadeIn {
@@ -533,51 +565,52 @@ export default function Booking(): JSX.Element {
         }
         
         .card-glass {
-          background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
-          backdrop-filter: blur(16px) saturate(150%);
-          border: 1px solid rgba(255,255,255,0.1);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-          color: #ffffff;
+          background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(0,0,0,0.06);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+          color: #1f2937;
           animation: fadeIn 0.6s ease-out;
+          border-radius: 24px;
         }
         .card-glass:hover {
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-          border-color: rgba(255,255,255,0.15);
-          transform: translateY(-2px);
+          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+          border-color: rgba(0,0,0,0.08);
           transition: all 0.3s ease;
+          transform: translateY(-2px);
         }
         .card-glass .text-xs,
         .card-glass .text-sm {
           font-size: 105% !important;
           line-height: 1.5;
-          color: rgba(255,255,255,0.95);
+          color: #4b5563;
         }
         input, select, textarea {
-          background: rgba(255,255,255,0.08);
-          border: 1.5px solid rgba(255,255,255,0.2);
-          color: #ffffff;
-          backdrop-filter: blur(10px);
-          transition: all 0.3s ease;
+          background: rgba(255,255,255,1);
+          border: 1px solid rgba(0,0,0,0.1);
+          color: #1f2937;
+          transition: all 0.25s ease;
+          border-radius: 12px;
         }
         input::placeholder, select::placeholder, textarea::placeholder {
-          color: rgba(255,255,255,0.5);
+          color: rgba(0,0,0,0.4);
         }
         input:focus, select:focus, textarea:focus {
           outline: none;
-          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
-          border-color: rgba(255,255,255,0.4);
-          background: rgba(255,255,255,0.12);
-          transform: scale(1.01);
+          box-shadow: 0 0 0 3px rgba(255, 210, 77, 0.12);
+          border-color: #FFD24D;
+          background: rgba(255,255,255,1);
         }
         .btn-primary {
-          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-          color: white;
+          background: linear-gradient(135deg, #FFD24D 0%, #FFC107 100%);
+          color: #1a202c;
           border: none;
-          box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-          font-weight: 600;
-          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(255, 210, 77, 0.3);
+          font-weight: 700;
+          transition: all 0.25s ease;
           position: relative;
           overflow: hidden;
+          border-radius: 12px;
         }
         .btn-primary::before {
           content: '';
@@ -594,7 +627,7 @@ export default function Booking(): JSX.Element {
         }
         .btn-primary:hover { 
           transform: translateY(-2px); 
-          box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+          box-shadow: 0 6px 20px rgba(255, 210, 77, 0.5);
         }
         .btn-primary:active {
           transform: translateY(0);
@@ -605,26 +638,27 @@ export default function Booking(): JSX.Element {
           transform: none;
         }
         .btn-secondary {
-          background: rgba(255,255,255,0.1);
-          color: #ffffff;
-          border: 1.5px solid rgba(255,255,255,0.3);
-          backdrop-filter: blur(10px);
+          background: rgba(255,255,255,1);
+          color: #1f2937;
+          border: 1px solid rgba(0,0,0,0.1);
           font-weight: 500;
-          transition: all 0.3s ease;
+          transition: all 0.25s ease;
+          border-radius: 12px;
         }
         .btn-secondary:hover {
-          background: rgba(255,255,255,0.15);
-          border-color: rgba(255,255,255,0.4);
-          transform: translateX(-2px);
+          background: rgba(243,244,246,1);
+          border-color: rgba(0,0,0,0.15);
+          transform: translateY(-1px);
         }
         .btn-accent { 
           background: linear-gradient(135deg, #FFD24D, #FFC107); 
           color: #1a202c; 
           font-weight: 700;
-          box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+          box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+          border-radius: 12px;
         }
         .btn-accent:hover {
-          box-shadow: 0 6px 20px rgba(255, 193, 7, 0.6);
+          box-shadow: 0 6px 20px rgba(255, 193, 7, 0.5);
           transform: translateY(-2px);
         }
         .price-highlight { 
@@ -637,16 +671,16 @@ export default function Booking(): JSX.Element {
           background-size: 1000px 100%;
         }
         .step-dot { 
-          background: rgba(255,255,255,0.1); 
-          color: rgba(255,255,255,0.7);
-          border: 2px solid rgba(255,255,255,0.2);
+          background: rgba(0,0,0,0.05); 
+          color: rgba(0,0,0,0.5);
+          border: 2px solid rgba(0,0,0,0.1);
           transition: all 0.3s ease;
         }
         .step-dot.active {
-          background: linear-gradient(135deg, #667eea, #764ba2);
+          background: linear-gradient(135deg, #3b82f6, #2563eb);
           color: white;
-          border-color: #667eea;
-          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
+          border-color: #3b82f6;
+          box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
           transform: scale(1.1);
           animation: scaleIn 0.5s ease-out;
         }
@@ -663,12 +697,18 @@ export default function Booking(): JSX.Element {
           color: #FFC107;
         }
         .info-card {
-          background: rgba(255,255,255,0.08);
-          border: 1px solid rgba(255,255,255,0.15);
-          backdrop-filter: blur(10px);
-          border-radius: 12px;
+          background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));
+          border: 1px solid rgba(0,0,0,0.06);
+          backdrop-filter: blur(8px);
+          border-radius: 16px;
           padding: 1.5rem;
           animation: slideInLeft 0.5s ease-out;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+        .info-card:hover {
+          box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+          transform: translateY(-2px);
+          transition: all 0.25s ease;
         }
         .success-badge {
           background: linear-gradient(135deg, #10b981, #059669);
@@ -681,12 +721,20 @@ export default function Booking(): JSX.Element {
         .payment-option {
           animation: fadeIn 0.4s ease-out;
           animation-fill-mode: both;
+          background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));
+          border: 2px solid rgba(0,0,0,0.08);
+          border-radius: 16px;
+          padding: 1.25rem;
+          cursor: pointer;
+          transition: all 0.25s ease;
         }
         .payment-option:nth-child(1) { animation-delay: 0.1s; }
         .payment-option:nth-child(2) { animation-delay: 0.2s; }
         .payment-option:nth-child(3) { animation-delay: 0.3s; }
         .payment-option:hover {
-          transform: translateX(4px);
+          transform: translateY(-2px);
+          border-color: #FFD24D;
+          box-shadow: 0 6px 20px rgba(255, 210, 77, 0.2);
         }
         .section-header {
           animation: slideInLeft 0.5s ease-out;
@@ -702,47 +750,47 @@ export default function Booking(): JSX.Element {
       <div className="container mx-auto px-5 relative z-10">
         {/* Page Header */}
         <div className="text-center mb-10">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 drop-shadow-lg">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
             Complete Your Booking
           </h1>
-          <p className="text-lg text-white/90 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-700 max-w-2xl mx-auto">
             You're just a few steps away from your dream European adventure!
           </p>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-          <div className="lg:col-span-8 space-y-6">
-            <div className="card-glass rounded-2xl p-5 shadow-2xl overflow-x-auto">
+        <div className="max-w-4xl mx-auto">
+          <div className="space-y-6">
+            <div className="rounded-3xl card-glass p-3 md:p-5 shadow-sm overflow-x-auto">
               <ProgressIndicator 
                 steps={bookingSteps}
                 currentStep={step + 1}
                 className="mb-0 min-w-max"
               />
             </div>
-            <div className="card-glass rounded-2xl p-6 md:p-8 shadow-2xl">{/* Step 3: Payment Method Selection */}
+            <div className="rounded-3xl card-glass p-6 md:p-8 shadow-sm">{/* Step 3: Payment Method Selection */}
               {/* Step 3: Payment Method Selection */}
               {step === 3 && paymentType !== "cash-appointment" && (
                 <section aria-labelledby="payment-heading">
-                  <div className="flex items-center gap-3 mb-6 section-header">
-                    <div className="p-3 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl">
-                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-3 bg-blue-600 rounded-xl">
+                      <svg className="w-8 h-8 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                       </svg>
                     </div>
                     <div>
-                      <h2 id="payment-heading" className="text-2xl font-bold text-white">Select Payment Method</h2>
-                      <p className="text-white/80 text-sm">Choose how you'd like to complete your booking</p>
+                      <h2 id="payment-heading" className="text-2xl font-bold text-gray-900">Select Payment Method</h2>
+                      <p className="text-gray-700 text-sm">Choose how you'd like to complete your booking</p>
                     </div>
                   </div>
 
                   {/* Demo Mode Notice */}
-                  <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl flex items-start gap-3">
-                    <svg className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="mb-6 p-4 bg-yellow-50 border-2 border-yellow-400 rounded-xl flex items-start gap-3">
+                    <svg className="w-5 h-5 text-yellow-700 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <div className="text-sm">
-                      <div className="font-semibold text-yellow-300 mb-1">Demo Mode Active</div>
-                      <p className="text-yellow-200/80">This is a demonstration booking flow. No actual payment will be processed. Select any method to see how the payment experience works!</p>
+                      <div className="font-semibold text-yellow-900 mb-1">Demo Mode Active</div>
+                      <p className="text-gray-900">This is a demonstration booking flow. No actual payment will be processed. Select any method to see how the payment experience works!</p>
                     </div>
                   </div>
                   
@@ -766,7 +814,7 @@ export default function Booking(): JSX.Element {
                       <svg className="w-5 h-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <div className="text-sm text-red-200">{error}</div>
+                      <div className="text-sm text-red-700">{error}</div>
                     </div>
                   )}
                   
@@ -794,53 +842,53 @@ export default function Booking(): JSX.Element {
               {/* Step 4: Review Booking */}
               {step === 4 && (
                 <section aria-labelledby="review-confirm-heading">
-                  <div className="flex items-center gap-3 mb-6 section-header">
-                    <div className="p-3 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl">
-                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-3 bg-green-600 rounded-xl">
+                      <svg className="w-8 h-8 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div>
-                      <h2 id="review-confirm-heading" className="text-2xl font-bold text-white">Review Your Booking</h2>
-                      <p className="text-white/80 text-sm">Double-check everything before proceeding</p>
+                      <h2 id="review-confirm-heading" className="text-2xl font-bold text-gray-900">Review Your Booking</h2>
+                      <p className="text-gray-700 text-sm">Double-check everything before proceeding</p>
                     </div>
                   </div>
                   
-                  <div className="info-card border-2 border-white/20">
+                  <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <div className="text-xs text-white/60 uppercase tracking-wider mb-1">Tour Package</div>
-                        <div className="font-bold text-white text-lg">{tour.title}</div>
-                        <div className="text-sm text-white/80 mt-2">{tour.summary}</div>
+                        <div className="text-xs text-gray-600 uppercase tracking-wider mb-1">Tour Package</div>
+                        <div className="font-bold text-gray-900 text-lg">{tour.title}</div>
+                        <div className="text-sm text-gray-700 mt-2">{tour.summary}</div>
                       </div>
                       <div>
-                        <div className="text-xs text-white/60 uppercase tracking-wider mb-1">Departure Date</div>
-                        <div className="font-semibold text-white">{selectedDate || "—"}</div>
-                        <div className="text-xs text-white/60 uppercase tracking-wider mt-3 mb-1">Passengers</div>
-                        <div className="font-semibold text-white">{passengers} {passengers === 1 ? 'person' : 'people'}</div>
+                        <div className="text-xs text-gray-600 uppercase tracking-wider mb-1">Departure Date</div>
+                        <div className="font-semibold text-gray-900">{selectedDate || "—"}</div>
+                        <div className="text-xs text-gray-600 uppercase tracking-wider mt-3 mb-1">Passengers</div>
+                        <div className="font-semibold text-gray-900">{passengers} {passengers === 1 ? 'person' : 'people'}</div>
                       </div>
                     </div>
                     {wantsAppointment && (
-                      <div className="mt-6 pt-6 border-t border-white/20">
-                        <div className="text-xs text-white/60 uppercase tracking-wider mb-2">Office Appointment</div>
-                        <div className="flex items-center gap-2 text-sm text-white">
+                      <div className="mt-6 pt-6 border-t border-gray-300">
+                        <div className="text-xs text-gray-600 uppercase tracking-wider mb-2">Office Appointment</div>
+                        <div className="flex items-center gap-2 text-sm text-gray-900 font-medium">
                           <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                           <span>{new Date(appointmentDate).toLocaleDateString()} at {appointmentTime}</span>
                         </div>
-                        <div className="text-xs text-white/60 mt-1">Purpose: {appointmentPurpose.replace('-', ' ')}</div>
+                        <div className="text-xs text-gray-600 mt-1">Purpose: {appointmentPurpose.replace('-', ' ')}</div>
                       </div>
                     )}
                     {selectedPaymentMethod && (
-                      <div className="mt-6 pt-6 border-t border-white/20">
-                        <div className="text-xs text-white/60 uppercase tracking-wider mb-3">Selected Payment Method</div>
-                        <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-400/30">
+                      <div className="mt-6 pt-6 border-t border-gray-300">
+                        <div className="text-xs text-gray-600 uppercase tracking-wider mb-3">Selected Payment Method</div>
+                        <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl border-2 border-blue-200">
                           <span className="text-3xl">{selectedPaymentMethod.icon}</span>
                           <div className="flex-1">
-                            <div className="font-bold text-white text-lg">{selectedPaymentMethod.name}</div>
-                            <div className="text-sm text-white/70">{selectedPaymentMethod.description}</div>
-                            <div className="mt-2 flex items-center gap-2 text-xs text-white/60">
+                            <div className="font-bold text-gray-900 text-lg">{selectedPaymentMethod.name}</div>
+                            <div className="text-sm text-gray-700">{selectedPaymentMethod.description}</div>
+                            <div className="mt-2 flex items-center gap-2 text-xs text-gray-600 font-medium">
                               <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
@@ -850,13 +898,13 @@ export default function Booking(): JSX.Element {
                         </div>
                       </div>
                     )}
-                    <div className="mt-6 pt-6 border-t border-white/20">
+                    <div className="mt-6 pt-6 border-t border-gray-300">
                       <div className="flex justify-between items-center mb-3">
-                        <div className="text-sm text-white/70">Per person</div>
-                        <div className="font-semibold text-white text-lg">{formatCurrencyPHP(perPerson)}</div>
+                        <div className="text-sm text-gray-700 font-medium">Per person</div>
+                        <div className="font-semibold text-gray-900 text-lg">{formatCurrencyPHP(perPerson)}</div>
                       </div>
                       <div className="flex justify-between items-center">
-                        <div className="text-base text-white font-semibold">Total Amount</div>
+                        <div className="text-base text-gray-900 font-semibold">Total Amount</div>
                         <div className="text-3xl font-bold price-highlight">{formatCurrencyPHP(total)}</div>
                       </div>
                     </div>
@@ -886,13 +934,13 @@ export default function Booking(): JSX.Element {
                 <section aria-labelledby="confirm-heading">
                   <div className="flex items-center gap-3 mb-6 section-header">
                     <div className="p-3 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-xl">
-                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-8 h-8 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                       </svg>
                     </div>
                     <div>
-                      <h2 id="confirm-heading" className="text-2xl font-bold text-white">Complete Your Payment</h2>
-                      <p className="text-white/80 text-sm">Secure demo payment - No actual charges will be made</p>
+                      <h2 id="confirm-heading" className="text-2xl font-bold text-gray-900">Complete Your Payment</h2>
+                      <p className="text-gray-700 text-sm">Secure demo payment - No actual charges will be made</p>
                     </div>
                   </div>
 
@@ -941,39 +989,53 @@ export default function Booking(): JSX.Element {
                   {step === 0 && (
                     <section aria-labelledby="review-heading">
                       <div className="flex items-center gap-3 mb-6 section-header">
-                        <div className="p-3 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-xl">
-                          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="p-3 bg-green-100 rounded-xl">
+                          <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                           </svg>
                         </div>
                         <div>
-                          <h2 id="review-heading" className="text-2xl font-bold text-white">Review Your Selection</h2>
-                          <p className="text-white/80 text-sm">Confirm your tour details and travel date</p>
+                          <h2 id="review-heading" className="text-2xl font-bold text-gray-900">Review Your Selection</h2>
+                          <p className="text-gray-700 text-sm">Confirm your tour details and travel date</p>
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div className="info-card form-field">
                           <div className="flex items-start gap-3">
-                            <div className="p-2 bg-blue-500/20 rounded-lg flex-shrink-0">
-                              <svg className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+                              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="text-xs text-white/60 uppercase tracking-wider mb-1">Tour Package</div>
-                              <div className="font-bold text-white text-lg break-words">{tour.title}</div>
-                              <div className="text-sm text-white/80 mt-2">{tour.summary}</div>
+                              <div className="text-xs text-gray-600 uppercase tracking-wider mb-1">Tour Package</div>
+                              <div className="font-bold text-gray-900 text-lg break-words">{tour.title}</div>
+                              <div className="text-sm text-gray-700 mt-2">{tour.summary}</div>
                             </div>
                           </div>
                         </div>
-                        <div className="info-card form-field">
-                          <div className="text-xs text-white/60 uppercase tracking-wider mb-2">Travel Date</div>
+                        <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-5 form-field">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="text-xs text-gray-600 uppercase tracking-wider">Travel Date</div>
+                            {selectedDate && (
+                              <div className="flex items-center gap-1 text-xs text-green-600 font-medium">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                Pre-selected
+                              </div>
+                            )}
+                          </div>
                           <select 
                             value={selectedDate ?? ""} 
                             onChange={(e) => setSelectedDate(e.target.value)} 
-                            className="mt-1 w-full rounded-xl px-4 py-3 bg-white/10 border-2 border-white/20 text-white focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 font-medium"
+                            className={`mt-1 w-full rounded-xl px-4 py-3 bg-white border-2 text-gray-900 focus:ring-2 focus:ring-blue-500/20 font-medium transition-all ${
+                              selectedDate 
+                                ? 'border-green-400 focus:border-green-500' 
+                                : 'border-gray-300 focus:border-blue-500'
+                            }`}
                           >
-                            <option value="" className="bg-slate-800 text-slate-300">Select departure date</option>
+                            <option value="" className="bg-white text-gray-500">Select departure date</option>
                             {tour.departureDates && tour.departureDates.length > 0 ? (
                               tour.departureDates.map((dateRange, index) => {
                                 const value =
@@ -985,13 +1047,13 @@ export default function Booking(): JSX.Element {
                                     ? dateRange
                                     : `${new Date(dateRange.start).toLocaleDateString()} - ${new Date(dateRange.end).toLocaleDateString()}`;
                                 return (
-                                  <option key={index} value={value} className="bg-slate-800 text-white">
+                                  <option key={index} value={value} className="bg-white text-gray-900 font-medium">
                                     {label}
                                   </option>
                                 );
                               })
                             ) : tour.travelWindow ? (
-                              <option value={`${tour.travelWindow.start} - ${tour.travelWindow.end}`} className="bg-slate-800 text-white">
+                              <option value={`${tour.travelWindow.start} - ${tour.travelWindow.end}`} className="bg-white text-gray-900 font-medium">
                                 {`${new Date(tour.travelWindow.start).toLocaleDateString()} - ${new Date(tour.travelWindow.end).toLocaleDateString()}`}
                               </option>
                             ) : (
@@ -1006,23 +1068,23 @@ export default function Booking(): JSX.Element {
                               Please select a departure date to continue
                             </div>
                           )}
-                          <div className="text-xs text-white/60 uppercase tracking-wider mt-4 mb-2">Number of Passengers</div>
+                          <div className="text-xs text-gray-600 uppercase tracking-wider mt-4 mb-2">Number of Passengers</div>
                           <input 
                             type="number" 
                             min={1} 
                             value={passengers} 
                             onChange={(e) => setPassengers(Math.max(1, Number(e.target.value)))} 
-                            className="mt-1 w-full md:w-40 rounded-xl px-4 py-3 bg-white/10 border-2 border-white/20 text-white font-bold text-lg text-center focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20" 
+                            className="mt-1 w-full md:w-40 rounded-xl px-4 py-3 bg-white border-2 border-gray-300 text-gray-900 font-bold text-lg text-center focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" 
                           />
                         </div>
                       </div>
-                      <div className="mt-6 p-5 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl border border-white/20">
+                      <div className="mt-6 p-5 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border-2 border-purple-200">
                         <div className="flex items-center justify-between mb-2">
-                          <div className="text-sm text-white/70">Price per person</div>
-                          <div className="text-xl font-bold text-white">{formatCurrencyPHP(perPerson)}</div>
+                          <div className="text-sm text-gray-700">Price per person</div>
+                          <div className="text-xl font-bold text-gray-900">{formatCurrencyPHP(perPerson)}</div>
                         </div>
-                        <div className="flex items-center justify-between pt-3 border-t border-white/20">
-                          <div className="text-base font-semibold text-white">Total Amount</div>
+                        <div className="flex items-center justify-between pt-3 border-t-2 border-purple-200">
+                          <div className="text-base font-semibold text-gray-900">Total Amount</div>
                           <div className="text-2xl font-bold price-highlight">{formatCurrencyPHP(total)}</div>
                         </div>
                       </div>
@@ -1030,12 +1092,12 @@ export default function Booking(): JSX.Element {
                       {/* Payment Options */}
                       <div className="mt-8 p-6 info-card">
                         <div className="flex items-center gap-3 mb-5">
-                          <div className="p-2 bg-yellow-500/20 rounded-lg">
-                            <svg className="w-6 h-6 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <div className="p-2 bg-yellow-100 rounded-lg">
+                            <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                           </div>
-                          <h3 className="text-xl font-bold text-white">Choose Payment Method</h3>
+                          <h3 className="text-xl font-bold text-gray-900">Choose Payment Method</h3>
                         </div>
                         <div className="space-y-4">
                           <label className="payment-option flex items-start gap-4 cursor-pointer p-4 rounded-xl border-2 border-white/20 hover:border-white/40 transition-all bg-white/5 hover:bg-white/10 group">
@@ -1049,15 +1111,15 @@ export default function Booking(): JSX.Element {
                             />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <svg className="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <div className="text-white font-bold text-lg">Full Payment (Online)</div>
+                                <div className="text-gray-900 font-bold text-lg">Full Payment (Online)</div>
                               </div>
-                              <div className="text-sm text-white/80 break-words">
-                                Pay the complete amount now: <span className="font-bold text-green-300">{formatCurrencyPHP(total)}</span>
+                              <div className="text-sm text-gray-700 break-words">
+                                Pay the complete amount now: <span className="font-bold text-green-600">{formatCurrencyPHP(total)}</span>
                               </div>
-                              <div className="mt-2 text-xs text-white/60">✓ Instant confirmation</div>
+                              <div className="mt-2 text-xs text-gray-600">✓ Instant confirmation</div>
                             </div>
                           </label>
 
@@ -1076,21 +1138,21 @@ export default function Booking(): JSX.Element {
                                 />
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                    <svg className="w-5 h-5 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    <div className="text-white font-bold text-lg">Downpayment (Online Payment)</div>
+                                    <div className="text-gray-900 font-bold text-lg">Downpayment (Online Payment)</div>
                                   </div>
-                                  <div className="text-sm text-white/80">
+                                  <div className="text-sm text-gray-700">
                                     Pay partial amount now, remaining before departure
                                   </div>
-                                  <div className="mt-2 text-xs text-white/60">✓ Flexible payment terms</div>
+                                  <div className="mt-2 text-xs text-gray-600">✓ Flexible payment terms</div>
                                 </div>
                               </label>                              {paymentType === "downpayment" && (
-                                <div className="ml-8 p-4 bg-slate-900/50 rounded-lg space-y-4">
+                                <div className="ml-8 p-4 bg-gray-50 border-2 border-gray-200 rounded-lg space-y-4">
                                   <div>
-                                    <label className="block text-slate-300 text-sm mb-2">Select Payment Terms</label>
-                                    <div className="grid grid-cols-3 gap-2 mb-3">
+                                    <label className="block text-gray-700 text-sm font-medium mb-2">Select Payment Terms</label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
                                       {[
                                         { value: "30", label: "30%" },
                                         { value: "50", label: "50%" },
@@ -1115,7 +1177,7 @@ export default function Booking(): JSX.Element {
                                     </div>
                                     
                                     <div className="flex items-center gap-2">
-                                      <label className="text-slate-300 text-sm">Custom:</label>
+                                      <label className="text-gray-700 font-medium text-sm">Custom:</label>
                                       <input
                                         type="number"
                                         min="10"
@@ -1131,35 +1193,35 @@ export default function Booking(): JSX.Element {
                                           }
                                         }}
                                         placeholder="10-90"
-                                        className="w-20 rounded px-3 py-2 bg-white/10 border border-white/20 text-white text-sm"
+                                        className="w-20 rounded px-3 py-2 bg-white border-2 border-gray-300 text-gray-900 text-sm"
                                       />
-                                      <span className="text-slate-400 text-sm">%</span>
+                      <span className="text-gray-600 text-sm">%</span>
                                     </div>
                                   </div>
                                   
                                   <div className="pt-3 border-t border-slate-700 space-y-2">
                                     <div className="flex justify-between text-sm">
-                                      <span className="text-slate-300">Total Amount:</span>
-                                      <span className="text-slate-100 font-semibold">{formatCurrencyPHP(total)}</span>
+                                      <span className="text-gray-700">Total Amount:</span>
+                                      <span className="text-gray-900 font-semibold">{formatCurrencyPHP(total)}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
-                                      <span className="text-slate-300">Downpayment ({downpaymentPercentage}%):</span>
-                                      <span className="text-blue-400 font-semibold">{formatCurrencyPHP(downpaymentAmount)}</span>
+                                      <span className="text-gray-700">Downpayment ({downpaymentPercentage}%):</span>
+                                      <span className="text-gray-900 font-semibold">{formatCurrencyPHP(downpaymentAmount)}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
-                                      <span className="text-slate-300">Remaining Balance:</span>
-                                      <span className="text-yellow-400 font-semibold">{formatCurrencyPHP(remainingBalance)}</span>
+                                      <span className="text-gray-700">Remaining Balance:</span>
+                                      <span className="text-gray-900 font-semibold">{formatCurrencyPHP(remainingBalance)}</span>
                                     </div>
                                     
                                     {/* Payment Terms Information */}
-                                    <div className="mt-4 p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+                                    <div className="mt-4 p-3 bg-orange-900/30 border-2 border-orange-600 rounded-lg">
                                       <div className="flex items-start gap-2 mb-2">
-                                        <svg className="w-4 h-4 text-orange-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-4 h-4 text-orange-300 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         <div className="flex-1">
-                                          <div className="text-sm font-semibold text-orange-300 mb-1">Payment Terms</div>
-                                          <ul className="text-xs text-orange-200/90 space-y-1 list-disc list-inside">
+                                          <div className="text-sm font-semibold text-orange-200 mb-1">Payment Terms</div>
+                                          <ul className="text-xs text-gray-700 space-y-1 list-disc list-inside">
                                             <li>Pay downpayment now to secure your booking</li>
                                             <li>Remaining balance due <strong>30 days before departure</strong></li>
                                             <li>Payment reminders will be sent via email & SMS</li>
@@ -1192,15 +1254,15 @@ export default function Booking(): JSX.Element {
                             />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <svg className="w-5 h-5 text-yellow-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
-                                <div className="text-white font-bold text-lg">Cash on Hand (Office Visit)</div>
+                                <div className="text-gray-900 font-bold text-lg">Cash on Hand (Office Visit)</div>
                               </div>
-                              <div className="text-sm text-white/80 break-words">
-                                Pay in person at our office: <span className="font-bold text-yellow-300">{formatCurrencyPHP(total)}</span>
+                              <div className="text-sm text-gray-700 break-words">
+                                Pay in person at our office: <span className="font-bold text-gray-900">{formatCurrencyPHP(total)}</span>
                               </div>
-                              <div className="mt-2 text-xs text-white/60 flex items-center gap-1">
+                              <div className="mt-2 text-xs text-gray-600 flex items-center gap-1">
                                 <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -1212,15 +1274,15 @@ export default function Booking(): JSX.Element {
                         
                         <div className="mt-4 pt-3 border-t border-slate-700">
                           <div className="flex items-center justify-between">
-                            <div className="text-sm font-medium text-slate-300">
+                            <div className="text-sm font-medium text-gray-700">
                               {paymentType === "cash-appointment" ? "To Pay at Office" : paymentType === "full" ? "Total Amount" : "Amount to Pay Now"}
                             </div>
-                            <div className="text-lg font-bold text-blue-400">
+                            <div className="text-lg font-bold text-gray-900">
                               {formatCurrencyPHP(paymentType === "cash-appointment" ? total : paymentAmount)}
                             </div>
                           </div>
                           {paymentType === "cash-appointment" && (
-                            <div className="mt-2 text-xs text-yellow-400 flex items-center gap-1">
+                            <div className="mt-2 text-xs text-gray-600 flex items-center gap-1">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
@@ -1260,13 +1322,13 @@ export default function Booking(): JSX.Element {
                     <section aria-labelledby="lead-heading">
                       <div className="flex items-center gap-3 mb-6 section-header">
                         <div className="p-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl">
-                          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-8 h-8 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                           </svg>
                         </div>
                         <div>
-                          <h2 id="lead-heading" className="text-2xl font-bold text-white">Your Information</h2>
-                          <p className="text-white/80 text-sm">Tell us about the lead passenger</p>
+                          <h2 id="lead-heading" className="text-2xl font-bold text-gray-900">Your Information</h2>
+                          <p className="text-gray-700 text-sm">Tell us about the lead passenger</p>
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1299,11 +1361,21 @@ export default function Booking(): JSX.Element {
                         </div>
                         <div className="form-field">
                           <input 
-                            placeholder="Passport or ID" 
+                            placeholder="Philippine Passport (e.g., P1234567A)" 
                             value={customerPassport}
-                            onChange={(e) => setCustomerPassport(e.target.value)}
-                            className="w-full rounded-xl px-4 py-3" 
+                            onChange={(e) => handlePassportChange(e.target.value)}
+                            onBlur={(e) => validatePassport(e.target.value)}
+                            className={`w-full rounded-xl px-4 py-3 ${passportError ? 'border-2 border-red-500 focus:border-red-500' : ''}`}
+                            maxLength={9}
                           />
+                          {passportError && (
+                            <div className="mt-2 text-red-400 text-sm flex items-start gap-2">
+                              <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span>{passportError}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="mt-6 flex justify-between">
@@ -1314,10 +1386,11 @@ export default function Booking(): JSX.Element {
                             setCustomerEmail("");
                             setCustomerPhone("");
                             setCustomerPassport("");
+                            setPassportError("");
                           }} className="px-4 py-2 btn-secondary rounded">Reset</button>
                           <button 
                             onClick={handleNext} 
-                            disabled={!customerName.trim() || !customerEmail.trim()}
+                            disabled={!customerName.trim() || !customerEmail.trim() || !!passportError}
                             className="px-4 py-2 btn-primary rounded disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Continue
@@ -1330,10 +1403,10 @@ export default function Booking(): JSX.Element {
                   {step === 2 && (
                     <section aria-labelledby="appointment-heading">
                       <div className="mb-6">
-                        <h2 id="appointment-heading" className="text-lg font-semibold mb-2 text-slate-100">
+                        <h2 id="appointment-heading" className="text-lg font-semibold mb-2 text-gray-900">
                           Schedule an Office Visit
                         </h2>
-                        <p className="text-slate-300 text-sm">
+                        <p className="text-gray-700 text-sm">
                           {paymentType === "cash-appointment" 
                             ? "You selected 'Cash on Hand' payment. Please schedule your office visit below to complete your payment."
                             : "Would you like to visit our office for a consultation? This is optional."}
@@ -1366,8 +1439,8 @@ export default function Booking(): JSX.Element {
                             </svg>
                           </div>
                           <div className="flex-1">
-                            <h3 className="text-white font-semibold mb-2">Discover Group Office</h3>
-                            <div className="space-y-1 text-sm text-slate-300">
+                            <h3 className="text-gray-900 font-semibold mb-2">Discover Group Office</h3>
+                            <div className="space-y-1 text-sm text-gray-700">
                               <p className="flex items-center gap-2">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -1415,55 +1488,55 @@ export default function Booking(): JSX.Element {
                       {/* Appointment Details (shown when checkbox is checked OR cash-appointment is selected) */}
                       {(wantsAppointment || paymentType === "cash-appointment") && (
                         <div className="space-y-4 mb-6 p-5 bg-white/5 border border-white/10 rounded-lg">
-                          <h3 className="text-white font-semibold mb-3">
+                          <h3 className="text-gray-900 font-semibold mb-3">
                             {paymentType === "cash-appointment" ? "Schedule Your Payment Appointment" : "Select Your Preferred Date & Time"}
                           </h3>
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-slate-300 text-sm mb-2">Appointment Date</label>
+                              <label className="block text-gray-700 font-medium text-sm mb-2">Appointment Date</label>
                               <input
                                 type="date"
                                 value={appointmentDate}
                                 onChange={(e) => setAppointmentDate(e.target.value)}
                                 min={new Date().toISOString().split('T')[0]}
-                                className="w-full rounded px-3 py-2 bg-white/10 border border-white/20 text-white"
+                                className="w-full rounded px-3 py-2 bg-white border-2 border-gray-300 text-gray-900"
                                 required
                               />
                             </div>
                             
                             <div>
-                              <label className="block text-slate-300 text-sm mb-2">Preferred Time</label>
+                              <label className="block text-gray-700 font-medium text-sm mb-2">Preferred Time</label>
                               <select
                                 value={appointmentTime}
                                 onChange={(e) => setAppointmentTime(e.target.value)}
-                                className="w-full rounded px-3 py-2 bg-white/10 border border-white/20 text-white"
+                                className="w-full rounded px-3 py-2 bg-white border-2 border-gray-300 text-gray-900"
                                 required
                               >
-                                <option value="">Select a time</option>
+                                <option value="" className="bg-gray-800 text-white">Select a time</option>
                 
-                                <option value="10:00">10:00 AM</option>
-                                <option value="11:00">11:00 AM</option>
-                                <option value="13:00">1:00 PM</option>
-                                <option value="14:00">2:00 PM</option>
-                                <option value="15:00">3:00 PM</option>
-                                <option value="16:00">4:00 PM</option>
+                                <option value="10:00" className="bg-gray-800 text-white">10:00 AM</option>
+                                <option value="11:00" className="bg-gray-800 text-white">11:00 AM</option>
+                                <option value="13:00" className="bg-gray-800 text-white">1:00 PM</option>
+                                <option value="14:00" className="bg-gray-800 text-white">2:00 PM</option>
+                                <option value="15:00" className="bg-gray-800 text-white">3:00 PM</option>
+                                <option value="16:00" className="bg-gray-800 text-white">4:00 PM</option>
                               </select>
                             </div>
                           </div>
 
                           <div>
-                            <label className="block text-slate-300 text-sm mb-2">Purpose of Visit</label>
+                            <label className="block text-gray-700 font-medium text-sm mb-2">Purpose of Visit</label>
                             <select
                               value={appointmentPurpose}
                               onChange={(e) => setAppointmentPurpose(e.target.value)}
-                              className="w-full rounded px-3 py-2 bg-white/10 border border-white/20 text-white"
+                              className="w-full rounded px-3 py-2 bg-white border-2 border-gray-300 text-gray-900"
                             >
-                              <option value="consultation">General Consultation</option>
-                              <option value="tour-details">Discuss Tour Details</option>
-                              <option value="payment">Payment & Documentation</option>
-                              <option value="customization">Customize Itinerary</option>
-                              <option value="group-booking">Group Booking</option>
+                              <option value="consultation" className="bg-gray-800 text-white">General Consultation</option>
+                              <option value="tour-details" className="bg-gray-800 text-white">Discuss Tour Details</option>
+                              <option value="payment" className="bg-gray-800 text-white">Payment & Documentation</option>
+                              <option value="customization" className="bg-gray-800 text-white">Customize Itinerary</option>
+                              <option value="group-booking" className="bg-gray-800 text-white">Group Booking</option>
                             </select>
                           </div>
 
@@ -1483,8 +1556,8 @@ export default function Booking(): JSX.Element {
                       {/* Benefits of Office Visit */}
                       {!wantsAppointment && (
                         <div className="bg-white/5 border border-white/10 rounded-lg p-5 mb-6">
-                          <h3 className="text-white font-semibold mb-3">Benefits of an Office Visit:</h3>
-                          <ul className="space-y-2 text-slate-300 text-sm">
+                          <h3 className="text-gray-900 font-semibold mb-3">Benefits of an Office Visit:</h3>
+                          <ul className="space-y-2 text-gray-700 text-sm">
                             <li className="flex items-start gap-2">
                               <svg className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -1531,16 +1604,16 @@ export default function Booking(): JSX.Element {
                   {/* Step 4: Review Booking (for cash-appointment) */}
                   {step === 4 && paymentType === "cash-appointment" && (
                     <section aria-labelledby="review-confirm-heading">
-                      <h2 id="review-confirm-heading" className="text-lg font-semibold mb-3 text-slate-100">
+                      <h2 id="review-confirm-heading" className="text-lg font-semibold mb-3 text-gray-900">
                         Review & Confirm Your Booking
                       </h2>
                       
                       <div className="bg-white/5 border border-white/10 rounded-lg p-6 mb-6 space-y-4">
                         <div className="pb-4 border-b border-white/10">
-                          <h3 className="text-white font-semibold mb-2">Tour Details</h3>
-                          <div className="text-slate-300 text-sm space-y-1">
-                            <div><strong className="text-slate-100">Tour:</strong> {tour.title}</div>
-                            <div><strong className="text-slate-100">Departure:</strong> {(() => {
+                          <h3 className="text-gray-900 font-semibold mb-2">Tour Details</h3>
+                          <div className="text-gray-700 text-sm space-y-1">
+                            <div><strong className="text-gray-900">Tour:</strong> {tour.title}</div>
+                            <div><strong className="text-gray-900">Departure:</strong> {(() => {
                               if (!selectedDate) return "—";
                               
                               // Handle date ranges (e.g., "2025-05-13 - 2025-05-27")
@@ -1565,37 +1638,37 @@ export default function Booking(): JSX.Element {
                               const date = new Date(selectedDate);
                               return isNaN(date.getTime()) ? "—" : date.toLocaleDateString();
                             })()}</div>
-                            <div><strong className="text-slate-100">Passengers:</strong> {passengers}</div>
+                            <div><strong className="text-gray-900">Passengers:</strong> {passengers}</div>
                           </div>
                         </div>
 
                         {wantsAppointment && appointmentDate && (
                           <div className="pb-4 border-b border-white/10">
-                            <h3 className="text-white font-semibold mb-2">Office Appointment</h3>
-                            <div className="text-slate-300 text-sm space-y-1">
+                            <h3 className="text-gray-900 font-semibold mb-2">Office Appointment</h3>
+                            <div className="text-gray-700 text-sm space-y-1">
                               <div className="flex items-center gap-2">
                                 <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                <span><strong className="text-slate-100">Date:</strong> {new Date(appointmentDate).toLocaleDateString()}</span>
+                                <span><strong className="text-gray-900">Date:</strong> {new Date(appointmentDate).toLocaleDateString()}</span>
                               </div>
                               <div className="flex items-center gap-2">
                                 <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <span><strong className="text-slate-100">Time:</strong> {appointmentTime}</span>
+                                <span><strong className="text-gray-900">Time:</strong> {appointmentTime}</span>
                               </div>
-                              <div><strong className="text-slate-100">Purpose:</strong> {appointmentPurpose.replace('-', ' ')}</div>
+                              <div><strong className="text-gray-900">Purpose:</strong> {appointmentPurpose.replace('-', ' ')}</div>
                             </div>
                           </div>
                         )}
 
                         <div className="pb-4 border-b border-white/10">
-                          <h3 className="text-white font-semibold mb-2">Contact Information</h3>
-                          <div className="text-slate-300 text-sm space-y-1">
-                            <div><strong className="text-slate-100">Name:</strong> {customerName || "—"}</div>
-                            <div><strong className="text-slate-100">Email:</strong> {customerEmail || "—"}</div>
-                            <div><strong className="text-slate-100">Phone:</strong> {customerPhone || "—"}</div>
+                          <h3 className="text-gray-900 font-semibold mb-2">Contact Information</h3>
+                          <div className="text-gray-700 text-sm space-y-1">
+                            <div><strong className="text-gray-900">Name:</strong> {customerName || "—"}</div>
+                            <div><strong className="text-gray-900">Email:</strong> {customerEmail || "—"}</div>
+                            <div><strong className="text-gray-900">Phone:</strong> {customerPhone || "—"}</div>
                           </div>
                         </div>
 
@@ -1618,8 +1691,8 @@ export default function Booking(): JSX.Element {
 
                         <div className="pt-4 border-t border-white/10">
                           <div className="flex justify-between items-center">
-                            <span className="text-slate-300">Base tour per person:</span>
-                            <span className="text-slate-100 font-semibold">{formatCurrencyPHP(perPerson)}</span>
+                            <span className="text-gray-700">Base tour per person:</span>
+                            <span className="text-gray-900 font-semibold">{formatCurrencyPHP(perPerson)}</span>
                           </div>
                           
                           {/* Display custom routes if any */}
@@ -1633,16 +1706,16 @@ export default function Booking(): JSX.Element {
                                   </div>
                                   <span className="text-purple-300 font-semibold text-sm">{formatCurrencyPHP(route.pricePerPerson)}</span>
                                 </div>
-                              ))}
+                              ))}  
                               <div className="flex justify-between items-center mt-3 pt-2 border-t border-white/10">
-                                <span className="text-slate-200 font-semibold">Combined per person:</span>
-                                <span className="text-slate-100 font-bold">{formatCurrencyPHP(combinedPerPerson)}</span>
+                                <span className="text-gray-900 font-semibold">Combined per person:</span>
+                                <span className="text-gray-900 font-bold">{formatCurrencyPHP(combinedPerPerson)}</span>
                               </div>
                             </>
                           )}
                           
                           <div className="flex justify-between items-center mt-2">
-                            <span className="text-white font-semibold">Total Amount:</span>
+                            <span className="text-gray-900 font-semibold">Total Amount:</span>
                             <span className="text-2xl font-bold text-blue-400">{formatCurrencyPHP(total)}</span>
                           </div>
                         </div>
@@ -1665,7 +1738,7 @@ export default function Booking(): JSX.Element {
                   {/* Step 5: Confirmation (for cash-appointment) */}
                   {step === 5 && paymentType === "cash-appointment" && (
                     <section aria-labelledby="final-confirm-heading">
-                      <h2 id="final-confirm-heading" className="text-lg font-semibold mb-3 text-slate-100">
+                      <h2 id="final-confirm-heading" className="text-lg font-semibold mb-3 text-gray-900">
                         Complete Your Booking
                       </h2>
                       
@@ -1677,8 +1750,8 @@ export default function Booking(): JSX.Element {
                             </svg>
                           </div>
                           <div className="flex-1">
-                            <h3 className="text-white font-bold text-lg mb-2">You're Almost Done!</h3>
-                            <p className="text-slate-300 text-sm">
+                            <h3 className="text-gray-900 font-bold text-lg mb-2">You're Almost Done!</h3>
+                            <p className="text-gray-700 text-sm">
                               Click "Complete Booking" below to finalize your reservation. You will receive a confirmation email with your appointment details.
                             </p>
                           </div>
@@ -1686,8 +1759,8 @@ export default function Booking(): JSX.Element {
                       </div>
 
                       <div className="bg-white/5 border border-white/10 rounded-lg p-6 mb-6">
-                        <h3 className="text-white font-semibold mb-3">What happens next?</h3>
-                        <ol className="space-y-3 text-slate-300 text-sm">
+                        <h3 className="text-gray-900 font-semibold mb-3">What happens next?</h3>
+                        <ol className="space-y-3 text-gray-700 text-sm">
                           <li className="flex items-start gap-3">
                             <span className="bg-blue-500/20 text-blue-400 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 font-semibold">1</span>
                             <span>You'll receive a confirmation email with your booking ID and appointment details</span>
@@ -1702,7 +1775,7 @@ export default function Booking(): JSX.Element {
                           </li>
                           <li className="flex items-start gap-3">
                             <span className="bg-blue-500/20 text-blue-400 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 font-semibold">4</span>
-                            <span>Bring <strong className="text-white">{formatCurrencyPHP(total)}</strong> cash (or use credit/debit card at office)</span>
+                            <span>Bring <strong className="text-gray-900">{formatCurrencyPHP(total)}</strong> cash (or use credit/debit card at office)</span>
                           </li>
                         </ol>
                       </div>
@@ -1728,108 +1801,6 @@ export default function Booking(): JSX.Element {
               )}
             </div>
           </div>
-          <aside className="lg:col-span-4 space-y-6 order-first lg:order-last">
-            <div className="lg:sticky lg:top-24">
-              <div className="card-glass rounded-2xl p-5 shadow-2xl">
-                <img src={tour.images?.[0] ?? "/assets/placeholder.jpg"} alt={tour.title} className="w-full h-40 object-cover rounded" />
-                <div className="mt-4">
-                  <div className="text-lg font-semibold text-slate-100">{tour.title}</div>
-                  <div className="text-sm text-slate-300 mt-1">
-                    {tour.line ?? ""} • {(() => {
-                      const baseDays = tour.durationDays ?? tour.itinerary?.length ?? 0;
-                      const additionalDays = customRoutes.reduce((sum, route) => sum + route.durationDays, 0);
-                      const totalDays = baseDays + additionalDays;
-                      
-                      if (customRoutes.length > 0) {
-                        return (
-                          <>
-                            <span className="font-semibold text-yellow-400">{totalDays} days</span>
-                            <span className="text-xs text-slate-400"> ({baseDays} + {additionalDays} combined)</span>
-                          </>
-                        );
-                      }
-                      return `${baseDays} days`;
-                    })()}
-                  </div>
-                  
-                  {/* Show additional routes if any */}
-                  {customRoutes.length > 0 && (
-                    <div className="mt-3 p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-                      <div className="text-xs text-purple-300 font-semibold mb-2 flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                        Additional Route Included
-                      </div>
-                      {customRoutes.map((route, idx) => (
-                        <div key={idx} className="text-sm text-slate-200 flex items-center gap-2">
-                          <span className="text-purple-400">+</span>
-                          <span>{route.tourTitle}</span>
-                          <span className="text-xs text-slate-400">({route.durationDays} days)</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  <div className="mt-4 text-sm text-slate-300 space-y-2">
-                    <div><strong className="text-slate-100">Departure:</strong> <span className="ml-2">
-                      {(() => {
-                        if (!selectedDate) return "—";
-                        
-                        // Handle date ranges (e.g., "2025-05-13 - 2025-05-27")
-                        if (selectedDate.includes(' - ')) {
-                          const [startDate, endDate] = selectedDate.split(' - ').map(d => d.trim());
-                          const start = new Date(startDate);
-                          const end = new Date(endDate);
-                          
-                          if (isNaN(start.getTime()) || isNaN(end.getTime())) return "—";
-                          
-                          return `${start.toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric'
-                          })} - ${end.toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}`;
-                        }
-                        
-                        // Handle single dates
-                        const date = new Date(selectedDate);
-                        if (isNaN(date.getTime())) return "—";
-                        
-                        return date.toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric', 
-                          year: 'numeric' 
-                        });
-                      })()}
-                    </span></div>
-                    <div><strong className="text-slate-100">Passengers:</strong> <span className="ml-2">{passengers}</span></div>
-                    <div><strong className="text-slate-100">Per head:</strong> <span className="ml-2 font-semibold">{formatCurrencyPHP(perPerson)}</span></div>
-                    <div className="card-divider">
-                      <div className="text-xs text-slate-300">Total</div>
-                      <div className="text-2xl font-bold price-highlight">{formatCurrencyPHP(total)}</div>
-                    </div>
-                  </div>
-                  <div className="mt-4 flex gap-3">
-                    <Link to={`/tour/${tour.slug}`} className="flex-1 px-3 py-2 btn-secondary rounded text-center">Back to tour</Link>
-                    <button onClick={() => { setStep(3); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="px-3 py-2 btn-primary rounded">Proceed</button>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-4 card-glass rounded-xl p-4 text-sm text-slate-300 shadow-xl">
-                <div className="font-semibold mb-2 text-slate-100 flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Need help?
-                </div>
-                <div>Call reservations: <strong className="text-slate-100">+63 02 8526 8404</strong></div>
-                <div className="mt-2">Email: <a href="mailto:reservations@example.com" className="text-accent-yellow underline">reservations@example.com</a></div>
-              </div>
-            </div>
-          </aside>
         </div>
       </div>
       <BackToTop />

@@ -45,7 +45,7 @@ export default function AboutUs() {
   ];
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+    <main className="min-h-screen bg-gradient-to-b from-gray-50 via-gray-100 to-white">
       {/* Hero Section with Parallax Effect */}
       <section className="relative h-[70vh] flex items-center justify-center overflow-hidden">
         <div 
@@ -55,7 +55,7 @@ export default function AboutUs() {
             transform: 'scale(1.1)',
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-900/80 via-blue-800/70 to-gray-900/90" />
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-50/95 via-purple-50/90 to-white/95" />
         
         {/* Animated background elements */}
         <motion.div
@@ -93,7 +93,7 @@ export default function AboutUs() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-6xl md:text-7xl font-bold text-white mb-6"
+            className="text-6xl md:text-7xl font-bold text-gray-900 mb-6"
           >
             Discover Group
           </motion.h1>
@@ -102,7 +102,7 @@ export default function AboutUs() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-2xl text-blue-100 max-w-3xl mx-auto mb-4"
+            className="text-2xl text-gray-700 max-w-3xl mx-auto mb-4"
           >
             Creating Unforgettable Travel Experiences Since 2008
           </motion.p>
@@ -111,7 +111,7 @@ export default function AboutUs() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            className="flex items-center justify-center gap-2 text-yellow-300"
+            className="flex items-center justify-center gap-2 text-yellow-600"
           >
             <MapPin className="w-5 h-5" />
             <span className="text-lg">Quezon City, Philippines</span>
@@ -124,7 +124,7 @@ export default function AboutUs() {
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
-          <ChevronRight className="w-8 h-8 text-white rotate-90" />
+          <ChevronRight className="w-8 h-8 text-gray-900 rotate-90" />
         </motion.div>
       </section>
 
@@ -141,11 +141,11 @@ export default function AboutUs() {
                 viewport={{ once: true }}
                 className="card-glass rounded-2xl p-6 text-center hover:shadow-2xl transition-all group"
               >
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-lg">
                   <stat.icon className="w-8 h-8 text-white" />
                 </div>
-                <div className="text-4xl font-bold text-white mb-2">{stat.number}</div>
-                <div className="text-slate-300">{stat.label}</div>
+                <div className="text-4xl font-bold text-gray-900 mb-2">{stat.number}</div>
+                <div className="text-gray-600">{stat.label}</div>
               </motion.div>
             ))}
           </div>
@@ -162,8 +162,8 @@ export default function AboutUs() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Our Story</h2>
-            <p className="text-xl text-slate-300 max-w-3xl mx-auto">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Our Story</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Discover what makes us the trusted travel partner for thousands of adventurers
             </p>
           </motion.div>
@@ -178,14 +178,15 @@ export default function AboutUs() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as TabType)}
-                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-semibold transition-all ${
+                className={`flex items-center gap-2 px-4 py-3 md:px-8 md:py-4 rounded-xl font-semibold transition-all text-sm md:text-base ${
                   activeTab === tab.key
-                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg scale-105'
-                    : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                    ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white shadow-lg scale-105'
+                    : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-yellow-300 hover:bg-yellow-50'
                 }`}
               >
-                <tab.icon className="w-5 h-5" />
-                {tab.label}
+                <tab.icon className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
               </button>
             ))}
           </div>
@@ -202,16 +203,16 @@ export default function AboutUs() {
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="card-glass rounded-2xl p-8">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center shadow-lg">
                       <Calendar className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold text-white">Founded in May 2008</h3>
+                    <h3 className="text-2xl font-bold text-gray-900">Founded in May 2008</h3>
                   </div>
-                  <p className="text-slate-300 leading-relaxed mb-4">
+                  <p className="text-gray-700 leading-relaxed mb-4">
                     Discover Group of Travel Services Inc. began with a simple vision: to make travel accessible, 
                     enjoyable, and truly unforgettable for every Filipino traveler.
                   </p>
-                  <p className="text-slate-300 leading-relaxed">
+                  <p className="text-gray-700 leading-relaxed">
                     What started as a small travel agency in Quezon City has grown into a trusted name in the 
                     Philippine travel industry, serving thousands of satisfied customers across 15+ years.
                   </p>
@@ -219,16 +220,16 @@ export default function AboutUs() {
 
                 <div className="card-glass rounded-2xl p-8">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center shadow-lg">
                       <MapPin className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold text-white">Our Headquarters</h3>
+                    <h3 className="text-2xl font-bold text-gray-900">Our Headquarters</h3>
                   </div>
-                  <p className="text-slate-300 leading-relaxed mb-4">
+                  <p className="text-gray-700 leading-relaxed mb-4">
                     Located at the 22nd floor of The Upper Class Tower on Quezon Avenue, Diliman, 
                     our modern office serves as the hub for all our travel operations.
                   </p>
-                  <p className="text-slate-300 leading-relaxed">
+                  <p className="text-gray-700 leading-relaxed">
                     Our strategic location in Metro Manila allows us to serve clients nationwide while 
                     maintaining close partnerships with international travel networks.
                   </p>
@@ -236,12 +237,12 @@ export default function AboutUs() {
 
                 <div className="card-glass rounded-2xl p-8 md:col-span-2">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center shadow-lg">
                       <Award className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold text-white">Accredited & Trusted</h3>
+                    <h3 className="text-2xl font-bold text-gray-900">Accredited & Trusted</h3>
                   </div>
-                  <p className="text-slate-300 leading-relaxed">
+                  <p className="text-gray-700 leading-relaxed">
                     As a DOT-accredited travel agency since 2022, we uphold the highest standards of service quality 
                     and professionalism. Our dedicated team of 11-50 travel experts combines personalized attention 
                     with industry expertise to ensure every journey exceeds expectations.
@@ -260,13 +261,13 @@ export default function AboutUs() {
                     transition={{ duration: 0.4, delay: index * 0.1 }}
                     className="card-glass rounded-2xl p-6 hover:shadow-2xl transition-all group cursor-pointer"
                   >
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg">
                       <service.icon className="w-8 h-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-3 group-hover:text-yellow-400 transition-colors">
+                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-yellow-600 transition-colors">
                       {service.title}
                     </h3>
-                    <p className="text-slate-300 leading-relaxed">{service.desc}</p>
+                    <p className="text-gray-700 leading-relaxed">{service.desc}</p>
                   </motion.div>
                 ))}
               </div>
@@ -287,8 +288,8 @@ export default function AboutUs() {
                         <value.icon className="w-10 h-10 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-2xl font-bold text-white mb-3">{value.title}</h3>
-                        <p className="text-slate-300 text-lg leading-relaxed">{value.desc}</p>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-3">{value.title}</h3>
+                        <p className="text-gray-700 text-lg leading-relaxed">{value.desc}</p>
                       </div>
                     </div>
                   </motion.div>
@@ -300,7 +301,7 @@ export default function AboutUs() {
       </section>
 
       {/* Mission Statement */}
-      <section className="py-20 bg-gradient-to-r from-blue-900/50 to-purple-900/50">
+      <section className="py-20 bg-gradient-to-r from-blue-50 to-purple-50">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -309,21 +310,21 @@ export default function AboutUs() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto text-center"
           >
-            <Sparkles className="w-16 h-16 text-yellow-400 mx-auto mb-6" />
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <Sparkles className="w-16 h-16 text-yellow-500 mx-auto mb-6" />
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
               Our Mission
             </h2>
-            <p className="text-2xl text-blue-100 leading-relaxed mb-8">
+            <p className="text-2xl text-gray-700 leading-relaxed mb-8">
               To make travel accessible, enjoyable, and truly unforgettable by crafting personalized 
               journeys that create lasting memories and meaningful connections.
             </p>
-            <p className="text-xl text-slate-300 mb-12">
+            <p className="text-xl text-gray-600 mb-12">
               Whether you're planning a family holiday, a group adventure, or a once-in-a-lifetime journey, 
               Discover Group is your trusted partner in turning travel dreams into reality.
             </p>
             <a
               href="/contact"
-              className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-blue-900 font-bold text-lg rounded-full shadow-2xl hover:from-yellow-300 hover:to-yellow-400 hover:scale-105 transition-all"
+              className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-bold text-lg rounded-xl shadow-2xl hover:from-yellow-500 hover:to-yellow-600 hover:scale-105 hover:-translate-y-1 transition-all"
             >
               <Phone className="w-6 h-6" />
               Start Your Journey Today
@@ -343,13 +344,13 @@ export default function AboutUs() {
               viewport={{ once: true }}
               className="card-glass rounded-2xl p-8"
             >
-              <Users className="w-16 h-16 text-blue-400 mb-6" />
-              <h3 className="text-3xl font-bold text-white mb-4">Dedicated Team</h3>
-              <p className="text-slate-300 text-lg leading-relaxed mb-4">
+              <Users className="w-16 h-16 text-yellow-500 mb-6" />
+              <h3 className="text-3xl font-bold text-gray-900 mb-4">Dedicated Team</h3>
+              <p className="text-gray-700 text-lg leading-relaxed mb-4">
                 Our team of 11-50 travel professionals brings together years of experience, 
                 local knowledge, and a passion for creating extraordinary travel experiences.
               </p>
-              <p className="text-slate-300 leading-relaxed">
+              <p className="text-gray-700 leading-relaxed">
                 Each member is committed to providing personalized service while maintaining 
                 the professional expertise you deserve.
               </p>
@@ -362,12 +363,12 @@ export default function AboutUs() {
               viewport={{ once: true }}
               className="card-glass rounded-2xl p-8"
             >
-              <Heart className="w-16 h-16 text-pink-400 mb-6" />
-              <h3 className="text-3xl font-bold text-white mb-4">Creating Stories</h3>
-              <p className="text-slate-300 text-lg leading-relaxed mb-4">
+              <Heart className="w-16 h-16 text-pink-500 mb-6" />
+              <h3 className="text-3xl font-bold text-gray-900 mb-4">Creating Stories</h3>
+              <p className="text-gray-700 text-lg leading-relaxed mb-4">
                 We don't just book trips—we create stories and build memories that last a lifetime.
               </p>
-              <p className="text-slate-300 leading-relaxed">
+              <p className="text-gray-700 leading-relaxed">
                 Every itinerary is thoughtfully designed to reflect your unique preferences, ensuring 
                 your journey is as individual as you are.
               </p>

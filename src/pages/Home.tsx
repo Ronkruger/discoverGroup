@@ -181,12 +181,12 @@ export default function Home() {
   return (
     <main>
       {/* Hero Section - Enhanced */}
-      <section className="relative bg-gradient-to-br from-blue-900 via-blue-700 to-blue-500 text-white py-20 overflow-hidden min-h-[75vh] flex items-center justify-center">
+      <section className="relative bg-gradient-to-br from-blue-50 via-blue-100 to-purple-50 text-gray-900 py-20 overflow-hidden min-h-[75vh] flex items-center justify-center">
         {/* Animated Background with Particles */}
         <div className="absolute inset-0 overflow-hidden">
           {/* Gradient Overlay */}
           <motion.div
-            className="absolute inset-0 bg-gradient-to-tr from-blue-950/50 via-transparent to-blue-800/30"
+            className="absolute inset-0 bg-gradient-to-tr from-blue-100/50 via-transparent to-purple-100/30"
             animate={{ 
               backgroundPosition: ["0% 0%", "100% 100%"],
               opacity: [0.3, 0.6, 0.3]
@@ -196,7 +196,7 @@ export default function Home() {
           
           {/* Floating Geometric Shapes */}
           <motion.div
-            className="absolute top-20 left-10 w-32 h-32 bg-white/5 rounded-full blur-3xl"
+            className="absolute top-20 left-10 w-32 h-32 bg-yellow-300/10 rounded-full blur-3xl"
             animate={{ 
               x: [0, 100, 0],
               y: [0, 50, 0],
@@ -205,7 +205,7 @@ export default function Home() {
             transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.div
-            className="absolute bottom-20 right-20 w-40 h-40 bg-yellow-300/10 rounded-full blur-3xl"
+            className="absolute bottom-20 right-20 w-40 h-40 bg-blue-300/15 rounded-full blur-3xl"
             animate={{ 
               x: [0, -80, 0],
               y: [0, -60, 0],
@@ -214,7 +214,7 @@ export default function Home() {
             transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.div
-            className="absolute top-1/3 right-1/4 w-24 h-24 bg-blue-300/10 rounded-full blur-2xl"
+            className="absolute top-1/3 right-1/4 w-24 h-24 bg-purple-300/15 rounded-full blur-2xl"
             animate={{ 
               x: [0, 60, 0],
               y: [0, -40, 0]
@@ -232,23 +232,23 @@ export default function Home() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl shadow-2xl p-8 md:p-12 flex flex-col items-center"
+            className="backdrop-blur-xl bg-white/95 border border-gray-200 rounded-3xl shadow-2xl p-8 md:p-12 flex flex-col items-center"
           >
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 drop-shadow-lg text-center leading-tight"
+              className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 drop-shadow-lg text-center leading-tight text-gray-900"
             >
               Experience the Magic of <br />
-              <span className="text-yellow-300 inline-block mt-2">European Adventures</span>
+              <span className="bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent inline-block mt-2">European Adventures</span>
             </motion.h1>
             
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.2 }}
-              className="text-lg md:text-xl mb-10 max-w-2xl mx-auto text-center text-white/90 leading-relaxed"
+              className="text-lg md:text-xl mb-10 max-w-2xl mx-auto text-center text-gray-700 leading-relaxed"
             >
               Join thousands of travelers exploring Europe's most stunning destinations — 
               expert guides, guaranteed departures, and memories that last a lifetime.
@@ -276,16 +276,16 @@ export default function Home() {
               className="mt-10 grid grid-cols-3 gap-6 md:gap-12 w-full max-w-2xl"
             >
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-yellow-300">30K+</div>
-                <div className="text-xs md:text-sm text-white/80 mt-1">Happy Travelers</div>
+                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">30K+</div>
+                <div className="text-xs md:text-sm text-gray-700 mt-1">Happy Travelers</div>
               </div>
-              <div className="text-center border-x border-white/20">
-                <div className="text-2xl md:text-3xl font-bold text-yellow-300">75+</div>
-                <div className="text-xs md:text-sm text-white/80 mt-1">Tour Packages</div>
+              <div className="text-center border-x border-gray-300">
+                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">75+</div>
+                <div className="text-xs md:text-sm text-gray-700 mt-1">Tour Packages</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-yellow-300">4.9★</div>
-                <div className="text-xs md:text-sm text-white/80 mt-1">Customer Rating</div>
+                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">4.9★</div>
+                <div className="text-xs md:text-sm text-gray-700 mt-1">Customer Rating</div>
               </div>
             </motion.div>
           </motion.div>
@@ -297,9 +297,9 @@ export default function Home() {
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
-          <div className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center p-2">
+          <div className="w-6 h-10 border-2 border-gray-400 rounded-full flex items-start justify-center p-2">
             <motion.div
-              className="w-1.5 h-1.5 bg-white rounded-full"
+              className="w-1.5 h-1.5 bg-gray-600 rounded-full"
               animate={{ y: [0, 16, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
@@ -369,13 +369,13 @@ export default function Home() {
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 1 }}
-              className="mt-6 bg-white border border-green-200 rounded-lg p-4 shadow-sm max-w-md mx-auto"
+              className="mt-6 bg-white border-2 border-green-300 rounded-lg p-4 shadow-sm max-w-md mx-auto"
             >
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <div className="text-sm">
-                  <span className="font-medium">{hashName(recentBooking.customerName)}</span> just booked 
-                  <span className="font-medium"> {getTourTitle(recentBooking.tourSlug)}</span> • {recentBooking.timeAgo}
+                <div className="text-sm text-gray-900 font-medium">
+                  <span className="font-semibold text-gray-900">{hashName(recentBooking.customerName)}</span> just booked 
+                  <span className="font-semibold text-blue-600"> {getTourTitle(recentBooking.tourSlug)}</span> • <span className="text-gray-600">{recentBooking.timeAgo}</span>
                 </div>
               </div>
             </motion.div>
@@ -384,7 +384,7 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="bg-gradient-to-b from-gray-800 to-gray-900 py-20">
+      <section className="bg-gradient-to-b from-gray-50 to-white py-20">
         <div className="container mx-auto px-6 grid md:grid-cols-4 gap-12 text-center">
           {[
             { label: "Happy Travelers", value: homepageSettings.statistics.travelers, suffix: "+" },
@@ -400,42 +400,42 @@ export default function Home() {
               viewport={{ once: true }}
               className="p-6"
             >
-              <h3 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              <h3 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 <CountUp end={stat.value} duration={3} separator="," decimals={stat.label === "Average Rating" ? 1 : 0} />
                 {stat.suffix}
               </h3>
-              <p className="text-slate-300 mt-2">{stat.label}</p>
+              <p className="text-gray-700 mt-2">{stat.label}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
       {/* Why Choose Us */}
-      <section className="py-20 bg-gray-900">
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-6 text-center">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="text-3xl font-bold mb-12 text-white"
+            className="text-3xl font-bold mb-12 text-gray-900"
           >
             Why Travel with Us?
           </motion.h2>
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                icon: <Map className="w-10 h-10 text-blue-400 mx-auto" />,
+                icon: <Map className="w-10 h-10 text-blue-600 mx-auto" />,
                 title: "Customizable Itineraries",
                 desc: "Tailor-made routes designed to match your travel style and preferences.",
               },
               {
-                icon: <Users className="w-10 h-10 text-purple-400 mx-auto" />,
+                icon: <Users className="w-10 h-10 text-purple-600 mx-auto" />,
                 title: "Professional Guides",
                 desc: "Passionate local experts bringing history and culture to life.",
               },
               {
-                icon: <CheckCircle className="w-10 h-10 text-green-400 mx-auto" />,
+                icon: <CheckCircle className="w-10 h-10 text-green-600 mx-auto" />,
                 title: "Guaranteed Excellence",
                 desc: "25+ years delivering exceptional European travel experiences.",
               },
@@ -448,11 +448,11 @@ export default function Home() {
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.03, rotate: 1 }}
                 whileTap={{ scale: 0.98 }}
-                className="p-6 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl hover:shadow-2xl hover:from-white/15 hover:to-white/8 transition-all"
+                className="p-6 bg-white border-2 border-gray-200 rounded-2xl shadow-lg hover:shadow-xl hover:border-gray-300 transition-all"
               >
                 {f.icon}
-                <h3 className="font-semibold text-lg mt-4 text-white">{f.title}</h3>
-                <p className="text-slate-300 mt-2">{f.desc}</p>
+                <h3 className="font-semibold text-lg mt-4 text-gray-900">{f.title}</h3>
+                <p className="text-gray-700 mt-2">{f.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -559,7 +559,7 @@ export default function Home() {
             >
               <Link
                 to="/routes"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-bold rounded-full hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
               >
                 Explore All Routes
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -598,7 +598,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-gradient-to-b from-gray-900 to-gray-800">
+      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
             <motion.h2
@@ -606,7 +606,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="text-3xl font-bold mb-4 text-white"
+              className="text-3xl font-bold mb-4 text-gray-900"
             >
               What Our Travelers Say
             </motion.h2>
@@ -616,7 +616,7 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
               onClick={() => setShowReviewForm(!showReviewForm)}
-              className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl"
+              className="px-6 py-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-bold rounded-full hover:from-yellow-500 hover:to-yellow-600 transition-all shadow-lg hover:shadow-xl"
             >
               {showReviewForm ? 'Cancel' : 'Write a Review'}
             </motion.button>
@@ -640,21 +640,21 @@ export default function Home() {
               exit={{ opacity: 0, height: 0 }}
               className="max-w-2xl mx-auto mb-12"
             >
-              <form onSubmit={handleReviewSubmit} className="card-glass rounded-2xl p-8 shadow-2xl">
+              <form onSubmit={handleReviewSubmit} className="bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-lg border border-gray-200 rounded-2xl p-8 shadow-2xl">
                 <div className="mb-6">
-                  <label className="block text-white font-semibold mb-2">Your Name</label>
+                  <label className="block text-gray-900 font-semibold mb-2">Your Name</label>
                   <input
                     type="text"
                     required
                     value={reviewForm.name}
                     onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/50"
                     placeholder="Enter your name"
                   />
                 </div>
 
                 <div className="mb-6">
-                  <label className="block text-white font-semibold mb-2">Rating</label>
+                  <label className="block text-gray-900 font-semibold mb-2">Rating</label>
                   <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
@@ -676,13 +676,13 @@ export default function Home() {
                 </div>
 
                 <div className="mb-6">
-                  <label className="block text-white font-semibold mb-2">Your Review</label>
+                  <label className="block text-gray-900 font-semibold mb-2">Your Review</label>
                   <textarea
                     required
                     value={reviewForm.comment}
                     onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
                     rows={4}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/50"
                     placeholder="Share your experience with us..."
                   />
                 </div>
@@ -690,7 +690,7 @@ export default function Home() {
                 <button
                   type="submit"
                   disabled={reviewSubmitting}
-                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-bold rounded-xl hover:from-yellow-500 hover:to-yellow-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {reviewSubmitting ? 'Submitting...' : 'Submit Review'}
                 </button>
@@ -709,7 +709,7 @@ export default function Home() {
                   transition={{ duration: 0.6, delay: i * 0.1 }}
                   viewport={{ once: true }}
                   whileHover={{ scale: 1.02 }}
-                  className="p-6 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl hover:shadow-2xl hover:from-white/15 transition-all"
+                  className="p-6 bg-white border-2 border-gray-200 rounded-2xl shadow-lg hover:shadow-xl hover:border-gray-300 transition-all"
                 >
                   <div className="flex gap-1 mb-3">
                     {[...Array(5)].map((_, idx) => (
@@ -718,13 +718,13 @@ export default function Home() {
                         className={`w-4 h-4 ${
                           idx < review.rating
                             ? 'fill-yellow-400 text-yellow-400'
-                            : 'text-slate-600'
+                            : 'text-gray-300'
                         }`}
                       />
                     ))}
                   </div>
-                  <p className="italic text-slate-300 mb-4">"{review.comment}"</p>
-                  <p className="font-semibold text-white">{review.name}</p>
+                  <p className="italic text-gray-700 mb-4">"{review.comment}"</p>
+                  <p className="font-semibold text-gray-900">{review.name}</p>
                   {review.tourTitle && (
                     <p className="text-xs text-slate-400 mt-1">{review.tourTitle}</p>
                   )}
@@ -756,7 +756,7 @@ export default function Home() {
                   transition={{ duration: 0.6, delay: i * 0.2 }}
                   viewport={{ once: true }}
                   whileHover={{ scale: 1.02 }}
-                  className="p-6 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl hover:shadow-2xl hover:from-white/15 transition-all"
+                  className="p-6 bg-white border-2 border-gray-200 rounded-2xl shadow-lg hover:shadow-xl hover:border-gray-300 transition-all"
                 >
                   <div className="flex gap-1 mb-3">
                     {[...Array(5)].map((_, idx) => (
@@ -766,8 +766,8 @@ export default function Home() {
                       />
                     ))}
                   </div>
-                  <p className="italic text-slate-300 mb-4">"{t.quote}"</p>
-                  <p className="font-semibold text-white">{t.name}</p>
+                  <p className="italic text-gray-700 mb-4">"{t.quote}"</p>
+                  <p className="font-semibold text-gray-900">{t.name}</p>
                 </motion.div>
               ))
             )}
@@ -805,7 +805,7 @@ export default function Home() {
           >
             <Link
               to="/contact"
-              className="px-8 py-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 hover:shadow-xl transition"
+              className="px-8 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-bold rounded-full shadow-lg hover:from-yellow-500 hover:to-yellow-600 hover:shadow-xl transition"
             >
               Contact Us
             </Link>

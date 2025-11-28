@@ -36,7 +36,9 @@ const allowedOrigins = [
   'https://discovergroup.netlify.app',  // Client production (main)
   'https://discoverg.netlify.app',  // Client production (alternate)
   'https://discovergrp.netlify.app',  // Client production (alternate)
+  'https://discover-grp.netlify.app',  // Client production (new repo)
   'https://admin--discovergrp.netlify.app',  // Admin production
+  'https://admin-discoverg.netlify.app',  // Admin production (new repo)
   'https://admindiscovergrp.netlify.app',  // Admin production (alternate)
   'https://lambent-dodol-2486cc.netlify.app',  // Admin preview
 ];
@@ -112,6 +114,7 @@ import favoritesRouter from "./routes/favorites";
 import reviewsRouter from "./routes/reviews";
 import homepageSettingsRouter from "./routes/homepage-settings";
 import countriesRouter from "./routes/countries";
+import promoBannerRouter from "./routes/promoBanner";
 app.use("/admin/tours", adminToursRouter);
 app.use("/admin/users", adminUsersRouter);
 app.use("/admin/bookings", adminBookingsRouter);
@@ -125,6 +128,7 @@ app.use("/api/favorites", favoritesRouter);
 app.use("/api/reviews", reviewsRouter);
 app.use("/api/homepage-settings", homepageSettingsRouter);
 app.use("/api/countries", countriesRouter);
+app.use("/api/promo-banners", promoBannerRouter);
 app.use("/api", emailRouter);
 app.use("/auth", authRouter);
 

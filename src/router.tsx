@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Loading from "./components/Loading";
 import React from "react";
+import { useTheme } from "./context/ThemeContext";
 
 
 import Booking from "./pages/Booking";
@@ -14,7 +15,7 @@ import BookingConfirmation from "./pages/BookingConfirmation";
 // Lazy load pages
 const Home = lazy(() => import("./pages/Home"));
 const RoutesPage = lazy(() => import("./pages/RoutesPage"));
-const TourDetail = lazy(() => import("./pages/TourDetail"));
+const TourDetail = lazy(() => import("./pages/TourDetailNew"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
 const TourBuilder = lazy(() => import("./pages/TourBuilder"));
 const DestinationCountry = lazy(() => import("./pages/DestinationCountry"));
@@ -26,10 +27,14 @@ const Profile = lazy(() => import("./pages/Profile"));
 const UserSettings = lazy(() => import("./pages/UserSettings"));
 const AboutUs = lazy(() => import("./pages/AboutUs"));
 const Favorites = lazy(() => import("./pages/Favorites"));
+const WaysToGo = lazy(() => import("./pages/WaysToGo"));
+const Deals = lazy(() => import("./pages/Deals"));
 
-export default function AppRouter() {
+function AppContent() {
+  const { darkMode } = useTheme();
+
   return (
-    <Router>
+    <div className={`${darkMode ? 'dark bg-gray-900 text-white' : 'bg-white text-gray-900'} min-h-screen transition-colors duration-300`}>
       <Header />
       <Suspense fallback={<Loading />}>
         <Routes>
@@ -46,6 +51,7 @@ export default function AppRouter() {
           {/* Canonical singular routes */}
           <Route path="/tour/:slug" element={<TourDetail />} />
           <Route path="/tour/builder/:slug" element={<TourBuilder />} />
+          <Route path="/tour/builder" element={<TourBuilder />} />
 
 
           {/* Booking route */}
@@ -72,6 +78,8 @@ export default function AppRouter() {
 
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/ways-to-go" element={<WaysToGo />} />
+          <Route path="/deals" element={<Deals />} />
 
           {/* Helpful fallback route to display when no route matches (avoids silent console-only warnings) */}
           <Route
@@ -89,6 +97,14 @@ export default function AppRouter() {
         </Routes>
       </Suspense>
       <Footer />
+    </div>
+  );
+}
+
+export default function AppRouter() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }

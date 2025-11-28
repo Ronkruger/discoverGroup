@@ -33,42 +33,31 @@ import { fetchTourBySlug } from "../api/tours";
 import type { Tour, ItineraryDay, Stop, DepartureDate } from "../types";
 import { DepartureDateCalendar } from "../components/DepartureDateCalendar";
 import BackToTop from "../components/BackToTop";
-// Gallery image with fallback and debug info
+// Gallery image with fallback
 function GalleryImageWithFallback({ src }: { src: string }) {
   const [error, setError] = useState(false);
+  
   return (
-    <div style={{position:'relative'}}>
+    <div className="relative">
       {!error ? (
         <img
           src={src}
           alt="Gallery"
-          className="w-full h-[70vh] object-contain border-2 border-yellow-400 bg-white"
-          onLoad={e => {
-            const img = e.currentTarget;
-            console.log('Gallery image loaded:', img.src, 'naturalWidth:', img.naturalWidth, 'naturalHeight:', img.naturalHeight);
-          }}
-          onError={() => {
-            setError(true);
-            console.error('Gallery image failed to load:', src);
-          }}
+          className="w-full h-[70vh] object-contain bg-white rounded-lg"
+          onError={() => setError(true)}
         />
       ) : (
-        <div style={{width:'100%',height:'70vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#fff',border:'2px solid #FFD24D'}}>
-          <img src="/assets/placeholder.jpg" alt="placeholder" style={{maxHeight:'60vh',maxWidth:'80vw'}} />
-          <div style={{position:'absolute',top:10,left:10,zIndex:1000,color:'yellow',background:'rgba(0,0,0,0.7)',padding:'6px',fontSize:'12px',maxWidth:'80vw',wordBreak:'break-all'}}>
-            <b>DEBUG src:</b> {src}<br />
-            <span style={{color:'red'}}>Image failed to load. Check Supabase permissions or URL.</span>
-          </div>
-        </div>
-      )}
-      {!error && (
-        <div style={{position:'absolute',top:10,left:10,zIndex:1000,color:'yellow',background:'rgba(0,0,0,0.7)',padding:'6px',fontSize:'12px',maxWidth:'80vw',wordBreak:'break-all'}}>
-          <b>DEBUG src:</b> {src}
+        <div className="w-full h-[70vh] flex items-center justify-center bg-gray-100 rounded-lg">
+          <img 
+            src="/assets/placeholder.jpg" 
+            alt="placeholder" 
+            className="max-h-[60vh] max-w-[80vw] object-contain"
+          />
         </div>
       )}
     </div>
   );
-  }
+}
 
 export default TourDetail;
 export { GalleryImageWithFallback };
@@ -114,8 +103,6 @@ function TourDetail() {
     }
     return [];
   }, [tour?.galleryImages, tour?.images]);
-    // Debug: log images array used for gallery
-    console.log("images for gallery", images);
 
   const carouselTimerRef = useRef<number | null>(null);
   // datesRef is the container for the date buttons (grid / vertical)
@@ -129,11 +116,6 @@ function TourDetail() {
         const t = await fetchTourBySlug(slug);
         if (cancelled) return;
         setTour(t);
-          // Debug: log galleryImages and full tour object
-          if (t) {
-            console.log("tour.galleryImages", t.galleryImages);
-            console.log("tour", t);
-          }
         if (t) {
           const defaultDate =
             t.travelWindow?.start ??
@@ -144,8 +126,7 @@ function TourDetail() {
               : null);
           setSelectedDate(defaultDate);
         }
-      } catch (err) {
-        console.error("fetchTourBySlug error", err);
+      } catch {
         if (!cancelled) setTour(null);
       }
     })();
@@ -442,8 +423,7 @@ useEffect(() => {
 
   // Inline styles + small CSS for theme variables and transitions
   const themeStyle: React.CSSProperties = {
-    background:
-      "linear-gradient(180deg, rgba(2,18,51,1) 0%, rgba(8,42,102,1) 35%, rgba(4,18,55,1) 100%)",
+    background: "linear-gradient(180deg, rgba(249,250,251,1) 0%, rgba(243,244,246,1) 35%, rgba(255,255,255,1) 100%)",
     ["--accent-yellow" as string]: "#FFD24D",
     ["--accent-yellow-600" as string]: "#FFC107",
     ["--muted-slate" as string]: "#94a3b8",
@@ -454,27 +434,27 @@ useEffect(() => {
     const compactWrapper = compact ? "p-3" : "p-4";
     const compactButtons = compact ? "text-sm px-2 py-1" : "px-3 py-2";
     return (
-      <div className={`${compact ? "w-full" : "w-full"} ${compactWrapper} bg-white card-glass border border-white/8 rounded-lg shadow-lg`}>
-        <div className="text-xs text-slate-500">Launch Offer</div>
+      <div className={`${compact ? "w-full" : "w-full"} ${compactWrapper} bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-lg border border-gray-200 rounded-2xl shadow-xl hover:shadow-2xl transition-all`}>
+        <div className="text-xs text-gray-600 uppercase tracking-wider">Launch Offer</div>
 
         <div className="mt-2 flex items-baseline gap-3">
-          <div className="text-2xl font-bold" style={{ color: "var(--accent-yellow)" }}>
+          <div className="text-3xl font-bold text-gray-900">
             {formatCurrencyPHP(perPersonPrimary ?? 0)}
           </div>
-          <div className="text-xs text-slate-500">per person</div>
+          <div className="text-xs text-gray-600">per person</div>
         </div>
 
         <div className="mt-2 flex items-center gap-2">
           {typeof priceInfo.promo === "number" && (
-            <div className="text-xs text-slate-900 bg-accent-yellow px-2 py-1 rounded">Promo available</div>
+            <div className="text-xs text-gray-900 bg-gradient-to-r from-yellow-400 to-yellow-500 px-3 py-1 rounded-full font-semibold shadow-md">Promo available</div>
           )}
-          <div className="text-xs text-slate-400">· Flexible payment</div>
+          <div className="text-xs text-gray-600">· Flexible payment</div>
         </div>
 
         {/* If a flipbook is provided, show quick access */}
         {tour && tour.bookingPdfUrl && (
           <div className="mt-3">
-            <a href={tour.bookingPdfUrl} target="_blank" rel="noopener noreferrer" className="inline-block text-sm px-3 py-1 bg-white/90 rounded font-semibold">
+            <a href={tour.bookingPdfUrl} target="_blank" rel="noopener noreferrer" className="inline-block text-sm px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 border border-gray-300 rounded-xl font-semibold smooth-transition hover:shadow-md">
               Open Flipbook
             </a>
           </div>
@@ -483,21 +463,49 @@ useEffect(() => {
         {compact ? (
           <div className="mt-3 space-y-2">
             <div className="flex gap-2">
-              <button onClick={showAvailableDates} className={`${compactButtons} bg-rose-600 text-white rounded`}>Available Dates</button>
-              <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className={`${compactButtons} border rounded bg-white hover:bg-slate-50`}>Customize</Link>
+              <button onClick={showAvailableDates} className={`${compactButtons} bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 rounded-xl font-bold smooth-transition hover:shadow-lg hover:-translate-y-0.5`}>Available Dates</button>
+              <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className={`${compactButtons} border border-gray-300 rounded-xl bg-white text-gray-900 hover:bg-gray-50 smooth-transition hover:shadow-md font-semibold`}>Customize</Link>
             </div>
-            <Link
-              to={`/booking/${encodeURIComponent(builderSlug)}`}
-              state={{ tour, selectedDate, passengers, perPerson: perPersonForTotals }}
-              className="w-full text-center px-3 py-2 bg-accent-yellow text-slate-900 rounded font-semibold block"
-            >
-              BOOK NOW
-            </Link>
+            {hasDepartureDates ? (
+              selectedDate ? (
+                <Link
+                  to={`/booking/${encodeURIComponent(builderSlug)}`}
+                  state={{ tour, selectedDate, passengers, perPerson: perPersonForTotals }}
+                  className="w-full text-center px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-bold block smooth-transition hover:shadow-lg hover:-translate-y-0.5"
+                >
+                  BOOK NOW
+                </Link>
+              ) : (
+                <>
+                  <button
+                    disabled
+                    className="w-full text-center px-3 py-2 bg-gray-300 text-gray-500 rounded-xl font-bold cursor-not-allowed"
+                    title="Please select a departure date first"
+                  >
+                    Select a Date to Book
+                  </button>
+                  <div className="p-2 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2 text-xs text-yellow-800">
+                    <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span>Click "Available Dates" and select a date first</span>
+                  </div>
+                </>
+              )
+            ) : (
+              <Link
+                to={`/booking/${encodeURIComponent(builderSlug)}`}
+                state={{ tour, selectedDate, passengers, perPerson: perPersonForTotals }}
+                className="w-full text-center px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-bold block smooth-transition hover:shadow-lg hover:-translate-y-0.5"
+              >
+                BOOK NOW
+              </Link>
+            )}
           </div>
         ) : (
           <>
             <div className="mt-3 flex gap-2">
-              <button onClick={showAvailableDates} className={`${compactButtons} bg-rose-600 text-white rounded`}>Available Dates</button>
+              <button onClick={showAvailableDates} className={`${compactButtons} bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 rounded-xl font-bold smooth-transition hover:shadow-lg hover:-translate-y-0.5`}>Available Dates</button>
             </div>
           </>
         )}
@@ -505,62 +513,90 @@ useEffect(() => {
         {!compact && (
           <>
             <div className="mt-4">
-              <div className="text-xs text-slate-400">PASSENGERS</div>
+              <div className="text-xs text-gray-600 uppercase tracking-wider">PASSENGERS</div>
               <div className="mt-2 flex items-center gap-2">
-                <button onClick={() => togglePassenger(-1)} className="px-2 py-1 bg-white/6 rounded">−</button>
+                <button onClick={() => togglePassenger(-1)} className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 border border-gray-300 rounded-lg font-semibold transition-all">−</button>
                 <input
                   type="number"
                   min={1}
                   max={10}
                   value={passengers}
                   onChange={(e) => setPassengers(Math.max(1, Math.min(10, Number(e.target.value) || 1)))}
-                  className="w-16 text-black px-2 py-1 rounded border"
+                  className="w-16 text-gray-900 px-2 py-2 rounded-lg border border-gray-300 text-center font-semibold focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
                   aria-label="Number of passengers"
                 />
-                <button onClick={() => togglePassenger(1)} className="px-2 py-1 bg-white/6 rounded">+</button>
-                <div className="ml-auto text-xs text-slate-400">Max 10</div>
+                <button onClick={() => togglePassenger(1)} className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 border border-gray-300 rounded-lg font-semibold transition-all">+</button>
+                <div className="ml-auto text-xs text-gray-600">Max 10</div>
               </div>
             </div>
 
             <div className="mt-4">
               <div className="flex items-center justify-between">
-                <div className="text-xs text-slate-300">PRICE</div>
-                <div className="text-xs text-slate-400">Preview options</div>
+                <div className="text-xs text-gray-600 uppercase tracking-wider">PRICE</div>
+                <div className="text-xs text-gray-600">Preview options</div>
               </div>
 
               <div className="mt-2">
-                <div className="text-lg font-semibold" style={{ color: "var(--accent-yellow)" }}>
-                  {formatCurrencyPHP(perPersonPrimary ?? 0)} <span className="text-xs text-slate-300">per person</span>
+                <div className="text-lg font-bold text-gray-900">
+                  {formatCurrencyPHP(perPersonPrimary ?? 0)} <span className="text-xs text-gray-600">per person</span>
                 </div>
 
                 <div className="mt-2 flex items-center gap-2">
                   {typeof priceInfo.promo === "number" && (
                     <>
-                      <label className="inline-flex items-center gap-2 text-sm text-slate-200">
-                        <input type="checkbox" checked={usePromoForTotals} onChange={(e) => setUsePromoForTotals(e.target.checked)} />
+                      <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                        <input type="checkbox" checked={usePromoForTotals} onChange={(e) => setUsePromoForTotals(e.target.checked)} className="rounded border-gray-300" />
                         Use promo for totals
                       </label>
-                      <div className="text-xs text-slate-300">Promo: <span className="font-semibold">{formatCurrencyPHP(typeof priceInfo.promo === "number" ? priceInfo.promo : 0)}</span></div>
+                      <div className="text-xs text-gray-700">Promo: <span className="font-semibold">{formatCurrencyPHP(typeof priceInfo.promo === "number" ? priceInfo.promo : 0)}</span></div>
                     </>
                   )}
                 </div>
 
                 {passengers > 1 && (
-                  <div className="text-sm font-bold mt-3 text-white">Total: {formatCurrencyPHP(totalForPassengers)}</div>
+                  <div className="text-sm font-bold mt-3 text-gray-900">Total: {formatCurrencyPHP(totalForPassengers)}</div>
                 )}
               </div>
             </div>
 
             <div className="flex gap-2 mt-4">
-              <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className="flex-1 text-center px-3 py-2 bg-accent-yellow text-slate-900 rounded font-semibold">CUSTOMIZE</Link>
-              <Link
-                to={`/booking/${encodeURIComponent(builderSlug)}`}
-                state={{ tour, selectedDate, passengers, perPerson: perPersonForTotals }}
-                className="px-3 py-2 border rounded text-sm inline-flex items-center gap-2 bg-white text-slate-900 font-semibold shadow hover:shadow-md"
-              >
-                BOOK NOW
-              </Link>
+              <Link to={`/tour/builder/${encodeURIComponent(builderSlug)}`} className="flex-1 text-center px-3 py-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 rounded-xl font-bold smooth-transition hover:shadow-lg hover:-translate-y-0.5">CUSTOMIZE</Link>
+              {hasDepartureDates ? (
+                selectedDate ? (
+                  <Link
+                    to={`/booking/${encodeURIComponent(builderSlug)}`}
+                    state={{ tour, selectedDate, passengers, perPerson: perPersonForTotals }}
+                    className="px-3 py-2 border border-gray-300 rounded-xl text-sm inline-flex items-center gap-2 bg-white text-gray-900 font-bold shadow hover:shadow-md smooth-transition hover:-translate-y-0.5"
+                  >
+                    BOOK NOW
+                  </Link>
+                ) : (
+                  <button
+                    disabled
+                    className="px-3 py-2 border border-gray-300 rounded-xl text-sm inline-flex items-center gap-2 bg-gray-300 text-gray-500 font-bold cursor-not-allowed"
+                    title="Please select a departure date first"
+                  >
+                    Select Date
+                  </button>
+                )
+              ) : (
+                <Link
+                  to={`/booking/${encodeURIComponent(builderSlug)}`}
+                  state={{ tour, selectedDate, passengers, perPerson: perPersonForTotals }}
+                  className="px-3 py-2 border border-gray-300 rounded-xl text-sm inline-flex items-center gap-2 bg-white text-gray-900 font-bold shadow hover:shadow-md smooth-transition hover:-translate-y-0.5"
+                >
+                  BOOK NOW
+                </Link>
+              )}
             </div>
+            {!selectedDate && hasDepartureDates && (
+              <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2 text-sm text-yellow-800">
+                <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span>Please click "Available Dates" and select a departure date to continue.</span>
+              </div>
+            )}
           </>
         )}
       </div>
@@ -573,7 +609,7 @@ useEffect(() => {
   }
 
   return (
-  <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800" style={themeStyle}>
+  <div className="min-h-screen" style={themeStyle}>
       <style>{`
         .accent-yellow { color: var(--accent-yellow); }
         .bg-accent-yellow { background-color: var(--accent-yellow); }
@@ -627,21 +663,21 @@ useEffect(() => {
       `}</style>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav className="text-sm text-slate-200/80 mb-4 flex items-center gap-2">
-          <Link to="/" className="hover:underline">Home</Link>
-          <span className="text-slate-400">/</span>
-          <Link to="/tours" className="hover:underline">Tours</Link>
-          <span className="text-slate-400">/</span>
-          <span className="text-white font-medium">{tour ? tour.title! : ""}</span>
+        {/* Breadcrumb with animation */}
+        <nav className="text-sm text-gray-700 mb-6 flex items-center gap-2 animate-fade-in">
+          <Link to="/" className="hover:text-blue-600 smooth-transition hover:underline">Home</Link>
+          <span className="text-gray-500">/</span>
+          <Link to="/tours" className="hover:text-blue-600 smooth-transition hover:underline">Tours</Link>
+          <span className="text-gray-500">/</span>
+          <span className="text-gray-900 font-semibold">{tour ? tour.title! : ""}</span>
         </nav>
 
         {/* Mobile-optimized layout: Hero -> Title -> Booking -> Content */}
         <div className="lg:hidden">
-          {/* Mobile Hero - Reduced height */}
-          <div className="relative mb-4">
-            <div className="rounded-lg overflow-hidden shadow-xl">
-              <div className="relative w-full h-48 bg-slate-800 rounded">
+          {/* Mobile Hero - Reduced height with animation */}
+          <div className="relative mb-4 animate-scale-in stagger-1">
+            <div className="rounded-2xl overflow-hidden shadow-2xl gradient-border image-overlay">
+              <div className="relative w-full h-48 bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl">
                 {tour && tour.images && tour.images.length > 0 && isSafeImageUrl(tour.images[carouselIndex!]) ? (
                   <img
                     src={tour.images![carouselIndex!]}
@@ -660,26 +696,26 @@ useEffect(() => {
                 <button
                   aria-label="Previous image"
                   onClick={prevImage}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white rounded-full p-1.5"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 bg-gray-900/80 hover:bg-gray-900 text-white rounded-full p-1.5"
                 >
                   ‹
                 </button>
                 <button
                   aria-label="Next image"
                   onClick={nextImage}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white rounded-full p-1.5"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-gray-900/80 hover:bg-gray-900 text-white rounded-full p-1.5"
                 >
                   ›
                 </button>
 
                 {/* Mobile badges - simplified */}
-                <div className="absolute left-4 bottom-4 text-left text-white z-10">
+                <div className="absolute left-4 bottom-4 text-left z-10">
                   <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1 bg-white/20 text-white px-2 py-1 rounded-full text-xs">
+                    <span className="inline-flex items-center gap-1 bg-gray-900/80 text-white px-2 py-1 rounded-full text-xs font-medium">
                       {(tour?.durationDays ?? itinerary.length)} days
                     </span>
                     {tour && tour.guaranteedDeparture && (
-                      <span className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-200 px-2 py-1 rounded-full text-xs">
+                      <span className="inline-flex items-center gap-1 bg-emerald-600/90 text-white px-2 py-1 rounded-full text-xs font-medium">
                         Guaranteed
                       </span>
                     )}
@@ -700,37 +736,37 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Mobile Title Section */}
-          <div className="mb-4">
-            <div className="text-xs uppercase tracking-wider text-slate-200/80">{tour?.line ?? "Line"}</div>
-            <h1 className="font-serif font-extrabold text-2xl text-white mt-1 leading-tight">
+          {/* Mobile Title Section with animations */}
+          <div className="mb-4 animate-fade-in-up stagger-2">
+            <div className="text-xs uppercase tracking-widest text-gray-600 animate-fade-in stagger-3">{tour?.line ?? "Line"}</div>
+            <h1 className="font-serif font-extrabold text-2xl text-gray-900 mt-1 leading-tight animate-slide-in-left stagger-3">
               {tour?.title}
             </h1>
-            <p className="text-slate-300 mt-2 text-sm">{tour?.summary}</p>
+            <p className="text-gray-700 mt-2 text-sm animate-fade-in stagger-4">{tour?.summary}</p>
 
-            <div className="mt-3 flex items-center gap-2">
-              <button onClick={() => openGallery(0)} className="px-3 py-1.5 bg-accent-yellow text-slate-900 rounded font-semibold text-sm">
+            <div className="mt-3 flex items-center gap-2 animate-fade-in stagger-5">
+              <button onClick={() => openGallery(0)} className="px-3 py-1.5 bg-accent-yellow text-slate-900 rounded-lg font-semibold text-sm smooth-transition hover:shadow-lg hover:scale-105">
                 View gallery
               </button>
               {highlights.length > 0 && (
-                <span className="text-xs text-slate-300">• {highlights.slice(0, 2).join(", ")}</span>
+                <span className="text-xs text-gray-600">• {highlights.slice(0, 2).join(", ")}</span>
               )}
             </div>
           </div>
 
-          {/* Mobile Booking Card */}
-          <div className="mb-6">
+          {/* Mobile Booking Card with animation */}
+          <div className="mb-6 animate-scale-in stagger-4">
             <BookingCard compact />
           </div>
         </div>
 
   {/* Desktop layout: Hero + CTA column to the right on large screens */}
   <div className="mb-6 hidden lg:grid grid-cols-3 gap-6 items-start relative">
-          {/* Hero image (left: spans 2 columns on lg) */}
-          <div className="lg:col-span-2 relative">
-            <div className="rounded-2xl overflow-hidden shadow-2xl ring-2 ring-white/10">
+          {/* Hero image (left: spans 2 columns on lg) with animation */}
+          <div className="lg:col-span-2 relative animate-scale-in stagger-1">
+            <div className="rounded-2xl overflow-hidden shadow-2xl ring-2 ring-white/10 gradient-border image-overlay modern-card">
               {/* Carousel */}
-              <div className="relative w-full h-80 md:h-[450px] bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl">
+              <div className="relative w-full h-80 md:h-[450px] bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl">
                 {tour && tour.images && tour.images.length > 0 && isSafeImageUrl(tour.images![carouselIndex!]) ? (
                   <img
                     src={tour.images![carouselIndex!]}
@@ -749,7 +785,7 @@ useEffect(() => {
                 <button
                   aria-label="Previous image"
                   onClick={prevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white rounded-full p-3 transition-all duration-200 hover:scale-110 shadow-lg"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-gray-900/80 backdrop-blur-sm hover:bg-gray-900 text-white rounded-full p-3 transition-all duration-200 hover:scale-110 shadow-lg"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
@@ -758,7 +794,7 @@ useEffect(() => {
                 <button
                   aria-label="Next image"
                   onClick={nextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white rounded-full p-3 transition-all duration-200 hover:scale-110 shadow-lg"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-gray-900/80 backdrop-blur-sm hover:bg-gray-900 text-white rounded-full p-3 transition-all duration-200 hover:scale-110 shadow-lg"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
@@ -766,15 +802,15 @@ useEffect(() => {
                 </button>
 
                 {/* Desktop lower-left badges and gallery button */}
-                <div className="absolute left-6 bottom-6 text-left text-white max-w-2xl z-10">
-                  <div className="mt-0">
-                    <p className="text-slate-200/90 max-w-xl">{tour ? String(tour.shortDescription || tour.summary || "") : ""}</p>
-                  </div>
+                <div className="absolute left-6 bottom-6 text-left max-w-2xl z-10">
+                  <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-lg">
+                    <p className="text-gray-900 max-w-xl font-medium">{tour ? String(tour.shortDescription || tour.summary || "") : ""}</p>
 
-                  <div className="mt-4 flex items-center gap-3">
-                    <span className="inline-flex items-center gap-2 bg-white/6 text-white px-3 py-1 rounded-full text-sm">• {tour?.durationDays ?? itinerary.length} days</span>
-                    {tour && tour.guaranteedDeparture && <span className="inline-flex items-center gap-2 bg-emerald-50/6 text-emerald-200 px-3 py-1 rounded-full text-sm">Guaranteed</span>}
-                    <button onClick={() => openGallery(0)} className="px-3 py-1.5 bg-accent-yellow text-slate-900 rounded font-semibold text-sm">View gallery</button>
+                  <div className="mt-3 flex items-center gap-3">
+                    <span className="inline-flex items-center gap-2 bg-gray-900/80 text-white px-3 py-1 rounded-full text-sm font-medium">• {tour?.durationDays ?? itinerary.length} days</span>
+                    {tour && tour.guaranteedDeparture && <span className="inline-flex items-center gap-2 bg-emerald-600/90 text-white px-3 py-1 rounded-full text-sm font-medium">Guaranteed</span>}
+                    <button onClick={() => openGallery(0)} className="px-3 py-1.5 bg-accent-yellow text-gray-900 rounded font-semibold text-sm shadow-lg">View gallery</button>
+                  </div>
                   </div>
                 </div>
 
@@ -796,29 +832,29 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Desktop CTA column (right side of image on lg) */}
-          <div className="lg:col-span-1 items-start flex">
+          {/* Desktop CTA column (right side of image on lg) with animation */}
+          <div className="lg:col-span-1 items-start flex animate-slide-in-right-custom stagger-2">
             <div className="w-full">
               <BookingCard />
             </div>
           </div>
         </div>
 
-        {/* Desktop Title block (below hero image) */}
-        <div className="mb-6 hidden lg:block">
+        {/* Desktop Title block (below hero image) with animation */}
+        <div className="mb-6 hidden lg:block animate-fade-in-up stagger-3">
           <div className="bg-transparent rounded-md">
             <div className="lg:flex lg:items-center lg:justify-between">
               <div className="lg:w-2/3">
-                <div className="text-xs uppercase tracking-wider text-slate-200/80">{tour ? tour.line! ?? "Line" : "Line"}</div>
-                <h1 className="font-serif font-extrabold text-3xl md:text-4xl text-white mt-2 leading-tight">
+                <div className="text-xs uppercase tracking-wider text-gray-600">{tour ? tour.line! ?? "Line" : "Line"}</div>
+                <h1 className="font-serif font-extrabold text-3xl md:text-4xl text-gray-900 mt-2 leading-tight">
                   {tour ? tour.title! : ""}
                 </h1>
-                <p className="text-slate-300 mt-3 max-w-3xl">{tour ? tour.summary! : ""}</p>
+                <p className="text-gray-700 mt-3 max-w-3xl">{tour ? tour.summary! : ""}</p>
 
                 <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <span className="inline-flex items-center gap-2 bg-white/6 text-white px-3 py-1 rounded-full text-sm">• {tour ? (tour.durationDays! ?? itinerary.length) : itinerary.length} days</span>
-                  {tour && tour.guaranteedDeparture && <span className="inline-flex items-center gap-2 bg-emerald-50/6 text-emerald-200 px-3 py-1 rounded-full text-sm">Guaranteed departure</span>}
-                  {highlights.length > 0 && <span className="text-sm text-slate-300">• {highlights.join(", ")}</span>}
+                  <span className="inline-flex items-center gap-2 bg-gray-100 text-gray-900 px-3 py-1 rounded-full text-sm font-medium border-2 border-gray-200">• {tour ? (tour.durationDays! ?? itinerary.length) : itinerary.length} days</span>
+                  {tour && tour.guaranteedDeparture && <span className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-sm font-medium border-2 border-emerald-200">Guaranteed departure</span>}
+                  {highlights.length > 0 && <span className="text-sm text-gray-600">• {highlights.join(", ")}</span>}
                 </div>
               </div>
 
@@ -829,9 +865,9 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* Tour Video Section - Full Width */}
+        {/* Tour Video Section - Full Width with animation */}
         {tour && (tour as unknown as { video_url?: string }).video_url && (
-          <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-gray-900 to-gray-800">
+          <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl bg-white border-2 border-gray-200 animate-scale-in stagger-4">
             <div className="p-6 lg:p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-blue-600 p-3 rounded-xl">
@@ -840,8 +876,8 @@ useEffect(() => {
                   </svg>
                 </div>
                 <div>
-                  <h2 className="text-2xl lg:text-3xl font-bold text-white">Experience This Tour</h2>
-                  <p className="text-gray-300 text-sm lg:text-base">Watch our exclusive video preview</p>
+                  <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">Experience This Tour</h2>
+                  <p className="text-gray-700 text-sm lg:text-base">Watch our exclusive video preview</p>
                 </div>
               </div>
               
@@ -862,45 +898,45 @@ useEffect(() => {
               </div>
 
               <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                <div className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
                   <div className="flex items-center gap-3">
-                    <div className="bg-blue-500/20 p-2 rounded-lg">
-                      <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="bg-blue-100 p-2 rounded-lg">
+                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
                     </div>
                     <div>
-                      <div className="text-xs text-gray-400">Visual Preview</div>
-                      <div className="text-sm font-semibold text-white">See highlights</div>
+                      <div className="text-xs text-gray-600">Visual Preview</div>
+                      <div className="text-sm font-semibold text-gray-900">See highlights</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                <div className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
                   <div className="flex items-center gap-3">
-                    <div className="bg-green-500/20 p-2 rounded-lg">
-                      <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="bg-green-100 p-2 rounded-lg">
+                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div>
-                      <div className="text-xs text-gray-400">Real Experience</div>
-                      <div className="text-sm font-semibold text-white">Authentic footage</div>
+                      <div className="text-xs text-gray-600">Real Experience</div>
+                      <div className="text-sm font-semibold text-gray-900">Authentic footage</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                <div className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
                   <div className="flex items-center gap-3">
-                    <div className="bg-purple-500/20 p-2 rounded-lg">
-                      <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="bg-purple-100 p-2 rounded-lg">
+                      <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div>
-                      <div className="text-xs text-gray-400">Plan Ahead</div>
-                      <div className="text-sm font-semibold text-white">Know what to expect</div>
+                      <div className="text-xs text-gray-600">Plan Ahead</div>
+                      <div className="text-sm font-semibold text-gray-900">Know what to expect</div>
                     </div>
                   </div>
                 </div>
@@ -909,16 +945,16 @@ useEffect(() => {
           </div>
         )}
 
-        {/* Tabs: full width under the hero/title */}
-        <div className="bg-white/10 card-glass rounded-xl border border-white/10 mb-8 shadow-xl">
+        {/* Tabs: full width under the hero/title with animation */}
+        <div className="bg-white border-2 border-gray-200 rounded-xl mb-8 shadow-lg animate-fade-in stagger-5">
           <div className="px-6 py-2">
             <div className="flex gap-6 overflow-x-auto">
               <button 
                 onClick={() => setActiveTab("itinerary")} 
-                className={`px-4 py-4 whitespace-nowrap relative transition-all duration-200 ${
+                className={`px-4 py-4 whitespace-nowrap relative smooth-transition ${
                   activeTab === "itinerary" 
-                    ? "text-accent-yellow font-bold" 
-                    : "text-slate-300 hover:text-white"
+                    ? "text-blue-600 font-bold scale-105" 
+                    : "text-gray-700 hover:text-gray-900 hover:scale-105"
                 }`}
               >
                 <span className="flex items-center gap-2">
@@ -928,16 +964,16 @@ useEffect(() => {
                   Itinerary
                 </span>
                 {activeTab === "itinerary" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-accent-yellow rounded-full" />
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full animate-scale-in" />
                 )}
               </button>
               
               <button 
                 onClick={() => setActiveTab("availability")} 
-                className={`px-4 py-4 whitespace-nowrap relative transition-all duration-200 ${
+                className={`px-4 py-4 whitespace-nowrap relative smooth-transition ${
                   activeTab === "availability" 
-                    ? "text-accent-yellow font-bold" 
-                    : "text-slate-300 hover:text-white"
+                    ? "text-blue-600 font-bold scale-105" 
+                    : "text-gray-700 hover:text-gray-900 hover:scale-105"
                 }`}
               >
                 <span className="flex items-center gap-2">
@@ -947,16 +983,16 @@ useEffect(() => {
                   Availability
                 </span>
                 {activeTab === "availability" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-accent-yellow rounded-full" />
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full animate-scale-in" />
                 )}
               </button>
               
               <button 
                 onClick={() => setActiveTab("extensions")} 
-                className={`px-4 py-4 whitespace-nowrap relative transition-all duration-200 ${
+                className={`px-4 py-4 whitespace-nowrap relative smooth-transition ${
                   activeTab === "extensions" 
-                    ? "text-accent-yellow font-bold" 
-                    : "text-slate-300 hover:text-white"
+                    ? "text-blue-600 font-bold scale-105" 
+                    : "text-gray-700 hover:text-gray-900 hover:scale-105"
                 }`}
               >
                 <span className="flex items-center gap-2">
@@ -966,16 +1002,16 @@ useEffect(() => {
                   Extensions
                 </span>
                 {activeTab === "extensions" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-accent-yellow rounded-full" />
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full animate-scale-in" />
                 )}
               </button>
               
               <button 
                 onClick={() => setActiveTab("details")} 
-                className={`px-4 py-4 whitespace-nowrap relative transition-all duration-200 ${
+                className={`px-4 py-4 whitespace-nowrap relative smooth-transition ${
                   activeTab === "details" 
-                    ? "text-accent-yellow font-bold" 
-                    : "text-slate-300 hover:text-white"
+                    ? "text-blue-600 font-bold scale-105" 
+                    : "text-gray-700 hover:text-gray-900 hover:scale-105"
                 }`}
               >
                 <span className="flex items-center gap-2">
@@ -985,7 +1021,7 @@ useEffect(() => {
                   Details
                 </span>
                 {activeTab === "details" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-accent-yellow rounded-full" />
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full animate-scale-in" />
                 )}
               </button>
             </div>
@@ -999,8 +1035,8 @@ useEffect(() => {
             {/* Tab panels */}
             <div>
               {activeTab === "itinerary" && (
-                <div className="bg-gradient-to-br from-white/10 to-white/5 card-glass rounded-2xl p-6 lg:p-8 border border-white/10 shadow-xl">
-                  <h3 className="text-2xl lg:text-3xl font-bold mb-6 text-white flex items-center gap-3">
+                <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 lg:p-8 shadow-lg animate-fade-in-up">
+                  <h3 className="text-2xl lg:text-3xl font-bold mb-6 text-gray-900 flex items-center gap-3 animate-slide-in-left">
                     <div className="bg-blue-600 p-2 rounded-lg">
                       <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -1009,8 +1045,8 @@ useEffect(() => {
                     Day-by-day itinerary
                   </h3>
                   <div className="space-y-6">
-                    {itinerary.map((day: ItineraryDay & { image?: string }) => (
-                      <div key={day.day} className="p-6 border-2 border-white/10 rounded-xl bg-gradient-to-br from-white/5 to-transparent hover:from-white/10 hover:border-white/20 transition-all duration-300 hover:shadow-lg itinerary-day">
+                    {itinerary.map((day: ItineraryDay & { image?: string }, index: number) => (
+                      <div key={day.day} className={`p-6 border-2 border-gray-200 rounded-xl bg-gray-50 hover:bg-gray-100 hover:shadow-md smooth-transition animate-fade-in-up stagger-${Math.min(index + 1, 5)}`}>
                         <div className="flex items-start justify-between">
                           <div className="w-full">
                             <div className="flex items-center gap-3 mb-3">
@@ -1018,17 +1054,17 @@ useEffect(() => {
                                 {day.day}
                               </div>
                               <div>
-                                <div className="text-xs text-slate-400 uppercase tracking-wider">Day {day.day}</div>
-                                <div className="text-xl font-bold text-white">{day.title}</div>
+                                <div className="text-xs text-gray-600 uppercase tracking-wider">Day {day.day}</div>
+                                <div className="text-xl font-bold text-gray-900">{day.title}</div>
                               </div>
                             </div>
-                            <p className="text-slate-300 leading-relaxed pl-13">{day.description}</p>
+                            <p className="text-gray-700 leading-relaxed pl-13">{day.description}</p>
                             {day.image && (
                               <div className="mt-4 pl-13">
                                 <img 
                                   src={day.image} 
                                   alt={`Itinerary Day ${day.day}`} 
-                                  className="w-full max-w-2xl h-48 object-cover rounded-lg border-2 border-white/10 shadow-lg hover:scale-105 transition-transform duration-300" 
+                                  className="w-full max-w-2xl h-48 object-cover rounded-lg border-2 border-gray-200 shadow-md hover:scale-105 transition-transform duration-300" 
                                 />
                               </div>
                             )}
@@ -1036,16 +1072,16 @@ useEffect(() => {
                         </div>
                       </div>
                     ))}
-                    {itinerary.length === 0 && <div className="text-slate-300">No itinerary available.</div>}
+                    {itinerary.length === 0 && <div className="text-gray-700">No itinerary available.</div>}
                   </div>
                 </div>
               )}
               {activeTab === "availability" && (
-                <div className="bg-white/6 card-glass rounded-lg p-6 border border-white/6">
-                  <h3 className="text-xl font-semibold mb-4 text-white">Availability</h3>
-                  <p className="text-slate-300">
+                <div className="bg-white border-2 border-gray-200 rounded-lg p-6 animate-fade-in-up shadow-lg">
+                  <h3 className="text-xl font-semibold mb-4 text-gray-900 animate-slide-in-left">Availability</h3>
+                  <p className="text-gray-700">
                     {hasTravelWindow ? (
-                      <>This tour runs from <strong className="text-white">{formatDate(tour!.travelWindow!.start)}</strong> to <strong className="text-white">{formatDate(tour!.travelWindow!.end)}</strong>.</>
+                      <>This tour runs from <strong className="text-gray-900">{formatDate(tour!.travelWindow!.start)}</strong> to <strong className="text-gray-900">{formatDate(tour!.travelWindow!.end)}</strong>.</>
                     ) : hasDepartureDates ? (
                       <>Multiple discrete departure dates are available. Choose one from the right.</>
                     ) : (
@@ -1055,20 +1091,20 @@ useEffect(() => {
                 </div>
               )}
               {activeTab === "extensions" && (
-                <div className="bg-white/6 card-glass rounded-lg p-6 border border-white/6">
-                  <h3 className="text-xl font-semibold mb-4 text-white">Extensions</h3>
-                  <p className="text-slate-300">Optional extensions (e.g., pre/post stays) are available on some departures.</p>
+                <div className="bg-white border-2 border-gray-200 rounded-lg p-6 animate-fade-in-up shadow-lg">
+                  <h3 className="text-xl font-semibold mb-4 text-gray-900 animate-slide-in-left">Extensions</h3>
+                  <p className="text-gray-700">Optional extensions (e.g., pre/post stays) are available on some departures.</p>
                 </div>
               )}
               {activeTab === "details" && (
-                <div className="bg-white/6 card-glass rounded-lg p-6 border border-white/6">
-                  <h3 className="text-xl font-semibold mb-4 text-white">Tour details</h3>
-                  <p className="text-slate-300">Practical information, inclusion/exclusion, activity level and more.</p>
+                <div className="bg-white border-2 border-gray-200 rounded-lg p-6 animate-fade-in-up shadow-lg">
+                  <h3 className="text-xl font-semibold mb-4 text-gray-900 animate-slide-in-left">Tour details</h3>
+                  <p className="text-gray-700">Practical information, inclusion/exclusion, activity level and more.</p>
 
                   {/* If flipbook is available show it here too */}
                   {tour && tour.bookingPdfUrl && (
                     <div className="mt-4">
-                      <h4 className="text-sm text-white mb-2">Flipbook</h4>
+                      <h4 className="text-sm text-gray-900 mb-2 font-medium">Flipbook</h4>
                       <a href={tour.bookingPdfUrl!} target="_blank" rel="noopener noreferrer" className="inline-block px-3 py-2 bg-accent-yellow text-slate-900 rounded font-semibold">Open Flipbook</a>
                     </div>
                   )}
@@ -1079,9 +1115,9 @@ useEffect(() => {
 
           {/* Right: booking summary + stops (BookingCard removed from aside to avoid duplication) */}
           <aside className="space-y-6">
-            {/* Departure Dates Calendar */}
+            {/* Departure Dates Calendar with animation */}
             {hasDepartureDates && (
-              <section ref={datesRef}>
+              <section ref={datesRef} className="animate-scale-in stagger-2">
                 <DepartureDateCalendar
                   departureDates={(tour!.departureDates! as DepartureDate[]).map(dateObj => {
                     // Handle both legacy string and new object format
@@ -1096,34 +1132,34 @@ useEffect(() => {
               </section>
             )}
             
-            {/* Legacy Travel Window (if no departure dates) */}
+            {/* Legacy Travel Window (if no departure dates) with animation */}
             {!hasDepartureDates && hasTravelWindow && (
-              <section className="bg-white/6 card-glass rounded-lg p-5 border border-white/6 shadow-sm">
-                <h4 className="text-sm text-slate-200 mb-3">Travel Window</h4>
-                <div className="text-sm text-slate-200">
-                  <div className="font-semibold text-white">{formatDate(tour!.travelWindow!.start)} – {formatDate(tour!.travelWindow!.end)}</div>
-                  <div className="text-slate-400 text-xs mt-1">Tour runs during this period</div>
+              <section className="bg-white border-2 border-gray-200 rounded-lg p-5 shadow-md animate-scale-in stagger-2">
+                <h4 className="text-sm text-gray-700 mb-3 font-medium">Travel Window</h4>
+                <div className="text-sm text-gray-700">
+                  <div className="font-semibold text-gray-900">{formatDate(tour!.travelWindow!.start)} – {formatDate(tour!.travelWindow!.end)}</div>
+                  <div className="text-gray-600 text-xs mt-1">Tour runs during this period</div>
                 </div>
               </section>
             )}
             
             {!hasDepartureDates && !hasTravelWindow && (
-              <section className="bg-white/6 card-glass rounded-lg p-5 border border-white/6 shadow-sm">
-                <h4 className="text-sm text-slate-200 mb-3">Departure</h4>
-                <div className="text-sm text-slate-400">No departure information available</div>
+              <section className="bg-white border-2 border-gray-200 rounded-lg p-5 shadow-md animate-scale-in stagger-2">
+                <h4 className="text-sm text-gray-700 mb-3 font-medium">Departure</h4>
+                <div className="text-sm text-gray-600">No departure information available</div>
               </section>
             )}
 
-            {/* Tour summary card */}
-            <section className="bg-white/6 card-glass rounded-lg p-5 border border-white/6 shadow-sm">
-              <h4 className="text-sm text-slate-200 mb-2">Tour overview</h4>
-              <div className="text-sm text-slate-200">
+            {/* Tour summary card with animation */}
+            <section className="bg-white border-2 border-gray-200 rounded-lg p-5 shadow-md animate-scale-in stagger-3">
+              <h4 className="text-sm text-gray-700 mb-2 font-medium">Tour overview</h4>
+              <div className="text-sm text-gray-700">
                 <p className="mb-2">{tour?.summary}</p>
 
-                <ul className="text-sm text-slate-300 space-y-2">
-                  <li><strong className="text-white">Duration:</strong> {(tour?.durationDays ?? itinerary.length)} days</li>
-                  <li><strong className="text-white">Countries:</strong> {countriesVisited.join(", ") || "—"}</li>
-                  <li><strong className="text-white">Highlights:</strong> {highlights.join(", ") || "—"}</li>
+                <ul className="text-sm text-gray-700 space-y-2">
+                  <li><strong className="text-gray-900">Duration:</strong> {(tour?.durationDays ?? itinerary.length)} days</li>
+                  <li><strong className="text-gray-900">Countries:</strong> {countriesVisited.join(", ") || "—"}</li>
+                  <li><strong className="text-gray-900">Highlights:</strong> {highlights.join(", ") || "—"}</li>
                 </ul>
 
                 {/* Country image preview (first up to 3) */}
@@ -1138,14 +1174,14 @@ useEffect(() => {
                         )}
                       </div>
                     ))}
-                    {(tour.additionalInfo as AdditionalInfo).countries!.length > 3 && <div className="text-xs text-slate-300 self-end">+{(tour.additionalInfo as AdditionalInfo).countries!.length - 3}</div>}
+                    {(tour.additionalInfo as AdditionalInfo).countries!.length > 3 && <div className="text-xs text-gray-600 self-end">+{(tour.additionalInfo as AdditionalInfo).countries!.length - 3}</div>}
                   </div>
                 )}
               </div> {/* Close .text-sm .text-slate-200 */}
             </section> {/* Close Tour overview section */}
 
-            {/* Chat with Agent Card */}
-            <section className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 card-glass rounded-lg p-5 border-2 border-blue-400/30 shadow-lg">
+            {/* Chat with Agent Card with animation and glow */}
+            <section className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-5 border-2 border-blue-300 shadow-lg animate-scale-in stagger-4">
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
@@ -1155,8 +1191,8 @@ useEffect(() => {
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-base font-semibold text-white mb-1">Have Questions?</h4>
-                  <p className="text-xs text-slate-200 mb-3">Chat with our travel experts to learn more about this tour, customize your itinerary, or get personalized recommendations.</p>
+                  <h4 className="text-base font-semibold text-gray-900 mb-1">Have Questions?</h4>
+                  <p className="text-xs text-gray-700 mb-3">Chat with our travel experts to learn more about this tour, customize your itinerary, or get personalized recommendations.</p>
                   <a 
                     href="https://m.me/YourFacebookPage" 
                     target="_blank" 
@@ -1168,8 +1204,8 @@ useEffect(() => {
                     </svg>
                     Chat with Sales Agent
                   </a>
-                  <div className="mt-2 flex items-center gap-2 text-xs text-slate-300">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <div className="mt-2 flex items-center gap-2 text-xs text-gray-700">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                     <span>Usually replies within minutes</span>
                   </div>
                 </div>
@@ -1215,12 +1251,12 @@ useEffect(() => {
       {/* Stops map modal (simple route preview) */}
       {stopsMapOpen && (
         <div className="fixed inset-0 z-40 flex items-center justify-center modal-backdrop">
-          <div className="max-w-2xl w-full mx-4 bg-white/6 card-glass rounded-lg p-4 border border-white/8">
+          <div className="max-w-2xl w-full mx-4 bg-white border-2 border-gray-200 rounded-lg p-4 shadow-xl">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="text-white font-semibold">Route preview</h3>
-              <button onClick={() => setStopsMapOpen(false)} className="text-white/80">Close</button>
+              <h3 className="text-gray-900 font-semibold">Route preview</h3>
+              <button onClick={() => setStopsMapOpen(false)} className="text-gray-700 hover:text-gray-900 font-medium">Close</button>
             </div>
-            <div className="text-slate-200 text-sm">
+            <div className="text-gray-700 text-sm">
               <ol className="space-y-2">
                 {stops.length === 0 && <li>No stops to preview.</li>}
                 {stops.map((s, i) => {
@@ -1230,8 +1266,8 @@ useEffect(() => {
                     <li key={i} className="flex items-center gap-3">
                       <div className="text-2xl">{flag ?? "🏳️"}</div>
                       <div>
-                        <div className="font-medium">{s.city}</div>
-                        <div className="text-xs text-slate-300">{s.country}</div>
+                        <div className="font-medium text-gray-900">{s.city}</div>
+                        <div className="text-xs text-gray-600">{s.country}</div>
                       </div>
                     </li>
                   );

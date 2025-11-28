@@ -92,7 +92,7 @@ export default function SearchResults(): JSX.Element {
               <button
                 type="button"
                 onClick={() => setPassengers((p) => Math.max(1, p - 1))}
-                className="w-9 h-9 rounded-full border border-slate-300 flex items-center justify-center text-lg font-bold bg-slate-100 hover:bg-blue-100 active:bg-blue-200 transition"
+                className="w-11 h-11 rounded-full border border-slate-300 flex items-center justify-center text-lg font-bold bg-slate-100 hover:bg-blue-100 active:bg-blue-200 transition"
                 aria-label="Decrease passengers"
               >
                 −
@@ -111,7 +111,7 @@ export default function SearchResults(): JSX.Element {
               <button
                 type="button"
                 onClick={() => setPassengers((p) => p + 1)}
-                className="w-9 h-9 rounded-full border border-slate-300 flex items-center justify-center text-lg font-bold bg-slate-100 hover:bg-blue-100 active:bg-blue-200 transition"
+                className="w-11 h-11 rounded-full border border-slate-300 flex items-center justify-center text-lg font-bold bg-slate-100 hover:bg-blue-100 active:bg-blue-200 transition"
                 aria-label="Increase passengers"
               >
                 +

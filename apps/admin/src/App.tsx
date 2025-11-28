@@ -19,6 +19,7 @@ import SalesDepartment from './pages/SalesDepartment';
 import MapMarkersManagement from './pages/MapMarkersManagement';
 import HomepageManagement from './pages/HomepageManagement';
 import CountryManagement from './pages/CountryManagement';
+import PromoBannerManagement from './pages/PromoBannerManagement';
 import { UserRole } from "./types/auth";
 
 // Loading component
@@ -241,6 +242,19 @@ const AppRouter: React.FC = () => {
                   allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.WEB_DEVELOPER]}
                 >
                   <CountryManagement />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Promo Banner Management - Administrator & Web Developer */}
+            <Route
+              path="/promo-banners"
+              element={
+                <ProtectedRoute 
+                  requiredPermission="canAccessSettings"
+                  allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.WEB_DEVELOPER]}
+                >
+                  <PromoBannerManagement />
                 </ProtectedRoute>
               }
             />

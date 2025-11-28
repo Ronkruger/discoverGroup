@@ -395,13 +395,42 @@ export default function TourDetailNew() {
               </div>
 
               {/* Reserve Button */}
-              <Link
-                to={`/booking/${slug}`}
-                state={{ tour, passengers, perPerson: displayPrice, selectedDate }}
-                className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-3 rounded-lg transition-all block text-center mb-4"
-              >
-                Reserve
-              </Link>
+              {hasDepartureDates ? (
+                selectedDate ? (
+                  <Link
+                    to={`/booking/${slug}`}
+                    state={{ tour, passengers, perPerson: displayPrice, selectedDate }}
+                    className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-3 rounded-lg transition-all block text-center mb-4"
+                  >
+                    Reserve
+                  </Link>
+                ) : (
+                  <button
+                    disabled
+                    className="w-full bg-gray-300 text-gray-500 font-semibold py-3 rounded-lg cursor-not-allowed block text-center mb-4 relative"
+                    title="Please select a departure date first"
+                  >
+                    <span>Select a Date to Reserve</span>
+                  </button>
+                )
+              ) : (
+                <Link
+                  to={`/booking/${slug}`}
+                  state={{ tour, passengers, perPerson: displayPrice, selectedDate }}
+                  className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-3 rounded-lg transition-all block text-center mb-4"
+                >
+                  Reserve
+                </Link>
+              )}
+
+              {!selectedDate && hasDepartureDates && (
+                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2 text-sm text-yellow-800">
+                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <span>Please select a departure date from the available dates above to continue with your reservation.</span>
+                </div>
+              )}
 
               <p className="text-center text-sm text-gray-600 mb-4">
                 You won't be charged yet

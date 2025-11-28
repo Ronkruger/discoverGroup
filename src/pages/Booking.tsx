@@ -1015,11 +1015,25 @@ export default function Booking(): JSX.Element {
                           </div>
                         </div>
                         <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-5 form-field">
-                          <div className="text-xs text-gray-600 uppercase tracking-wider mb-2">Travel Date</div>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="text-xs text-gray-600 uppercase tracking-wider">Travel Date</div>
+                            {selectedDate && (
+                              <div className="flex items-center gap-1 text-xs text-green-600 font-medium">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                Pre-selected
+                              </div>
+                            )}
+                          </div>
                           <select 
                             value={selectedDate ?? ""} 
                             onChange={(e) => setSelectedDate(e.target.value)} 
-                            className="mt-1 w-full rounded-xl px-4 py-3 bg-white border-2 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-medium"
+                            className={`mt-1 w-full rounded-xl px-4 py-3 bg-white border-2 text-gray-900 focus:ring-2 focus:ring-blue-500/20 font-medium transition-all ${
+                              selectedDate 
+                                ? 'border-green-400 focus:border-green-500' 
+                                : 'border-gray-300 focus:border-blue-500'
+                            }`}
                           >
                             <option value="" className="bg-white text-gray-500">Select departure date</option>
                             {tour.departureDates && tour.departureDates.length > 0 ? (

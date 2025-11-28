@@ -335,7 +335,10 @@ export default function TourDetailNew() {
                     </label>
                     <div className="space-y-2 max-h-64 overflow-y-auto">
                       {departureDates.map((date, idx) => {
-                        const dateValue = typeof date === 'string' ? date : JSON.stringify(date);
+                        // Match the format used in Booking.tsx dropdown
+                        const dateValue = typeof date === 'string' 
+                          ? date 
+                          : `${(date as { start: string; end: string }).start} - ${(date as { start: string; end: string }).end}`;
                         const displayDateStr = typeof date === 'string' 
                           ? formatDate(date)
                           : `${formatDate((date as { start: string; end: string }).start)} - ${formatDate((date as { start: string; end: string }).end)}`;

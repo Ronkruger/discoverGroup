@@ -15,15 +15,12 @@ import uploadsRouter from "./routes/uploads";
 
 logger.info("Server starting, environment variables:");
 logger.info(`PORT: ${process.env.PORT || "4000 (default)"}`);
+logger.info(`MONGODB_URI: ${process.env.MONGODB_URI ? process.env.MONGODB_URI.substring(0, 30) + '...' : 'NOT SET'}`);
 
 const app = express();
 
 // Security middleware
 app.use(helmet());
-
-connectDB();
-app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
-app.use("/api/uploads", uploadsRouter);
 
 // CORS configuration
 const allowedOrigins = [
@@ -92,7 +89,10 @@ if (process.env.NODE_ENV === 'production') {
     credentials: true
   }));
 }
+
 app.use(express.json());
+app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
+app.use("/api/uploads", uploadsRouter);
 
 // Root route: provide a small JSON response so GET / is useful in the browser
 app.get("/", (_req: Request, res: Response) =>
@@ -101,7 +101,6 @@ app.get("/", (_req: Request, res: Response) =>
     endpoints: ["/admin/tours", "/public/tours", "/health"],
   })
 );
-
 
 import adminUsersRouter from "./routes/admin/users";
 import adminBookingsRouter from "./routes/admin/bookings";
@@ -117,6 +116,7 @@ import favoritesRouter from "./routes/favorites";
 import homepageSettingsRouter from "./routes/homepage-settings";
 import countriesRouter from "./routes/countries";
 import promoBannerRouter from "./routes/promoBanner";
+
 app.use("/admin/tours", adminToursRouter);
 app.use("/admin/users", adminUsersRouter);
 app.use("/admin/bookings", adminBookingsRouter);
@@ -140,7 +140,22 @@ app.get("/health", (_req: Request, res: Response) => res.json({ ok: true }));
 // Error handling middleware (must be last)
 app.use(errorHandler);
 
-const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
-app.listen(PORT, '0.0.0.0', () => {
-  logger.info(`✅ API server listening on http://localhost:${PORT}`);
-});
+// Initialize server with async database connection
+async function initializeServer() {
+  try {
+    // Connect to database before starting server
+    await connectDB();
+    logger.info("✅ Database connection successful");
+    
+    const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
+    app.listen(PORT, '0.0.0.0', () => {
+      logger.info(`✅ API server listening on http://0.0.0.0:${PORT}`);
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error(`❌ Failed to initialize server: ${errorMessage}`);
+    process.exit(1);
+  }
+}
+
+initializeServer();

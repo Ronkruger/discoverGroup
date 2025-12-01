@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, Save, X, Upload, ChevronUp, ChevronDown } from 'lucide-react';
-import { fetchCountries, createCountry, updateCountry, deleteCountry, type Country, type Attraction, type Testimonial } from '../../../../src/api/countries';
+import { fetchCountries, deleteCountry, type Country, type Attraction, type Testimonial } from '../../../../src/api/countries';
+import { createCountryAdmin, updateCountryAdmin } from '../services/apiClient';
 import { uploadFile } from '../lib/supabase';
 import React from 'react';
 
@@ -178,10 +179,10 @@ export default function CountryManagement() {
 
     try {
       if (editingCountry) {
-        await updateCountry(editingCountry._id, formData);
+        await updateCountryAdmin(editingCountry._id, formData);
         alert('Country updated successfully!');
       } else {
-        await createCountry(formData as Omit<Country, '_id' | 'slug' | 'createdAt' | 'updatedAt'>);
+        await createCountryAdmin(formData as Omit<Country, '_id' | 'slug' | 'createdAt' | 'updatedAt'>);
         alert('Country created successfully!');
       }
       handleCancel();

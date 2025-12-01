@@ -164,3 +164,45 @@ export async function fetchCountriesByContinent(continent: string): Promise<stri
   };
   return countries[continent] || [];
 }
+
+// ----- Admin Countries (used by admin UI) -----
+export interface AdminCountryPayload {
+  name: string;
+  description: string;
+  heroQuery?: string;
+  heroImageUrl?: string;
+  heroImages?: string[];
+  bestTime: string;
+  currency: string;
+  language: string;
+  visaInfo?: string;
+  attractions?: unknown[];
+  testimonials?: unknown[];
+  isActive?: boolean;
+}
+
+export async function createCountryAdmin(data: Partial<AdminCountryPayload>): Promise<Record<string, unknown>> {
+  const res = await fetch(`${API_BASE}/api/countries`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => res.statusText);
+    throw new Error(`Failed to create country: ${res.status} ${text}`);
+  }
+  return res.json();
+}
+
+export async function updateCountryAdmin(id: string, data: Partial<AdminCountryPayload>): Promise<Record<string, unknown>> {
+  const res = await fetch(`${API_BASE}/api/countries/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => res.statusText);
+    throw new Error(`Failed to update country: ${res.status} ${text}`);
+  }
+  return res.json();
+}

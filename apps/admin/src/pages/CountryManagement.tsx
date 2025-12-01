@@ -187,8 +187,9 @@ export default function CountryManagement() {
       handleCancel();
       loadCountries();
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save country';
       console.error('Save failed:', error);
-      alert('Failed to save country');
+      alert(errorMessage);
     }
   };
 

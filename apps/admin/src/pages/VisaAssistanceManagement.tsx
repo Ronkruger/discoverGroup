@@ -13,7 +13,9 @@ import {
   Calendar,
   Filter,
   Search,
-  Plus
+  Plus,
+  X,
+  Save
 } from 'lucide-react';
 
 interface VisaApplication {
@@ -113,6 +115,19 @@ export default function VisaAssistanceManagement() {
   const [showDetails, setShowDetails] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isNewApplicationModalOpen, setIsNewApplicationModalOpen] = useState(false);
+  const [newApplicationForm, setNewApplicationForm] = useState({
+    customerName: '',
+    customerEmail: '',
+    customerPhone: '',
+    nationality: 'Filipino',
+    destinationCountry: '',
+    visaType: 'Tourist',
+    urgency: 'standard' as 'standard' | 'rush' | 'emergency',
+    additionalServices: [] as string[],
+    tourReference: '',
+    notes: ''
+  });
 
   useEffect(() => {
     let filtered = applications;
@@ -137,6 +152,72 @@ export default function VisaAssistanceManagement() {
     setApplications(prev => 
       prev.map(app => app.id === id ? { ...app, status: newStatus } : app)
     );
+  };
+
+  const handleCreateNewApplication = () => {
+    // Generate new application ID
+    const newId = `VA-${new Date().getFullYear()}-${String(applications.length + 1).padStart(3, '0')}`;
+    
+    const newApplication: VisaApplication = {
+      id: newId,
+      ...newApplicationForm,
+      status: 'pending',
+      applicationDate: new Date().toISOString().split('T')[0],
+      submittedDocuments: {
+        passport: '',
+        photo: '',
+        bankStatement: '',
+        employmentCertificate: '',
+        itr: ''
+      },
+      estimatedCost: calculateEstimatedCost(newApplicationForm.destinationCountry, newApplicationForm.visaType, newApplicationForm.urgency),
+      assignedTo: 'Visa Team'
+    };
+    
+    setApplications(prev => [newApplication, ...prev]);
+    setIsNewApplicationModalOpen(false);
+    resetNewApplicationForm();
+  };
+
+  const calculateEstimatedCost = (country: string, visaType: string, urgency: string): number => {
+    let baseCost = 8500; // Base processing fee
+    
+    // Country multiplier
+    const countryMultipliers: Record<string, number> = {
+      'USA': 1.8, 'Canada': 1.6, 'UK': 1.5, 'Australia': 1.4,
+      'Germany': 1.3, 'France': 1.3, 'Italy': 1.2, 'Spain': 1.2,
+      'Japan': 1.4, 'South Korea': 1.2
+    };
+    baseCost *= countryMultipliers[country] || 1.0;
+    
+    // Visa type multiplier
+    const visaMultipliers: Record<string, number> = {
+      'Tourist': 1.0, 'Business': 1.3, 'Student': 1.5, 'Work': 2.0, 'Transit': 0.6
+    };
+    baseCost *= visaMultipliers[visaType] || 1.0;
+    
+    // Urgency multiplier
+    const urgencyMultipliers: Record<string, number> = {
+      'standard': 1.0, 'rush': 1.5, 'emergency': 2.0
+    };
+    baseCost *= urgencyMultipliers[urgency] || 1.0;
+    
+    return Math.round(baseCost);
+  };
+
+  const resetNewApplicationForm = () => {
+    setNewApplicationForm({
+      customerName: '',
+      customerEmail: '',
+      customerPhone: '',
+      nationality: 'Filipino',
+      destinationCountry: '',
+      visaType: 'Tourist',
+      urgency: 'standard',
+      additionalServices: [],
+      tourReference: '',
+      notes: ''
+    });
   };
 
   const downloadDocument = (filename: string) => {
@@ -179,7 +260,10 @@ export default function VisaAssistanceManagement() {
             <p className="text-gray-600 mt-2">Manage visa applications and customer assistance requests</p>
           </div>
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2">
+            <button 
+              onClick={() => setIsNewApplicationModalOpen(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+            >
               <Plus size={20} />
               New Application
             </button>
@@ -525,6 +609,264 @@ export default function VisaAssistanceManagement() {
               <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">
                 Add Note
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Application Modal */}
+      {isNewApplicationModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">New Visa Application</h2>
+                <button
+                  onClick={() => {
+                    setIsNewApplicationModalOpen(false);
+                    resetNewApplicationForm();
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                handleCreateNewApplication();
+              }} className="space-y-6">
+                {/* Customer Information */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <User size={20} />
+                    Customer Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={newApplicationForm.customerName}
+                        onChange={(e) => setNewApplicationForm(prev => ({ ...prev, customerName: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter full name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={newApplicationForm.customerEmail}
+                        onChange={(e) => setNewApplicationForm(prev => ({ ...prev, customerEmail: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter email address"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Phone Number *
+                      </label>
+                      <input
+                        type="tel"
+                        required
+                        value={newApplicationForm.customerPhone}
+                        onChange={(e) => setNewApplicationForm(prev => ({ ...prev, customerPhone: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="+63 912 345 6789"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Nationality *
+                      </label>
+                      <select
+                        value={newApplicationForm.nationality}
+                        onChange={(e) => setNewApplicationForm(prev => ({ ...prev, nationality: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="Filipino">Filipino</option>
+                        <option value="American">American</option>
+                        <option value="Canadian">Canadian</option>
+                        <option value="Australian">Australian</option>
+                        <option value="British">British</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Visa Information */}
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <Globe size={20} />
+                    Visa Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Destination Country *
+                      </label>
+                      <select
+                        required
+                        value={newApplicationForm.destinationCountry}
+                        onChange={(e) => setNewApplicationForm(prev => ({ ...prev, destinationCountry: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="">Select destination country</option>
+                        <option value="USA">United States</option>
+                        <option value="Canada">Canada</option>
+                        <option value="UK">United Kingdom</option>
+                        <option value="Australia">Australia</option>
+                        <option value="Germany">Germany</option>
+                        <option value="France">France</option>
+                        <option value="Italy">Italy</option>
+                        <option value="Spain">Spain</option>
+                        <option value="Japan">Japan</option>
+                        <option value="South Korea">South Korea</option>
+                        <option value="Singapore">Singapore</option>
+                        <option value="Thailand">Thailand</option>
+                        <option value="Malaysia">Malaysia</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Visa Type *
+                      </label>
+                      <select
+                        value={newApplicationForm.visaType}
+                        onChange={(e) => setNewApplicationForm(prev => ({ ...prev, visaType: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="Tourist">Tourist/Visitor</option>
+                        <option value="Business">Business</option>
+                        <option value="Student">Student</option>
+                        <option value="Work">Work/Employment</option>
+                        <option value="Transit">Transit</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Processing Urgency *
+                      </label>
+                      <select
+                        value={newApplicationForm.urgency}
+                        onChange={(e) => setNewApplicationForm(prev => ({ ...prev, urgency: e.target.value as 'standard' | 'rush' | 'emergency' }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="standard">Standard (10-15 business days)</option>
+                        <option value="rush">Rush (5-7 business days)</option>
+                        <option value="emergency">Emergency (1-3 business days)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Tour Reference (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={newApplicationForm.tourReference}
+                        onChange={(e) => setNewApplicationForm(prev => ({ ...prev, tourReference: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Tour booking reference"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional Services */}
+                <div className="bg-green-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Additional Services (Optional)
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {[
+                      'Document Translation',
+                      'Passport Photo Service', 
+                      'Embassy Appointment Booking',
+                      'Travel Insurance',
+                      'Hotel Booking Assistance',
+                      'Flight Booking Assistance'
+                    ].map((service) => (
+                      <label key={service} className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={newApplicationForm.additionalServices.includes(service)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setNewApplicationForm(prev => ({
+                                ...prev,
+                                additionalServices: [...prev.additionalServices, service]
+                              }));
+                            } else {
+                              setNewApplicationForm(prev => ({
+                                ...prev,
+                                additionalServices: prev.additionalServices.filter(s => s !== service)
+                              }));
+                            }
+                          }}
+                          className="rounded text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-700">{service}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Additional Notes (Optional)
+                  </label>
+                  <textarea
+                    value={newApplicationForm.notes}
+                    onChange={(e) => setNewApplicationForm(prev => ({ ...prev, notes: e.target.value }))}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Any special requirements or additional information..."
+                  />
+                </div>
+
+                {/* Estimated Cost Display */}
+                {newApplicationForm.destinationCountry && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-yellow-800 mb-2">Estimated Processing Cost</h4>
+                    <p className="text-2xl font-bold text-yellow-900">
+                      ₱{calculateEstimatedCost(newApplicationForm.destinationCountry, newApplicationForm.visaType, newApplicationForm.urgency).toLocaleString()}
+                    </p>
+                    <p className="text-sm text-yellow-700 mt-1">
+                      * Final cost may vary based on embassy fees and additional requirements
+                    </p>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex justify-end space-x-3 pt-6 border-t">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsNewApplicationModalOpen(false);
+                      resetNewApplicationForm();
+                    }}
+                    className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                  >
+                    <Save size={16} />
+                    Create Application
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

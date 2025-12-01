@@ -63,7 +63,14 @@ export async function createCountry(country: Partial<Country>): Promise<Country>
     body: JSON.stringify(country),
   });
   if (!response.ok) {
-    throw new Error('Failed to create country');
+    let errorMessage = 'Failed to create country';
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.error || errorMessage;
+    } catch {
+      errorMessage = `Server error (${response.status}): ${response.statusText}`;
+    }
+    throw new Error(errorMessage);
   }
   return response.json();
 }
@@ -75,7 +82,14 @@ export async function updateCountry(id: string, country: Partial<Country>): Prom
     body: JSON.stringify(country),
   });
   if (!response.ok) {
-    throw new Error('Failed to update country');
+    let errorMessage = 'Failed to update country';
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.error || errorMessage;
+    } catch {
+      errorMessage = `Server error (${response.status}): ${response.statusText}`;
+    }
+    throw new Error(errorMessage);
   }
   return response.json();
 }

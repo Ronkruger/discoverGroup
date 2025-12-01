@@ -37,8 +37,16 @@ router.post('/', async (req: Request, res: Response) => {
     await country.save();
     res.status(201).json(country);
   } catch (error) {
-    console.error('Error creating country:', error);
-    res.status(500).json({ error: 'Failed to create country' });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error creating country:', errorMessage);
+    console.error('Request body:', req.body);
+    if (error instanceof Error && error.name === 'ValidationError') {
+      res.status(400).json({ error: `Validation error: ${errorMessage}` });
+    } else if (error instanceof Error && error.message.includes('E11000')) {
+      res.status(409).json({ error: 'Country name already exists' });
+    } else {
+      res.status(500).json({ error: `Failed to create country: ${errorMessage}` });
+    }
   }
 });
 
@@ -56,8 +64,16 @@ router.put('/:id', async (req: Request, res: Response) => {
     }
     res.json(country);
   } catch (error) {
-    console.error('Error updating country:', error);
-    res.status(500).json({ error: 'Failed to update country' });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error updating country:', errorMessage);
+    console.error('Request body:', req.body);
+    if (error instanceof Error && error.name === 'ValidationError') {
+      res.status(400).json({ error: `Validation error: ${errorMessage}` });
+    } else if (error instanceof Error && error.message.includes('E11000')) {
+      res.status(409).json({ error: 'Country name already exists' });
+    } else {
+      res.status(500).json({ error: `Failed to update country: ${errorMessage}` });
+    }
   }
 });
 

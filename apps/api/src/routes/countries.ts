@@ -33,19 +33,38 @@ router.get('/:slug', async (req: Request, res: Response) => {
 // Create new country (admin)
 router.post('/', async (req: Request, res: Response) => {
   try {
+    console.log('Creating country with data:', JSON.stringify(req.body, null, 2));
+    
+    // Validate required fields
+    const requiredFields = ['name', 'description', 'bestTime', 'currency', 'language'];
+    const missingFields = requiredFields.filter(field => !req.body[field]);
+    
+    if (missingFields.length > 0) {
+      return res.status(400).json({ 
+        error: `Missing required fields: ${missingFields.join(', ')}`
+      });
+    }
+    
     const country = new Country(req.body);
     await country.save();
+    console.log('Country created successfully:', country._id);
     res.status(201).json(country);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : '';
     console.error('Error creating country:', errorMessage);
+    console.error('Stack trace:', errorStack);
     console.error('Request body:', req.body);
+    
     if (error instanceof Error && error.name === 'ValidationError') {
       res.status(400).json({ error: `Validation error: ${errorMessage}` });
     } else if (error instanceof Error && error.message.includes('E11000')) {
       res.status(409).json({ error: 'Country name already exists' });
     } else {
-      res.status(500).json({ error: `Failed to create country: ${errorMessage}` });
+      res.status(500).json({ 
+        error: `Failed to create country: ${errorMessage}`,
+        details: process.env.NODE_ENV === 'development' ? errorStack : undefined
+      });
     }
   }
 });

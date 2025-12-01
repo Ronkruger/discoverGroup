@@ -12,6 +12,7 @@ import authRouter from "./routes/auth";
 import { connectDB } from "./db";
 import path from "path";
 import uploadsRouter from "./routes/uploads";
+import healthRouter from "./routes/health";
 
 logger.info("Server starting, environment variables:");
 logger.info(`PORT: ${process.env.PORT || "4000 (default)"}`);
@@ -135,7 +136,9 @@ app.use("/api/promo-banners", promoBannerRouter);
 app.use("/api", emailRouter);
 app.use("/auth", authRouter);
 
-app.get("/health", (_req: Request, res: Response) => res.json({ ok: true }));
+// Health check routes
+app.use("/health", healthRouter);
+app.get("/health-simple", (_req: Request, res: Response) => res.json({ ok: true }));
 
 // Error handling middleware (must be last)
 app.use(errorHandler);

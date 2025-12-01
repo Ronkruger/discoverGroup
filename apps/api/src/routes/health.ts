@@ -21,7 +21,7 @@ router.get('/', (req: Request, res: Response) => {
       status: mongoReadyStates[mongoConnectionState],
       state: mongoConnectionState,
       host: mongoose.connection.host,
-      db: mongoose.connection.db?.getName() || 'unknown',
+      db: mongoose.connection.db?.databaseName || 'unknown',
       connected: mongoConnectionState === 1
     },
     environment: {
@@ -76,7 +76,7 @@ router.get('/db', async (req: Request, res: Response) => {
         state: mongoReadyStates[mongoConnectionState],
         readyState: mongoConnectionState,
         host: mongoose.connection.host || 'unknown',
-        database: mongoose.connection.db?.getName() || 'unknown',
+        database: mongoose.connection.name || 'unknown',
         uri: process.env.MONGODB_URI ? process.env.MONGODB_URI.substring(0, 40) + '...' : 'NOT SET'
       },
       ping: pingResult ? 'success' : 'not available',

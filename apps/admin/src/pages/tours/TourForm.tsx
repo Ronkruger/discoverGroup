@@ -8,7 +8,10 @@ import {
   FileText,
   Clock,
   DollarSign,
-  Camera
+  Camera,
+  Plus,
+  X,
+  Check
 } from "lucide-react";
 import { createClient } from '@supabase/supabase-js';
 
@@ -58,12 +61,12 @@ async function createImageRecord(label: 'main' | 'gallery'): Promise<{ id: strin
   return { id: `${label}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, label };
 }
 
-const LINE_OPTIONS = [
-  { value: "", label: "Select Line" },
+// Initial tour line options - will be extended with user-added lines
+const DEFAULT_LINE_OPTIONS = [
   { value: "ROUTE_A", label: "Route A Preferred" },
-    { value: "ROUTE_B", label: "Route B Deluxe" },
-    { value: "ROUTE_C", label: "Route C Preferred" },
-    { value: "ROUTE_D", label: "Route D Easy" },
+  { value: "ROUTE_B", label: "Route B Deluxe" },
+  { value: "ROUTE_C", label: "Route C Preferred" },
+  { value: "ROUTE_D", label: "Route D Easy" },
 ];
 
 interface ExtendedTour extends Tour {
@@ -196,6 +199,41 @@ export default function TourForm(): JSX.Element {
     });
   }
 
+  // Tour Line Handlers
+  function handleAddTourLine() {
+    if (!newLineName.trim() || !newLineValue.trim()) {
+      alert("Please fill in both Tour Line name and value");
+      return;
+    }
+
+    // Check if line already exists
+    if (tourLines.some(line => line.value === newLineValue)) {
+      alert("This tour line value already exists");
+      return;
+    }
+
+    // Add the new line
+    const newLine = { value: newLineValue, label: newLineName };
+    setTourLines([...tourLines, newLine]);
+
+    // Auto-select the newly created line
+    handleInputChange("line", newLineValue);
+
+    // Reset modal
+    setNewLineName("");
+    setNewLineValue("");
+    setShowAddLineModal(false);
+
+    // Show success message
+    alert(`✅ Tour Line "${newLineName}" added and selected!`);
+  }
+
+  function resetAddLineModal() {
+    setNewLineName("");
+    setNewLineValue("");
+    setShowAddLineModal(false);
+  }
+
   // Form state
   const [formData, setFormData] = useState<TourFormData>({
     title: "",
@@ -236,6 +274,11 @@ export default function TourForm(): JSX.Element {
   // Gallery modal state for galleryImages
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
+  // Tour Line Modal state
+  const [tourLines, setTourLines] = useState<Array<{ value: string; label: string }>>(DEFAULT_LINE_OPTIONS);
+  const [showAddLineModal, setShowAddLineModal] = useState(false);
+  const [newLineName, setNewLineName] = useState("");
+  const [newLineValue, setNewLineValue] = useState("");
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
@@ -566,18 +609,100 @@ export default function TourForm(): JSX.Element {
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   Tour Line
                 </label>
-                <select
-                  value={formData.line}
-                  onChange={(e) => handleInputChange("line", e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm bg-white"
-                >
-                  {LINE_OPTIONS.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex gap-2">
+                  <select
+                    value={formData.line}
+                    onChange={(e) => handleInputChange("line", e.target.value)}
+                    className="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm bg-white"
+                  >
+                    <option value="">Select Line</option>
+                    {tourLines.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddLineModal(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg flex items-center gap-2 transition-colors"
+                    title="Add new tour line"
+                  >
+                    <Plus size={18} />
+                    <span className="hidden sm:inline">Add Line</span>
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  {formData.line ? `Selected: ${tourLines.find(l => l.value === formData.line)?.label}` : "Choose or create a tour line"}
+                </p>
               </div>
+
+              {/* Add Tour Line Modal */}
+              {showAddLineModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                  <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-8">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-xl font-bold text-gray-900">Add New Tour Line</h3>
+                      <button
+                        onClick={resetAddLineModal}
+                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        <X size={24} />
+                      </button>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Tour Line Name *
+                        </label>
+                        <input
+                          type="text"
+                          value={newLineName}
+                          onChange={(e) => setNewLineName(e.target.value)}
+                          placeholder="e.g., Route E Premium"
+                          className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                          onKeyPress={(e) => e.key === 'Enter' && handleAddTourLine()}
+                        />
+                        <p className="text-xs text-gray-500 mt-1">The display name for the tour line</p>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Tour Line Code *
+                        </label>
+                        <input
+                          type="text"
+                          value={newLineValue}
+                          onChange={(e) => setNewLineValue(e.target.value.toUpperCase().replace(/\s+/g, '_'))}
+                          placeholder="e.g., ROUTE_E"
+                          className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm font-mono uppercase"
+                          onKeyPress={(e) => e.key === 'Enter' && handleAddTourLine()}
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Unique code (auto-formatted to uppercase)</p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 mt-8">
+                      <button
+                        type="button"
+                        onClick={resetAddLineModal}
+                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 px-4 rounded-lg transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleAddTourLine}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                      >
+                        <Check size={18} />
+                        Add & Select
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">

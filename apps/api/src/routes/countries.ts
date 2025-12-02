@@ -1,7 +1,44 @@
 import { Router, Request, Response } from 'express';
 import Country from '../models/Country';
+import mongoose from 'mongoose';
 
 const router = Router();
+
+// Debug endpoint to check MongoDB connection
+router.get('/debug/status', async (req: Request, res: Response) => {
+  try {
+    const mongoState = mongoose.connection.readyState;
+    const mongoStates: Record<number, string> = {
+      0: 'disconnected',
+      1: 'connected',
+      2: 'connecting',
+      3: 'disconnecting'
+    };
+    
+    let dbTest = null;
+    try {
+      dbTest = await mongoose.connection.db?.admin().ping();
+    } catch {
+      dbTest = null;
+    }
+    
+    res.json({
+      mongoState: mongoStates[mongoState],
+      mongoStateCode: mongoState,
+      mongoConnected: mongoState === 1,
+      mongoDBName: mongoose.connection.name,
+      mongoHost: mongoose.connection.host,
+      dbPingSuccess: dbTest ? true : false,
+      countryModelExists: !!Country,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
 
 // Get all countries
 router.get('/', async (req: Request, res: Response) => {
@@ -58,11 +95,14 @@ router.post('/', async (req: Request, res: Response) => {
     res.status(201).json(result);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorName = error instanceof Error ? error.name : 'Unknown';
     const errorStack = error instanceof Error ? error.stack : '';
     
     console.error('[Country POST] Error creating country:', errorMessage);
+    console.error('[Country POST] Error name:', errorName);
     console.error('[Country POST] Stack trace:', errorStack);
     console.error('[Country POST] Request body:', req.body);
+    console.error('[Country POST] Full error object:', error);
     
     // Handle specific error types
     if (error instanceof Error && error.name === 'ValidationError') {
@@ -76,7 +116,10 @@ router.post('/', async (req: Request, res: Response) => {
       res.status(400).json({ error: 'Country name is invalid or contains no alphanumeric characters' });
     } else {
       res.status(500).json({ 
-        error: `Failed to create country: ${errorMessage}`
+        error: `Failed to create country: ${errorMessage}`,
+        errorName,
+        mongoConnected: mongoose.connection.readyState === 1,
+        details: process.env.NODE_ENV === 'development' ? { errorMessage, errorName, stack: errorStack } : undefined
       });
     }
   }

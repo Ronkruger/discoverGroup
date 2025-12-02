@@ -4,6 +4,7 @@ import { fetchCountries, deleteCountry, type Country, type Attraction, type Test
 import { createCountryAdmin, updateCountryAdmin } from '../services/apiClient';
 import { createClient } from '@supabase/supabase-js';
 import React from 'react';
+import { useToast } from '../components/Toast';
 
 // --- Supabase Upload Helper (same pattern as TourForm) ---
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -33,6 +34,7 @@ async function uploadImageToSupabase(
 }
 
 export default function CountryManagement() {
+  const { success, error: errorToast } = useToast();
   const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingCountry, setEditingCountry] = useState<Country | null>(null);
@@ -54,22 +56,22 @@ export default function CountryManagement() {
   const [uploadingHero, setUploadingHero] = useState(false);
   const [uploadingAttraction, setUploadingAttraction] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadCountries();
-  }, []);
-
-  const loadCountries = async () => {
+  const loadCountries = React.useCallback(async () => {
     try {
       setLoading(true);
       const data = await fetchCountries();
       setCountries(data);
     } catch (error) {
       console.error('Failed to load countries:', error);
-      alert('Failed to load countries');
+      errorToast('Failed to load countries');
     } finally {
       setLoading(false);
     }
-  };
+  }, [errorToast]);
+
+  useEffect(() => {
+    loadCountries();
+  }, [loadCountries]);
 
   const handleEdit = (country: Country) => {
     setEditingCountry(country);
@@ -181,10 +183,10 @@ export default function CountryManagement() {
       const updatedAttractions = [...(formData.attractions || [])];
       updatedAttractions[index] = { ...updatedAttractions[index], imageUrl: url };
       setFormData({ ...formData, attractions: updatedAttractions });
-      alert('Attraction image uploaded successfully!');
+      success('Hero image uploaded successfully! ✅');
     } catch (error) {
       console.error('Upload failed:', error);
-      alert(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      errorToast(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setUploadingAttraction(null);
     }
@@ -192,24 +194,24 @@ export default function CountryManagement() {
 
   const handleSave = async () => {
     if (!formData.name || !formData.description || !formData.bestTime || !formData.currency || !formData.language) {
-      alert('Please fill in all required fields');
+      errorToast('Please fill in all required fields');
       return;
     }
 
     try {
       if (editingCountry) {
         await updateCountryAdmin(editingCountry._id, formData);
-        alert('Country updated successfully!');
+        success('Country updated successfully! ✅');
       } else {
         await createCountryAdmin(formData as Omit<Country, '_id' | 'slug' | 'createdAt' | 'updatedAt'>);
-        alert('Country created successfully!');
+        success('Country created successfully! ✅');
       }
       handleCancel();
       loadCountries();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to save country';
       console.error('Save failed:', error);
-      alert(errorMessage);
+      errorToast(errorMessage);
     }
   };
 
@@ -218,11 +220,11 @@ export default function CountryManagement() {
 
     try {
       await deleteCountry(id);
-      alert('Country deleted successfully!');
+      success('Country deleted successfully! 🗑️');
       loadCountries();
     } catch (error) {
       console.error('Delete failed:', error);
-      alert('Failed to delete country');
+      errorToast('Failed to delete country');
     }
   };
 

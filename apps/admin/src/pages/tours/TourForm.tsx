@@ -14,6 +14,7 @@ import {
   Check
 } from "lucide-react";
 import { createClient } from '@supabase/supabase-js';
+import { useToast } from "../../components/Toast";
 
 // --- Supabase Upload Helper ---
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -46,8 +47,8 @@ async function uploadImageToSupabase(
   const { error, data } = response;
   if (error) {
     console.error('[Supabase Upload] Error:', error.message, error);
-    alert('Supabase upload failed: ' + error.message);
-    return '';
+    // Toast will be called from the calling function
+    throw new Error('Supabase upload failed: ' + error.message);
   }
   // Get public URL
   const { publicUrl } = supabase.storage.from(bucket).getPublicUrl(filePath).data;
@@ -163,6 +164,8 @@ interface TourFormData {
 }
 
 export default function TourForm(): JSX.Element {
+  const { success, error: errorToast } = useToast();
+  
   // Itinerary image upload handler
   async function handleItineraryImageUpload(idx: number, file?: File | null) {
     if (!file) return;
@@ -202,13 +205,13 @@ export default function TourForm(): JSX.Element {
   // Tour Line Handlers
   function handleAddTourLine() {
     if (!newLineName.trim() || !newLineValue.trim()) {
-      alert("Please fill in both Tour Line name and value");
+      errorToast("Please fill in both Tour Line name and value");
       return;
     }
 
     // Check if line already exists
     if (tourLines.some(line => line.value === newLineValue)) {
-      alert("This tour line value already exists");
+      errorToast("This tour line value already exists");
       return;
     }
 
@@ -225,7 +228,7 @@ export default function TourForm(): JSX.Element {
     setShowAddLineModal(false);
 
     // Show success message
-    alert(`✅ Tour Line "${newLineName}" added and selected!`);
+    success(`Tour Line "${newLineName}" added and selected! ✅`);
   }
 
   function resetAddLineModal() {
@@ -1419,7 +1422,7 @@ export default function TourForm(): JSX.Element {
                           
                           // Validate file size (100MB limit)
                           if (file.size > 100 * 1024 * 1024) {
-                            alert('Video file size must be less than 100MB');
+                            errorToast('Video file size must be less than 100MB');
                             return;
                           }
 
@@ -1432,7 +1435,7 @@ export default function TourForm(): JSX.Element {
                             }
                           } catch (error) {
                             console.error('Video upload failed:', error);
-                            alert('Failed to upload video. Please try again.');
+                            errorToast('Failed to upload video. Please try again.');
                           }
                         }}
                         className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"

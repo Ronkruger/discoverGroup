@@ -3,12 +3,14 @@ import { JSX, useEffect, useState } from "react";
 import { fetchTours, deleteTour } from "../../services/apiClient";
 import { Link } from "react-router-dom";
 import { Plus, Edit2, Trash2, Calendar, DollarSign, MapPin, Loader } from "lucide-react";
+import { useToast } from "../../components/Toast";
 
 export default function ToursList(): JSX.Element {
   const [tours, setTours] = useState<Tour[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | number | null>(null);
+  const { success, error: errorToast } = useToast();
 
   useEffect(() => {
     let mounted = true;
@@ -41,9 +43,10 @@ export default function ToursList(): JSX.Element {
       setDeletingId(id);
       await deleteTour(id);
       setTours(prev => (prev ? prev.filter(t => `${t.id}` !== `${id}`) : prev));
+      success("Tour deleted successfully! 🗑️");
     } catch (err) {
       console.error("Delete failed", err);
-      alert(err instanceof Error ? err.message : "Failed to delete tour");
+      errorToast(err instanceof Error ? err.message : "Failed to delete tour");
     } finally {
       setDeletingId(null);
     }

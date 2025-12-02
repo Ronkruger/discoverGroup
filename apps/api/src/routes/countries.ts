@@ -33,37 +33,50 @@ router.get('/:slug', async (req: Request, res: Response) => {
 // Create new country (admin)
 router.post('/', async (req: Request, res: Response) => {
   try {
-    console.log('Creating country with data:', JSON.stringify(req.body, null, 2));
+    console.log('[Country POST] Creating country with data:', JSON.stringify(req.body, null, 2));
     
     // Validate required fields
     const requiredFields = ['name', 'description', 'bestTime', 'currency', 'language'];
     const missingFields = requiredFields.filter(field => !req.body[field]);
     
     if (missingFields.length > 0) {
+      console.warn('[Country POST] Missing required fields:', missingFields);
       return res.status(400).json({ 
         error: `Missing required fields: ${missingFields.join(', ')}`
       });
     }
     
+    // Create country using the model (pre-save hooks will generate slug)
     const country = new Country(req.body);
+    console.log('[Country POST] Created country instance, now saving...');
+    
     await country.save();
-    console.log('Country created successfully:', country._id);
-    res.status(201).json(country);
+    console.log('[Country POST] Country saved successfully:', country._id);
+    
+    // Return similar to tour creation
+    const result = country.toObject();
+    res.status(201).json(result);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const errorStack = error instanceof Error ? error.stack : '';
-    console.error('Error creating country:', errorMessage);
-    console.error('Stack trace:', errorStack);
-    console.error('Request body:', req.body);
     
+    console.error('[Country POST] Error creating country:', errorMessage);
+    console.error('[Country POST] Stack trace:', errorStack);
+    console.error('[Country POST] Request body:', req.body);
+    
+    // Handle specific error types
     if (error instanceof Error && error.name === 'ValidationError') {
+      const validationError = error as Record<string, unknown> & Error;
+      console.error('[Country POST] Validation error details:', validationError.errors);
       res.status(400).json({ error: `Validation error: ${errorMessage}` });
     } else if (error instanceof Error && error.message.includes('E11000')) {
-      res.status(409).json({ error: 'Country name already exists' });
+      const field = error.message.includes('name') ? 'name' : 'slug';
+      res.status(409).json({ error: `Country ${field} already exists` });
+    } else if (error instanceof Error && error.message.includes('Unable to generate slug')) {
+      res.status(400).json({ error: 'Country name is invalid or contains no alphanumeric characters' });
     } else {
       res.status(500).json({ 
-        error: `Failed to create country: ${errorMessage}`,
-        details: process.env.NODE_ENV === 'development' ? errorStack : undefined
+        error: `Failed to create country: ${errorMessage}`
       });
     }
   }

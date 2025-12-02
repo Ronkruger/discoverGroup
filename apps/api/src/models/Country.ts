@@ -39,10 +39,20 @@ countrySchema.pre('save', function(next) {
 
 // Generate slug from name before saving
 countrySchema.pre('save', function(next) {
-  if (this.isModified('name') && !this.slug) {
-    this.slug = this.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  try {
+    if (this.isModified('name') && !this.slug) {
+      if (!this.name || this.name.trim().length === 0) {
+        return next(new Error('Country name cannot be empty'));
+      }
+      this.slug = this.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      if (!this.slug || this.slug.length === 0) {
+        return next(new Error('Unable to generate slug from country name'));
+      }
+    }
+    next();
+  } catch (error) {
+    next(error as Error);
   }
-  next();
 });
 
 export default mongoose.models.Country || mongoose.model('Country', countrySchema);

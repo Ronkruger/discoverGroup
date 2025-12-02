@@ -1,9 +1,8 @@
-// Updated ToursList with Delete button wired to services/apiClient.deleteTour
-
 import { Tour } from "@discovergroup/types";
 import { JSX, useEffect, useState } from "react";
 import { fetchTours, deleteTour } from "../../services/apiClient";
 import { Link } from "react-router-dom";
+import { Plus, Edit2, Trash2, Calendar, DollarSign, MapPin, Loader } from "lucide-react";
 
 export default function ToursList(): JSX.Element {
   const [tours, setTours] = useState<Tour[] | null>(null);
@@ -41,7 +40,6 @@ export default function ToursList(): JSX.Element {
     try {
       setDeletingId(id);
       await deleteTour(id);
-      // remove from local state
       setTours(prev => (prev ? prev.filter(t => `${t.id}` !== `${id}`) : prev));
     } catch (err) {
       console.error("Delete failed", err);
@@ -51,141 +49,150 @@ export default function ToursList(): JSX.Element {
     }
   }
 
-  if (loading) return <div style={{ padding: 32 }}>Loading tours…</div>;
-  if (error) return <div style={{ color: "crimson", padding: 32 }}>Error: {error}</div>;
-  if (!tours || tours.length === 0)
+  if (loading) {
     return (
-      <div style={{ padding: 32 }}>
-        <div style={{ marginBottom: 12 }}>No tours found.</div>
-        <Link to="/tours/create">
-          <button style={createBtnStyle}>Create first tour</button>
-        </Link>
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <Loader className="animate-spin mx-auto mb-4 text-blue-600" size={40} />
+          <p className="text-gray-600 text-lg">Loading tours…</p>
+        </div>
       </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+          <h2 className="font-bold mb-2">Error Loading Tours</h2>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!tours || tours.length === 0) {
+    return (
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="bg-white rounded-lg p-12 text-center">
+          <MapPin className="mx-auto mb-4 text-gray-400" size={48} />
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">No tours yet</h2>
+          <p className="text-gray-600 mb-6">Create your first tour to get started</p>
+          <Link to="/tours/create">
+            <button className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-200">
+              <Plus size={20} />
+              Create First Tour
+            </button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{
-      background: "#fff",
-      margin: "40px auto",
-      borderRadius: 12,
-      boxShadow: "0 2px 16px 0 rgba(30,30,60,.08)",
-      maxWidth: 1100,
-      padding: "32px 30px"
-    }}>
-      <div style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 22
-      }}>
-        <h2 style={{ fontSize: 22, fontWeight: 700 }}>Tours</h2>
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Tours</h1>
+          <p className="text-gray-600 mt-1">{tours.length} tour{tours.length !== 1 ? 's' : ''} available</p>
+        </div>
         <Link to="/tours/create">
-          <button style={createBtnStyle}>+ Create Tour</button>
+          <button className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-200">
+            <Plus size={20} />
+            Create Tour
+          </button>
         </Link>
       </div>
-      <div style={{ overflowX: "auto" }}>
-        <table style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          background: "#fff",
-          borderRadius: 10,
-          overflow: "hidden",
-          fontSize: 15,
-        }}>
-          <thead>
-            <tr style={{ background: "#faf7fa" }}>
-              <th style={thStyle}>Title</th>
-              <th style={thStyle}>Slug</th>
-              <th style={thStyle}>Line</th>
-              <th style={thStyle}>Duration</th>
-              <th style={thStyle}>Regular Price</th>
-              <th style={thStyle}>Promo Price</th>
-              <th style={thStyle}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tours.map((t) => (
-              <tr key={t.id} style={{ background: "#fff" }}>
-                <td style={tdStyle}>
-                  <div style={{ fontWeight: 600 }}>{t.title}</div>
-                  <div style={{ color: "#888", fontSize: 13, maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {t.summary}
+
+      {/* Tours Grid */}
+      <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+        {tours.map((tour) => (
+          <div
+            key={tour.id}
+            className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden"
+          >
+            {/* Card Header */}
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 border-b border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 truncate">{tour.title}</h3>
+              <p className="text-sm text-gray-600 mt-1 line-clamp-2">{tour.summary || "No description"}</p>
+            </div>
+
+            {/* Card Body */}
+            <div className="p-4 space-y-3">
+              {/* Tour Line */}
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-semibold uppercase text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                  {tour.line || "No Line"}
+                </span>
+              </div>
+
+              {/* Info Grid */}
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                {/* Duration */}
+                <div className="flex items-start gap-2">
+                  <Calendar size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-gray-500 text-xs">Duration</p>
+                    <p className="font-semibold text-gray-900">{tour.durationDays ?? "-"} days</p>
                   </div>
-                </td>
-                <td style={tdStyle}><code>{t.slug}</code></td>
-                <td style={tdStyle}>{t.line}</td>
-                <td style={{ ...tdStyle, textAlign: "center" }}>{t.durationDays ?? "-"}</td>
-                <td style={{ ...tdStyle, textAlign: "right" }}>
-                  {t.regularPricePerPerson ? `₱${t.regularPricePerPerson.toLocaleString()}` : "--"}
-                </td>
-                <td style={{ ...tdStyle, textAlign: "right" }}>
-                  {t.promoPricePerPerson ? `₱${t.promoPricePerPerson.toLocaleString()}` : "--"}
-                </td>
-                <td style={{ ...tdStyle, minWidth: 160 }}>
-                  <Link to={`/tours/${t.id}`}>
-                    <button style={editBtnStyle}>Edit</button>
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(t.id)}
-                    disabled={deletingId === t.id}
-                    style={{
-                      ...deleteBtnStyle,
-                      opacity: deletingId === t.id ? 0.6 : 1,
-                      cursor: deletingId === t.id ? "not-allowed" : "pointer"
-                    }}
-                    aria-label={`Delete tour ${t.title}`}
-                  >
-                    {deletingId === t.id ? "Deleting…" : "Delete"}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+
+                {/* Regular Price */}
+                <div className="flex items-start gap-2">
+                  <DollarSign size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-gray-500 text-xs">Regular</p>
+                    <p className="font-semibold text-gray-900">
+                      {tour.regularPricePerPerson ? `₱${(tour.regularPricePerPerson as unknown as number).toLocaleString()}` : "--"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Promo Price */}
+              {tour.promoPricePerPerson && (
+                <div className="bg-amber-50 border border-amber-200 rounded p-2 text-xs">
+                  <p className="text-amber-700">
+                    <span className="font-semibold">Promo: </span>
+                    ₱{(tour.promoPricePerPerson as unknown as number).toLocaleString()}
+                  </p>
+                </div>
+              )}
+
+              {/* Slug */}
+              <div className="pt-2 border-t border-gray-200">
+                <p className="text-xs text-gray-500 mb-1">Slug</p>
+                <code className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded block truncate">
+                  {tour.slug}
+                </code>
+              </div>
+            </div>
+
+            {/* Card Footer - Actions */}
+            <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex gap-2">
+              <Link to={`/tours/${tour.id}`} className="flex-1">
+                <button className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-200 text-sm">
+                  <Edit2 size={16} />
+                  Edit
+                </button>
+              </Link>
+              <button
+                onClick={() => handleDelete(tour.id)}
+                disabled={deletingId === tour.id}
+                className="flex items-center justify-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                aria-label={`Delete tour ${tour.title}`}
+              >
+                {deletingId === tour.id ? (
+                  <Loader size={16} className="animate-spin" />
+                ) : (
+                  <Trash2 size={16} />
+                )}
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
-
-const thStyle: React.CSSProperties = {
-  textAlign: "left",
-  padding: "12px 16px",
-  background: "#f6f6fa",
-  fontWeight: 700,
-  borderBottom: "1px solid #eee"
-};
-const tdStyle: React.CSSProperties = {
-  padding: "12px 16px",
-  borderBottom: "1px solid #f2f2f2",
-  fontSize: 15,
-  verticalAlign: "top"
-};
-const createBtnStyle: React.CSSProperties = {
-  padding: "10px 20px",
-  borderRadius: 6,
-  border: "none",
-  background: "linear-gradient(90deg,#ee4d7e 0,#ff6a3d 100%)",
-  color: "#fff",
-  fontWeight: 600,
-  fontSize: 15,
-  cursor: "pointer"
-};
-const editBtnStyle: React.CSSProperties = {
-  padding: "7px 16px",
-  borderRadius: 6,
-  border: "none",
-  fontWeight: 600,
-  background: "linear-gradient(90deg,#ee4d7e 0,#ff6a3d 100%)",
-  color: "#fff",
-  cursor: "pointer",
-  marginRight: 8,
-};
-const deleteBtnStyle: React.CSSProperties = {
-  padding: "7px 12px",
-  borderRadius: 6,
-  border: "none",
-  fontWeight: 600,
-  background: "#ef4444",
-  color: "#fff",
-  cursor: "pointer",
-};

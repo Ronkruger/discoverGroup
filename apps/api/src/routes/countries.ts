@@ -71,6 +71,8 @@ router.get('/:slug', async (req: Request, res: Response) => {
 router.post('/', async (req: Request, res: Response) => {
   try {
     console.log('[Country POST] Creating country with data:', JSON.stringify(req.body, null, 2));
+    console.log('[Country POST] MongoDB connection state:', mongoose.connection.readyState);
+    console.log('[Country POST] Country model available:', !!Country);
     
     // Validate required fields
     const requiredFields = ['name', 'description', 'bestTime', 'currency', 'language'];
@@ -83,32 +85,50 @@ router.post('/', async (req: Request, res: Response) => {
       });
     }
     
-    // Create country using the model (pre-save hooks will generate slug)
-    const country = new Country(req.body);
-    console.log('[Country POST] Created country instance, now saving...');
+    // Ensure MongoDB is connected
+    if (mongoose.connection.readyState !== 1) {
+      console.error('[Country POST] MongoDB not connected. State:', mongoose.connection.readyState);
+      return res.status(503).json({ 
+        error: 'Database connection not ready',
+        mongoState: mongoose.connection.readyState
+      });
+    }
     
-    await country.save();
-    console.log('[Country POST] Country saved successfully:', country._id);
+    // Create country using the model (pre-save hooks will generate slug)
+    console.log('[Country POST] Creating new Country instance...');
+    const country = new Country(req.body);
+    console.log('[Country POST] Country instance created, preparing to save...');
+    console.log('[Country POST] Country data:', country);
+    
+    const savedCountry = await country.save();
+    console.log('[Country POST] ✅ Country saved successfully:', savedCountry._id);
     
     // Return similar to tour creation
-    const result = country.toObject();
+    const result = savedCountry.toObject();
     res.status(201).json(result);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const errorName = error instanceof Error ? error.name : 'Unknown';
     const errorStack = error instanceof Error ? error.stack : '';
     
-    console.error('[Country POST] Error creating country:', errorMessage);
+    console.error('[Country POST] ❌ Error creating country:', errorMessage);
     console.error('[Country POST] Error name:', errorName);
+    console.error('[Country POST] Error code:', (error as Record<string, unknown>)?.code);
     console.error('[Country POST] Stack trace:', errorStack);
     console.error('[Country POST] Request body:', req.body);
-    console.error('[Country POST] Full error object:', error);
+    console.error('[Country POST] Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
     
     // Handle specific error types
     if (error instanceof Error && error.name === 'ValidationError') {
       const validationError = error as Record<string, unknown> & Error;
       console.error('[Country POST] Validation error details:', validationError.errors);
-      res.status(400).json({ error: `Validation error: ${errorMessage}` });
+      res.status(400).json({ 
+        error: `Validation error: ${errorMessage}`,
+        details: Object.entries(validationError.errors || {}).map(([field, err]: [string, unknown]) => ({
+          field,
+          message: (err as Record<string, unknown>)?.message || String(err)
+        }))
+      });
     } else if (error instanceof Error && error.message.includes('E11000')) {
       const field = error.message.includes('name') ? 'name' : 'slug';
       res.status(409).json({ error: `Country ${field} already exists` });
@@ -119,6 +139,7 @@ router.post('/', async (req: Request, res: Response) => {
         error: `Failed to create country: ${errorMessage}`,
         errorName,
         mongoConnected: mongoose.connection.readyState === 1,
+        mongoState: mongoose.connection.readyState,
         details: process.env.NODE_ENV === 'development' ? { errorMessage, errorName, stack: errorStack } : undefined
       });
     }

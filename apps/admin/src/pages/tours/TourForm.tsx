@@ -414,9 +414,22 @@ export default function TourForm(): JSX.Element {
       setSaving(true);
       setError(null);
 
+      // Prepare images array: combine mainImage and galleryImages
+      const imagesArray: string[] = [];
+      if (formData.mainImage) imagesArray.push(formData.mainImage);
+      if (formData.galleryImages && Array.isArray(formData.galleryImages)) {
+        imagesArray.push(...formData.galleryImages.filter((img: string) => img && img !== formData.mainImage));
+      }
+
       // Prepare payload - convert empty strings to undefined/null for numbers
       const payload = {
         ...formData,
+        // Map form fields to database field
+        images: imagesArray.length > 0 ? imagesArray : undefined,
+        // Remove form-only fields that shouldn't go to DB
+        mainImage: undefined,
+        galleryImages: undefined,
+        relatedImages: undefined,
         regularPricePerPerson: formData.regularPricePerPerson === "" ? undefined : Number(formData.regularPricePerPerson),
         promoPricePerPerson: formData.promoPricePerPerson === "" ? undefined : Number(formData.promoPricePerPerson),
         basePricePerDay: formData.basePricePerDay === "" ? undefined : Number(formData.basePricePerDay),

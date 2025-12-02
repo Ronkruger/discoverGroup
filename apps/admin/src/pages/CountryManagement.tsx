@@ -2,8 +2,35 @@ import { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, Save, X, Upload, ChevronUp, ChevronDown } from 'lucide-react';
 import { fetchCountries, deleteCountry, type Country, type Attraction, type Testimonial } from '../../../../src/api/countries';
 import { createCountryAdmin, updateCountryAdmin } from '../services/apiClient';
-import { uploadFile } from '../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import React from 'react';
+
+// --- Supabase Upload Helper (same pattern as TourForm) ---
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+console.log('[CountryManagement] supabaseUrl:', supabaseUrl);
+console.log('[CountryManagement] supabaseAnonKey:', supabaseAnonKey);
+const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
+
+async function uploadImageToSupabase(
+  file: File,
+  bucket: string = 'country-images',
+  folder: string = 'hero-images'
+): Promise<string> {
+  const filePath = `${folder}/${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name}`;
+  console.log('[Country Upload] Attempting upload:', { file: file.name, fileSize: file.size, bucket, filePath });
+  
+  const { error } = await supabase.storage.from(bucket).upload(filePath, file);
+  
+  if (error) {
+    console.error('[Country Upload] Error:', error.message);
+    throw new Error(error.message);
+  }
+  
+  const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(filePath);
+  console.log('[Country Upload] Success. Public URL:', publicUrl);
+  return publicUrl;
+}
 
 export default function CountryManagement() {
   const [countries, setCountries] = useState<Country[]>([]);
@@ -107,22 +134,18 @@ export default function CountryManagement() {
 
     try {
       setUploadingHero(true);
-      const result = await uploadFile(file, 'country-images', { folder: 'hero-images' });
-      if (result.success && result.url) {
-        const currentImages = formData.heroImages || [];
-        const updatedImages = [...currentImages, result.url];
-        setFormData({ 
-          ...formData, 
-          heroImages: updatedImages,
-          heroImageUrl: updatedImages[0] // Set first image as primary
-        });
-        alert('Hero image uploaded successfully!');
-      } else {
-        throw new Error(result.error || 'Upload failed');
-      }
+      const url = await uploadImageToSupabase(file, 'country-images', 'hero-images');
+      const currentImages = formData.heroImages || [];
+      const updatedImages = [...currentImages, url];
+      setFormData({ 
+        ...formData, 
+        heroImages: updatedImages,
+        heroImageUrl: updatedImages[0] // Set first image as primary
+      });
+      alert('Hero image uploaded successfully!');
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Failed to upload image');
+      alert(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setUploadingHero(false);
     }
@@ -154,18 +177,14 @@ export default function CountryManagement() {
 
     try {
       setUploadingAttraction(index.toString());
-      const result = await uploadFile(file, 'country-images', { folder: 'attraction-images' });
-      if (result.success && result.url) {
-        const updatedAttractions = [...(formData.attractions || [])];
-        updatedAttractions[index] = { ...updatedAttractions[index], imageUrl: result.url };
-        setFormData({ ...formData, attractions: updatedAttractions });
-        alert('Attraction image uploaded successfully!');
-      } else {
-        throw new Error(result.error || 'Upload failed');
-      }
+      const url = await uploadImageToSupabase(file, 'country-images', 'attraction-images');
+      const updatedAttractions = [...(formData.attractions || [])];
+      updatedAttractions[index] = { ...updatedAttractions[index], imageUrl: url };
+      setFormData({ ...formData, attractions: updatedAttractions });
+      alert('Attraction image uploaded successfully!');
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Failed to upload image');
+      alert(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setUploadingAttraction(null);
     }

@@ -188,8 +188,14 @@ export async function createCountryAdmin(data: Partial<AdminCountryPayload>): Pr
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    const text = await res.text().catch(() => res.statusText);
-    throw new Error(`Failed to create country: ${res.status} ${text}`);
+    let errorMessage = res.statusText;
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody.error || errorBody.message || JSON.stringify(errorBody);
+    } catch {
+      errorMessage = await res.text().catch(() => res.statusText);
+    }
+    throw new Error(`Failed to create country: ${res.status} ${errorMessage}`);
   }
   return res.json();
 }
@@ -201,8 +207,14 @@ export async function updateCountryAdmin(id: string, data: Partial<AdminCountryP
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    const text = await res.text().catch(() => res.statusText);
-    throw new Error(`Failed to update country: ${res.status} ${text}`);
+    let errorMessage = res.statusText;
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody.error || errorBody.message || JSON.stringify(errorBody);
+    } catch {
+      errorMessage = await res.text().catch(() => res.statusText);
+    }
+    throw new Error(`Failed to update country: ${res.status} ${errorMessage}`);
   }
   return res.json();
 }

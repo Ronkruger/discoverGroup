@@ -291,6 +291,21 @@ export default function Login() {
                   </div>
                 </motion.div>
 
+                {/* Forgot Password Link */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.65 }}
+                  className="text-right"
+                >
+                  <Link
+                    to="/forgot-password"
+                    className="text-sm font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-purple-600 transition-all duration-300"
+                  >
+                    Forgot password?
+                  </Link>
+                </motion.div>
+
                 {/* Submit Button */}
                 <motion.button
                   initial={{ opacity: 0, y: 20 }}

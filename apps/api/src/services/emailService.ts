@@ -708,3 +708,121 @@ The Discover Group Team
     };
   }
 };
+
+export const sendPasswordResetEmail = async (
+  email: string,
+  fullName: string,
+  resetUrl: string
+): Promise<{ success: boolean; messageId?: string; previewUrl?: string; error?: string }> => {
+  try {
+    const transporter = await createTransporter();
+
+    const mailOptions = {
+      from: `${getEmailFromName()} <${getEmailFromAddress()}>`,
+      to: email,
+      subject: 'Password Reset Request - Discover Group',
+      html: `
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            line-height: 1.6; 
+            color: #333; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+        .container { 
+            background: #f5f5f5; 
+            border-radius: 8px; 
+            padding: 30px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+        .header { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            padding: 20px; 
+            border-radius: 8px 8px 0 0; 
+            text-align: center; 
+        }
+        .content { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 0 0 8px 8px; 
+        }
+        .reset-btn { 
+            display: inline-block; 
+            padding: 12px 30px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            margin: 20px 0; 
+            font-weight: bold; 
+        }
+        .reset-btn:hover { 
+            opacity: 0.9; 
+        }
+        .footer { 
+            margin-top: 20px; 
+            font-size: 12px; 
+            color: #666; 
+            border-top: 1px solid #eee; 
+            padding-top: 10px; 
+        }
+    </style>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Password Reset</h1>
+        </div>
+        <div class="content">
+            <p>Hello ${fullName},</p>
+            <p>We received a request to reset your password. Click the button below to set a new password:</p>
+            <div style="text-align: center;">
+                <a href="${resetUrl}" class="reset-btn">Reset Password</a>
+            </div>
+            <p style="color: #666; font-size: 14px;">Or copy this link: <br><code>${resetUrl}</code></p>
+            <p style="color: #d32f2f;">This link will expire in 1 hour.</p>
+            <p style="color: #666;">If you didn't request a password reset, you can ignore this email.</p>
+        </div>
+        <div class="footer">
+            <p>© Discover Group. All rights reserved.</p>
+        </div>
+    </div>
+      `,
+      text: `
+Hello ${fullName},
+
+We received a request to reset your password. Click the link below to set a new password:
+${resetUrl}
+
+This link will expire in 1 hour.
+
+If you didn't request a password reset, you can ignore this email.
+
+Best regards,
+The Discover Group Team
+      `.trim(),
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+
+    if (previewUrl) {
+      console.log('📧 Password Reset Email Preview URL: %s', previewUrl);
+    }
+
+    console.log('✅ Password reset email sent! Message ID:', info.messageId);
+
+    return {
+      success: true,
+      messageId: info.messageId,
+      previewUrl: previewUrl || undefined,
+    };
+  } catch (error) {
+    console.error('❌ Password reset email sending failed:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to send password reset email',
+    };
+  }
+};

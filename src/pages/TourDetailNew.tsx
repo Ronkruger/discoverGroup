@@ -4,9 +4,10 @@ import { fetchTourBySlug } from "../api/tours";
 import type { Tour } from "../types";
 import { 
   MapPin, Users, Clock, Heart, Share2, 
-  Star, ChevronRight, Check, Calendar
+  ChevronRight, Check, Calendar
 } from "lucide-react";
 import BackToTop from "../components/BackToTop";
+import TourReviews from "../components/TourReviews";
 
 export default function TourDetailNew() {
   const { slug } = useParams<{ slug: string }>();
@@ -91,22 +92,17 @@ export default function TourDetailNew() {
                   <MapPin className="w-4 h-4" />
                   <span>{tour.line || "Multiple Destinations"}</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span className="font-medium">4.8</span>
-                  <span>(120 reviews)</span>
-                </div>
               </div>
             </div>
             <div className="flex items-center gap-2 lg:gap-3 w-full lg:w-auto">
               <button 
                 onClick={() => setIsWishlisted(!isWishlisted)}
-                className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-3 lg:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-3 lg:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-900"
               >
                 <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-red-500 text-red-500' : ''}`} />
                 <span className="text-sm font-medium">Save</span>
               </button>
-              <button className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-3 lg:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <button className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-3 lg:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-900">
                 <Share2 className="w-5 h-5" />
                 <span className="text-sm font-medium">Share</span>
               </button>
@@ -248,34 +244,6 @@ export default function TourDetailNew() {
                 </div>
               </div>
             </div>
-
-            {/* Reviews */}
-            <div>
-              <div className="flex items-center gap-2 mb-6">
-                <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
-                <h3 className="text-xl font-bold text-gray-900">4.8 · 120 reviews</h3>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4 mb-6">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-700">Cleanliness</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-32 h-1 bg-gray-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-gray-900" style={{ width: '95%' }} />
-                    </div>
-                    <span className="text-sm font-medium">4.9</span>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-700">Communication</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-32 h-1 bg-gray-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-gray-900" style={{ width: '92%' }} />
-                    </div>
-                    <span className="text-sm font-medium">4.8</span>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Right Sidebar - Booking Card */}
@@ -379,14 +347,14 @@ export default function TourDetailNew() {
                   <div className="flex items-center justify-between">
                     <button
                       onClick={() => setPassengers(Math.max(1, passengers - 1))}
-                      className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-900 transition-colors"
+                      className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-900 transition-colors text-gray-900"
                     >
                       -
                     </button>
                     <span className="text-gray-900 font-medium">{passengers} guest{passengers > 1 ? 's' : ''}</span>
                     <button
                       onClick={() => setPassengers(Math.min(15, passengers + 1))}
-                      className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-900 transition-colors"
+                      className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-900 transition-colors text-gray-900"
                     >
                       +
                     </button>
@@ -464,6 +432,11 @@ export default function TourDetailNew() {
               <p>Map showing tour locations</p>
             </div>
           </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-12 border-t pt-12">
+          <TourReviews tourSlug={tour.slug} tourTitle={tour.title} />
         </div>
       </div>
 

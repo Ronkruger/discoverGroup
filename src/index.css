@@ -46,6 +46,18 @@ main {
   color: #fff;
 }
 
+/* Input placeholder styling - darker and more visible */
+input::placeholder,
+textarea::placeholder {
+  color: #6b7280 !important;
+  opacity: 1 !important;
+}
+
+input:focus::placeholder,
+textarea:focus::placeholder {
+  color: #9ca3af !important;
+}
+
 /* Custom animations for header */
 @keyframes shimmer {
   0% {
@@ -122,6 +134,36 @@ input::placeholder, select::placeholder, textarea::placeholder {
 input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 2px #3b82f6;
   border-color: transparent;
+}
+
+/* Override for white background inputs - force dark text */
+input.bg-white, select.bg-white, textarea.bg-white {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #d1d5db;
+}
+
+input.bg-white::placeholder, select.bg-white::placeholder, textarea.bg-white::placeholder {
+  color: #9ca3af !important;
+}
+
+/* Force dark text for autofilled inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+  -webkit-text-fill-color: #111827 !important;
+  box-shadow: 0 0 0 30px white inset !important;
+}
+
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus,
+select:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+  -webkit-text-fill-color: #111827 !important;
+  box-shadow: 0 0 0 30px white inset !important;
 }
 
 /* Toast animations */
@@ -250,6 +292,7 @@ input:focus, select:focus, textarea:focus {
   padding: 2px;
   background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   opacity: 0;

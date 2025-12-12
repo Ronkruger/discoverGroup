@@ -47,7 +47,7 @@ function GalleryImageWithFallback({ src }: { src: string }) {
           onError={() => setError(true)}
         />
       ) : (
-        <div className="w-full h-[70vh] flex items-center justify-center bg-gray-100 rounded-lg">
+        <div className="w-[200vw] h-[70vh] flex items-center justify-center bg-gray-100 rounded-lg">
           <img 
             src="/assets/placeholder.jpg" 
             alt="placeholder" 

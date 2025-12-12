@@ -127,18 +127,18 @@ export default function VisaAssistance() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Europe (Schengen)</h3>
-              <div className="space-y-2 text-sm">
-                <p><strong>Processing Time:</strong> 10-15 business days</p>
-                <p><strong>Validity:</strong> 90 days within 180 days</p>
-                <p><strong>Cost:</strong> PHP 4,500 - PHP 8,000</p>
+              <div className="space-y-2 text-sm text-gray-900">
+                <p className="text-gray-900"><strong>Processing Time:</strong> 10-15 business days</p>
+                <p className="text-gray-900"><strong>Validity:</strong> 90 days within 180 days</p>
+                <p className="text-gray-900"><strong>Cost:</strong> PHP 4,500 - PHP 8,000</p>
               </div>
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">USA</h3>
-              <div className="space-y-2 text-sm">
-                <p><strong>Processing Time:</strong> 3-5 weeks</p>
-                <p><strong>Validity:</strong> 10 years (multiple entry)</p>
-                <p><strong>Cost:</strong> PHP 8,000 - PHP 15,000</p>
+              <div className="space-y-2 text-sm text-gray-900">
+                <p className="text-gray-900"><strong>Processing Time:</strong> 3-5 weeks</p>
+                <p className="text-gray-900"><strong>Validity:</strong> 10 years (multiple entry)</p>
+                <p className="text-gray-900"><strong>Cost:</strong> PHP 8,000 - PHP 15,000</p>
               </div>
             </div>
           </div>
@@ -157,26 +157,26 @@ export default function VisaAssistance() {
                 placeholder="Full Name"
                 value={customerInfo.name}
                 onChange={(e) => setCustomerInfo(prev => ({ ...prev, name: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
               />
               <input
                 type="email"
                 placeholder="Email Address"
                 value={customerInfo.email}
                 onChange={(e) => setCustomerInfo(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
               />
               <input
                 type="tel"
                 placeholder="Phone Number"
                 value={customerInfo.phone}
                 onChange={(e) => setCustomerInfo(prev => ({ ...prev, phone: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
               />
               <select
                 value={customerInfo.nationality}
                 onChange={(e) => setCustomerInfo(prev => ({ ...prev, nationality: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
               >
                 <option value="Filipino">Filipino</option>
                 <option value="Other">Other</option>
@@ -190,7 +190,7 @@ export default function VisaAssistance() {
             <select
               value={selectedCountry}
               onChange={(e) => setSelectedCountry(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
             >
               <option value="">Select destination country</option>
               {tourCountries.map(country => (
@@ -203,7 +203,7 @@ export default function VisaAssistance() {
           <div className="mb-6">
             <h3 className="font-semibold text-gray-900 mb-3">Visa Type</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+              <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 text-gray-900">
                 <input
                   type="radio"
                   name="visaType"
@@ -214,7 +214,7 @@ export default function VisaAssistance() {
                 />
                 <span>Tourist Visa</span>
               </label>
-              <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+              <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 text-gray-900">
                 <input
                   type="radio"
                   name="visaType"
@@ -225,7 +225,7 @@ export default function VisaAssistance() {
                 />
                 <span>Business Visa</span>
               </label>
-              <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+              <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 text-gray-900">
                 <input
                   type="radio"
                   name="visaType"
@@ -278,7 +278,7 @@ export default function VisaAssistance() {
           <div className="mb-6">
             <h3 className="font-semibold text-gray-900 mb-3">Processing Urgency</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+              <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 text-gray-900">
                 <input
                   type="radio"
                   name="urgency"
@@ -292,7 +292,7 @@ export default function VisaAssistance() {
                   <p className="text-sm text-gray-600">10-15 business days</p>
                 </div>
               </label>
-              <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+              <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 text-gray-900">
                 <input
                   type="radio"
                   name="urgency"
@@ -306,7 +306,7 @@ export default function VisaAssistance() {
                   <p className="text-sm text-gray-600">5-7 business days (+PHP 3,000)</p>
                 </div>
               </label>
-              <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+              <label className="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 text-gray-900">
                 <input
                   type="radio"
                   name="urgency"
@@ -328,7 +328,7 @@ export default function VisaAssistance() {
             <h3 className="font-semibold text-gray-900 mb-3">Additional Services</h3>
             <div className="space-y-2">
               {services.map(service => (
-                <label key={service.id} className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                <label key={service.id} className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 text-gray-900">
                   <input
                     type="checkbox"
                     checked={additionalServices.includes(service.id)}
@@ -352,21 +352,21 @@ export default function VisaAssistance() {
             <div className="flex items-center gap-3">
               <Phone className="text-blue-600" size={24} />
               <div>
-                <p className="font-semibold">Call Us</p>
+                <p className="font-semibold text-gray-900">Call Us</p>
                 <p className="text-gray-600">+63 123 456 7890</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Mail className="text-blue-600" size={24} />
               <div>
-                <p className="font-semibold">Email Us</p>
+                <p className="font-semibold text-gray-900">Email Us</p>
                 <p className="text-gray-600">visa@discovergroup.com</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Clock className="text-blue-600" size={24} />
               <div>
-                <p className="font-semibold">Office Hours</p>
+                <p className="font-semibold text-gray-900">Office Hours</p>
                 <p className="text-gray-600">Mon-Fri 9AM-6PM</p>
               </div>
             </div>

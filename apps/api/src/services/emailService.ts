@@ -715,13 +715,12 @@ export const sendPasswordResetEmail = async (
   resetUrl: string
 ): Promise<{ success: boolean; messageId?: string; previewUrl?: string; error?: string }> => {
   try {
-    const transporter = await createTransporter();
-
-    const mailOptions = {
-      from: `${getEmailFromName()} <${getEmailFromAddress()}>`,
-      to: email,
-      subject: 'Password Reset Request - Discover Group',
-      html: `
+    console.log('📧 Sending password reset email to:', email);
+    console.log('🔧 Environment check for password reset email:');
+    console.log('- SENDGRID_API_KEY:', SENDGRID_API_KEY ? '✅ Set' : '❌ Not set');
+    console.log('- EMAIL_USER:', process.env.EMAIL_USER ? '✅ Set' : '❌ Not set');
+    
+    const passwordResetHtml = `
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -788,8 +787,9 @@ export const sendPasswordResetEmail = async (
             <p>© Discover Group. All rights reserved.</p>
         </div>
     </div>
-      `,
-      text: `
+    `;
+
+    const passwordResetText = `
 Hello ${fullName},
 
 We received a request to reset your password. Click the link below to set a new password:
@@ -801,28 +801,92 @@ If you didn't request a password reset, you can ignore this email.
 
 Best regards,
 The Discover Group Team
-      `.trim(),
-    };
+    `.trim();
 
-    const info = await transporter.sendMail(mailOptions);
-    const previewUrl = nodemailer.getTestMessageUrl(info);
+    // Try SendGrid first
+    if (SENDGRID_API_KEY) {
+      try {
+        console.log('📧 Using SendGrid for password reset email');
+      
+        const fromEmail = getEmailFromAddress();
+        const fromName = getEmailFromName();
+        
+        const msg = {
+          to: email,
+          from: {
+            email: fromEmail,
+            name: fromName,
+          },
+          subject: 'Password Reset Request - Discover Group',
+          html: passwordResetHtml,
+          text: passwordResetText,
+          categories: ['password-reset', 'transactional'],
+          customArgs: {
+            email: email,
+            type: 'password-reset',
+          },
+        };
 
-    if (previewUrl) {
-      console.log('📧 Password Reset Email Preview URL: %s', previewUrl);
+        console.log('📤 Sending password reset email via SendGrid...');
+        const [response] = await sgMail.send(msg);
+        
+        console.log('✅ Password reset email sent successfully via SendGrid!');
+        console.log('✅ Status Code:', response.statusCode);
+        console.log('✅ Message ID:', response.headers['x-message-id']);
+
+        return {
+          success: true,
+          messageId: response.headers['x-message-id'] as string,
+        };
+      } catch (sendGridError) {
+        console.error('❌ SendGrid password reset error:', sendGridError);
+        console.error('SendGrid error details:', JSON.stringify(sendGridError, null, 2));
+        // Don't return error yet, try Nodemailer fallback
+      }
     }
 
-    console.log('✅ Password reset email sent! Message ID:', info.messageId);
+    // Fallback to Nodemailer if SendGrid is not configured or fails
+    console.log('⚠️ SendGrid not configured or failed, using Nodemailer fallback for password reset');
+    
+    try {
+      const transporter = await createTransporter();
+      const fromEmail = getEmailFromAddress();
+      const fromName = getEmailFromName();
 
-    return {
-      success: true,
-      messageId: info.messageId,
-      previewUrl: previewUrl || undefined,
-    };
+      const mailOptions = {
+        from: `"${fromName}" <${fromEmail}>`,
+        to: email,
+        subject: 'Password Reset Request - Discover Group',
+        html: passwordResetHtml,
+        text: passwordResetText,
+      };
+
+      const info = await transporter.sendMail(mailOptions);
+      const previewUrl = nodemailer.getTestMessageUrl(info);
+
+      if (previewUrl) {
+        console.log('📧 Password Reset Email Preview URL: %s', previewUrl);
+      }
+
+      console.log('✅ Password reset email sent via Nodemailer! Message ID:', info.messageId);
+
+      return {
+        success: true,
+        messageId: info.messageId,
+        previewUrl: previewUrl || undefined,
+      };
+    } catch (nodemailerError) {
+      console.error('❌ Nodemailer also failed:', nodemailerError);
+      return {
+        success: false,
+        error: nodemailerError instanceof Error ? nodemailerError.message : 'Failed to send password reset email via Nodemailer',
+      };
+    }
   } catch (error) {
-    console.error('❌ Password reset email sending failed:', error);
+    console.error('❌ Password reset email sending failed with critical error:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to send password reset email',
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 };

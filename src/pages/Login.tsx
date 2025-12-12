@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, Plane, Sparkles, ArrowRight } from 'lucide-react';
+import { Lock, Eye, EyeOff, Plane, Sparkles, ArrowRight } from 'lucide-react';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -227,11 +227,11 @@ export default function Login() {
                       className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl opacity-0 group-hover:opacity-20 blur transition duration-300"
                     />
                     <div className="relative flex items-center">
-                      <Mail className="absolute left-4 text-gray-400 group-hover:text-blue-600 transition-colors" size={20} />
                       <motion.input
                         whileFocus={{ scale: 1.01 }}
                         type="email"
-                        className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all duration-300"
+                        className="w-full px-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all duration-300"
+                        style={{ color: '#111827' }}
                         placeholder="you@example.com"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
@@ -266,11 +266,11 @@ export default function Login() {
                       className="absolute -inset-0.5 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl opacity-0 group-hover:opacity-20 blur transition duration-300"
                     />
                     <div className="relative flex items-center">
-                      <Lock className="absolute left-4 text-gray-400 group-hover:text-indigo-600 transition-colors" size={20} />
                       <motion.input
                         whileFocus={{ scale: 1.01 }}
                         type={showPassword ? "text" : "password"}
-                        className="w-full pl-12 pr-12 py-3.5 bg-white border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all duration-300"
+                        className="w-full pl-4 pr-12 py-3.5 bg-white border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all duration-300"
+                        style={{ color: '#111827' }}
                         placeholder="••••••••"
                         value={password}
                         onChange={e => setPassword(e.target.value)}
@@ -289,21 +289,6 @@ export default function Login() {
                       </motion.button>
                     </div>
                   </div>
-                </motion.div>
-
-                {/* Forgot Password Link */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.65 }}
-                  className="text-right"
-                >
-                  <Link
-                    to="/forgot-password"
-                    className="text-sm font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-purple-600 transition-all duration-300"
-                  >
-                    Forgot password?
-                  </Link>
                 </motion.div>
 
                 {/* Submit Button */}

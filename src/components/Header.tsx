@@ -377,20 +377,7 @@ export default function Header(): React.ReactElement {
 
 
             {/* contact - Enhanced */}
-            <div className="hidden lg:flex flex-col text-sm text-gray-700 items-end leading-tight bg-gradient-to-br from-blue-50 to-blue-100/50 p-4 rounded-2xl shadow-lg border border-blue-200/50 hover:shadow-xl transition-all duration-300 group">
-              <div className="font-bold text-blue-900 mb-1 flex items-center gap-2">
-                <span className="text-lg">📞</span> Contact Us
-              </div>
-              <div className="text-xs flex flex-col gap-1">
-                <a href="tel:+6302852684 04" className="flex items-center gap-2 hover:text-blue-600 transition-colors">
-                  <span className="font-semibold">PH:</span> +63 02 8526 8404
-                </a>
-                <a href="tel:+6581216065" className="flex items-center gap-2 hover:text-blue-600 transition-colors">
-                  <span className="font-semibold">SG:</span> +65 8121 6065
-                </a>
-              </div>
-              <div className="mt-1 text-[10px] text-blue-600 font-medium">24/7 Support Available</div>
-            </div>
+         
 
 
             <div className="hidden md:block">
@@ -414,31 +401,31 @@ export default function Header(): React.ReactElement {
                 </button>
                 {userMenuOpen && (
                   <div className="absolute right-0 mt-3 w-64 bg-white border-2 border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden">
-                    <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-4">
-                      <div className="font-bold text-lg">{user.fullName || 'User'}</div>
-                      <div className="text-xs text-blue-100">{user.email}</div>
+                    <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 px-5 py-4">
+                      <div className="font-bold text-lg text-gray-900">{user.fullName || 'User'}</div>
+                      <div className="text-xs text-gray-700">{user.email}</div>
                     </div>
                     <ul className="py-2 text-sm">
                       <li>
-                        <Link to="/bookings" className="flex items-center gap-3 px-5 py-3 hover:bg-blue-50 transition-all group" onClick={() => setUserMenuOpen(false)}>
+                        <Link to="/bookings" className="flex items-center gap-3 px-5 py-3 hover:bg-blue-50 transition-all group text-gray-900" onClick={() => setUserMenuOpen(false)}>
                           <span className="text-lg group-hover:scale-110 transition-transform">📋</span>
                           <span className="font-medium">My Bookings</span>
                         </Link>
                       </li>
                       <li>
-                        <Link to="/favorites" className="flex items-center gap-3 px-5 py-3 hover:bg-blue-50 transition-all group" onClick={() => setUserMenuOpen(false)}>
+                        <Link to="/favorites" className="flex items-center gap-3 px-5 py-3 hover:bg-blue-50 transition-all group text-gray-900" onClick={() => setUserMenuOpen(false)}>
                           <span className="text-lg group-hover:scale-110 transition-transform">❤️</span>
                           <span className="font-medium">My Favorites</span>
                         </Link>
                       </li>
                       <li>
-                        <Link to="/profile" className="flex items-center gap-3 px-5 py-3 hover:bg-blue-50 transition-all group" onClick={() => setUserMenuOpen(false)}>
+                        <Link to="/profile" className="flex items-center gap-3 px-5 py-3 hover:bg-blue-50 transition-all group text-gray-900" onClick={() => setUserMenuOpen(false)}>
                           <span className="text-lg group-hover:scale-110 transition-transform">👤</span>
                           <span className="font-medium">Profile</span>
                         </Link>
                       </li>
                       <li>
-                        <Link to="/settings" className="flex items-center gap-3 px-5 py-3 hover:bg-blue-50 transition-all group" onClick={() => setUserMenuOpen(false)}>
+                        <Link to="/settings" className="flex items-center gap-3 px-5 py-3 hover:bg-blue-50 transition-all group text-gray-900" onClick={() => setUserMenuOpen(false)}>
                           <span className="text-lg group-hover:scale-110 transition-transform">⚙️</span>
                           <span className="font-medium">Settings</span>
                         </Link>
@@ -524,12 +511,12 @@ export default function Header(): React.ReactElement {
                       <div className="absolute right-0 mt-2 w-48 bg-white border rounded-xl shadow-lg z-50">
                         <ul className="py-2 text-sm">
                           <li>
-                            <Link to="/profile" className="block px-4 py-2 hover:bg-gray-50" onClick={() => setUserMenuOpen(false)}>
+                            <Link to="/profile" className="block px-4 py-2 hover:bg-gray-50 text-gray-900" onClick={() => setUserMenuOpen(false)}>
                               See Profile
                             </Link>
                           </li>
                           <li>
-                            <Link to="/settings" className="block px-4 py-2 hover:bg-gray-50" onClick={() => setUserMenuOpen(false)}>
+                            <Link to="/settings" className="block px-4 py-2 hover:bg-gray-50 text-gray-900" onClick={() => setUserMenuOpen(false)}>
                               User Settings
                             </Link>
                           </li>

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Star, ThumbsUp, Verified } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
 interface ReviewCategory {
   tourGuide: number;
   cleanliness: number;
@@ -41,7 +43,6 @@ export default function TourReviews({ tourSlug, tourTitle }: TourReviewsProps) {
   const [stats, setStats] = useState<ReviewStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [showReviewForm, setShowReviewForm] = useState(false);
-  const [canReview, setCanReview] = useState(false);
   const [reviewEligibility, setReviewEligibility] = useState<{
     canReview: boolean;
     isVerified: boolean;
@@ -73,7 +74,7 @@ export default function TourReviews({ tourSlug, tourTitle }: TourReviewsProps) {
 
   const fetchReviews = async () => {
     try {
-      const response = await fetch(`/api/reviews/tour/${tourSlug}?sortBy=${sortBy}`);
+      const response = await fetch(`${API_URL}/api/reviews/tour/${tourSlug}?sortBy=${sortBy}`);
       if (response.ok) {
         const data = await response.json();
         setReviews(data.reviews);
@@ -89,14 +90,13 @@ export default function TourReviews({ tourSlug, tourTitle }: TourReviewsProps) {
   const checkReviewEligibility = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/reviews/user/eligibility/${tourSlug}`, {
+      const response = await fetch(`${API_URL}/api/reviews/user/eligibility/${tourSlug}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       if (response.ok) {
         const data = await response.json();
-        setCanReview(data.canReview);
         setReviewEligibility(data);
       }
     } catch (error) {
@@ -110,7 +110,7 @@ export default function TourReviews({ tourSlug, tourTitle }: TourReviewsProps) {
     setSubmitting(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/reviews', {
+      const response = await fetch(`${API_URL}/api/reviews`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,10 +127,9 @@ export default function TourReviews({ tourSlug, tourTitle }: TourReviewsProps) {
       if (response.ok) {
         const data = await response.json();
         setShowReviewForm(false);
-        setCanReview(false);
+        setShowReviewForm(false);
         fetchReviews(); // Refresh reviews
         alert(data.message);
-      } else {
         const errorData = await response.json();
         alert(errorData.error);
       }
@@ -144,7 +143,7 @@ export default function TourReviews({ tourSlug, tourTitle }: TourReviewsProps) {
 
   const markHelpful = async (reviewId: string) => {
     try {
-      const response = await fetch(`/api/reviews/${reviewId}/helpful`, {
+      const response = await fetch(`${API_URL}/api/reviews/${reviewId}/helpful`, {
         method: 'PUT'
       });
       if (response.ok) {
@@ -255,10 +254,19 @@ export default function TourReviews({ tourSlug, tourTitle }: TourReviewsProps) {
         </div>
 
         <div className="flex gap-2">
-          {user && canReview && !showReviewForm && (
+          {user ? (
+            !showReviewForm && (
+              <button
+                onClick={() => setShowReviewForm(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                Write Review
+              </button>
+            )
+          ) : (
             <button
-              onClick={() => setShowReviewForm(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              onClick={() => alert('Please log in to write a review')}
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-medium"
             >
               Write Review
             </button>
@@ -316,20 +324,38 @@ export default function TourReviews({ tourSlug, tourTitle }: TourReviewsProps) {
       {/* Review Form */}
       {showReviewForm && (
         <div className="mb-8 p-6 border-2 border-blue-200 rounded-lg bg-blue-50">
-          <h4 className="font-semibold text-lg mb-4">
-            Write Your Review
-            {reviewEligibility?.isVerified && (
-              <span className="ml-2 inline-flex items-center gap-1 text-sm text-green-600">
-                <Verified className="w-4 h-4" />
-                Verified Booking
-              </span>
-            )}
-          </h4>
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-semibold text-lg text-gray-900">
+              Write Your Review
+              {reviewEligibility?.isVerified && (
+                <span className="ml-2 inline-flex items-center gap-1 text-sm text-green-600">
+                  <Verified className="w-4 h-4" />
+                  Verified Booking
+                </span>
+              )}
+            </h4>
+            <button
+              onClick={() => setShowReviewForm(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Eligibility Info */}
+          {reviewEligibility && !reviewEligibility.isVerified && (
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+              <p>
+                {reviewEligibility.message || 
+                  "Your review will be published after moderation. Reviews from verified bookings are auto-approved!"}
+              </p>
+            </div>
+          )}
 
           <div className="space-y-6">
             {/* Overall Rating */}
             <div>
-              <label className="block text-sm font-medium mb-2">Overall Rating</label>
+              <label className="block text-sm font-medium mb-2 text-gray-900">Overall Rating</label>
               {renderStarRating(reviewForm.rating, true, (rating) => 
                 setReviewForm(prev => ({ ...prev, rating }))
               )}
@@ -337,7 +363,7 @@ export default function TourReviews({ tourSlug, tourTitle }: TourReviewsProps) {
 
             {/* Category Ratings */}
             <div>
-              <label className="block text-sm font-medium mb-3">Category Ratings</label>
+              <label className="block text-sm font-medium mb-3 text-gray-900">Category Ratings</label>
               <div className="grid md:grid-cols-2 gap-4">
                 {Object.entries({
                   tourGuide: 'Tour Guide Quality',
@@ -347,7 +373,7 @@ export default function TourReviews({ tourSlug, tourTitle }: TourReviewsProps) {
                   organization: 'Organization'
                 }).map(([key, label]) => (
                   <div key={key} className="flex items-center justify-between">
-                    <span className="text-sm">{label}</span>
+                    <span className="text-sm text-gray-900">{label}</span>
                     {renderStarRating(
                       reviewForm.categories[key as keyof ReviewCategory], 
                       true, 
@@ -363,12 +389,12 @@ export default function TourReviews({ tourSlug, tourTitle }: TourReviewsProps) {
 
             {/* Comment */}
             <div>
-              <label className="block text-sm font-medium mb-2">Your Review</label>
+              <label className="block text-sm font-medium mb-2 text-gray-900">Your Review</label>
               <textarea
                 value={reviewForm.comment}
                 onChange={(e) => setReviewForm(prev => ({ ...prev, comment: e.target.value }))}
                 rows={5}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
                 placeholder="Share your experience with this tour..."
                 required
               />

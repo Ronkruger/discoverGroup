@@ -230,13 +230,15 @@ export default function Home() {
         <div className="relative z-10 w-full max-w-5xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.8 }}
             className="backdrop-blur-xl bg-white/95 border border-gray-200 rounded-3xl shadow-2xl p-8 md:p-12 flex flex-col items-center"
           >
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.1 }}
               className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 drop-shadow-lg text-center leading-tight text-gray-900"
             >
@@ -246,7 +248,8 @@ export default function Home() {
             
             <motion.p
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               transition={{ duration: 1, delay: 0.2 }}
               className="text-lg md:text-xl mb-10 max-w-2xl mx-auto text-center text-gray-700 leading-relaxed"
             >
@@ -257,8 +260,11 @@ export default function Home() {
             {/* Search Bar */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.4 }}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
               className="w-full max-w-2xl mx-auto"
             >
               <EnhancedSearch 
@@ -271,22 +277,53 @@ export default function Home() {
             {/* Quick Stats */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.6 }}
               className="mt-10 grid grid-cols-3 gap-6 md:gap-12 w-full max-w-2xl"
             >
-              <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">30K+</div>
+              <motion.div 
+                whileHover={{ scale: 1.1, y: -5 }}
+                className="text-center"
+              >
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.8 }}
+                  className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent"
+                >
+                  30K+
+                </motion.div>
                 <div className="text-xs md:text-sm text-gray-700 mt-1">Happy Travelers</div>
-              </div>
-              <div className="text-center border-x border-gray-300">
-                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">75+</div>
+              </motion.div>
+              <motion.div 
+                whileHover={{ scale: 1.1, y: -5 }}
+                className="text-center border-x border-gray-300"
+              >
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.9 }}
+                  className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent"
+                >
+                  75+
+                </motion.div>
                 <div className="text-xs md:text-sm text-gray-700 mt-1">Tour Packages</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">4.9★</div>
+              </motion.div>
+              <motion.div 
+                whileHover={{ scale: 1.1, y: -5 }}
+                className="text-center"
+              >
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.5, delay: 1.0 }}
+                  className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent"
+                >
+                  4.9★
+                </motion.div>
                 <div className="text-xs md:text-sm text-gray-700 mt-1">Customer Rating</div>
-              </div>
+              </motion.div>
             </motion.div>
           </motion.div>
         </div>
@@ -311,7 +348,13 @@ export default function Home() {
       <FeaturedVideos />
 
       {/* Trust Signals & Social Proof */}
-      <section className="bg-blue-50 py-12">
+      <motion.section 
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6 }}
+        className="bg-blue-50 py-12"
+      >
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center text-center">
             <motion.div
@@ -319,9 +362,16 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
+              whileHover={{ scale: 1.1, y: -5 }}
+              whileTap={{ scale: 0.95 }}
               className="flex flex-col items-center gap-2"
             >
-              <Shield className="w-8 h-8 text-green-600" />
+              <motion.div
+                whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+                transition={{ duration: 0.5 }}
+              >
+                <Shield className="w-8 h-8 text-green-600" />
+              </motion.div>
               <div className="text-sm font-medium text-gray-900">100% Secure</div>
               <div className="text-xs text-gray-600">Guaranteed Departures</div>
             </motion.div>
@@ -331,9 +381,16 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               viewport={{ once: true }}
+              whileHover={{ scale: 1.1, y: -5 }}
+              whileTap={{ scale: 0.95 }}
               className="flex flex-col items-center gap-2"
             >
-              <Award className="w-8 h-8 text-yellow-600" />
+              <motion.div
+                whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+                transition={{ duration: 0.5 }}
+              >
+                <Award className="w-8 h-8 text-yellow-600" />
+              </motion.div>
               <div className="text-sm font-medium text-gray-900">Award Winning</div>
               <div className="text-xs text-gray-600">Best Tour Operator 2024</div>
             </motion.div>
@@ -343,9 +400,16 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
+              whileHover={{ scale: 1.1, y: -5 }}
+              whileTap={{ scale: 0.95 }}
               className="flex flex-col items-center gap-2"
             >
-              <HeadphonesIcon className="w-8 h-8 text-blue-600" />
+              <motion.div
+                whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+                transition={{ duration: 0.5 }}
+              >
+                <HeadphonesIcon className="w-8 h-8 text-blue-600" />
+              </motion.div>
               <div className="text-sm font-medium text-gray-900">24/7 Support</div>
               <div className="text-xs text-gray-600">Expert Travel Assistance</div>
             </motion.div>
@@ -355,9 +419,16 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
               viewport={{ once: true }}
+              whileHover={{ scale: 1.1, y: -5 }}
+              whileTap={{ scale: 0.95 }}
               className="flex flex-col items-center gap-2"
             >
-              <Star className="w-8 h-8 text-yellow-500" />
+              <motion.div
+                whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+                transition={{ duration: 0.5 }}
+              >
+                <Star className="w-8 h-8 text-yellow-500" />
+              </motion.div>
               <div className="text-sm font-medium text-gray-900">4.9/5 Rating</div>
               <div className="text-xs text-gray-600">From 2,500+ Reviews</div>
             </motion.div>
@@ -369,10 +440,15 @@ export default function Home() {
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 1 }}
+              whileHover={{ scale: 1.02, boxShadow: "0 10px 40px rgba(34, 197, 94, 0.2)" }}
               className="mt-6 bg-white border-2 border-green-300 rounded-lg p-4 shadow-sm max-w-md mx-auto"
             >
               <div className="flex items-center gap-3">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <motion.div 
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-3 h-3 bg-green-500 rounded-full"
+                ></motion.div>
                 <div className="text-sm text-gray-900 font-medium">
                   <span className="font-semibold text-gray-900">{hashName(recentBooking.customerName)}</span> just booked 
                   <span className="font-semibold text-blue-600"> {getTourTitle(recentBooking.tourSlug)}</span> • <span className="text-gray-600">{recentBooking.timeAgo}</span>
@@ -381,10 +457,16 @@ export default function Home() {
             </motion.div>
           )}
         </div>
-      </section>
+      </motion.section>
 
       {/* Stats Section */}
-      <section className="bg-gradient-to-b from-gray-50 to-white py-20">
+      <motion.section 
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.7 }}
+        className="bg-gradient-to-b from-gray-50 to-white py-20"
+      >
         <div className="container mx-auto px-6 grid md:grid-cols-4 gap-12 text-center">
           {[
             { label: "Happy Travelers", value: homepageSettings.statistics.travelers, suffix: "+" },
@@ -398,7 +480,9 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: i * 0.2 }}
               viewport={{ once: true }}
-              className="p-6"
+              whileHover={{ y: -10, scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="p-6 cursor-pointer"
             >
               <h3 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 <CountUp end={stat.value} duration={3} separator="," decimals={stat.label === "Average Rating" ? 1 : 0} />
@@ -408,10 +492,16 @@ export default function Home() {
             </motion.div>
           ))}
         </div>
-      </section>
+      </motion.section>
 
       {/* Why Choose Us */}
-      <section className="py-20 bg-white">
+      <motion.section 
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.7 }}
+        className="py-20 bg-white"
+      >
         <div className="container mx-auto px-6 text-center">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -457,10 +547,16 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Featured Routes Carousel */}
-      <section className="bg-gradient-to-b from-gray-50 to-white py-24">
+      <motion.section 
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.1 }}
+        transition={{ duration: 0.7 }}
+        className="bg-gradient-to-b from-gray-50 to-white py-24"
+      >
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -557,15 +653,27 @@ export default function Home() {
               viewport={{ once: true }}
               className="text-center mt-16"
             >
-              <Link
-                to="/routes"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-bold rounded-full hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+              <motion.div
+                whileHover={{ scale: 1.05, x: 5 }}
+                whileTap={{ scale: 0.95 }}
               >
-                Explore All Routes
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </Link>
+                <Link
+                  to="/routes"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-bold rounded-full hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                >
+                  Explore All Routes
+                  <motion.svg 
+                    animate={{ x: [0, 5, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                    className="w-5 h-5" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </motion.svg>
+                </Link>
+              </motion.div>
             </motion.div>
           )}
         </div>
@@ -595,10 +703,16 @@ export default function Home() {
             transform: scale(1.2);
           }
         `}</style>
-      </section>
+      </motion.section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+      <motion.section
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.1 }}
+        transition={{ duration: 0.7 }}
+        className="py-20 bg-gradient-to-b from-gray-50 to-white"
+      >
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
             <motion.h2
@@ -615,6 +729,8 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setShowReviewForm(!showReviewForm)}
               className="px-6 py-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-bold rounded-full hover:from-yellow-500 hover:to-yellow-600 transition-all shadow-lg hover:shadow-xl"
             >
@@ -657,11 +773,13 @@ export default function Home() {
                   <label className="block text-gray-900 font-semibold mb-2">Rating</label>
                   <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <button
+                      <motion.button
                         key={star}
                         type="button"
                         onClick={() => setReviewForm({ ...reviewForm, rating: star })}
-                        className="transition-transform hover:scale-110"
+                        whileHover={{ scale: 1.2, rotate: [0, -10, 10, 0] }}
+                        whileTap={{ scale: 0.9 }}
+                        className="transition-transform"
                       >
                         <Star
                           className={`w-8 h-8 ${
@@ -670,7 +788,7 @@ export default function Home() {
                               : 'text-slate-500'
                           }`}
                         />
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
                 </div>
@@ -773,10 +891,16 @@ export default function Home() {
             )}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Call to Action */}
-      <section className="bg-gradient-to-br from-blue-900 to-purple-900 py-20">
+      <motion.section 
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.7 }}
+        className="bg-gradient-to-br from-blue-900 to-purple-900 py-20"
+      >
         <div className="container mx-auto px-6 text-center">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -802,16 +926,18 @@ export default function Home() {
             whileInView={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.4 }}
             viewport={{ once: true }}
+            whileHover={{ scale: 1.05, y: -3 }}
+            whileTap={{ scale: 0.95 }}
           >
             <Link
               to="/contact"
-              className="px-8 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-bold rounded-full shadow-lg hover:from-yellow-500 hover:to-yellow-600 hover:shadow-xl transition"
+              className="inline-block px-8 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-bold rounded-full shadow-lg hover:from-yellow-500 hover:to-yellow-600 hover:shadow-xl transition"
             >
               Contact Us
             </Link>
           </motion.div>
         </div>
-      </section>
+      </motion.section>
       <BackToTop />
     </main>
   );

@@ -58,7 +58,13 @@ export default function FeaturedVideos() {
   const currentVideo = videos[currentIndex];
 
   return (
-    <section className="relative py-32 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-[800px] overflow-hidden">
+    <motion.section 
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{ duration: 0.8 }}
+      className="relative py-32 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-[800px] overflow-hidden"
+    >
       {/* Video Background */}
       <div className="absolute inset-0 overflow-hidden">
         <AnimatePresence mode="wait">
@@ -198,6 +204,6 @@ export default function FeaturedVideos() {
           </>
         )}
       </div>
-    </section>
+    </motion.section>
   );
 }

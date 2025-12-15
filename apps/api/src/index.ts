@@ -4,6 +4,16 @@ import cors from "cors";
 import helmet from "helmet";
 import logger from "./utils/logger";
 import { errorHandler } from "./middleware/errorHandler";
+import { apiLimiter } from "./middleware/rateLimiter";
+import {
+  sanitizeData,
+  preventParameterPollution,
+  speedLimiter,
+  additionalSecurityHeaders,
+  sqlInjectionProtection,
+  suspiciousActivityLogger,
+  requestSizeLimiter,
+} from "./middleware/security";
 
 import adminToursRouter from "./routes/admin/tours";
 import publicToursRouter from "./routes/public/tours";
@@ -20,8 +30,51 @@ logger.info(`MONGODB_URI: ${process.env.MONGODB_URI ? process.env.MONGODB_URI.su
 
 const app = express();
 
-// Security middleware
-app.use(helmet());
+// Trust proxy - important for rate limiting behind reverse proxies (Netlify, Railway, etc.)
+app.set('trust proxy', 1);
+
+// Security middleware - Applied in order of importance
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:", "blob:"],
+      connectSrc: ["'self'"],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"],
+    },
+  },
+  crossOriginEmbedderPolicy: false, // Allow images from different origins
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true,
+  },
+}));
+
+// Additional security headers
+app.use(additionalSecurityHeaders);
+
+// Request size limiter (prevent large payloads)
+app.use(requestSizeLimiter);
+
+// Suspicious activity logger
+app.use(suspiciousActivityLogger);
+
+// SQL injection protection
+app.use(sqlInjectionProtection);
+
+// NoSQL injection protection (sanitize MongoDB queries)
+app.use(sanitizeData);
+
+// Prevent HTTP Parameter Pollution
+app.use(preventParameterPollution);
+
+// Speed limiter (progressive delay)
+app.use(speedLimiter);
 
 // CORS configuration
 const allowedOrigins = [
@@ -91,7 +144,14 @@ if (process.env.NODE_ENV === 'production') {
   }));
 }
 
-app.use(express.json());
+// Body parser with size limits
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Apply general rate limiter to all API routes
+app.use('/api/', apiLimiter);
+app.use('/admin/', apiLimiter);
+
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 app.use("/api/uploads", uploadsRouter);
 

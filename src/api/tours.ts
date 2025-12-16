@@ -20,6 +20,24 @@ export async function fetchTours(): Promise<Tour[]> {
   }
 }
 
+export async function fetchFeaturedTours(limit: number = 6): Promise<Tour[]> {
+  try {
+    const response = await fetch(`${API_BASE}/public/tours?limit=${limit}&featured=true`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch featured tours: ${response.status}`);
+    }
+    const tours = await response.json();
+    console.log('✅ Loaded featured tours from API:', tours.length);
+    return tours;
+  } catch (error) {
+    console.error("❌ Error fetching featured tours from API:", error);
+    // Fallback to fetching all tours and taking first 6
+    console.log('⚠️ Falling back to fetchTours with limit');
+    const allTours = await fetchTours();
+    return allTours.slice(0, limit);
+  }
+}
+
 export async function fetchTourBySlug(slug: string): Promise<Tour | null> {
   try {
     const response = await fetch(`${API_BASE}/public/tours/${slug}`);

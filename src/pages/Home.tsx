@@ -1,27 +1,20 @@
 import * as React from "react";
-import { fetchTours } from "../api/tours";
+import { fetchFeaturedTours } from "../api/tours";
 import { toggleFavorite, getFavorites } from "../api/favorites";
 import { fetchRecentBookingNotification } from "../api/bookings";
 import { submitReview, fetchApprovedReviews } from "../api/reviews";
 import { useAuth } from "../context/useAuth";
 import type { Tour } from "../types";
 import type { Review } from "../api/reviews";
-import TourCard from "../components/TourCard";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Map, Users, CheckCircle, Shield, Award, HeadphonesIcon, Star } from "lucide-react";
 import CountUp from "react-countup";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination } from "swiper/modules";
 import { EnhancedSearch } from "../components/EnhancedSearch";
-import { SkeletonCard } from "../components/LoadingComponents";
 import { NetworkError } from "../components/ErrorComponents";
 import { getHomepageSettings, getHomepageSettingsSync } from "../services/homepageSettings";
 import BackToTop from "../components/BackToTop";
 import FeaturedVideos from "../components/FeaturedVideos";
-
-import "swiper/css";
-import "swiper/css/pagination";
 
 // Hash name function: e.g., "Ron" -> "R*n", "Sarah" -> "S***h"
 function hashName(name: string): string {
@@ -124,7 +117,8 @@ export default function Home() {
       try {
         setLoading(true);
         setError(null);
-        const toursData = await fetchTours();
+        // Fetch only 6 featured tours for homepage performance
+        const toursData = await fetchFeaturedTours(6);
         if (!cancelled) {
           setTours(toursData);
         }
@@ -149,7 +143,7 @@ export default function Home() {
   const handleRetryTours = () => {
     setTours([]);
     setError(null);
-    fetchTours().then(setTours).catch(() => setError('Failed to load tours'));
+    fetchFeaturedTours(6).then(setTours).catch(() => setError('Failed to load tours'));
   };
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
@@ -282,48 +276,7 @@ export default function Home() {
               transition={{ duration: 0.8, delay: 0.6 }}
               className="mt-10 grid grid-cols-3 gap-6 md:gap-12 w-full max-w-2xl"
             >
-              <motion.div 
-                whileHover={{ scale: 1.1, y: -5 }}
-                className="text-center"
-              >
-                <motion.div 
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.8 }}
-                  className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent"
-                >
-                  30K+
-                </motion.div>
-                <div className="text-xs md:text-sm text-gray-700 mt-1">Happy Travelers</div>
-              </motion.div>
-              <motion.div 
-                whileHover={{ scale: 1.1, y: -5 }}
-                className="text-center border-x border-gray-300"
-              >
-                <motion.div 
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.9 }}
-                  className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent"
-                >
-                  75+
-                </motion.div>
-                <div className="text-xs md:text-sm text-gray-700 mt-1">Tour Packages</div>
-              </motion.div>
-              <motion.div 
-                whileHover={{ scale: 1.1, y: -5 }}
-                className="text-center"
-              >
-                <motion.div 
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.5, delay: 1.0 }}
-                  className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent"
-                >
-                  4.9★
-                </motion.div>
-                <div className="text-xs md:text-sm text-gray-700 mt-1">Customer Rating</div>
-              </motion.div>
+           
             </motion.div>
           </motion.div>
         </div>
@@ -343,6 +296,240 @@ export default function Home() {
           </div>
         </motion.div>
       </section>
+
+      {/* Featured Routes Section - Asymmetric Luxury Layout */}
+      <motion.section
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="relative py-24 bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 overflow-hidden"
+      >
+        {/* Ambient Background Effects */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500 rounded-full filter blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500 rounded-full filter blur-3xl" />
+        </div>
+        
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Distinctive Header with Side Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-16 items-end">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="lg:col-span-5"
+            >
+              <p className="text-sm font-medium text-gray-400 uppercase tracking-[0.3em] mb-4">
+                OUR MOST POPULAR TRIPS
+              </p>
+              <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6">
+                Featured
+                <span className="block italic text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                  Routes
+                </span>
+              </h2>
+              <p className="text-lg text-gray-300 italic leading-relaxed">
+                The journeys our travelers are booking right now
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="lg:col-span-7 flex justify-end"
+            >
+              <Link to="/routes">
+                <motion.button
+                  whileHover={{ scale: 1.05, x: 10 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="group px-8 py-4 bg-transparent border-2 border-white/30 hover:border-white text-white font-medium rounded-none transition-all duration-300 flex items-center gap-3"
+                >
+                  <span className="uppercase tracking-wider text-sm">Explore All Trips</span>
+                  <svg className="w-5 h-5 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </motion.button>
+              </Link>
+            </motion.div>
+          </div>
+
+          {/* Asymmetric Masonry-Style Grid */}
+          {loading && (
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-auto">
+              {Array.from({ length: 6 }).map((_, index) => {
+                // Same asymmetric layout patterns as the actual cards
+                const layouts = [
+                  { span: 'md:col-span-7', height: 'h-[500px]' },    // Large left
+                  { span: 'md:col-span-5', height: 'h-[500px]' },    // Medium right
+                  { span: 'md:col-span-5', height: 'h-[450px]' },    // Medium left
+                  { span: 'md:col-span-7', height: 'h-[450px]' },    // Large right
+                  { span: 'md:col-span-6', height: 'h-[420px]' },    // Equal left
+                  { span: 'md:col-span-6', height: 'h-[420px]' },    // Equal right
+                ];
+                const layout = layouts[index];
+                
+                return (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.15 }}
+                    className={`${layout.span} relative overflow-hidden`}
+                  >
+                    <div className={`relative ${layout.height} bg-gray-800/50 animate-pulse`}>
+                      {/* Skeleton shimmer effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-700/50 to-transparent animate-shimmer" />
+                      
+                      {/* Skeleton badges */}
+                      <div className="absolute top-6 right-6 w-24 h-8 bg-gray-700/50 rounded" />
+                      <div className="absolute top-6 left-6 w-10 h-10 bg-gray-700/50 rounded" />
+                      
+                      {/* Skeleton content at bottom */}
+                      <div className="absolute bottom-0 left-0 right-0 p-8 space-y-3">
+                        <div className="w-20 h-6 bg-gray-700/50 rounded" />
+                        <div className="w-3/4 h-8 bg-gray-700/50 rounded" />
+                        <div className="w-1/2 h-4 bg-gray-700/50 rounded" />
+                        <div className="w-32 h-6 bg-gray-700/50 rounded mt-4" />
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+
+          {error && (
+            <NetworkError onRetry={handleRetryTours} />
+          )}
+
+          {!loading && !error && tours.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-auto">
+              {tours.map((tour, index) => {
+                // Define asymmetric layout patterns
+                const layouts = [
+                  { span: 'md:col-span-7', height: 'h-[500px]' },    // Large left
+                  { span: 'md:col-span-5', height: 'h-[500px]' },    // Medium right
+                  { span: 'md:col-span-5', height: 'h-[450px]' },    // Medium left
+                  { span: 'md:col-span-7', height: 'h-[450px]' },    // Large right
+                  { span: 'md:col-span-6', height: 'h-[420px]' },    // Equal left
+                  { span: 'md:col-span-6', height: 'h-[420px]' },    // Equal right
+                ];
+                
+                const layout = layouts[index];
+                
+                return (
+                  <motion.div
+                    key={tour.id}
+                    initial={{ opacity: 0, y: 50 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.7, delay: index * 0.15 }}
+                    className={`${layout.span} group relative overflow-hidden`}
+                  >
+                    <Link to={`/tour/${tour.slug}`} className="block h-full">
+                      <div className={`relative ${layout.height} overflow-hidden bg-gray-800`}>
+                        {/* Tour Image with Parallax Effect */}
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          transition={{ duration: 0.6 }}
+                          className="absolute inset-0"
+                        >
+                          <img
+                            src={tour.images?.[0] || '/placeholder-tour.jpg'}
+                            alt={tour.title || 'Tour'}
+                            className="w-full h-full object-cover"
+                          />
+                          {/* Dark Gradient Overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-500" />
+                        </motion.div>
+
+                        {/* Night Badge */}
+                        {tour.duration && (
+                          <div className="absolute top-6 right-6 z-20 px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-medium uppercase tracking-wider">
+                            {tour.duration}
+                          </div>
+                        )}
+
+                        {/* Favorite Button */}
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (!user) {
+                              alert('Please log in to add favorites');
+                              return;
+                            }
+                            toggleFavorite(tour.slug).then(result => {
+                              setFavorites(result.favorites);
+                            }).catch(error => {
+                              console.error('Failed to toggle favorite:', error);
+                            });
+                          }}
+                          className="absolute top-6 left-6 z-20 p-3 bg-black/20 backdrop-blur-md border border-white/10 hover:bg-white/20 transition-all duration-300 group/fav"
+                        >
+                          <svg
+                            className={`w-5 h-5 transition-colors ${
+                              favorites.includes(tour.slug)
+                                ? 'fill-red-500 stroke-red-500'
+                                : 'fill-none stroke-white group-hover/fav:stroke-red-400'
+                            }`}
+                            viewBox="0 0 24 24"
+                            strokeWidth="2"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                          </svg>
+                        </button>
+
+                        {/* Content Overlay - Bottom */}
+                        <motion.div
+                          initial={{ y: 20, opacity: 0 }}
+                          whileInView={{ y: 0, opacity: 1 }}
+                          transition={{ duration: 0.6, delay: 0.3 }}
+                          className="absolute bottom-0 left-0 right-0 p-8 z-10"
+                        >
+                          {/* Category Badge */}
+                          {tour.category && (
+                            <span className="inline-block px-3 py-1 mb-4 text-xs font-medium text-white/90 border border-white/30 uppercase tracking-wider">
+                              {tour.category}
+                            </span>
+                          )}
+
+                          {/* Title */}
+                          <h3 className="text-2xl md:text-3xl font-bold text-white mb-3 leading-tight group-hover:text-blue-300 transition-colors duration-300">
+                            {tour.title}
+                          </h3>
+
+                          {/* Description */}
+                          {tour.description && (
+                            <p className="text-gray-300 text-sm mb-4 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              {tour.description}
+                            </p>
+                          )}
+
+                          {/* Explore Button */}
+                          <motion.div
+                            whileHover={{ x: 5 }}
+                            className="inline-flex items-center gap-2 text-white font-medium uppercase tracking-wider text-sm border-b-2 border-white/50 hover:border-white transition-all duration-300 pb-1"
+                          >
+                            <span>Explore Trip</span>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                          </motion.div>
+                        </motion.div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </motion.section>
 
       {/* Featured Videos Section */}
       <FeaturedVideos />
@@ -547,162 +734,6 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </motion.section>
-
-      {/* Featured Routes Carousel */}
-      <motion.section 
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.1 }}
-        transition={{ duration: 0.7 }}
-        className="bg-gradient-to-b from-gray-50 to-white py-24"
-      >
-        <div className="container mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Featured Routes
-            </h2>
-            <div className="w-20 h-1.5 bg-gradient-to-r from-blue-600 to-blue-400 mx-auto rounded-full mb-4"></div>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Discover our most popular European adventures, handpicked for unforgettable experiences
-            </p>
-          </motion.div>
-          
-          {loading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <SkeletonCard key={index} />
-              ))}
-            </div>
-          )}
-
-          {error && (
-            <NetworkError onRetry={handleRetryTours} />
-          )}
-
-          {!loading && !error && tours.length > 0 && (
-            <Swiper
-              modules={[Autoplay, Pagination]}
-              spaceBetween={30}
-              slidesPerView={1}
-              pagination={{ 
-                clickable: true,
-                dynamicBullets: true,
-              }}
-              autoplay={{ 
-                delay: 5000, 
-                disableOnInteraction: false,
-                pauseOnMouseEnter: true,
-              }}
-              breakpoints={{
-                640: { slidesPerView: 1, spaceBetween: 20 },
-                768: { slidesPerView: 2, spaceBetween: 24 },
-                1024: { slidesPerView: 3, spaceBetween: 30 },
-              }}
-              className="featured-routes-swiper !pb-16"
-            >
-              {tours.slice(0, 6).map((tour, index) => (
-                <SwiperSlide key={tour.id} data-slide-id={tour.id}>
-                  <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    viewport={{ once: true }}
-                    whileHover={{ y: -8 }}
-                    className="h-full"
-                  >
-                    <TourCard 
-                      tour={tour} 
-                      isWishlisted={favorites.includes(tour.slug)}
-                      onWishlist={async (tourSlug) => {
-                        if (!user) {
-                          alert('Please log in to add favorites');
-                          return;
-                        }
-                        try {
-                          const result = await toggleFavorite(tourSlug);
-                          setFavorites(result.favorites);
-                          console.log(`${result.action === 'added' ? '❤️ Added to' : '💔 Removed from'} favorites:`, tourSlug);
-                        } catch (error) {
-                          console.error('Failed to toggle favorite:', error);
-                          alert('Failed to update favorites. Please try again.');
-                        }
-                      }}
-                      onShare={(tour) => {
-                        console.log('Share tour:', tour.title);
-                        // TODO: Implement share functionality
-                      }}
-                    />
-                  </motion.div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          )}
-          
-          {!loading && !error && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              viewport={{ once: true }}
-              className="text-center mt-16"
-            >
-              <motion.div
-                whileHover={{ scale: 1.05, x: 5 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Link
-                  to="/routes"
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-bold rounded-full hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 shadow-lg hover:shadow-xl"
-                >
-                  Explore All Routes
-                  <motion.svg 
-                    animate={{ x: [0, 5, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                    className="w-5 h-5" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </motion.svg>
-                </Link>
-              </motion.div>
-            </motion.div>
-          )}
-        </div>
-
-        <style>{`
-          .featured-routes-swiper .swiper-pagination {
-            bottom: 0 !important;
-          }
-          
-          .featured-routes-swiper .swiper-pagination-bullet {
-            width: 12px;
-            height: 12px;
-            background: #3b82f6;
-            opacity: 0.3;
-            transition: all 0.3s ease;
-          }
-          
-          .featured-routes-swiper .swiper-pagination-bullet-active {
-            opacity: 1;
-            width: 32px;
-            border-radius: 6px;
-            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
-          }
-          
-          .featured-routes-swiper .swiper-pagination-bullet:hover {
-            opacity: 0.7;
-            transform: scale(1.2);
-          }
-        `}</style>
       </motion.section>
 
       {/* Testimonials */}

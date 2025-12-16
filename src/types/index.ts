@@ -44,7 +44,10 @@ export type Tour = {
   slug: string;
   title: string;
   summary?: string;
+  description?: string;
   line?: string;
+  category?: string;
+  duration?: string;
   durationDays: number;
   highlights?: string[];
   images?: string[];

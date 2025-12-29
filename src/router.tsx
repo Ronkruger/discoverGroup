@@ -3,6 +3,7 @@ import { Suspense, lazy } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Loading from "./components/Loading";
+import ScrollToTop from "./components/ScrollToTop";
 import React from "react";
 import { useTheme } from "./context/ThemeContext";
 
@@ -38,6 +39,7 @@ function AppContent() {
 
   return (
     <div className={`${darkMode ? 'dark bg-gray-900 text-white' : 'bg-white text-gray-900'} min-h-screen transition-colors duration-300`}>
+      <ScrollToTop />
       <Header />
       <Suspense fallback={<Loading />}>
         <Routes>

@@ -17,6 +17,11 @@ export default function TourDetailNew() {
   const [passengers, setPassengers] = useState(1);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
+  // Scroll to top when component mounts or slug changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [slug]);
+
   useEffect(() => {
     if (!slug) return;
     

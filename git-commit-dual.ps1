@@ -74,7 +74,7 @@ if ($remotes -match "company") {
 } else {
     Write-Host "ℹ️  No 'company' remote configured." -ForegroundColor Yellow
     Write-Host "   To add company remote, run:" -ForegroundColor Yellow
-    Write-Host "   git remote add company <company-repo-url>" -ForegroundColor Yellow
+    Write-Host "   git remote add company `<company-repo-url`>" -ForegroundColor Yellow
     Write-Host ""
 }
 

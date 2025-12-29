@@ -14,13 +14,16 @@ export default function Favorites() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect if not logged in
-    if (!user) {
-      navigate('/login');
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    
+    if (!user || !token) {
+      // User is not logged in, redirect to login with return URL
+      navigate('/login?redirect=/favorites', { replace: true });
       return;
     }
 
@@ -45,6 +48,14 @@ export default function Favorites() {
         console.log('✅ Loaded', validTours.length, 'favorite tours');
       } catch (err) {
         console.error('❌ Failed to load favorites:', err);
+        
+        // If it's an authentication error, clear auth and redirect to login
+        if (err instanceof Error && (err.message.includes('Invalid token') || err.message.includes('not authenticated') || err.message.includes('User not authenticated'))) {
+          logout(); // Use logout from context to properly clear everything
+          navigate('/login?redirect=/favorites&message=session-expired', { replace: true });
+          return;
+        }
+        
         setError('Failed to load your favorite tours. Please try again.');
       } finally {
         setLoading(false);
@@ -52,7 +63,7 @@ export default function Favorites() {
     };
 
     loadFavorites();
-  }, [user, navigate]);
+  }, [user, navigate, logout]);
 
   const handleToggleFavorite = async (tourSlug: string) => {
     try {

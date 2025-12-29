@@ -37,3 +37,13 @@ export async function deleteReview(reviewId: string) {
   const response = await axios.delete(`${API_URL}/api/reviews/${reviewId}`);
   return response.data;
 }
+
+export async function fetchTourReviewStats(tourSlug: string) {
+  try {
+    const response = await axios.get(`${API_URL}/api/reviews/tour/${tourSlug}`);
+    return response.data.stats;
+  } catch (error) {
+    console.warn(`Failed to fetch review stats for ${tourSlug}:`, error);
+    return { averageRating: 0, totalReviews: 0 };
+  }
+}

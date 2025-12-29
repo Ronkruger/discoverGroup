@@ -26,16 +26,6 @@
  * - fullStops
  * - extensions
  */
-// Helper to validate image URLs against CSP
-function isSafeImageUrl(url: string | undefined): boolean {
-  if (!url) return false;
-  // Allow only http(s) URLs or relative URLs
-  return (
-    url.startsWith("http://") ||
-    url.startsWith("https://") ||
-    url.startsWith("/")
-  );
-}
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useEffect, useRef, useState, type JSX, type ChangeEvent } from "react";
 import type { Tour, Stop, ItineraryDay } from "../types";
@@ -929,7 +919,7 @@ export default function TourBuilder(): JSX.Element {
           <aside className="space-y-6">
             <div className="rounded-3xl card-glass shadow-lg overflow-hidden">
               <img
-                src={isSafeImageUrl(tour.images?.[0]) ? tour.images?.[0] : "/assets/placeholder.jpg"}
+                src={tour.images?.[0] || "/assets/placeholder.jpg"}
                 alt={tour.title}
                 className="w-full h-36 object-cover"
               />
@@ -947,7 +937,7 @@ export default function TourBuilder(): JSX.Element {
                     <div className="mt-3 flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center gap-2 bg-gray-100 text-gray-900 px-3 py-1 rounded-full text-sm">• {tour?.durationDays ?? itinerary.length} days</span>
                       {tour?.guaranteedDeparture && (
-                        <span className="inline-flex items-center gap-2 bg-emerald-600/20 text-emerald-200 px-3 py-1 rounded-full text-sm">Guaranteed departure</span>
+                        <span className="inline-flex items-center gap-2 bg-emerald-600/20 text-emerald-900 px-3 py-1 rounded-full text-sm">Guaranteed departure</span>
                       )}
 
                       {/* Countries list turned into clickable filter badges with tooltip (title) */}

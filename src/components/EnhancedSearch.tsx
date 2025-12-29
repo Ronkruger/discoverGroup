@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, MapPin, TrendingUp } from 'lucide-react';
+import { MapPin, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface SearchSuggestion {
@@ -120,7 +120,7 @@ export const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
 
   return (
     <div className={`relative ${className}`}>
-      <form onSubmit={handleSubmit} className="flex items-stretch">
+      <form onSubmit={handleSubmit} className="flex items-stretch bg-white rounded-full shadow-2xl overflow-hidden">
         <div className="relative flex-1">
           <input
             ref={inputRef}
@@ -129,11 +129,10 @@ export const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
             onChange={handleInputChange}
             onFocus={handleFocus}
             placeholder={placeholder}
-            className="w-full px-6 py-3 pl-12 rounded-l-full shadow-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full h-full px-6 py-4 placeholder-gray-400 bg-white focus:outline-none text-lg text-gray-900 font-medium"
             aria-label="Search destinations"
             autoComplete="off"
           />
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           
           {/* Dropdown with suggestions - positioned relative to input */}
           {isOpen && (
@@ -219,7 +218,7 @@ export const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
         </div>
         <button
           type="submit"
-          className="px-6 py-3 bg-yellow-400 text-black font-semibold rounded-r-full shadow-md hover:bg-yellow-300 transition focus:outline-none focus:ring-2 focus:ring-yellow-500"
+          className="px-8 py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-black font-bold text-lg hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 focus:outline-none flex items-center gap-2 whitespace-nowrap"
           aria-label="Search"
         >
           Explore

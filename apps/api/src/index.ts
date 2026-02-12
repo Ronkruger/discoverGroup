@@ -91,6 +91,9 @@ const app = express();
 // Trust proxy - important for rate limiting behind reverse proxies (Netlify, Railway, etc.)
 app.set('trust proxy', 1);
 
+// Disable X-Powered-By header for security
+app.disable('x-powered-by');
+
 // Security middleware - Applied in order of importance
 app.use(helmet({
   contentSecurityPolicy: {

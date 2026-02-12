@@ -50,6 +50,12 @@ export const additionalSecurityHeaders = (_req: Request, res: Response, next: Ne
   // Permissions policy (formerly Feature Policy)
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
   
+  // Remove powered by header
+  res.removeHeader('X-Powered-By');
+  
+  // Add security version header
+  res.setHeader('X-Security-Version', '1.2.0');
+  
   next();
 };
 

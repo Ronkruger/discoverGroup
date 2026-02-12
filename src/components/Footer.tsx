@@ -1,7 +1,8 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MapPin, Phone, Mail, Facebook, Instagram } from "lucide-react";
+import { MapPin, Phone, Mail, Facebook, Instagram, Shield } from "lucide-react";
+import { APP_VERSION, SECURITY_CONFIG } from "../config/version";
 
 export default function Footer() {
   return (
@@ -147,18 +148,36 @@ export default function Footer() {
 
       {/* Bottom Bar */}
       <motion.div
-        className="bg-gray-950 py-6 text-center"
+        className="bg-gray-950 py-6"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
         <div className="container mx-auto px-6">
-          <p className="text-sm text-gray-400">
-            © {new Date().getFullYear()} <span className="text-yellow-400 font-semibold">Discover Group</span>. All rights reserved.
-          </p>
-          <p className="text-xs text-gray-500 mt-2">
-            Creating unforgettable journeys since 2020
-          </p>
+          <div className="text-center mb-4">
+            <p className="text-sm text-gray-400">
+              © {new Date().getFullYear()} <span className="text-yellow-400 font-semibold">Discover Group</span>. All rights reserved.
+            </p>
+            <p className="text-xs text-gray-500 mt-2">
+              Creating unforgettable journeys since 2020
+            </p>
+          </div>
+          
+          {/* Version & Security Info */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 border-t border-gray-800">
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <span className="font-mono">v{APP_VERSION}</span>
+            </div>
+            <span className="hidden sm:block text-gray-700">•</span>
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <Shield className="w-3 h-3 text-green-500" />
+              <span>Security v{SECURITY_CONFIG.VERSION}</span>
+            </div>
+            <span className="hidden sm:block text-gray-700">•</span>
+            <div className="text-xs text-gray-500">
+              <span>Protected by {SECURITY_CONFIG.FEATURES.length} security layers</span>
+            </div>
+          </div>
         </div>
       </motion.div>
     </footer>

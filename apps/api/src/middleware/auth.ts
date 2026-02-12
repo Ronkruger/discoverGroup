@@ -12,6 +12,8 @@ export interface AuthenticatedRequest extends Request {
     fullName?: string;
     role: string;
   };
+  body: Record<string, unknown>;
+  params: Record<string, string>;
 }
 
 interface JWTPayload {

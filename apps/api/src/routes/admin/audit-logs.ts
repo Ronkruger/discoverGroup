@@ -43,12 +43,12 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
 
     // Date range filter
     if (startDate || endDate) {
-      filter.timestamp = {};
+      filter.timestamp = {} as Record<string, Date>;
       if (startDate) {
-        filter.timestamp.$gte = new Date(startDate as string);
+        (filter.timestamp as Record<string, Date>).$gte = new Date(startDate as string);
       }
       if (endDate) {
-        filter.timestamp.$lte = new Date(endDate as string);
+        (filter.timestamp as Record<string, Date>).$lte = new Date(endDate as string);
       }
     }
 
@@ -92,15 +92,16 @@ router.get('/stats', requireAuth, requireAdmin, async (req, res) => {
     const { startDate, endDate } = req.query;
 
     // Build date filter
-    const dateFilter: Record<string, unknown> = {};
+    const dateFilter: Record<string, Date | Record<string, Date>> = {};
     if (startDate || endDate) {
-      dateFilter.timestamp = {};
+      const timestampFilter: Record<string, Date> = {};
       if (startDate) {
-        dateFilter.timestamp.$gte = new Date(startDate as string);
+        timestampFilter.$gte = new Date(startDate as string);
       }
       if (endDate) {
-        dateFilter.timestamp.$lte = new Date(endDate as string);
+        timestampFilter.$lte = new Date(endDate as string);
       }
+      dateFilter.timestamp = timestampFilter;
     }
 
     // Aggregate statistics

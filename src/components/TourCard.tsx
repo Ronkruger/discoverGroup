@@ -23,6 +23,7 @@ export default function TourCard({
 }: TourCardProps) {
   const [wishlistState, setWishlistState] = useState(isWishlisted);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [imageError, setImageError] = useState(false);
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -62,13 +63,23 @@ export default function TourCard({
   const displayPrice = hasPromoPrice ? promoPrice : (regularPrice || price);
   const originalPrice = hasPromoPrice ? regularPrice : undefined;
 
-  const currentImage = tour.images?.[currentImageIndex] ?? "/image.png";
+  // Fallback image chain: tour image → fallback → default
+  const getFallbackImage = () => {
+    // Use a pleasant default gradient/placeholder
+    return "/image.png";
+  };
+  
+  const currentImage = imageError 
+    ? getFallbackImage()
+    : (tour.images?.[currentImageIndex] ?? getFallbackImage());
+
+  // Reset error state when image index changes
+  React.useEffect(() => {
+    setImageError(false);
+  }, [currentImageIndex]);
 
   // Get tour category or type
   const tourCategory = tour.line || "Tour Package";
-
-  // Count number of countries
-  const countryCount = countries?.length || 1;
 
   return (
     <Link 
@@ -78,12 +89,13 @@ export default function TourCard({
       aria-labelledby={`tour-title-${tour.slug}`}
     >
       {/* Image Section with Carousel */}
-      <div className="relative h-64 overflow-hidden bg-gray-100">
+      <div className="relative h-64 overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300">
         <img
           src={currentImage}
           alt={tour.title}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           loading="lazy"
+          onError={() => setImageError(true)}
         />
 
         {/* Category Badge - Top Left */}

@@ -53,6 +53,7 @@ export default function TourCard({
   const price = isNumber(tour.price) ? tour.price : undefined;
   const rating = isNumber(tour.rating) ? tour.rating : undefined;
   const countries = isStringArray(tour.countries) ? tour.countries : undefined;
+  const countryCount = countries?.length || 0;
 
   // Sale logic
   const now = new Date();

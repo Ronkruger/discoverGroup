@@ -5,8 +5,15 @@ import Stripe from "stripe";
 
 dotenv.config();
 
+// Validate required environment variables
+if (!process.env.STRIPE_SECRET_KEY) {
+  console.error('❌ CRITICAL: STRIPE_SECRET_KEY is required but not set.');
+  console.error('Please set STRIPE_SECRET_KEY in your .env file.');
+  process.exit(1);
+}
+
 const app = express();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // CORS configuration for production and development
 const allowedOrigins = [

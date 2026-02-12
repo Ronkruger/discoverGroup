@@ -1,5 +1,5 @@
 import express from 'express';
-import { requireAdmin } from '../../middleware/auth';
+import { requireAuth, requireAdmin } from '../../middleware/auth';
 
 const router = express.Router();
 
@@ -11,7 +11,7 @@ const adminSettings = {
 };
 
 // GET /admin/settings - Get all settings
-router.get('/', requireAdmin, async (req, res) => {
+router.get('/', requireAuth, requireAdmin, async (req, res) => {
   try {
     res.json({
       success: true,
@@ -27,7 +27,7 @@ router.get('/', requireAdmin, async (req, res) => {
 });
 
 // PUT /admin/settings - Update settings
-router.put('/', requireAdmin, async (req, res) => {
+router.put('/', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { bookingDepartmentEmail, emailFromAddress, emailFromName } = req.body;
 

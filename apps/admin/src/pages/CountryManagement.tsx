@@ -2,35 +2,35 @@ import { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, Save, X, Upload, ChevronUp, ChevronDown } from 'lucide-react';
 import { fetchCountries, deleteCountry, type Country, type Attraction, type Testimonial } from '../../../../src/api/countries';
 import { createCountryAdmin, updateCountryAdmin } from '../services/apiClient';
-import { createClient } from '@supabase/supabase-js';
 import React from 'react';
 import { useToast } from '../components/Toast';
 
-// --- Supabase Upload Helper (same pattern as TourForm) ---
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-console.log('[CountryManagement] supabaseUrl:', supabaseUrl);
-console.log('[CountryManagement] supabaseAnonKey:', supabaseAnonKey);
-const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
-
-async function uploadImageToSupabase(
+// --- Image Upload Helper (TODO: Implement with your storage solution) ---
+async function uploadImageToStorage(
   file: File,
-  bucket: string = 'country-images',
-  folder: string = 'hero-images'
+  countryId: string,
+  imageType: 'hero' | 'attraction'
 ): Promise<string> {
-  const filePath = `${folder}/${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name}`;
-  console.log('[Country Upload] Attempting upload:', { file: file.name, fileSize: file.size, bucket, filePath });
-  
-  const { error } = await supabase.storage.from(bucket).upload(filePath, file);
-  
-  if (error) {
-    console.error('[Country Upload] Error:', error.message);
-    throw new Error(error.message);
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('folder', `countries/${countryId}/${imageType}`);
+  formData.append('label', imageType);
+
+  const response = await fetch(`${import.meta.env.VITE_ADMIN_API_URL}/api/upload/single`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Upload failed');
   }
-  
-  const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(filePath);
-  console.log('[Country Upload] Success. Public URL:', publicUrl);
-  return publicUrl;
+
+  const data = await response.json();
+  return data.url;
 }
 
 export default function CountryManagement() {
@@ -136,7 +136,8 @@ export default function CountryManagement() {
 
     try {
       setUploadingHero(true);
-      const url = await uploadImageToSupabase(file, 'country-images', 'hero-images');
+      const countryId = editingCountry?._id || formData._id || `new-${Date.now()}`;
+      const url = await uploadImageToStorage(file, countryId, 'hero');
       const currentImages = formData.heroImages || [];
       const updatedImages = [...currentImages, url];
       setFormData({ 
@@ -179,7 +180,8 @@ export default function CountryManagement() {
 
     try {
       setUploadingAttraction(index.toString());
-      const url = await uploadImageToSupabase(file, 'country-images', 'attraction-images');
+      const countryId = editingCountry?._id || formData._id || `new-${Date.now()}`;
+      const url = await uploadImageToStorage(file, countryId, 'attraction');
       const updatedAttractions = [...(formData.attractions || [])];
       updatedAttractions[index] = { ...updatedAttractions[index], imageUrl: url };
       setFormData({ ...formData, attractions: updatedAttractions });

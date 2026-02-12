@@ -53,7 +53,7 @@ export type Tour = {
   images?: string[];
   guaranteedDeparture?: boolean;
   bookingPdfUrl?: string;
-  video_url?: string | null; // Supabase storage URL for tour video
+  video_url?: string | null; // Storage URL for tour video
   // departureDates can be legacy string[] or new structured DepartureDate[]
   departureDates?: (string | DepartureDate)[];
   // New: travelWindow describes the start/end of the scheduled travel (when the tour runs)

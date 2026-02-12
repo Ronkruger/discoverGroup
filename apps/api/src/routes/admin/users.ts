@@ -1,6 +1,6 @@
 import express from 'express';
 import User from '../../models/User';
-import { requireAdmin } from '../../middleware/auth';
+import { requireAuth, requireAdmin } from '../../middleware/auth';
 import { IUser } from '../../models/User';
 
 const router = express.Router();
@@ -16,7 +16,7 @@ function transformUser(user: IUser & { toObject: () => Record<string, unknown> }
 }
 
 // GET /admin/users - List all users (admin only)
-router.get('/', requireAdmin, async (req, res) => {
+router.get('/', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { includeArchived } = req.query;
     const filter = includeArchived === 'true' ? {} : { isArchived: { $ne: true } };
@@ -29,7 +29,7 @@ router.get('/', requireAdmin, async (req, res) => {
 });
 
 // PUT /admin/users/:id - Update user (admin only)
-router.put('/:id', requireAdmin, async (req, res) => {
+router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -44,7 +44,7 @@ router.put('/:id', requireAdmin, async (req, res) => {
 });
 
 // PATCH /admin/users/:id/archive - Archive user (soft delete)
-router.patch('/:id/archive', requireAdmin, async (req, res) => {
+router.patch('/:id/archive', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const user = await User.findByIdAndUpdate(
@@ -61,7 +61,7 @@ router.patch('/:id/archive', requireAdmin, async (req, res) => {
 });
 
 // PATCH /admin/users/:id/unarchive - Unarchive user (restore)
-router.patch('/:id/unarchive', requireAdmin, async (req, res) => {
+router.patch('/:id/unarchive', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const user = await User.findByIdAndUpdate(
@@ -78,7 +78,7 @@ router.patch('/:id/unarchive', requireAdmin, async (req, res) => {
 });
 
 // DELETE /admin/users/:id - Permanently delete user
-router.delete('/:id', requireAdmin, async (req, res) => {
+router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const user = await User.findByIdAndDelete(id);

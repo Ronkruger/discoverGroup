@@ -2,6 +2,7 @@ import "dotenv/config";
 import express, { Request, Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
 import logger from "./utils/logger";
 import { errorHandler } from "./middleware/errorHandler";
 import { apiLimiter } from "./middleware/rateLimiter";
@@ -14,6 +15,13 @@ import {
   suspiciousActivityLogger,
   requestSizeLimiter,
 } from "./middleware/security";
+import {
+  csrfProtection,
+  csrfErrorHandler,
+  getCsrfToken,
+  conditionalCsrfProtection,
+} from "./middleware/csrf";
+import auditLog from "./middleware/auditLog";
 
 import adminToursRouter from "./routes/admin/tours";
 import publicToursRouter from "./routes/public/tours";
@@ -22,11 +30,61 @@ import authRouter from "./routes/auth";
 import { connectDB } from "./db";
 import path from "path";
 import uploadsRouter from "./routes/uploads";
+import uploadRouter from "./routes/upload";
 import healthRouter from "./routes/health";
+
+// CRITICAL: Validate required environment variables at startup
+function validateEnvironment() {
+  const required = ['JWT_SECRET', 'MONGODB_URI'];
+  const recommended = ['SENDGRID_API_KEY', 'STRIPE_SECRET_KEY', 'FRONTEND_URL', 'CLIENT_URL'];
+  
+  const missing = required.filter(key => !process.env[key]);
+  const missingRecommended = recommended.filter(key => !process.env[key]);
+  
+  if (missing.length > 0) {
+    logger.error('❌ CRITICAL: Missing required environment variables:');
+    missing.forEach(key => logger.error(`   - ${key}`));
+    logger.error('Server cannot start without these variables. Please check your .env file.');
+    process.exit(1);
+  }
+  
+  // Validate JWT_SECRET strength (at least 32 characters)
+  if (process.env.JWT_SECRET && process.env.JWT_SECRET.length < 32) {
+    logger.error('❌ CRITICAL: JWT_SECRET must be at least 32 characters long for security.');
+    logger.error('Generate a strong secret: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+    process.exit(1);
+  }
+  
+  // Warn about missing recommended variables
+  if (missingRecommended.length > 0 && process.env.NODE_ENV === 'production') {
+    logger.warn('⚠️  WARNING: Missing recommended environment variables for production:');
+    missingRecommended.forEach(key => logger.warn(`   - ${key}`));
+    logger.warn('Some features may not work properly without these.');
+  }
+  
+  // Additional validation
+  if (process.env.NODE_ENV === 'production') {
+    if (!process.env.FRONTEND_URL?.startsWith('https://')) {
+      logger.warn('⚠️  WARNING: FRONTEND_URL should use HTTPS in production');
+    }
+    if (!process.env.CLIENT_URL?.startsWith('https://')) {
+      logger.warn('⚠️  WARNING: CLIENT_URL should use HTTPS in production');
+    }
+  }
+  
+  logger.info('✅ Environment validation passed');
+}
+
+// Validate environment before starting
+validateEnvironment();
 
 logger.info("Server starting, environment variables:");
 logger.info(`PORT: ${process.env.PORT || "4000 (default)"}`);
-logger.info(`MONGODB_URI: ${process.env.MONGODB_URI ? process.env.MONGODB_URI.substring(0, 30) + '...' : 'NOT SET'}`);
+if (process.env.NODE_ENV === 'production') {
+  logger.info('MONGODB_URI: [REDACTED FOR SECURITY]');
+} else {
+  logger.info(`MONGODB_URI: ${process.env.MONGODB_URI ? process.env.MONGODB_URI.substring(0, 30) + '...' : 'NOT SET'}`);
+}
 
 const app = express();
 
@@ -148,12 +206,27 @@ if (process.env.NODE_ENV === 'production') {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Cookie parser (required for CSRF protection)
+app.use(cookieParser());
+
 // Apply general rate limiter to all API routes
 app.use('/api/', apiLimiter);
 app.use('/admin/', apiLimiter);
 
+// CSRF token generation endpoint (must be before CSRF protection)
+app.get('/api/csrf-token', csrfProtection, getCsrfToken);
+
+// Apply CSRF protection to admin routes (state-changing operations)
+// Note: Conditionally applied - GET requests don't need CSRF
+app.use('/admin/', conditionalCsrfProtection);
+app.use('/api/', conditionalCsrfProtection);
+
+// Apply audit logging to all admin routes
+app.use('/admin/', auditLog);
+
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 app.use("/api/uploads", uploadsRouter);
+app.use("/api/upload", uploadRouter);
 
 // Root route: provide a small JSON response so GET / is useful in the browser
 app.get("/", (_req: Request, res: Response) =>
@@ -170,6 +243,7 @@ import adminCustomerServiceRouter from "./routes/admin/customer-service";
 import adminSettingsRouter from "./routes/admin/settings";
 import adminDashboardRouter from "./routes/admin/dashboard";
 import adminReviewsRouter from "./routes/admin/reviews";
+import adminAuditLogsRouter from "./routes/admin/audit-logs";
 import apiBookingsRouter from "./routes/api/bookings";
 import apiReviewsRouter from "./routes/api/reviews";
 import favoritesRouter from "./routes/favorites";
@@ -186,6 +260,7 @@ app.use("/admin/customer-service", adminCustomerServiceRouter);
 app.use("/admin/settings", adminSettingsRouter);
 app.use("/admin/dashboard", adminDashboardRouter);
 app.use("/admin/reviews", adminReviewsRouter);
+app.use("/admin/audit-logs", adminAuditLogsRouter);
 app.use("/public/tours", publicToursRouter);
 app.use("/api/bookings", apiBookingsRouter);
 app.use("/api/favorites", favoritesRouter);
@@ -199,6 +274,9 @@ app.use("/auth", authRouter);
 // Health check routes
 app.use("/health", healthRouter);
 app.get("/health-simple", (_req: Request, res: Response) => res.json({ ok: true }));
+
+// CSRF error handler (before general error handler)
+app.use(csrfErrorHandler);
 
 // Error handling middleware (must be last)
 app.use(errorHandler);

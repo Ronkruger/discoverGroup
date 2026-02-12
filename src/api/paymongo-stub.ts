@@ -2,7 +2,7 @@
 // Full implementation for PayMongo payment integration
 // API Documentation: https://developers.paymongo.com/reference
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 
 type CreatePayMongoPaymentIntentRequest = {
   amount: number; // Amount in centavos (e.g., 100000 = PHP 1,000.00)

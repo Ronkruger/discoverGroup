@@ -1,11 +1,11 @@
 import express from 'express';
 import Review from '../../models/Review';
-import { requireAdmin } from '../../middleware/auth';
+import { requireAuth, requireAdmin } from '../../middleware/auth';
 
 const router = express.Router();
 
 // GET /admin/reviews - get all reviews with filtering
-router.get('/', requireAdmin, async (req, res) => {
+router.get('/', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { 
       status = 'all', 
@@ -81,7 +81,7 @@ router.get('/', requireAdmin, async (req, res) => {
 });
 
 // PATCH /admin/reviews/:reviewId/approve - approve a review
-router.patch('/:reviewId/approve', requireAdmin, async (req, res) => {
+router.patch('/:reviewId/approve', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { reviewId } = req.params;
     
@@ -104,7 +104,7 @@ router.patch('/:reviewId/approve', requireAdmin, async (req, res) => {
 });
 
 // PATCH /admin/reviews/:reviewId/reject - reject/hide a review
-router.patch('/:reviewId/reject', requireAdmin, async (req, res) => {
+router.patch('/:reviewId/reject', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { reviewId } = req.params;
     
@@ -127,7 +127,7 @@ router.patch('/:reviewId/reject', requireAdmin, async (req, res) => {
 });
 
 // DELETE /admin/reviews/:reviewId - delete a review
-router.delete('/:reviewId', requireAdmin, async (req, res) => {
+router.delete('/:reviewId', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { reviewId } = req.params;
     
@@ -146,7 +146,7 @@ router.delete('/:reviewId', requireAdmin, async (req, res) => {
 });
 
 // GET /admin/reviews/analytics - get review analytics
-router.get('/analytics', requireAdmin, async (req, res) => {
+router.get('/analytics', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { timeframe = '30d' } = req.query;
     

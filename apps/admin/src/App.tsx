@@ -2,6 +2,7 @@ import React, { JSX } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ToastProvider } from "./components/Toast";
+import { SessionMonitor } from "./components/SessionMonitor";
 import AuthPage from "./components/AuthPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
@@ -17,7 +18,6 @@ import CustomerService from "./pages/customer-service";
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import SalesDepartment from './pages/SalesDepartment';
-import MapMarkersManagement from './pages/MapMarkersManagement';
 import HomepageManagement from './pages/HomepageManagement';
 import CountryManagement from './pages/CountryManagement';
 import PromoBannerManagement from './pages/PromoBannerManagement';
@@ -55,6 +55,7 @@ const AppRouter: React.FC = () => {
 
   return (
     <div className="admin-shell">
+      <SessionMonitor />
       <Navbar />
 
       <div className="admin-main">
@@ -178,19 +179,6 @@ const AppRouter: React.FC = () => {
                   allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.BOOKING_DEPARTMENT]}
                 >
                   <SalesDepartment />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Map Markers Management - Administrator & Web Developer */}
-            <Route
-              path="/map-markers"
-              element={
-                <ProtectedRoute 
-                  requiredPermission="canAccessSettings"
-                  allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.WEB_DEVELOPER]}
-                >
-                  <MapMarkersManagement />
                 </ProtectedRoute>
               }
             />

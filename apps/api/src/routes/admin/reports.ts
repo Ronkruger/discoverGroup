@@ -1,5 +1,5 @@
 import express from "express";
-import { requireAdmin } from "../../middleware/auth";
+import { requireAuth, requireAdmin } from "../../middleware/auth";
 import Booking from "../../models/Booking";
 
 const router = express.Router();
@@ -40,7 +40,7 @@ const TOURS_MAP = {
 };
 
 // POST /admin/reports/comprehensive - Real implementation with MongoDB data
-router.post("/comprehensive", requireAdmin, async (req, res) => {
+router.post("/comprehensive", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { dateRange = '30d' } = req.body;
     const { startDate, endDate } = getDateRange(dateRange);
@@ -227,7 +227,7 @@ function generateBookingTrends(bookings: BookingRecord[]) {
 }
 
 // POST /admin/reports/metrics - Real metrics endpoint
-router.post("/metrics", requireAdmin, async (req, res) => {
+router.post("/metrics", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { dateRange = '30d' } = req.body;
     const { startDate, endDate } = getDateRange(dateRange);
@@ -264,7 +264,7 @@ router.post("/metrics", requireAdmin, async (req, res) => {
 });
 
 // POST /admin/reports/booking-trends - Booking trends endpoint
-router.post("/booking-trends", requireAdmin, async (req, res) => {
+router.post("/booking-trends", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { dateRange = '30d' } = req.body;
     const { startDate, endDate } = getDateRange(dateRange);
@@ -285,7 +285,7 @@ router.post("/booking-trends", requireAdmin, async (req, res) => {
 });
 
 // POST /admin/reports/popular-destinations - Popular destinations endpoint
-router.post("/popular-destinations", requireAdmin, async (req, res) => {
+router.post("/popular-destinations", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { dateRange = '30d' } = req.body;
     const { startDate, endDate } = getDateRange(dateRange);
@@ -329,7 +329,7 @@ router.post("/popular-destinations", requireAdmin, async (req, res) => {
 });
 
 // POST /admin/reports/customer-segments - Customer segments endpoint
-router.post("/customer-segments", requireAdmin, async (req, res) => {
+router.post("/customer-segments", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { dateRange = '30d' } = req.body;
     const { startDate, endDate } = getDateRange(dateRange);
@@ -381,7 +381,7 @@ router.post("/customer-segments", requireAdmin, async (req, res) => {
 });
 
 // POST /admin/reports/revenue-breakdown - Revenue breakdown endpoint
-router.post("/revenue-breakdown", requireAdmin, async (req, res) => {
+router.post("/revenue-breakdown", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { dateRange = '30d' } = req.body;
     const { startDate, endDate } = getDateRange(dateRange);
@@ -421,11 +421,11 @@ router.post("/revenue-breakdown", requireAdmin, async (req, res) => {
 });
 
 // Add other endpoints with placeholder implementations
-router.post("/customer-acquisition", requireAdmin, async (req, res) => {
+router.post("/customer-acquisition", requireAuth, requireAdmin, async (req, res) => {
   res.json([]);
 });
 
-router.post("/performance-metrics", requireAdmin, async (req, res) => {
+router.post("/performance-metrics", requireAuth, requireAdmin, async (req, res) => {
   res.json([]);
 });
 

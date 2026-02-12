@@ -39,7 +39,7 @@ export type Tour = {
   images?: string[]; // relative paths or URLs
   guaranteedDeparture?: boolean;
   bookingPdfUrl?: string | null;
-  video_url?: string | null; // Supabase storage URL for tour video
+  video_url?: string | null; // Storage URL for tour video
 
   travelWindow?: TravelWindow | null;
   itinerary?: ItineraryItem[];

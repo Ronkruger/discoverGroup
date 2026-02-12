@@ -4,7 +4,7 @@ import { useAuth } from '../context/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, User, Phone, Calendar, Users, Sparkles, MapPin, CheckCircle2, ArrowRight, Check, X, AlertCircle } from 'lucide-react';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 
 // Password strength calculator
 function calculatePasswordStrength(password: string): {

@@ -3,8 +3,6 @@ import { z } from 'zod';
 // Client environment variables schema
 export const clientEnvSchema = z.object({
   VITE_API_URL: z.string().url('API URL must be a valid URL'),
-  VITE_SUPABASE_URL: z.string().url('Supabase URL must be a valid URL'),
-  VITE_SUPABASE_ANON_KEY: z.string().min(1, 'Supabase anon key is required'),
   VITE_STRIPE_PUBLIC_KEY: z.string().optional(),
   VITE_EMAILJS_SERVICE_ID: z.string().optional(),
   VITE_EMAILJS_TEMPLATE_ID: z.string().optional(),

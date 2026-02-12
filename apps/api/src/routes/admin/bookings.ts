@@ -26,7 +26,7 @@ interface FullTour extends BaseTour {
 
 import express from "express";
 import Booking from "../../models/Booking";
-import { requireAdmin } from "../../middleware/auth";
+import { requireAuth, requireAdmin } from "../../middleware/auth";
 
 const router = express.Router();
 
@@ -61,7 +61,7 @@ const ADMIN_TOURS: BaseTour[] = [
 ];
 
 // GET /admin/bookings - list all bookings
-router.get("/", requireAdmin, async (req, res) => {
+router.get("/", requireAuth, requireAdmin, async (req, res) => {
   try {
     const bookings = await Booking.find().sort({ createdAt: -1 });
     
@@ -107,7 +107,7 @@ router.get("/", requireAdmin, async (req, res) => {
 });
 
 // GET /admin/bookings/dashboard-stats - booking stats
-router.get("/dashboard-stats", requireAdmin, async (req, res) => {
+router.get("/dashboard-stats", requireAuth, requireAdmin, async (req, res) => {
   try {
     const totalBookings = await Booking.countDocuments();
     const totalRevenue = await Booking.aggregate([
@@ -125,13 +125,36 @@ router.get("/dashboard-stats", requireAdmin, async (req, res) => {
       { $group: { _id: null, total: { $sum: "$totalAmount" } } }
     ]);
 
+    // Calculate growth rates
+    const lastWeek = new Date();
+    lastWeek.setDate(lastWeek.getDate() - 7);
+    
+    const lastMonth = new Date();
+    lastMonth.setMonth(lastMonth.getMonth() - 1);
+    
+    const lastWeekBookings = await Booking.countDocuments({
+      bookingDate: { $gte: lastWeek.toISOString() }
+    });
+    
+    const lastMonthBookings = await Booking.countDocuments({
+      bookingDate: { $gte: lastMonth.toISOString() }
+    });
+
+    const calculateGrowth = (current: number, previous: number): number => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - previous) / previous) * 100);
+    };
+
+    const weeklyGrowth = calculateGrowth(lastWeekBookings, totalBookings - lastWeekBookings);
+    const monthlyGrowth = calculateGrowth(lastMonthBookings, totalBookings - lastMonthBookings);
+
     res.json({
       totalBookings,
       totalRevenue: totalRevenue[0]?.total || 0,
       todayBookings,
       todayRevenue: todayRevenue[0]?.total || 0,
-      weeklyGrowth: 0, // TODO: Calculate actual growth
-      monthlyGrowth: 0 // TODO: Calculate actual growth
+      weeklyGrowth,
+      monthlyGrowth
     });
   } catch (error) {
     console.error('Error fetching dashboard stats:', error);
@@ -140,7 +163,7 @@ router.get("/dashboard-stats", requireAdmin, async (req, res) => {
 });
 
 // Sync admin tours with any new tours created
-router.post("/sync-tours", requireAdmin, async (req, res) => {
+router.post("/sync-tours", requireAuth, requireAdmin, async (req, res) => {
   try {
     // This endpoint could be used to sync tours between admin and public systems
     res.json({ message: "Tour sync completed", tours: ADMIN_TOURS });

@@ -1,11 +1,7 @@
 import { User, LoginCredentials, RegisterData, ROLE_PERMISSIONS, RolePermissions } from '../types/auth';
+import { setToken, getToken, getRefreshToken, clearToken, authFetch } from '../utils/tokenStorage';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-
-// Utility to get auth token from localStorage (if you use JWT)
-function getToken() {
-  return localStorage.getItem('token');
-}
 
 type NavigationItem = {
   label: string;
@@ -33,18 +29,27 @@ class AuthService {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials),
     });
-    if (!res.ok) throw new Error('Invalid email or password');
+    
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ error: 'Invalid email or password' }));
+      throw new Error(error.error || 'Login failed');
+    }
+    
     const data = await res.json();
-    // Optionally store token if returned
-    if (data.token) localStorage.setItem('token', data.token);
+    
+    // Store both access and refresh tokens
+    if (data.accessToken) {
+      setToken(data.accessToken, data.refreshToken);
+    }
+    
     return data.user;
   }
 
   // Register user via API
   async register(data: RegisterData): Promise<User> {
-    const res = await fetch(`${API_BASE_URL}/auth/register`, {
+    const res = await authFetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error('Registration failed');
@@ -56,18 +61,17 @@ class AuthService {
     const url = includeArchived 
       ? `${API_BASE_URL}/admin/users?includeArchived=true`
       : `${API_BASE_URL}/admin/users`;
-    const res = await fetch(url, {
-      headers: { 'Authorization': `Bearer ${getToken()}` },
-    });
+    
+    const res = await authFetch(url);
     if (!res.ok) throw new Error('Failed to fetch users');
     return await res.json();
   }
 
   // Update user via API
   async updateUser(userId: string, updates: Partial<User>): Promise<User> {
-    const res = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/users/${userId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates),
     });
     if (!res.ok) throw new Error('Failed to update user');
@@ -76,9 +80,8 @@ class AuthService {
 
   // Archive user (soft delete)
   async archiveUser(userId: string): Promise<User> {
-    const res = await fetch(`${API_BASE_URL}/admin/users/${userId}/archive`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/users/${userId}/archive`, {
       method: 'PATCH',
-      headers: { 'Authorization': `Bearer ${getToken()}` },
     });
     if (!res.ok) throw new Error('Failed to archive user');
     const data = await res.json();
@@ -87,9 +90,8 @@ class AuthService {
 
   // Unarchive user (restore)
   async unarchiveUser(userId: string): Promise<User> {
-    const res = await fetch(`${API_BASE_URL}/admin/users/${userId}/unarchive`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/users/${userId}/unarchive`, {
       method: 'PATCH',
-      headers: { 'Authorization': `Bearer ${getToken()}` },
     });
     if (!res.ok) throw new Error('Failed to unarchive user');
     const data = await res.json();
@@ -98,26 +100,74 @@ class AuthService {
 
   // Permanently delete user
   async deleteUser(userId: string): Promise<void> {
-    const res = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
+    const res = await authFetch(`${API_BASE_URL}/admin/users/${userId}`, {
       method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${getToken()}` },
     });
     if (!res.ok) throw new Error('Failed to delete user');
   }
 
-  logout(): void {
-    localStorage.removeItem('token');
+  // Refresh access token using refresh token
+  async refreshAccessToken(): Promise<boolean> {
+    const refreshToken = getRefreshToken();
+    if (!refreshToken) {
+      return false;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (!res.ok) {
+        clearToken();
+        return false;
+      }
+
+      const data = await res.json();
+      setToken(data.accessToken, data.refreshToken);
+      return true;
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      clearToken();
+      return false;
+    }
+  }
+
+  async logout(): Promise<void> {
+    const refreshToken = getRefreshToken();
+    
+    // Revoke refresh token on server
+    if (refreshToken) {
+      try {
+        await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken }),
+        });
+      } catch (error) {
+        console.error('Failed to revoke refresh token:', error);
+      }
+    }
+    
+    // Clear local tokens
+    clearToken();
   }
 
   // Optionally, get current user from token or API
   async getCurrentUser(): Promise<User | null> {
     const token = getToken();
     if (!token) return null;
-    const res = await fetch(`${API_BASE_URL}/auth/me`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
-    if (!res.ok) return null;
-    return await res.json();
+    
+    try {
+      const res = await authFetch(`${API_BASE_URL}/auth/me`);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (error) {
+      console.error('Failed to get current user:', error);
+      return null;
+    }
   }
 
   // Permission checking methods

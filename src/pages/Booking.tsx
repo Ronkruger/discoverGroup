@@ -423,7 +423,7 @@ export default function Booking(): JSX.Element {
       // Fire and forget - don't block the UI or user experience
       setTimeout(async () => {
         try {
-          const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:4000';
+          const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
           console.log('📡 Using API URL:', API_BASE_URL);
           
           const response = await fetch(`${API_BASE_URL}/api/send-booking-email`, {

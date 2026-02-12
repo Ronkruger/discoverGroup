@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import Tour from "../../models/Tour";
+import { requireAuth, requireAdmin } from "../../middleware/auth";
 
 const router = express.Router();
 
@@ -12,7 +13,7 @@ type PlainTour = {
 };
 
 // GET /admin/tours - list tours from MongoDB
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", requireAuth, requireAdmin, async (req: Request, res: Response) => {
   console.log(`[admin/tours] GET / requested from origin=${req.headers.origin} ip=${req.ip}`);
   try {
     const tours = await Tour.find().sort({ createdAt: -1 }).lean().exec();
@@ -29,7 +30,7 @@ router.get("/", async (req: Request, res: Response) => {
 });
 
 // POST /admin/tours - create a new tour
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", requireAuth, requireAdmin, async (req: Request, res: Response) => {
   try {
     const payload = req.body;
     const tour = new Tour(payload);
@@ -44,7 +45,7 @@ router.post("/", async (req: Request, res: Response) => {
 });
 
 // GET /admin/tours/:idOrSlug - get by Mongo _id or slug
-router.get("/:idOrSlug", async (req: Request, res: Response) => {
+router.get("/:idOrSlug", requireAuth, requireAdmin, async (req: Request, res: Response) => {
   const { idOrSlug } = req.params;
   console.log(`[admin/tours] GET /${idOrSlug} requested from origin=${req.headers.origin} ip=${req.ip}`);
   try {
@@ -67,7 +68,7 @@ router.get("/:idOrSlug", async (req: Request, res: Response) => {
 });
 
 // PUT /admin/tours/:idOrSlug - update existing tour by _id or slug
-router.put("/:idOrSlug", async (req: Request, res: Response) => {
+router.put("/:idOrSlug", requireAuth, requireAdmin, async (req: Request, res: Response) => {
   const { idOrSlug } = req.params;
   try {
     const filter = (/^[0-9a-fA-F]{24}$/.test(idOrSlug)) ? { _id: idOrSlug } : { slug: idOrSlug };
@@ -81,7 +82,7 @@ router.put("/:idOrSlug", async (req: Request, res: Response) => {
 });
 
 // DELETE /admin/tours/:idOrSlug - delete tour by _id or slug
-router.delete("/:idOrSlug", async (req: Request, res: Response) => {
+router.delete("/:idOrSlug", requireAuth, requireAdmin, async (req: Request, res: Response) => {
   const { idOrSlug } = req.params;
   try {
     const filter = (/^[0-9a-fA-F]{24}$/.test(idOrSlug)) ? { _id: idOrSlug } : { slug: idOrSlug };

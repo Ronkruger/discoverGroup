@@ -1,5 +1,5 @@
 import express from 'express';
-import { requireAdmin } from '../../middleware/auth';
+import { requireAuth, requireAdmin } from '../../middleware/auth';
 import Booking from '../../models/Booking';
 import Tour from '../../models/Tour';
 import User from '../../models/User';
@@ -10,7 +10,7 @@ const router = express.Router();
  * GET /admin/dashboard/stats
  * Fetch comprehensive dashboard statistics for Super Admin
  */
-router.get('/stats', requireAdmin, async (req, res) => {
+router.get('/stats', requireAuth, requireAdmin, async (req, res) => {
   try {
     // Get current date ranges
     const now = new Date();
@@ -142,7 +142,7 @@ router.get('/stats', requireAdmin, async (req, res) => {
  * GET /admin/dashboard/stats/:department
  * Fetch department-specific statistics
  */
-router.get('/stats/:department', requireAdmin, async (req, res) => {
+router.get('/stats/:department', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { department } = req.params;
     let departmentStats = {};

@@ -16,7 +16,7 @@ const testTour = {
     { city: 'Cebu', days: 1 }
   ],
   images: [
-    'https://your-supabase-url/image1.jpg'
+    'https://your-storage-url/image1.jpg'
   ],
   durationDays: 2,
   guaranteedDeparture: true,

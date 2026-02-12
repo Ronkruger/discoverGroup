@@ -13,7 +13,7 @@ function authenticateUser(req: Request, res: Response, next: () => void) {
   
   const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'changeme') as { id: string };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
     (req as Request & { userId: string }).userId = decoded.id;
     next();
   } catch {

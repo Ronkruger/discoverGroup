@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -6,6 +6,13 @@ import Loading from "./components/Loading";
 import ScrollToTop from "./components/ScrollToTop";
 import React from "react";
 import { useTheme } from "./context/ThemeContext";
+import BookingErrorBoundary from "./components/BookingErrorBoundary";
+
+// Redirect component for slug-based routes
+function RedirectWithSlug({ to }: { to: string }) {
+  const { slug } = useParams<{ slug: string }>();
+  return <Navigate to={to.replace(':slug', slug || '')} replace />;
+}
 
 
 import Booking from "./pages/Booking";
@@ -59,8 +66,12 @@ function AppContent() {
           <Route path="/tour/builder" element={<TourBuilder />} />
 
 
-          {/* Booking route */}
-          <Route path="/booking/:slug" element={<Booking />} />
+          {/* Booking route - wrapped in error boundary */}
+          <Route path="/booking/:slug" element={
+            <BookingErrorBoundary>
+              <Booking />
+            </BookingErrorBoundary>
+          } />
 
           {/* My Bookings (user bookings list) */}
           <Route path="/bookings" element={<ViewBookings />} />
@@ -80,8 +91,8 @@ function AppContent() {
           <Route path="/favorites" element={<Favorites />} />
 
           {/* Redirect plural → singular for compatibility */}
-          <Route path="/tours/:slug" element={<Navigate to="/tour/:slug" replace />} />
-          <Route path="/tours/:slug/builder" element={<Navigate to="/tour/builder/:slug" replace />} />
+          <Route path="/tours/:slug" element={<RedirectWithSlug to="/tour/:slug" />} />
+          <Route path="/tours/:slug/builder" element={<RedirectWithSlug to="/tour/builder/:slug" />} />
 
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/contact" element={<ContactPage />} />

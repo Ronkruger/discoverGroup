@@ -1,4 +1,3 @@
-
 import React, { JSX, useState, useEffect } from "react";
 import { createTour, updateTour, fetchTourById, fetchContinents, type Tour } from "../../services/apiClient";
 import { useNavigate, useParams } from "react-router-dom";
@@ -13,47 +12,38 @@ import {
   X,
   Check
 } from "lucide-react";
-import { createClient } from '@supabase/supabase-js';
 import { useToast } from "../../components/Toast";
 
-// --- Supabase Upload Helper ---
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-console.log('supabaseUrl:', supabaseUrl);
-console.log('supabaseAnonKey:', supabaseAnonKey);
-const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
-
-async function uploadImageToSupabase(
+// --- Image Upload Helper (Cloudflare R2) ---
+async function uploadImageToStorage(
   file: File,
-  bucket: string = 'tour-images',
-  tourId?: string,
-  label?: string
+  tourId: string,
+  imageType: 'main' | 'gallery' | 'itinerary' | 'video' | 'related',
+  dayNumber?: number
 ): Promise<string> {
-  // Accept tourId and label for foldered storage
-  // Usage: uploadImageToSupabase(file, 'tour-images', tourId, label)
-  const filePath = tourId && label
-    ? `${tourId}/${label}-${Date.now()}-${file.name}`
-    : `${Date.now()}-${file.name}`;
-  console.log('[Supabase Upload] Attempting upload:', {
-    file,
-    fileType: file?.type,
-    fileSize: file?.size,
-    bucket,
-    filePath,
-    policyHint: 'Ensure your Supabase storage policy allows INSERT for public/anons.'
+  const formData = new FormData();
+  const folder = imageType === 'itinerary' && dayNumber
+    ? `tours/${tourId}/itinerary/day-${dayNumber}`
+    : `tours/${tourId}/${imageType}`;
+  formData.append('file', file);
+  formData.append('folder', folder);
+  formData.append('label', imageType);
+
+  const response = await fetch(`${import.meta.env.VITE_ADMIN_API_URL}/api/upload/single`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    },
+    body: formData,
   });
-  const response = await supabase.storage.from(bucket).upload(filePath, file);
-  console.log('[Supabase Upload] Raw response:', response);
-  const { error, data } = response;
-  if (error) {
-    console.error('[Supabase Upload] Error:', error.message, error);
-    // Toast will be called from the calling function
-    throw new Error('Supabase upload failed: ' + error.message);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Upload failed');
   }
-  // Get public URL
-  const { publicUrl } = supabase.storage.from(bucket).getPublicUrl(filePath).data;
-  console.log('[Supabase Upload] Success. Public URL:', publicUrl, 'Data:', data);
-  return publicUrl;
+
+  const data = await response.json();
+  return data.url;
 }
 
 // Simulate backend API for image record creation
@@ -169,7 +159,8 @@ export default function TourForm(): JSX.Element {
   // Itinerary image upload handler
   async function handleItineraryImageUpload(idx: number, file?: File | null) {
     if (!file) return;
-    const url = await uploadImageToSupabase(file, 'itinerary-images', id || formData.slug, `day${idx + 1}`);
+    const tourId = id || formData.slug || `new-tour-${Date.now()}`;
+    const url = await uploadImageToStorage(file, tourId, 'itinerary', idx + 1);
     if (url) {
       setFormData((prev) => {
         const itinerary = [...prev.itinerary];
@@ -446,7 +437,8 @@ export default function TourForm(): JSX.Element {
 
   function handleCountryFile(index: number, file?: File | null) {
     if (!file) return;
-    uploadImageToSupabase(file, 'country-images').then(url => {
+    const tourId = id || formData.slug || `new-tour-${Date.now()}`;
+    uploadImageToStorage(file, tourId, 'related').then(url => {
       if (url) updateCountry(index, "image", url);
     });
   }
@@ -1243,7 +1235,8 @@ export default function TourForm(): JSX.Element {
                     if (!file) return;
                     // Create record with label 'main'
                     const record = await createImageRecord('main');
-                    const url = await uploadImageToSupabase(file, 'tour-images', id || formData.slug, 'main');
+                    const tourId = id || formData.slug || `new-tour-${Date.now()}`;
+                    const url = await uploadImageToStorage(file, tourId, 'main');
                     // Update record with URL (simulate)
                     record.url = url;
                     if (url) handleInputChange("mainImage", url);
@@ -1274,7 +1267,8 @@ export default function TourForm(): JSX.Element {
                             const file = e.target.files?.[0];
                             if (!file) return;
                             const record = await createImageRecord('gallery');
-                            const url = await uploadImageToSupabase(file, 'tour-images', id || formData.slug, 'gallery');
+                            const tourId = id || formData.slug || `new-tour-${Date.now()}`;
+                            const url = await uploadImageToStorage(file, tourId, 'gallery');
                             record.url = url;
                             // Update galleryFields and formData.galleryImages
                             const newFields = [...galleryFields];
@@ -1426,9 +1420,10 @@ export default function TourForm(): JSX.Element {
                             return;
                           }
 
-                          // Upload to Supabase
+                          // Upload to storage
                           try {
-                            const url = await uploadImageToSupabase(file, 'homepage-media', id || formData.slug, 'tour-video');
+                            const tourId = id || formData.slug || `new-tour-${Date.now()}`;
+                            const url = await uploadImageToStorage(file, tourId, 'video');
                             if (url) {
                               handleInputChange("video_url", url);
                               handleInputChange("videoFile", file);
@@ -1458,7 +1453,8 @@ export default function TourForm(): JSX.Element {
                   onChange={async (e) => {
                     const files = Array.from(e.target.files || []);
                     if (files.length === 0) return;
-                    const urls = await Promise.all(files.map(async (file) => await uploadImageToSupabase(file, 'tour-images', id || formData.slug, 'related')));
+                    const tourId = id || formData.slug || `new-tour-${Date.now()}`;
+                    const urls = await Promise.all(files.map(async (file) => await uploadImageToStorage(file, tourId, 'related')));
                     const validUrls = urls.filter(url => url);
                     handleInputChange("relatedImages", [...formData.relatedImages, ...validUrls]);
                   }}

@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { sendVerificationEmail } from '../services/emailService';
 import logger from '../utils/logger';
+import * as tokenService from '../services/tokenService';
 
 const router = express.Router();
 
@@ -20,7 +21,7 @@ router.post('/register', async (req, res) => {
     return res.status(409).json({ error: 'Email already registered' });
   }
   
-  const hashed = await bcrypt.hash(password, 10);
+  const hashed = await bcrypt.hash(password, 12);
   
   // Generate email verification token
   const verificationToken = crypto.randomBytes(32).toString('hex');
@@ -94,17 +95,19 @@ router.get('/verify-email', async (req, res) => {
     user.emailVerificationExpires = undefined;
     await user.save();
     
-    // Create JWT token now that email is verified
-    const jwtToken = jwt.sign(
-      { id: user._id, role: user.role }, 
-      process.env.JWT_SECRET || 'changeme', 
-      { expiresIn: '7d' }
+    // Generate access and refresh tokens
+    const ipAddress = req.ip || req.socket.remoteAddress;
+    const tokens = await tokenService.generateTokenPair(
+      user._id.toString(),
+      user.role,
+      ipAddress
     );
     
     res.json({
       success: true,
       message: 'Email verified successfully! You can now login.',
-      token: jwtToken,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
       user: {
         id: user._id,
         email: user.email,
@@ -181,7 +184,7 @@ router.get('/me', async (req, res) => {
   }
   const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'changeme') as jwt.JwtPayload;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as jwt.JwtPayload;
     const user = await User.findById(decoded.id as string);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -238,11 +241,18 @@ router.post('/login', async (req, res) => {
     });
   }
 
-  const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'changeme', { expiresIn: '7d' });
+  // Generate access and refresh tokens
+  const ipAddress = req.ip || req.socket.remoteAddress;
+  const tokens = await tokenService.generateTokenPair(
+    user._id.toString(),
+    user.role,
+    ipAddress
+  );
 
   logger.info(`Login successful for email: ${email}`);
   res.json({
-    token,
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
     user: {
       id: user._id,
       email: user.email,
@@ -330,7 +340,7 @@ router.post('/reset-password/:token', async (req, res) => {
     }
 
     // Hash new password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     // Update password and clear reset token
     user.password = hashedPassword;
@@ -339,10 +349,60 @@ router.post('/reset-password/:token', async (req, res) => {
     await user.save();
 
     logger.info(`Password reset successful for: ${user.email}`);
+    
+    // Revoke all refresh tokens for security
+    const ipAddress = req.ip || req.socket.remoteAddress;
+    await tokenService.revokeAllUserTokens(user._id.toString(), ipAddress);
+    
     res.status(200).json({ message: 'Password has been reset successfully' });
   } catch (error) {
     logger.error(`Reset password error: ${error}`);
     res.status(500).json({ error: 'An error occurred' });
+  }
+});
+
+// POST /auth/refresh-token
+router.post('/refresh-token', async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    
+    if (!refreshToken) {
+      return res.status(400).json({ error: 'Refresh token is required' });
+    }
+    
+    const ipAddress = req.ip || req.socket.remoteAddress;
+    const result = await tokenService.refreshAccessToken(refreshToken, ipAddress);
+    
+    logger.info(`Access token refreshed for user: ${result.userId}`);
+    res.json({
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+    });
+  } catch (error) {
+    logger.error(`Refresh token error: ${error}`);
+    const message = error instanceof Error ? error.message : 'Failed to refresh token';
+    res.status(401).json({ error: message });
+  }
+});
+
+// POST /auth/logout
+router.post('/logout', async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    
+    if (!refreshToken) {
+      return res.status(400).json({ error: 'Refresh token is required' });
+    }
+    
+    const ipAddress = req.ip || req.socket.remoteAddress;
+    await tokenService.revokeRefreshToken(refreshToken, ipAddress);
+    
+    logger.info('User logged out successfully');
+    res.json({ message: 'Logged out successfully' });
+  } catch (error) {
+    logger.error(`Logout error: ${error}`);
+    // Return 200 even on error - logout should always succeed from client perspective
+    res.status(200).json({ message: 'Logged out' });
   }
 });
 

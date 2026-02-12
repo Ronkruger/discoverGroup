@@ -1,7 +1,7 @@
 import type { Booking, Tour, BookingStatus, PaymentType, CustomRoute } from "../types";
 
-// Use VITE_API_BASE_URL (consistent with .env files) or VITE_API_URL as fallback
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:4000';
+// Use VITE_API_BASE_URL consistently
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 
 // Helper function to generate a booking ID
 function generateBookingId(): string {

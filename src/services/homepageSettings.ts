@@ -1,7 +1,7 @@
 // Service to fetch homepage settings from API
 // Settings are managed by the admin panel and stored in the database
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 
 interface HomepageSettings {
   logo: {

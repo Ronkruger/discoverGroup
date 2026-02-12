@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Star, ThumbsUp, Verified } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 
 interface ReviewCategory {
   tourGuide: number;

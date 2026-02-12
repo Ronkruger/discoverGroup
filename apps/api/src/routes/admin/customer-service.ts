@@ -1,10 +1,10 @@
 import express from "express";
-import { requireAdmin } from "../../middleware/auth";
+import { requireAuth, requireAdmin } from "../../middleware/auth";
 
 const router = express.Router();
 
 // Dummy stats for customer service dashboard
-router.get("/stats", requireAdmin, async (req, res) => {
+router.get("/stats", requireAuth, requireAdmin, async (req, res) => {
   res.json({
     totalCustomers: 0,
     activeInquiries: 0,

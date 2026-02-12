@@ -279,7 +279,7 @@ async function testInputValidation() {
 async function testFileUploadSecurity() {
   console.log(chalk.yellow('\n📁 File Upload Security Tests'));
   
-  logTest('File upload security', true, 'Using Supabase Storage with access policies');
+  logTest('File upload security', true, 'Using storage with access policies');
   logTest('File type validation', true, 'Implemented on frontend and backend');
   logTest('File size limits', true, '10MB limit enforced');
 }

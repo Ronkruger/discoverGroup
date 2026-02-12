@@ -54,7 +54,7 @@ interface PromoBanner {
   textColor: string;
 }
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'https://discovergroup.onrender.com';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 
 export default function Header(): React.ReactElement {
   const { user, logout } = useAuth();

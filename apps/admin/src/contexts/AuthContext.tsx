@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { LoginCredentials, RegisterData, AuthState } from '../types/auth';
 import { authService } from '../services/authService';
+import { initializeCsrf } from '../utils/csrf';
 
 interface AuthContextType extends AuthState {
   login: (credentials: LoginCredentials) => Promise<void>;
@@ -32,7 +33,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     error: null,
   });
 
+  // Automatic token refresh - run every 50 minutes (access token expires in 1 hour)
   useEffect(() => {
+    if (!authState.isAuthenticated) {
+      return;
+    }
+
+    const refreshInterval = setInterval(async () => {
+      console.log('Attempting to refresh access token...');
+      const success = await authService.refreshAccessToken();
+      
+      if (!success) {
+        console.warn('Token refresh failed, logging out user');
+        logout();
+      } else {
+        console.log('Access token refreshed successfully');
+      }
+    }, 50 * 60 * 1000); // 50 minutes
+
+    return () => clearInterval(refreshInterval);
+  }, [authState.isAuthenticated]);
+
+  useEffect(() => {
+    // Initialize CSRF protection
+    initializeCsrf();
+    
     // Async check for current user on app start
     (async () => {
       try {
@@ -96,8 +121,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const logout = (): void => {
-    authService.logout();
+  const logout = async (): Promise<void> => {
+    await authService.logout();
     setAuthState({
       user: null,
       isAuthenticated: false,

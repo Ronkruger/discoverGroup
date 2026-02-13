@@ -43,7 +43,7 @@ const TOURS_MAP = {
 router.post("/comprehensive", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { dateRange = '30d' } = req.body;
-    const { startDate, endDate } = getDateRange(dateRange);
+    const { startDate, endDate } = getDateRange(dateRange as string);
     
     // Get all bookings in date range
     const bookings = await Booking.find({
@@ -230,7 +230,7 @@ function generateBookingTrends(bookings: BookingRecord[]) {
 router.post("/metrics", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { dateRange = '30d' } = req.body;
-    const { startDate, endDate } = getDateRange(dateRange);
+    const { startDate, endDate } = getDateRange(dateRange as string);
     
     const bookings = await Booking.find({
       bookingDate: {
@@ -267,7 +267,7 @@ router.post("/metrics", requireAuth, requireAdmin, async (req, res) => {
 router.post("/booking-trends", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { dateRange = '30d' } = req.body;
-    const { startDate, endDate } = getDateRange(dateRange);
+    const { startDate, endDate } = getDateRange(dateRange as string);
     
     const bookings = await Booking.find({
       bookingDate: {
@@ -288,7 +288,7 @@ router.post("/booking-trends", requireAuth, requireAdmin, async (req, res) => {
 router.post("/popular-destinations", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { dateRange = '30d' } = req.body;
-    const { startDate, endDate } = getDateRange(dateRange);
+    const { startDate, endDate } = getDateRange(dateRange as string);
     
     const bookings = await Booking.find({
       bookingDate: {
@@ -332,7 +332,7 @@ router.post("/popular-destinations", requireAuth, requireAdmin, async (req, res)
 router.post("/customer-segments", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { dateRange = '30d' } = req.body;
-    const { startDate, endDate } = getDateRange(dateRange);
+    const { startDate, endDate } = getDateRange(dateRange as string);
     
     const bookings = await Booking.find({
       bookingDate: {
@@ -384,7 +384,7 @@ router.post("/customer-segments", requireAuth, requireAdmin, async (req, res) =>
 router.post("/revenue-breakdown", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { dateRange = '30d' } = req.body;
-    const { startDate, endDate } = getDateRange(dateRange);
+    const { startDate, endDate } = getDateRange(dateRange as string);
     
     const bookings = await Booking.find({
       bookingDate: {

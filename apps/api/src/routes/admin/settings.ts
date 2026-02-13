@@ -33,13 +33,13 @@ router.put('/', requireAuth, requireAdmin, async (req, res) => {
 
     // Update settings
     if (bookingDepartmentEmail) {
-      adminSettings.bookingDepartmentEmail = bookingDepartmentEmail;
+      adminSettings.bookingDepartmentEmail = bookingDepartmentEmail as string;
     }
     if (emailFromAddress) {
-      adminSettings.emailFromAddress = emailFromAddress;
+      adminSettings.emailFromAddress = emailFromAddress as string;
     }
     if (emailFromName) {
-      adminSettings.emailFromName = emailFromName;
+      adminSettings.emailFromName = emailFromName as string;
     }
 
     console.log('✅ Admin settings updated:', adminSettings);

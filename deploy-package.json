@@ -1,0 +1,16 @@
+{
+  "name": "discovergroup-api-deploy",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "node scripts/build-api-deploy.js",
+    "start": "node dist-node/apps/api/src/index.js",
+    "postinstall": "node scripts/build-api-deploy.js"
+  },
+  "dependencies": {
+    "fs-extra": "^11.2.0"
+  }
+}

@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ToastProvider } from "./components/Toast";
 import { SessionMonitor } from "./components/SessionMonitor";
+import { ServerStatusBanner } from "./components/ServerStatusBanner";
 import AuthPage from "./components/AuthPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
@@ -23,6 +24,7 @@ import CountryManagement from './pages/CountryManagement';
 import PromoBannerManagement from './pages/PromoBannerManagement';
 import VisaAssistanceManagement from './pages/VisaAssistanceManagement';
 import ReviewManagement from './pages/ReviewManagement';
+import { ServerDiagnosticsPage } from './pages/ServerDiagnostics';
 import { UserRole } from "./types/auth";
 
 // Loading component
@@ -56,6 +58,7 @@ const AppRouter: React.FC = () => {
   return (
     <div className="admin-shell">
       <SessionMonitor />
+      <ServerStatusBanner />
       <Navbar />
 
       <div className="admin-main">
@@ -215,6 +218,19 @@ const AppRouter: React.FC = () => {
                   allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.WEB_DEVELOPER]}
                 >
                   <Settings />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Server Diagnostics - Administrator & Web Developer */}
+            <Route
+              path="/diagnostics"
+              element={
+                <ProtectedRoute 
+                  requiredPermission="canAccessSettings"
+                  allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR, UserRole.WEB_DEVELOPER]}
+                >
+                  <ServerDiagnosticsPage />
                 </ProtectedRoute>
               }
             />

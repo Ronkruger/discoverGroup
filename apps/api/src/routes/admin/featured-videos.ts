@@ -139,7 +139,7 @@ router.post(
         description: description || undefined,
         video_url: videoUrl,
         thumbnail_url: thumbnailUrl,
-        display_order: display_order ? parseInt(display_order, 10) : 0,
+        display_order: display_order ? parseInt(display_order as string, 10) : 0,
         is_active: is_active === 'true' || is_active === true,
       });
 
@@ -179,9 +179,9 @@ router.put('/:id', requireAuth, requireRole('admin', 'super-admin'), async (req:
       return;
     }
 
-    if (title) video.title = title;
-    if (description !== undefined) video.description = description;
-    if (is_active !== undefined) video.is_active = is_active;
+    if (title) video.title = title as string;
+    if (description !== undefined) video.description = description as string;
+    if (is_active !== undefined) video.is_active = is_active as boolean;
     if (display_order !== undefined) video.display_order = parseInt(String(display_order), 10);
 
     await video.save();

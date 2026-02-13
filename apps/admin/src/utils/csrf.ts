@@ -22,13 +22,20 @@ let csrfExpiry: number = 0;
  */
 export async function fetchCsrfToken(): Promise<string> {
   try {
+    // Add timeout to prevent hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
     const response = await fetch(`${API_BASE_URL}/api/csrf-token`, {
       method: 'GET',
       credentials: 'include', // Important: include cookies
+      signal: controller.signal,
     });
 
+    clearTimeout(timeoutId);
+
     if (!response.ok) {
-      throw new Error('Failed to fetch CSRF token');
+      throw new Error(`Failed to fetch CSRF token: ${response.status} ${response.statusText}`);
     }
 
     const data: CsrfTokenResponse = await response.json();
@@ -43,7 +50,11 @@ export async function fetchCsrfToken(): Promise<string> {
     
     return csrfToken;
   } catch (error) {
-    console.error('Failed to fetch CSRF token:', error);
+    if (error.name === 'AbortError') {
+      console.error('CSRF token fetch timed out - API server may be sleeping');
+    } else {
+      console.error('Failed to fetch CSRF token:', error);
+    }
     throw error;
   }
 }
@@ -70,8 +81,29 @@ export async function getCsrfToken(): Promise<string> {
     }
   }
 
-  // Token expired or not available, fetch new one
-  return await fetchCsrfToken();
+  // Token expired or not available, fetch new one with retry logic
+  let retryCount = 0;
+  const maxRetries = 3;
+  
+  while (retryCount < maxRetries) {
+    try {
+      return await fetchCsrfToken();
+    } catch (fetchError) {
+      retryCount++;
+      
+      if (retryCount === maxRetries) {
+        console.error(`Failed to fetch CSRF token after ${maxRetries} attempts`, fetchError);
+        throw new Error('CSRF token fetch failed: API server may be down. Please try again later.');
+      }
+      
+      // Wait before retrying (exponential backoff)
+      const delay = Math.pow(2, retryCount) * 1000; // 2s, 4s, 8s
+      console.warn(`CSRF token fetch attempt ${retryCount} failed, retrying in ${delay}ms...`, fetchError);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  throw new Error('Unexpected error in getCsrfToken');
 }
 
 /**
@@ -146,6 +178,13 @@ export async function initializeCsrf(): Promise<void> {
     console.log('✅ CSRF protection initialized');
   } catch (error) {
     console.warn('⚠️  Failed to initialize CSRF protection:', error);
+    console.warn('This may be due to API server being down/sleeping. CSRF tokens will be fetched when needed.');
+    
+    // Display user-friendly message about server status
+    if (typeof error === 'object' && error !== null && 'name' in error && error.name === 'AbortError') {
+      console.warn('💤 API server appears to be sleeping (common on free hosting tiers)');
+    }
+    
     // Don't throw - app can still work, token will be fetched when needed
   }
 }

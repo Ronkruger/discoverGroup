@@ -9,6 +9,7 @@
  */
 
 import { addCsrfHeader, handleCsrfError, clearCsrfToken } from './csrf';
+import { getServerStatus, wakeUpServer } from './serverStatus';
 
 const TOKEN_KEY = 'auth_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
@@ -204,6 +205,18 @@ export async function authFetch(
     throw new Error('No authentication token available. Please login.');
   }
   
+  // Check server status and attempt to wake it up if needed
+  const serverStatus = await getServerStatus();
+  
+  if (!serverStatus.isOnline) {
+    console.log('🔄 Server appears to be down, attempting to wake it up...');
+    const wakeUpSuccess = await wakeUpServer();
+    
+    if (!wakeUpSuccess) {
+      throw new Error('The server is currently unavailable. This may be due to the free hosting tier going to sleep. Please try again in a moment.');
+    }
+  }
+  
   // Start with base headers including authentication
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string>),
@@ -215,8 +228,13 @@ export async function authFetch(
   const method = (options.method || 'GET').toUpperCase();
   
   if (stateChangingMethods.includes(method)) {
-    const headersWithCsrf = await addCsrfHeader(headers);
-    Object.assign(headers, headersWithCsrf);
+    try {
+      const headersWithCsrf = await addCsrfHeader(headers);
+      Object.assign(headers, headersWithCsrf);
+    } catch (error) {
+      console.warn('Failed to add CSRF header:', error);
+      // Continue without CSRF header - server will reject if needed
+    }
   }
   
   const requestOptions = {
@@ -225,30 +243,39 @@ export async function authFetch(
     credentials: 'include' as RequestCredentials, // Include cookies for CSRF
   };
   
-  const response = await fetch(url, requestOptions);
-  
-  // If 401, token is invalid - clear it
-  if (response.status === 401) {
-    clearToken();
-    clearCsrfToken();
-    throw new Error('Authentication failed. Please login again.');
-  }
-  
-  // If 403 with CSRF error, retry with new token
-  if (response.status === 403) {
-    try {
-      const errorData = await response.clone().json();
-      if (errorData.code === 'CSRF_TOKEN_INVALID') {
-        console.warn('CSRF token invalid, retrying with new token...');
-        return await handleCsrfError(async () => {
-          // Recursive call with new CSRF token
-          return authFetch(url, options);
-        });
-      }
-    } catch {
-      // Not a JSON response or different error, return original response
+  try {
+    const response = await fetch(url, requestOptions);
+    
+    // If 401, token is invalid - clear it
+    if (response.status === 401) {
+      clearToken();
+      clearCsrfToken();
+      throw new Error('Authentication failed. Please login again.');
     }
+    
+    // If 403 with CSRF error, retry with new token
+    if (response.status === 403) {
+      try {
+        const errorData = await response.clone().json();
+        if (errorData.code === 'CSRF_TOKEN_INVALID') {
+          console.warn('CSRF token invalid, retrying with new token...');
+          return await handleCsrfError(async () => {
+            // Recursive call with new CSRF token
+            return authFetch(url, options);
+          });
+        }
+      } catch {
+        // Not a JSON response or different error, return original response
+      }
+    }
+    
+    return response;
+  } catch (error) {
+    // Handle network errors (server down, timeout, etc.)
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Network error: Unable to reach the server. The server may be temporarily unavailable or sleeping.');
+    }
+    
+    throw error;
   }
-  
-  return response;
 }
